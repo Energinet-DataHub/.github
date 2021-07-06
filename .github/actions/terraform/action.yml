@@ -69,7 +69,7 @@ runs:
       shell: bash
       run: |
         git config --local --remove-section http."https://github.com/"
-        git config --global url."https://foo:${{ inputs.GITHUB_PAT_TOKEN }}@github.com/Energinet-DataHub/geh-terraform-modules".insteadOf "https://github.com/Energinet-DataHub/geh-terraform-modules"
+        git config --global url."https://foo:bar@github.com/Energinet-DataHub/geh-terraform-modules".insteadOf "https://github.com/Energinet-DataHub/geh-terraform-modules"
     
     - name: Find or create Terraform storage
       shell: bash
