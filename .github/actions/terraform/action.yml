@@ -102,7 +102,7 @@ runs:
       working-directory: ${{ inputs.TERRAFORM_WORKING_DIR_PATH }}
       run: |
         cp -fR ./env/${{ inputs.ENVIRONMENT_NAME }} ./main 2>/dev/null || :
-        cd ./env/${{ inputs.ENVIRONMENT_NAME }}
+        cd ./env
         ls -ahl
     
     - name: Configure Terraform Backend
