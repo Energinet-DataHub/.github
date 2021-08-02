@@ -39,10 +39,6 @@ inputs:
     required: true
   AZURE_RG_NAME:
     required: true
-outputs:
-  SQL_CONNECTION_STRING:
-    description: 'SQL Server connection string'
-    value: ${{ steps.terraform-apply.outputs.sql-connection-string }}
 
 runs:
   using: composite
@@ -123,6 +119,4 @@ runs:
       shell: bash
       id: terraform-apply
       working-directory: ${{ inputs.TERRAFORM_WORKING_DIR_PATH }}
-      run: | 
-        terraform apply -no-color -auto-approve
-        echo "::set-output name=sql-connection-string::$(terraform output sql_connection_string)"
+      run: terraform apply -no-color -auto-approve
