@@ -91,6 +91,7 @@ runs:
         echo "TF_VAR_organisation=${{ inputs.ORGANISATION_NAME }}" >> $GITHUB_ENV
         echo "TF_VAR_project=${{ inputs.PROJECT_NAME }}" >> $GITHUB_ENV
         echo "TF_VAR_resource_group_name=${{ inputs.AZURE_RG_NAME }}" >> $GITHUB_ENV
+        echo "TF_VAR_subscription_id=${{ inputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
     
     # Override/overwrite with environment specific infrastructure
     - name: Configure environment specific infrastructure
