@@ -43,10 +43,20 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1.2.1
+      with:
+        terraform_wrapper: false
+        terraform_version: "1.0.1"
+
     - name: Set Environment Secrets
       shell: bash
       run: |  
         echo "TERRAFORM_STORAGE_NAME=tfstate${{ inputs.PROJECT_NAME }}${{ inputs.ENVIRONMENT_SHORT }}" >> $GITHUB_ENV
+        echo "TERRAFORM_STATE_RESOURCE_GROUP_NAME=rg-${{ inputs.ORGANISATION_NAME }}-TerraformState-${{ inputs.ENVIRONMENT_SHORT }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ inputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
         echo "ARM_CLIENT_ID=${{ inputs.AZURE_SPN_ID }}" >> $GITHUB_ENV
         echo "ARM_CLIENT_OBJECT_ID=${{ inputs.AZURE_SPN_OBJECT_ID }}" >> $GITHUB_ENV
@@ -69,17 +79,24 @@ runs:
         git config --local --remove-section http."https://github.com/"
         git config --global url."https://foo:bar@github.com/Energinet-DataHub/geh-terraform-modules".insteadOf "https://github.com/Energinet-DataHub/geh-terraform-modules"
     
-    - name: Find or create Terraform storage
+    - name: Find or create Terraform state resource group
       shell: bash
-      id: state-storage-exists
+      run: |
+        if [ $(az group exists --name ${{ env.TERRAFORM_STATE_RESOURCE_GROUP_NAME }} --subscription "${{ inputs.AZURE_SUBSCRIPTION_ID }}") = false ]; then
+          echo "Resource group does not exist, creating new";
+          az group create --name ${{ env.TERRAFORM_STATE_RESOURCE_GROUP_NAME }} --location westeurope --subscription "${{ inputs.AZURE_SUBSCRIPTION_ID }}"
+        fi
+    
+    - name: Find or create Terraform state storage account
+      shell: bash
       run: |
         storage_exists=$(az storage account check-name --name ${{ env.TERRAFORM_STORAGE_NAME }} | python3 -c "import sys, json; print(not json.load(sys.stdin)['nameAvailable'])")
         if [ "$storage_exists" = True ]; then
           echo "Storage exists";
           exit;
         fi
-        az storage account create --resource-group ${{ inputs.AZURE_RG_NAME }} --name ${{ env.TERRAFORM_STORAGE_NAME }} --sku Standard_LRS --encryption-services blob --min-tls-version TLS1_2
-        account_key=$(az storage account keys list --resource-group ${{ inputs.AZURE_RG_NAME }} --account-name ${{ env.TERRAFORM_STORAGE_NAME }} --query '[0].value' -o tsv)
+        az storage account create --resource-group ${{ env.TERRAFORM_STATE_RESOURCE_GROUP_NAME }} --name ${{ env.TERRAFORM_STORAGE_NAME }} --sku Standard_LRS --encryption-services blob --min-tls-version TLS1_2
+        account_key=$(az storage account keys list --resource-group ${{ env.TERRAFORM_STATE_RESOURCE_GROUP_NAME }} --account-name ${{ env.TERRAFORM_STORAGE_NAME }} --query '[0].value' -o tsv)
         az storage container create --name tfstate --account-name ${{ env.TERRAFORM_STORAGE_NAME }} --account-key $account_key
 
     # Try not to reference TF_VAR variables in pipeline yml files, only values should be set and they should be read in terraform only
@@ -103,8 +120,8 @@ runs:
     - name: Configure Terraform Backend
       shell: bash
       run: |
-        sed -i 's/@resource_group_name/${{ inputs.AZURE_RG_NAME }}/' ${{ inputs.TERRAFORM_BACKEND_FILE_PATH }}
         sed -i 's/@storage_account_name/${{ env.TERRAFORM_STORAGE_NAME }}/' ${{ inputs.TERRAFORM_BACKEND_FILE_PATH }}
+        sed -i 's/@resource_group_name/${{ env.TERRAFORM_STATE_RESOURCE_GROUP_NAME }}/' ${{ inputs.TERRAFORM_BACKEND_FILE_PATH }}
 
     - name: Terraform Init
       shell: bash
