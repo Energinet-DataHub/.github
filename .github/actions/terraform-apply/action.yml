@@ -39,6 +39,8 @@ inputs:
     required: true
   AZURE_RG_NAME:
     required: true
+  TERRAFORM_VERSION:
+    required: true
 
 runs:
   using: composite
@@ -50,7 +52,7 @@ runs:
       uses: hashicorp/setup-terraform@v1.2.1
       with:
         terraform_wrapper: false
-        terraform_version: "1.0.1"
+        terraform_version: ${{ inputs.TERRAFORM_VERSION }}
 
     - name: Set Environment Secrets
       shell: bash
