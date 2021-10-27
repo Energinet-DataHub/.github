@@ -42,9 +42,7 @@ jobs:
       - name: Get release version
         shell: bash
         run: |
-          file=${{ env.LOCAL_REPO_FOLDER_PATH }}/VERSION
-          VERSION=$(cat "$file")
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
 
       - name: Copy Terraform to release folder
         shell: bash
@@ -79,5 +77,5 @@ jobs:
           # Commit and push
           cd ${{ env.REMOTE_REPO_FOLDER_PATH }}
           git add .
-          git commit -m "Pushing artifact v${{ env.RELEASE_VERSION }} from ${{ inputs.REPOSITORY_NAME }}"
+          git commit -m "Pushing artifact ${{ env.RELEASE_VERSION }} from ${{ inputs.REPOSITORY_NAME }}"
           git push origin main
