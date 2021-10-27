@@ -63,6 +63,7 @@ jobs:
         shell: bash
         env:
           REMOTE_REPO_URL: https://foo:${{ secrets.PAT_TOKEN }}@github.com/${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}
+          REMOTE_RELEASE_FOLDER_PATH: ${{ env.REMOTE_REPO_FOLDER_PATH }}/${{ inputs.REPOSITORY_NAME }}/artifacts
         run: |
           # Setup git
           git config --global user.email '${{ inputs.REPOSITORY_NAME }}@example.com'
@@ -70,13 +71,13 @@ jobs:
 
           # Setup remote repo
           git clone --single-branch --branch main ${{ env.REMOTE_REPO_URL }} ${{ env.REMOTE_REPO_FOLDER_PATH }}
-          mkdir ${{ env.REMOTE_REPO_FOLDER_PATH }}/${{ inputs.REPOSITORY_NAME }} 2>/dev/null || :
+          mkdir ${{ env.REMOTE_RELEASE_FOLDER_PATH }} 2>/dev/null || :
 
           # Copy release
-          cp ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_VERSION }}.zip ${{ env.REMOTE_REPO_FOLDER_PATH }}/${{ inputs.REPOSITORY_NAME }}
+          cp ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_VERSION }}.zip ${{ env.REMOTE_RELEASE_FOLDER_PATH }}
 
           # Commit and push
           cd ${{ env.REMOTE_REPO_FOLDER_PATH }}
           git add .
-          git commit -m "Pushing ${{ inputs.REPOSITORY_NAME }} release ${{ env.RELEASE_VERSION }}"
+          git commit -m "Pushing artifact v${{ env.RELEASE_VERSION }} from ${{ inputs.REPOSITORY_NAME }}"
           git push origin main
