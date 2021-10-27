@@ -1,0 +1,57 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Validate .NET
+
+on:
+  workflow_call:
+    inputs:
+      SOLUTION_FILE_PATH:
+        required: true
+        type: string
+      DOTNET_VERSION:
+        required: true
+        type: string
+      OUTPUT_PATH:
+        required: false
+        type: string
+        default: './output'
+
+jobs:
+  validate:
+    name: Validate .NET
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+
+      - name: Setup .NET 3.1.x environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Setup .NET ${{ inputs.DOTNET_VERSION }} environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+
+      - name: Build project
+        shell: bash
+        run: |
+          dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --configuration Release --output ${{ inputs.OUTPUT_PATH }}
+
+      - name: test and publish report
+        shell: bash
+        run: |
+          dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
+          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --filter Category=Unit /p:CollectCoverage=true /p:CoverletOutput=${{ inputs.OUTPUT_PATH }}/ /p:CoverletOutputFormat=cobertura /p:Threshold=0
