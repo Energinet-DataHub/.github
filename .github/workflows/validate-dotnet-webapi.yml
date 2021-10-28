@@ -20,6 +20,9 @@ on:
       SOLUTION_FILE_PATH:
         required: true
         type: string
+      BUILD_CONFIGURATION:
+        required: true
+        type: string
       DOTNET_VERSION:
         required: true
         type: string
