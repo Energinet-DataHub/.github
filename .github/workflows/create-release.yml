@@ -42,7 +42,8 @@ jobs:
       - name: Get release version
         shell: bash
         run: |
-          echo "RELEASE_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          VERSION=${{ github.sha }} | cut -c1-7
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Copy Terraform to release folder
         shell: bash
@@ -54,7 +55,7 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: '${{ env.RELEASE_VERSION }}.zip'
+          filename: ${{ env.RELEASE_VERSION }}.zip
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Publish artifact
