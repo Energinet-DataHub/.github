@@ -6,6 +6,8 @@ This repository contains shared github items such as actions, workflows and much
   - [Create Prerelease](#create-prerelease)
   - [Dispatch Deployment Request](#dispatch-deployment-request)
   - [Publish release](#publish-release)
+  - [MD Check](#md-check)
+  - [License Check](#license-check)
 
 ## Workflows
 
@@ -28,3 +30,15 @@ File: [publish-release.yml](.github/workflows/publish-release.yml)
 
 This workflow will find the associated pull request to a commit, if no pull request is found it will abort.
 It will use the pull request number to look for a tag with the same number, and mark that as published.
+
+### MD Check
+
+File: [md-check.yml](.github/workflows/md-check.yml)
+
+This workflow will perform a link, spelling and formatting check of all *.md files in the repository.
+
+### License Check
+
+File: [license-check.yml](.github/workflows/license-check.yml)
+
+This workflow will perform a check if all files containing application code, contains the correct license header.
