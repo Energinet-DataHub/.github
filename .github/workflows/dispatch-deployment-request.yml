@@ -1,0 +1,59 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Publish release and dispatch notification
+
+on:
+  workflow_call:
+    inputs:
+      REPOSITORY_NAME:
+        required: true
+        type: string
+        description: 'Local repository name'
+    secrets:
+      PAT_TOKEN:
+        required: true
+        description: 'Personal access token'
+      ENVIRONMENT_REPOSITORY_PATH:
+        required: true
+        description: 'Path to the environment repository, syntax: {owner}/{repo}'
+
+jobs:
+  publish_release_and_dispatch_notification:
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
+      EVENT_TYPE: '${{ inputs.REPOSITORY_NAME }}-deployment-request'
+    steps:
+      - name: Find associated pull request
+        uses: jwalton/gh-find-current-pr@v1
+        id: find_pull_request
+        with:
+          state: all
+    
+      - name: Fail if PR not found
+        if: steps.find_pull_request.outputs.pr == ''
+        run: exit 1
+
+      - name: Set RELEASE_VERSION
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: '${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}'
+          event-type: ${{ env.EVENT_TYPE }}
+          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}"}'
