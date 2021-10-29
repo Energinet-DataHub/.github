@@ -20,7 +20,7 @@ This workflow will create a prerelease with the same number as the pull request 
 File: [dispath-deployment-request.yml](.github/workflows/dispath-deployment-request.yml)
 
 This workflow will find the associated pull request to a commit, if no pull request is found it will abort.
-If it can find a pull request, it will dispatch an event containing the pull request number to the environment repository.
+If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
 
 ### Publish release
 

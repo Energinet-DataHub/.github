@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Publish release and dispath notification
+name: Publish release and dispatch notification
 
 on:
   workflow_call:
@@ -29,7 +29,7 @@ on:
         description: 'Path to the environment repository, syntax: {owner}/{repo}'
 
 jobs:
-  publish_release_and_dispath_notification:
+  publish_release_and_dispatch_notification:
     runs-on: ubuntu-latest
     env:
       REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
