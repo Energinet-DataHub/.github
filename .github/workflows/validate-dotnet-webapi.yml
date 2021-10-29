@@ -1,4 +1,4 @@
-# Copyright 2020 Energinet DataHub A/S
+# Copyright 2021 Energinet DataHub A/S
 #
 # Licensed under the Apache License, Version 2.0 (the "License2");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Validate .NET
+name: Validate ASP.NET Core Web API
 
 on:
   workflow_call:
@@ -20,39 +20,41 @@ on:
       SOLUTION_FILE_PATH:
         required: true
         type: string
+      BUILD_CONFIGURATION:
+        required: true
+        type: string
       DOTNET_VERSION:
         required: true
         type: string
-      OUTPUT_PATH:
-        required: false
-        type: string
-        default: './output'
 
 jobs:
   validate:
-    name: Validate .NET
     runs-on: windows-latest
+    name: Validate solution
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
-
-      - name: Setup .NET 3.1.x environment
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }} environment
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
-      - name: Build project
-        shell: bash
-        run: |
-          dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --configuration Release --output ${{ inputs.OUTPUT_PATH }}
+      - name: Cache NuGet packages
+        uses: actions/cache@v2
+        id: cache-nuget
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      - name: test and publish report
-        shell: bash
-        run: |
-          dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --filter Category=Unit /p:CollectCoverage=true /p:CoverletOutput=${{ inputs.OUTPUT_PATH }}/ /p:CoverletOutputFormat=cobertura /p:Threshold=0
+      - name: Restore NuGet packages
+        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+
+      - name: Build solution
+        run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
+
+      - name: Run tests
+        run: dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal
