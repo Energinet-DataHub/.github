@@ -24,8 +24,7 @@ on:
         type: string
 
 jobs:
-  validate:
-    name: Validate Terraform
+  validate_terraform:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
