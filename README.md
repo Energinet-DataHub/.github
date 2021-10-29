@@ -31,7 +31,7 @@ File: [publish-release.yml](.github/workflows/publish-release.yml)
 This workflow will find the associated pull request to a commit, if no pull request is found it will abort.
 It will use the pull request number to look for a tag with the same number, and mark that as published.
 
-### MD Check
+### Markdown Check
 
 File: [md-check.yml](.github/workflows/md-check.yml)
 
