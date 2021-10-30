@@ -21,4 +21,7 @@ matrix:
           - 'pre'
     sources:
      - '../../**/*.md'
+     - '../../**/*.mD'
+     - '../../**/*.Md'
+     - '../../**/*.MD'
     default_encoding: utf-8

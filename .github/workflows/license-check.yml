@@ -20,7 +20,23 @@ jobs:
   check-license-lines:
     name: Check License Lines
     runs-on: ubuntu-latest
+    env:
+      REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout local repo
+      uses: actions/checkout@v2
+
+    - name: Checkout remote repository
+      uses: actions/checkout@v2
+      with:
+        repository: 'Energinet-DataHub/.github'
+        path: ${{ env.REMOTE_REPO_PATH }}
+
+    - name: Copy configuration files
+      run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
+
+    - name: Cleanup remote
+      run: rm -rf ${{ env.REMOTE_REPO_PATH }}
+
     - name: Check License Lines
       uses: kt3k/license_checker@v1.0.3

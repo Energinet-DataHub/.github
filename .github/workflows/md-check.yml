@@ -20,6 +20,8 @@ jobs:
   md-check:
     name: Markdown Check
     runs-on: ubuntu-latest
+    env:
+      REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
       - name: Should skip?
         id: skip_check
@@ -33,20 +35,31 @@ jobs:
             "**.mD"
           ]'
 
-      - name: Checkout code
+      - name: Checkout local repo
         if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
+
+      - name: Checkout remote repository
+        uses: actions/checkout@v2
+        if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+        with:
+          repository: 'Energinet-DataHub/.github'
+          path: ${{ env.REMOTE_REPO_PATH }}
 
       - name: Copy configuration files
         if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
         run: |
-          cp ${GITHUB_WORKSPACE}/.github/utilities/md-spellcheck/spellcheck.yml ${GITHUB_WORKSPACE}/spellcheck.yml
-          cp ${GITHUB_WORKSPACE}/.github/utilities/md-spellcheck/wordlist.txt ${GITHUB_WORKSPACE}/wordlist.txt
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/.markdownlint.json ${{ github.workspace }}/.markdownlint.json
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/mlc_config.json ${{ github.workspace }}/mlc_config.json
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/spellcheck.yml ${{ github.workspace }}/spellcheck.yml
+
+      - name: Cleanup remote
+        if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+        run: rm -rf ${{ env.REMOTE_REPO_PATH }}
 
       - name: Replace path in Spell Check config
         if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
-        run: |
-          sed -i -e 's/..\/..\///g' ${GITHUB_WORKSPACE}/spellcheck.yml
+        run: sed -i -e 's/..\/..\///g' ${{ github.workspace }}/spellcheck.yml
 
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
@@ -55,7 +68,7 @@ jobs:
         with:
           use-quiet-mode: 'yes'
           use-verbose-mode: 'yes'
-          config-file: './.github/utilities/md-linkcheck/mlc_config.json'
+          config-file: './mlc_config.json'
         continue-on-error: true
         id: md-link-check
 
@@ -76,7 +89,7 @@ jobs:
         if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
         uses: avto-dev/markdown-lint@v1
         with:
-          args: '.'
+          args: './'
         continue-on-error: true
         id: md-lint-check
 
