@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Validate Terraform
+name: Terraform Validate
 
 on:
   workflow_call:
@@ -24,7 +24,7 @@ on:
         type: string
 
 jobs:
-  validate_terraform:
+  terraform_validate:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
