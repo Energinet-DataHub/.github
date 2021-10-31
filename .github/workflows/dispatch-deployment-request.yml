@@ -56,4 +56,4 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           repository: '${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}'
           event-type: ${{ env.EVENT_TYPE }}
-          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}"}'
+          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository": "${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}"}'
