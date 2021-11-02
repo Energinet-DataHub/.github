@@ -17,7 +17,8 @@ inputs:
   RELEASE_FOLDER_PATH:
     required: true
   RELEASE_VERSION:
-    description: 'Path to the solution file.'
+    required: true
+  PAT_TOKEN:
     required: true
 
 runs:
@@ -32,7 +33,7 @@ runs:
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        repo_token: "${{ secrets.PAT_TOKEN }}"
+        repo_token: "${{ inputs.PAT_TOKEN }}"
         automatic_release_tag: ${{ inputs.RELEASE_VERSION }}
         prerelease: true
         title: ${{ inputs.RELEASE_VERSION }}
