@@ -1,0 +1,143 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Markdown Check
+
+on:
+  workflow_call:
+
+jobs:
+  skip_md_check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - name: Should skip?
+        id: skip_check
+        uses: fkirc/skip-duplicate-actions@v1.4.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '[
+            "**.md",
+            "**.MD",
+            "**.Md",
+            "**.mD"
+          ]'
+
+  md_check:
+    needs: skip_md_check
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    name: Markdown Check
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_REPO_PATH: ${{ github.workspace }}/remote
+    steps:
+      - name: Checkout local repo
+        uses: actions/checkout@v2
+
+      - name: Checkout remote repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'Energinet-DataHub/.github'
+          path: ${{ env.REMOTE_REPO_PATH }}
+
+      - name: Copy configuration files
+        run: |
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/.markdownlint.json ${{ github.workspace }}/.markdownlint.json
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/mlc_config.json ${{ github.workspace }}/mlc_config.json
+          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/spellcheck.yml ${{ github.workspace }}/spellcheck.yml
+
+      - name: Cleanup remote
+        run: rm -rf ${{ env.REMOTE_REPO_PATH }}
+
+      - name: Replace path in Spell Check config
+        run: sed -i -e 's/..\/..\///g' ${{ github.workspace }}/spellcheck.yml
+
+      # https://github.com/marketplace/actions/markdown-link-check
+      - name: Markdown links check
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          config-file: './mlc_config.json'
+        continue-on-error: true
+        id: md-link-check
+
+      # https://github.com/marketplace/actions/github-spellcheck-action
+      - name: Markdown spell check
+        uses: rojopolis/spellcheck-github-actions@0.5.0
+        continue-on-error: true
+        id: md-spell-check
+
+      - name: Register markdownlint problem matcher
+        uses: xt0rted/markdownlint-problem-matcher@v1
+        id: md-lint-check-matcher
+
+      # https://github.com/marketplace/actions/markdownlint-mdl-action
+      - name: Markdown lint check
+        uses: avto-dev/markdown-lint@v1
+        with:
+          args: './'
+        continue-on-error: true
+        id: md-lint-check
+
+      - name: Summarize
+        run: |
+          echo "Markdown check results: "
+          fail=0
+          if [[ "${{steps.md-link-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-link-check.outcome}}" == "failure" ]]; then
+            fail=1
+            echo -e "- Markdown links check:   \e[31mFailure"
+          else
+            echo -e "- Markdown links check:   \e[32mSuccess"
+          fi
+          if [[ "${{steps.md-spell-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-spell-check.outcome}}" == "failure" ]]; then
+            fail=1
+            echo -e "- Markdown spell check:   \e[31mFailure"
+          else
+            echo -e "- Markdown spell check:   \e[32mSuccess"
+          fi
+          if [[ "${{steps.md-lint-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-lint-check.outcome}}" == "failure" ]]; then
+            fail=1
+            echo -e "- Markdown lint check:    \e[31mFailure"
+          else
+            echo -e "- Markdown lint check:    \e[32mSuccess"
+          fi
+          if [[ $fail -eq 1 ]]; then
+            echo -e "Expand individual steps above to view specific errors."
+            exit 1
+          fi
+
+  check_license_lines:
+    name: Check License Lines
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_REPO_PATH: ${{ github.workspace }}/remote
+    steps:
+    - name: Checkout local repo
+      uses: actions/checkout@v2
+
+    - name: Checkout remote repository
+      uses: actions/checkout@v2
+      with:
+        repository: 'Energinet-DataHub/.github'
+        path: ${{ env.REMOTE_REPO_PATH }}
+
+    - name: Copy configuration files
+      run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
+
+    - name: Cleanup remote
+      run: rm -rf ${{ env.REMOTE_REPO_PATH }}
+
+    - name: Check License Lines
+      uses: kt3k/license_checker@v1.0.3
