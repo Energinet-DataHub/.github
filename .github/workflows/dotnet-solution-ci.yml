@@ -34,9 +34,14 @@ on:
         required: false
         default: false
         type: boolean
+      INSTALL_AZURE_CORE_TOOLS:
+        required: false
+        default: false
+        type: boolean
 
 env:
   AZURITE_VERSION: '3.14.0'
+  AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '3.0.3568'
 
 jobs:
   function_ci:
@@ -57,6 +62,10 @@ jobs:
       - name: Setup Azurite
         if: ${{ inputs.INSTALL_AZURITE == true }}
         run: npm install -g azurite@${{ env.AZURITE_VERSION }}
+
+      - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+        if: ${{ inputs.INSTALL_AZURE_CORE_TOOLS == true }}
+        run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
       - name: Test and publish report
         shell: bash
