@@ -74,18 +74,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Install SQL LocalDB 2019
-        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Downloading..."
-          Import-Module BitsTransfer
-          Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
-          Write-Host "Installing..."
-          Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
-          Write-Host "Checking version..."
-          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
-
       - name: Setup .NET 3.1.x
         uses: actions/setup-dotnet@v1
         with:
@@ -107,6 +95,18 @@ jobs:
       - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
         if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
         run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+
+      - name: Install SQL LocalDB 2019
+        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+        shell: pwsh
+        run: |
+          Write-Host "Downloading..."
+          Import-Module BitsTransfer
+          Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
+          Write-Host "Installing..."
+          Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
+          Write-Host "Checking version..."
+          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
       - name: Cache NuGet packages
         uses: actions/cache@v2
