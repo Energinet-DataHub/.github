@@ -15,6 +15,11 @@ name: Create prerelease
 
 on:
   workflow_call:
+    inputs:
+      CALLER_REPOSITORY_PATH:
+        required: true
+        type: string
+        description: 'Path to local repository, syntax: {owner}/{repo}'
     secrets:
       PAT_TOKEN:
         required: true
@@ -25,19 +30,20 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
-      LOCAL_REPO_FOLDER_PATH: '${{ github.workspace }}/local_repo'
+      REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
       RELEASE_VERSION: ${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          path: ${{ env.LOCAL_REPO_FOLDER_PATH }}
+          repository: ${{ inputs.CALLER_REPOSITORY_PATH }}
+          path: ${{ env.REPO_FOLDER_PATH }}
 
-      - name: Copy Terraform to release folder
-        shell: bash
-        run: |
-          mkdir ${{ env.RELEASE_FOLDER_PATH }}
-          cp -fR ${{ env.LOCAL_REPO_FOLDER_PATH }}/build/infrastructure ${{ env.RELEASE_FOLDER_PATH }} 2>/dev/null || :
+      - name: Publish release content
+        uses: ./remote_repo/.github/actions/publish-release-contents
+        with:
+          RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
+          REPO_FOLDER_PATH: ${{ env.REPO_FOLDER_PATH }}
 
       - name: Zip artifact
         uses: thedoctor0/zip-release@master
@@ -46,9 +52,9 @@ jobs:
           filename: ${{ env.RELEASE_VERSION }}.zip
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
-          repo_token: "${{ secrets.PAT_TOKEN }}"
+          repo_token: ${{ secrets.PAT_TOKEN }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}

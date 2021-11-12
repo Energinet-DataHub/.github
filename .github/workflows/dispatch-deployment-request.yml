@@ -15,6 +15,15 @@ name: Publish release and dispatch notification
 
 on:
   workflow_call:
+    inputs:
+      CALLER_REPOSITORY_NAME:
+        required: true
+        description: 'Name of the local repository'
+        type: string
+      CALLER_REPOSITORY_PATH:
+        required: true
+        description: 'Path to local repository, syntax: {owner}/{repo}'
+        type: string
     secrets:
       PAT_TOKEN:
         required: true
@@ -22,19 +31,13 @@ on:
       ENVIRONMENT_REPOSITORY_PATH:
         required: true
         description: 'Path to the environment repository, syntax: {owner}/{repo}'
-      LOCAL_REPOSITORY_NAME:
-        required: true
-        description: 'Name of the local repository'
-      LOCAL_REPOSITORY_PATH:
-        required: true
-        description: 'Path to local repository, syntax: {owner}/{repo}'
 
 jobs:
   publish_release_and_dispatch_notification:
     runs-on: ubuntu-latest
     env:
       REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
-      EVENT_TYPE: '${{ secrets.LOCAL_REPOSITORY_NAME }}-deployment-request'
+      EVENT_TYPE: '${{ inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
     steps:
       - name: Find associated pull request
         uses: jwalton/gh-find-current-pr@v1
@@ -57,4 +60,4 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           repository: '${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}'
           event-type: ${{ env.EVENT_TYPE }}
-          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ secrets.LOCAL_REPOSITORY_PATH }}", "repository_name": "${{ secrets.LOCAL_REPOSITORY_NAME }}"}'
+          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ inputs.CALLER_REPOSITORY_PATH }}", "repository_name": "${{ inputs.CALLER_REPOSITORY_NAME }}"}'
