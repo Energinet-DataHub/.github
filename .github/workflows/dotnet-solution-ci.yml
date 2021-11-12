@@ -54,8 +54,6 @@ jobs:
   function_ci:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
-    environment: CI
-
     env:
       BUILD_CONFIGURATION: Release
       # Tool versions
