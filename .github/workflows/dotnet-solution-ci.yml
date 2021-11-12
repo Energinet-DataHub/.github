@@ -30,28 +30,85 @@ on:
         required: false
         default: false
         type: boolean
+      USE_AZURITE:
+        required: false
+        default: false
+        type: boolean
+      USE_AZURE_FUNCTIONS_CORE_TOOLS:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_SPN_ID:
+        required: true
+      AZURE_SPN_SECRET:
+        required: true
+      AZURE_KEYVAULT_URL:
+        required: true
 
 jobs:
   function_ci:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
+
+    environment: CI
+
+    env:
+      BUILD_CONFIGURATION: Release
+      # Tool versions
+      AZURITE_VERSION: '3.14.0'
+      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '3.0.3568'
+      # Variables necessary to manage Azure resources for tests (similar to local use of 'integrationtest.local.settings.json')
+      AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
+      # Only used if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
+      # Overrides settings in 'functionhost.settings.json'
+      FunctionAppHostPath: 'C:\npm\prefix\node_modules\azure-functions-core-tools\bin\func.dll'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
-              
-      - name: Setup .NET ${{ env.DOTNET_VERSION }} environment
+
+      - name: Setup .NET ${{ inputs.DOTNET_VERSION }} environment
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
       - name: Setup Azure Cosmos DB Emulator
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         uses: southpolesteve/cosmos-emulator-github-action@v1
 
-      - name: Test and publish report
-        shell: bash
+      - name: Install Azurite v${{ env.AZURITE_VERSION }}
+        if: ${{ inputs.USE_AZURITE == true }}
+        run: npm install -g azurite@${{ env.AZURITE_VERSION }}
+
+      - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+        if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
+        run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v2
+        id: cache-nuget
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore NuGet packages
+        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+
+      - name: Build solution
+        run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+      - name: Run tests and publish report
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
+          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
