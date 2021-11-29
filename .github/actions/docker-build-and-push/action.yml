@@ -17,7 +17,7 @@ inputs:
   DOCKER_USERNAME:
     description: 'Docker username used for login'
     required: true
-  DOCKER_PASWORD:
+  DOCKER_PASSWORD:
     description: 'Docker password used for login'
     required: true
   DOCKER_IMAGE:
