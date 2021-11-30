@@ -34,7 +34,8 @@ runs:
           echo "##[set-output name=property;]''"
         else
           echo "Set VersionSuffix"
-          echo "##[set-output name=property;]'-p:VersionSuffix=-alpha-${{github.run_number}}'"
+          echo "##[set-output name=property;]'-p:VersionSuffix=-alpha-'${{github.run_number}}''"
+
         fi
       env:
         BRANCH: ${GITHUB_REF#refs/heads/}
