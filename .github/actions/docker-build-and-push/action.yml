@@ -45,6 +45,9 @@ outputs:
   DIGEST: 
     description: 'Docker image labels'
     value: ${{ steps.push.outputs.digest }}
+  DOCKER_IMAGE_URL:
+    description: 'Docker image url'
+    value: ${{ steps.define_docker_url.outputs.DOCKER_IMAGE_URL }}
 
 runs:
   using: composite
@@ -82,3 +85,13 @@ runs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Define Docker Image Url
+      id: define_docker_url
+      shell: bash
+      run: |
+        export DOMAIN="hub.docker.com"
+        export PATH="layers/${{ inputs.DOCKER_IMAGE }}/${{ steps.define_version.outputs.VERSION_NUMBER }}/${{ steps.push.outputs.digest }}"
+        export URL="www.${ DOMAIN }/${ PATH }"
+        echo $URL
+        echo "::set-output name=DOCKER_IMAGE_URL::$URL"
