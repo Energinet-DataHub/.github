@@ -43,7 +43,7 @@ outputs:
     description: 'Docker image labels'
     value: ${{ steps.meta.outputs.labels }}
   DIGEST: 
-    description: 'Docker image labels'
+    description: 'Docker image digest'
     value: ${{ steps.push.outputs.digest }}
 
 runs:
