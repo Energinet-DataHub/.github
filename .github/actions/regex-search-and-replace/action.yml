@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: "Search and replace"
-description: "Search and replace a value in a file using regex"
+name: 'Search and replace'
+description: 'Search and replace a value in a file using regex'
 inputs:
   FILE_PATH:
-    description: "Path to file"
+    description: 'Path to file'
     required: true
   NEW_VALUE:
-    description: "New value to replace"
+    description: 'New value to replace'
     required: true
   REGEX_EXPRESSION:
     description: 'Regex expression to find value that needs to be changed. Enable non-capturing group eg. "^(?:.*tag: (.*))"'
@@ -56,7 +56,7 @@ runs:
           previous_value = match[0]
 
           if previous_value == new_value:
-              raise Exception("Warning: New value is the same as the current value. Not updating...")
+              raise Exception("New value is the same as the current value. Not updating...")
 
           new_content = data.replace(previous_value, new_value)
 
