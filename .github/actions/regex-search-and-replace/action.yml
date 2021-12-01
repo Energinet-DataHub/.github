@@ -1,0 +1,75 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: 'Search and replace'
+description: 'Search and replace a value in a file using regex'
+inputs:
+  FILE_PATH:
+    description: 'Path to file'
+    required: true
+  NEW_VALUE:
+    description: 'New value to replace'
+    required: true
+  REGEX_EXPRESSION:
+    description: 'Regex expression to find value that needs to be changed. Enable non-capturing group eg. "^(?:.*tag: (.*))"'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+
+    - name: install yaml
+      shell: bash
+      run: python -m pip install pyyaml
+
+    - name: Update Helm Chart Tags
+      uses: jannekem/run-python-script-action@v1
+      with:
+        script: |
+          import re
+
+          file = "${{ inputs.FILE_PATH }}"
+          new_value = "${{ inputs.NEW_VALUE }}"
+          regex_expression = r"${{ inputs.REGEX_EXPRESSION }}"
+
+          regex = re.compile(regex_expression, flags=re.MULTILINE)
+
+          with open(file) as f:
+              data = f.read()
+
+          match = regex.findall(data)
+
+          if not match:
+              raise Exception("No matches for r'" + regex_expression + "' in file: " + file)
+
+          previous_value = match[0]
+
+          if previous_value == new_value:
+              raise Exception("New value is the same as the current value. Not updating...")
+
+          new_content = data.replace(previous_value, new_value)
+
+          updated_line = None
+
+          for idx, updated_line in enumerate(data.splitlines()):
+              if previous_value in updated_line:
+                  updated_line = idx
+                  break
+
+          print("Replaced line: '" + data.splitlines()[updated_line] + "'")
+          print("With         : '" + new_content.splitlines()[updated_line] + "'")
+          print("Line #" + str(updated_line))
+
+          with open(file, 'w') as f:
+              f.write(new_content)
