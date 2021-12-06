@@ -27,6 +27,10 @@ on:
         required: false
         default: 'windows-latest'
         type: string
+      USE_AZURE_RESOURCES:
+        required: false
+        default: true
+        type: boolean
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
@@ -45,15 +49,15 @@ on:
         type: boolean
     secrets:
       AZURE_TENANT_ID:
-        required: true
+        required: false
       AZURE_SUBSCRIPTION_ID:
-        required: true
+        required: false
       AZURE_SPN_ID:
-        required: true
+        required: false
       AZURE_SPN_SECRET:
-        required: true
+        required: false
       AZURE_KEYVAULT_URL:
-        required: true
+        required: false
 
 jobs:
   function_ci:
@@ -64,6 +68,7 @@ jobs:
       # Tool versions
       AZURITE_VERSION: '3.14.0'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '3.0.3568'
+      # Only necessary if USE_AZURE_RESOURCES is TRUE
       # Necessary to manage Azure resources for tests (similar to local use of 'integrationtest.local.settings.json')
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Only valid if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
@@ -108,6 +113,12 @@ jobs:
           Write-Host "Checking version..."
           sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
+      - name: Login to use Azure resources in integration tests
+        if: ${{ inputs.USE_AZURE_RESOURCES == true }}
+        run: |
+          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
       - name: Cache NuGet packages
         uses: actions/cache@v2
         id: cache-nuget
@@ -126,6 +137,4 @@ jobs:
       - name: Run tests and publish report
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
