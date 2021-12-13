@@ -20,8 +20,15 @@ inputs:
   DOCKER_PASSWORD:
     description: 'Docker password used for login'
     required: true
+  REGISTRY:
+    description: 'Container Registry. Defualts to DockerHub. For options see: "https://github.com/docker/login-action"'
+    required: false
   DOCKER_IMAGE:
     description: 'Docker image name eg. "projectorigin/auth"'
+    required: true
+  FILE:
+    description: 'Path to the Dockerfile. (default {context}/Dockerfile)'
+    default: '{context}/Dockerfile'
     required: true
   MAJOR:
     description: 'Major number used in docker tag'
@@ -63,6 +70,7 @@ runs:
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
+        registry: ${{ inputs.REGISTRY }}
         username: ${{ inputs.DOCKER_USERNAME }}
         password: ${{ inputs.DOCKER_PASSWORD }}
     
@@ -80,6 +88,7 @@ runs:
       with: 
         context: .
         push: true
+        file: ${{ inputs.FILE }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         
