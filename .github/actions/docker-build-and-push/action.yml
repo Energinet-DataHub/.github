@@ -26,6 +26,18 @@ inputs:
   DOCKER_IMAGE:
     description: 'Docker image name eg. "projectorigin/auth"'
     required: true
+  INCLUDE_LATEST_TAG:
+    description: 'Tag image with latest tag <auto|true|false>'
+    default: 'true'
+    required: false
+  TAG_VERSION_PREFIX:
+    description: 'Image version tag prefix'
+    default: ''
+    required: false
+  TAG_VERSION_SUFFIX:
+    description: 'Image version tag suffix'
+    default: ''
+    required: false
   FILE:
     description: 'Path to the Dockerfile. (default {context}/Dockerfile)'
     default: '{context}/Dockerfile'
@@ -81,6 +93,10 @@ runs:
         images: ${{ inputs.DOCKER_IMAGE }}
         tags: |
           type=semver,pattern=v{{version}},value=${{ steps.define_version.outputs.VERSION_NUMBER }}
+        flavor: |
+          latest=${{ inputs.INCLUDE_LATEST_TAG }}
+          prefix=${{ inputs.TAG_VERSION_PREFIX }}
+          suffix=${{ inputs.TAG_VERSION_SUFFIX }}
 
     - name: Build and push Docker image
       id: push
