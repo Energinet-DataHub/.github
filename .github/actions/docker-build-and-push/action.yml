@@ -31,11 +31,11 @@ inputs:
     default: 'true'
     required: false
   TAG_VERSION_PREFIX:
-    description: 'Image version tag prefix'
+    description: 'Image version tag prefix eg. "<prefix>v0.0.1'
     default: ''
     required: false
   TAG_VERSION_SUFFIX:
-    description: 'Image version tag suffix'
+    description: 'Image version tag suffix eg. "v0.0.1<suffix>'
     default: ''
     required: false
   FILE:
