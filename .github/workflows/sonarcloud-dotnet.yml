@@ -29,12 +29,13 @@ on:
       SONAR_CLOUD_PROJECT:
         required: true
         type: string
-      SONAR_CLOUD_TOKEN:
-        required: true
-        type: string
       OPERATING_SYSTEM:
         required: false
         default: 'windows-latest'
+        type: string
+    secrets:
+      SONAR_CLOUD_TOKEN:
+        required: true
         type: string
 
 jobs:
