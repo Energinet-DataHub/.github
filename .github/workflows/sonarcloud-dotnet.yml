@@ -62,6 +62,6 @@ jobs:
 
       - name: Build and analyze
         run: |
-          dotnet sonarscanner begin /k:"${{ inputs.SONAR_CLOUD_PROJECT }}" /o:"${{ inputs.SONAR_CLOUD_ORGANIZATION }}" /d:sonar.login="${{ inputs.SONAR_CLOUD_TOKEN }}"
+          dotnet sonarscanner begin /k:"${{ inputs.SONAR_CLOUD_PROJECT }}" /o:"${{ inputs.SONAR_CLOUD_ORGANIZATION }}" /d:sonar.login="${{ secrets.SONAR_CLOUD_TOKEN }}"
           dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --configuration Release
-          dotnet sonarscanner end /d:sonar.login="${{ inputs.SONAR_CLOUD_TOKEN }}"
+          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_CLOUD_TOKEN }}"
