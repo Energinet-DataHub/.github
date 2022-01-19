@@ -56,6 +56,10 @@ on:
         required: false
       AZURE_SECRETS_KEYVAULT_URL:
         required: false
+      ENVIRONMENT_SHORT:
+        required: false
+      ENVIRONMENT_INSTANCE:
+        required: false
 
 jobs:
   function_ci:
@@ -70,6 +74,10 @@ jobs:
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Necessary to provide secrets for authentication and authorization if needed
       AZURE_SECRETS_KEYVAULT_URL: ${{ secrets.AZURE_SECRETS_KEYVAULT_URL }}
+      # Necessary to acquire a valid JWT token if needed
+      ENVIRONMENT_SHORT: ${{ secrets.ENVIRONMENT_SHORT }}
+      # Necessary to acquire a valid JWT token if needed
+      ENVIRONMENT_INSTANCE: ${{ secrets.ENVIRONMENT_INSTANCE }}
       # Only valid if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: 'C:\npm\prefix\node_modules\azure-functions-core-tools\bin\func.dll'
