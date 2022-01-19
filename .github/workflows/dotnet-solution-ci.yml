@@ -58,6 +58,8 @@ on:
         required: false
       AZURE_KEYVAULT_URL:
         required: false
+      AZURE_SECRETS_KEYVAULT_URL:
+        required: false
 
 jobs:
   function_ci:
@@ -71,6 +73,7 @@ jobs:
       # Only necessary if USE_AZURE_RESOURCES is TRUE
       # Necessary to manage Azure resources for tests (similar to local use of 'integrationtest.local.settings.json')
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
+      AZURE_SECRETS_KEYVAULT_URL: ${{ secrets.AZURE_SECRETS_KEYVAULT_URL }}
       # Only valid if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: 'C:\npm\prefix\node_modules\azure-functions-core-tools\bin\func.dll'
