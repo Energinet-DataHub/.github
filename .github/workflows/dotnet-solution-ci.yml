@@ -113,7 +113,7 @@ jobs:
           sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
       - name: Login to use Azure resources in integration tests
-        if: ${{ inputs.AZURE_KEYVAULT_URL != '' && inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
+        if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
         run: |
           az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
