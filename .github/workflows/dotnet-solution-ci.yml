@@ -123,13 +123,13 @@ jobs:
         uses: actions/cache@v2
         id: cache-nuget
         with:
-          path: ~/.nuget/packages
+          path: nuget_cache
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
           restore-keys: |
             ${{ runner.os }}-nuget-
 
       - name: Restore NuGet packages
-        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }} --packages nuget_cache
 
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
