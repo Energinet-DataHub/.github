@@ -33,10 +33,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Setup .NET ${{ input.DOTNET_VERSION }} environment
+      - name: Setup .NET ${{ inputs.DOTNET_VERSION }} environment
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ input.DOTNET_VERSION }}
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
       - name: Build/publish project
         shell: bash
