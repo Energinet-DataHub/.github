@@ -76,7 +76,7 @@ runs:
         token: ${{ inputs.token }}
         inputs: |
           { 
-            "repository": "${{ $GITHUB_REPOSITORY }}", 
+            "repository": "${{ github.repository }}", 
             "filename": "${{ steps.get_chart_info.outputs.filename }}", 
             "version": "${{ steps.get_chart_info.outputs.version }}"
           }
