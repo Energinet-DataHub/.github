@@ -93,4 +93,4 @@ runs:
             "version": "${{ steps.get_chart_info.outputs.version }}"
           }
         ref: main
-        repo: ${{ github.event.repository.owner }}/helm-charts
+        repo: ${{ github.repository_owner }}/helm-charts
