@@ -17,7 +17,10 @@ description: |
   Packages and creates a release with the chart, 
   and creates a workflow dispatch to pull into helm registry.
 inputs:
-  token: 
+  release_token: 
+    description: The token with access to create the release
+    required: true
+  dispatch_token: 
     description: The token with access to create the workflow-dispatch call.
     required: true
   chart_folder:
@@ -54,6 +57,8 @@ runs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.release_token }}
       with:
         tag_name: ${{ steps.get_chart_info.outputs.version }}
         release_name: Release ${{ steps.get_chart_info.outputs.version }}
@@ -63,6 +68,8 @@ runs:
     - name: Add chart.tar to release
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.release_token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ steps.get_chart_info.outputs.filename }}
@@ -73,7 +80,7 @@ runs:
       uses: benc-uk/workflow-dispatch@v1.1
       with:
         workflow: Update helm chart version
-        token: ${{ inputs.token }}
+        token: ${{ inputs.dispatch_token }}
         inputs: |
           { 
             "repository": "${{ github.repository }}", 
