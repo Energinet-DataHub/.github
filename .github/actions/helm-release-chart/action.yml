@@ -42,13 +42,13 @@ runs:
         echo ::set-output name=name::$(grep ^"name: " chart/Chart.yaml | cut -f2 -d' ')
         echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
 
-    - name: Lint chart
-      shell: bash
-      run: helm lint ${{ inputs.chart_folder }}
-
     - name: Update chart dependencies
       shell: bash
       run: helm dependency update ${{ inputs.chart_folder }}
+      
+    - name: Lint chart
+      shell: bash
+      run: helm lint ${{ inputs.chart_folder }}
 
     - name: Packages chart
       shell: bash
