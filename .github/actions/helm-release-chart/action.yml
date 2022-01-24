@@ -81,10 +81,10 @@ runs:
         asset_name: ${{ steps.generate_filename.outputs.filename }}
         asset_content_type: application/zip
 
-    - name: Update helm chart in base env
+    - name: Add chart to repository
       uses: benc-uk/workflow-dispatch@v1.1
       with:
-        workflow: Update helm chart version
+        workflow: Add chart via workflow dispatch
         token: ${{ inputs.dispatch_token }}
         inputs: |
           { 
