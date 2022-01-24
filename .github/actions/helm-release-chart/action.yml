@@ -44,15 +44,15 @@ runs:
 
     - name: Lint chart
       shell: bash
-      run: helm lint chart
+      run: helm lint ${{ inputs.chart_folder }}
 
     - name: Update chart dependencies
       shell: bash
-      run: helm dependency update chart
+      run: helm dependency update ${{ inputs.chart_folder }}
 
     - name: Packages chart
       shell: bash
-      run: helm package chart
+      run: helm package ${{ inputs.chart_folder }}
 
     - name: Create Release
       id: create_release
