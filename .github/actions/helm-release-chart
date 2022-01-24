@@ -1,0 +1,79 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'Release helm chart'
+description: |
+  Packages and creates a release with the chart, 
+  and creates a workflow dispatch to pull into helm registry.
+inputs:
+  token: 
+    description: The token with access to create the workflow-dispatch call.
+    required: true
+  chart_folder:
+    description: Path to the folder containing the chart.
+    required: true
+  chart_repository:
+    description: The repository containing the chart repository
+    default: ${{ github.event.repository.owner }}/helm-charts
+
+runs:
+  using: composite
+  steps:
+    - id: get_chart_info
+      name: Get info from Chart.yaml
+      run: |
+        echo ::set-output name=version::$(grep ^"version: " chart/Chart.yaml | cut -f2 -d' ')
+        echo ::set-output name=name::$(grep ^"name: " chart/Chart.yaml | cut -f2 -d' ')
+        echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
+
+    - name: Lint chart
+      run: helm lint chart
+
+    - name: Update chart dependencies
+      run: helm dependency update chart
+
+    - name: Packages chart
+      run: helm package chart
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ steps.get_chart_info.outputs.version }}
+        release_name: Release ${{ steps.get_chart_info.outputs.version }}
+        draft: false
+        prerelease: false
+
+    - name: Add chart.tar to release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ steps.get_chart_info.outputs.filename }}
+        asset_name: ${{ steps.get_chart_info.outputs.filename }}
+        asset_content_type: application/zip
+
+    - name: Update helm chart in base env
+      uses: benc-uk/workflow-dispatch@v1.1
+      with:
+        workflow: Update helm chart version
+        token: ${{ inputs.token }}
+        inputs: |
+          { 
+            "repository": "${{ $GITHUB_REPOSITORY }}", 
+            "filename": "${{ steps.get_chart_info.outputs.filename }}", 
+            "version": "${{ steps.get_chart_info.outputs.version }}"
+          }
+        ref: main
+        repo: ${{ github.event.repository.owner }}/helm-charts
