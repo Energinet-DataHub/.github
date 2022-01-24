@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'Release helm chart'
+name: Package and release helm chart
 description: |
   Packages and creates a release with the chart, 
   and creates a workflow dispatch to pull into helm registry.
@@ -26,24 +26,29 @@ inputs:
   chart_repository:
     description: The repository containing the chart repository
     default: ${{ github.event.repository.owner }}/helm-charts
+    required: false
 
 runs:
   using: composite
   steps:
     - id: get_chart_info
       name: Get info from Chart.yaml
+      shell: bash
       run: |
         echo ::set-output name=version::$(grep ^"version: " chart/Chart.yaml | cut -f2 -d' ')
         echo ::set-output name=name::$(grep ^"name: " chart/Chart.yaml | cut -f2 -d' ')
         echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
 
     - name: Lint chart
+      shell: bash
       run: helm lint chart
 
     - name: Update chart dependencies
+      shell: bash
       run: helm dependency update chart
 
     - name: Packages chart
+      shell: bash
       run: helm package chart
 
     - name: Create Release
