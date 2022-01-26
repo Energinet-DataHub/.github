@@ -1,0 +1,53 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Update version tag
+description: Updates the tag for a deployment in the chart in the eo-base-helm-chart.
+
+inputs:
+  image:
+    description: The container image name
+    required: true
+  tag:
+    description: The container image tag
+    required: true
+  deployment_name:
+    description: Deployment name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+
+    - name: Update image name 
+      uses: MartinSchmidt/ReusableWorkflow/.github/actions/yaml-set@main
+      with:
+        yaml_file: chart/values.yaml
+        yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.repository
+        value: ${{ inputs.image }}
+
+    - name: Update tag
+      uses: MartinSchmidt/ReusableWorkflow/.github/actions/yaml-set@main
+      with:
+        yaml_file: chart/values.yaml
+        yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.tag
+        value: ${{ inputs.tag }}
+
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v7 
+      with:
+        add: 'chart/values.yaml'
+        message: 'Updated version tag for ${{ inputs.deployment_name }} in the helm chart'
+        push: true

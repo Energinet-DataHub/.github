@@ -1,0 +1,63 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Helm Chart Version Check
+
+on:
+  workflow_call:
+    inputs:
+      chart_folder:
+        description: The folder containing the chart to release_name
+        required: true
+        type: string
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout main to get latest tag
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with: 
+            fallback: v0.0.0
+
+    # Get next valid semvers
+      - name: 'Get next versions'
+        id: semvers
+        uses: "WyriHaximus/github-action-next-semvers@v1"
+        with:
+          version: ${{ steps.previoustag.outputs.tag }}
+
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Get helm chart version
+        run: | 
+          echo HELM_VERSION=$(grep "version: " ${{ inputs.chart_folder }}/Chart.yaml | cut -f2 -d' ') >> $GITHUB_ENV
+          
+      - name: Print version
+        run: echo ${{ env.HELM_VERSION }}
+        
+      - name: Check versions
+        if: ${{ env.HELM_VERSION != steps.semvers.outputs.v_patch && env.HELM_VERSION != steps.semvers.outputs.v_minor && env.HELM_VERSION != steps.semvers.outputs.v_major }}
+        run: |
+          echo "The helm chart version ${{ env.HELM_VERSION }} must be an increment of the current version on main ${{ steps.previoustag.outputs.tag }}."
+          exit 1
