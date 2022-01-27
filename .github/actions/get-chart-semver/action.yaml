@@ -28,7 +28,7 @@ inputs:
 outputs:
   semver:
     description: The resulting semver
-    value: ${{ steps.generate_semver.outputs.name }}
+    value: ${{ steps.generate_semver.outputs.version }}
 
 runs:
   using: composite
