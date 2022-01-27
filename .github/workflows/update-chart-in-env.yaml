@@ -49,7 +49,6 @@ jobs:
   update_environment_chart:
     name: Update production environment
     runs-on: ubuntu-latest
-    needs: release_chart
     steps:
       - name: Update helm chart in base env
         uses: benc-uk/workflow-dispatch@v1.1
