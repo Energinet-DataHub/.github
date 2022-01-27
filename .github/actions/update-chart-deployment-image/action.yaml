@@ -29,8 +29,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v2
-
     - name: Update image name 
       uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
       with:
