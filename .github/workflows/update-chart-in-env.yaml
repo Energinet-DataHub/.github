@@ -62,5 +62,5 @@ jobs:
               "name": "${{ inputs.chart_name }}", 
               "targetBranch": "${{ inputs.env_branch }}",
               "repoURL": "${{ inputs.helm_repository }}", 
-              "targetRevision": "${{ inputs.chart_version }}", 
+              "targetRevision": "${{ inputs.chart_version }}"
             }
