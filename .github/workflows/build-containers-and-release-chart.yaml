@@ -73,14 +73,14 @@ jobs:
 
       - name: Build and push container image
         id: docker_build
-        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
+        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@helm_releases_action
         with: 
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image_name: ${{ steps.image_name.outputs.lowercase }}
           image_tag: ${{ matrix.containers.tag }}
 
       - name: Update container repo and tag in chart
-        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@main
+        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@helm_releases_action
         with: 
           deployment_name: ${{ matrix.containers.deployment_name }}
           image: ${{ steps.image_name.outputs.lowercase }}

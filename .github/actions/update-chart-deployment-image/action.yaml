@@ -30,14 +30,14 @@ runs:
   using: composite
   steps:
     - name: Update image name 
-      uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+      uses: Energinet-DataHub/.github/.github/actions/yaml-set@helm_releases_action
       with:
         yaml_file: chart/values.yaml
         yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.repository
         value: ${{ inputs.image }}
 
     - name: Update tag
-      uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+      uses: Energinet-DataHub/.github/.github/actions/yaml-set@helm_releases_action
       with:
         yaml_file: chart/values.yaml
         yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.tag
