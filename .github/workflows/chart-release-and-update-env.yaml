@@ -52,13 +52,13 @@ jobs:
 
       - name: Get chart name
         id: get-chart-name
-        uses: MartinSchmidt/ReusableWorkflow/.github/actions/yaml-get@main
+        uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
         with:
           yaml_file: ${{ inputs.chart_folder }}/Chart.yaml
           yaml_path: name
 
       - name: Update environment chart
-        uses: MartinSchmidt/ReusableWorkflow/.github/actions/update_environment_chart@main
+        uses: Energinet-DataHub/.github/.github/actions/update_environment_chart@main
         with:
           env_token: ${{ secrets.UPDATE_ENV_TOKEN }}
           env_repository: ${{ inputs.environment_repository }}
@@ -97,7 +97,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Update environment chart
-        uses: MartinSchmidt/ReusableWorkflow/.github/actions/update_environment_chart@main
+        uses: Energinet-DataHub/.github/.github/actions/update_environment_chart@main
         with:
           env_token: ${{ secrets.UPDATE_ENV_TOKEN }}
           env_repository: ${{ inputs.environment_repository }}

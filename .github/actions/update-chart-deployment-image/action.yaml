@@ -32,14 +32,14 @@ runs:
     - uses: actions/checkout@v2
 
     - name: Update image name 
-      uses: MartinSchmidt/ReusableWorkflow/.github/actions/yaml-set@main
+      uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
       with:
         yaml_file: chart/values.yaml
         yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.repository
         value: ${{ inputs.image }}
 
     - name: Update tag
-      uses: MartinSchmidt/ReusableWorkflow/.github/actions/yaml-set@main
+      uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
       with:
         yaml_file: chart/values.yaml
         yaml_path: eo-base-helm-chart.deployments.${{ inputs.deployment_name }}.image.tag
