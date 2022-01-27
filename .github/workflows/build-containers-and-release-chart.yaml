@@ -51,10 +51,10 @@ on:
     outputs:
       chart_name: 
         description:
-        value: ${{ steps.release_chart.outputs.chart_name }}
+        value: ${{ jobs.release_chart.outputs.chart_name }}
       chart_version:
         description:
-        value: ${{ steps.release_chart.outputs.chart_version }}
+        value: ${{ jobs.release_chart.outputs.chart_version }}
 jobs:
   build_containers_and_update_chart:
     name: Build containers
