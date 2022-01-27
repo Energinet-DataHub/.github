@@ -1,0 +1,108 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build containers, update and release chart
+
+on:
+  workflow_call:
+    inputs:
+      containers:
+        description: |
+          Json string containing the containers to be built.
+          the format is:
+          [
+            { deployment_name: "name1", dockerfile: "Dockerfile", tag: 'v1.2.3'  },
+            { deployment_name: "name2", dockerfile: "Dockerfile", tag: 'v1.3.1' }
+          ]
+        type: string
+        required: true
+      chart_folder:
+        description: The folder containing the chart to release_name
+        type: string
+        required: true
+      chart_version:
+        description: Override the chart version to a specific version
+        type: string
+        required: false
+      helm_repository:
+        description: The repository to publish the chart.
+        type: string
+        required: false
+        default: ${{ github.repository_owner }}/helm-charts
+ 
+    secrets:
+      RELEASE_CHART_TOKEN: 
+        description: |
+          The token used to create the release and 
+          release the chart with a workflow dispatch to 'inputs.helm_repository'.
+        required: true
+
+    outputs:
+      chart_name: 
+        description:
+        value: ${{ steps.release_chart.outputs.chart_name }}
+      chart_version:
+        description:
+        value: ${{ steps.release_chart.outputs.chart_version }}
+jobs:
+  build_containers_and_update_chart:
+    name: Build containers
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        containers: ${{fromJson(inputs.containers)}} 
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Container image name
+        id: image_name
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ghcr.io/${{ github.repository }}-${{ matrix.containers.deployment_name }}
+
+      - name: Build and push container image
+        id: docker_build
+        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
+        with: 
+          dockerfile: ${{ matrix.containers.Dockerfile }}
+          image_name: ${{ steps.image_name.outputs.lowercase }}
+          image_tag: ${{ matrix.containers.tag }}
+
+      - name: Update container repo and tag in chart
+        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@main
+        with: 
+          deployment_name: ${{ matrix.containers.deployment_name }}
+          image: ${{ steps.image_name.outputs.lowercase }}
+          tag: ${{ matrix.containers.tag }}
+
+  release_chart:
+    name: Release domain chart
+    needs: [build_containers_and_update_chart]
+    runs-on: ubuntu-latest
+    outputs:
+      chart_name: ${{ steps.release_chart.outputs.chart_name }}
+      chart_version: ${{ steps.release_chart.outputs.chart_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Release helm chart
+        id: release_chart
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@helm_releases_action
+        with:
+          release_token: ${{ secrets.RELEASE_CHART_TOKEN }}
+          dispatch_token: ${{ secrets.RELEASE_CHART_TOKEN }}
+          chart_folder: ${{ inputs.chart_folder }}
+          chart_repository: ${{ inputs.helm_repository }}
+          chart_version: ${{ inputs.chart_version }}

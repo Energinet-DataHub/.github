@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Build docker containers
+name: Build and push docker containers to ghcr.io
 description: |
   Installs python and pipenv to a specific version, 
   and install requirements from the pipfile
@@ -21,22 +21,16 @@ inputs:
   dockerfile:
     description: The path of the Dockerfile to build
     required: true
-  name:
-    description: The name of the resulting container, set to parameter after ghcr.io; ghcr.io/{name}
+  image_name:
+    description: "The full image name ex: ghcr.io/<my_container>"
+    required: true
+  image_tag:
+    description: "The image tag"
     required: true
   docker_context:
     description: The path for the docker build context, defaults to '.'
     required: false
     default: .
-
-outputs:
-  image_name:
-    description: "The full image name ex: ghcr.io/my_container"
-    value: ${{ steps.image_name.outputs.lowercase }}
-  image_tag:
-    description: "The image tag"
-    value: ${{ steps.tag.outputs.tag_name }}
-
 
 runs:
   using: composite
@@ -48,31 +42,10 @@ runs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
 
-    - name: Container image name
-      id: image_name
-      uses: ASzc/change-string-case-action@v2
-      with:
-        string: ghcr.io/${{ inputs.name }}
-
-    - name: Get tag
-      id: tag
-      shell: bash
-      run: |
-        if ${{github.event_name == 'push' && github.ref_name == 'main'}}
-        then    
-          echo "::set-output name=tag_name::$(grep 'version: ' chart/Chart.yaml | cut -f 2 -d ' ')"
-        elif ${{github.event_name == 'pull_request'}}
-        then
-          echo "::set-output name=tag_name::pr-${{ github.event.pull_request.number }}-${{ github.run_number }}"
-        else
-          echo Not supported on push to branches other than main
-          exit 1
-        fi
-
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: ${{ inputs.docker_context }}
         file: ${{ inputs.dockerfile }}
         push: true
-        tags: ${{ steps.image_name.outputs.lowercase }}:${{ steps.tag.outputs.tag_name }}
+        tags: ${{ inputs.image_name }}:${{ inputs.image_tag }}
