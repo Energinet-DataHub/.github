@@ -49,8 +49,7 @@ runs:
       name: Get info from Chart.yaml
       shell: bash
       run: |
-        VERSION_IN_FILE=$(grep ^"version: " chart/Chart.yaml | cut -f2 -d' ')
-        echo ::set-output name=version::${{ inputs.chart_version && inputs.chart_version || ${VERSION_IN_FILE} }}
+        echo ::set-output name=version::${{ inputs.chart_version }}
         echo ::set-output name=name::$(grep ^"name: " chart/Chart.yaml | cut -f2 -d' ')
 
     - id: generate_filename
@@ -80,7 +79,7 @@ runs:
         tag_name: ${{ steps.get_chart_info.outputs.version }}
         release_name: Release ${{ steps.get_chart_info.outputs.version }}
         draft: false
-        prerelease: false
+        prerelease: ${{ github.ref_name != 'main' }}
 
     - name: Add chart.tar to release
       id: upload-release-asset
