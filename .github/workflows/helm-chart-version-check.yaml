@@ -37,7 +37,7 @@ jobs:
         id: previous_tag
         uses: Energinet-Datahub/.github/.github/actions/yaml-get@main
         with: 
-            yaml_file: ${{ inputs.chart_folder}}/Chart.yaml
+            yaml_file: ${{ inputs.chart_folder }}/Chart.yaml
             yaml_path: version
 
       - name: Get next valid semvers
@@ -54,7 +54,7 @@ jobs:
         id: current_tag
         uses: Energinet-Datahub/.github/.github/actions/yaml-get@main
         with: 
-            yaml_file: ${{ inputs.chart_folder}}/Chart.yaml
+            yaml_file: ${{ inputs.chart_folder }}/Chart.yaml
             yaml_path: version
 
       - name: Check versions
