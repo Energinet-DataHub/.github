@@ -27,37 +27,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout main to get latest tag
-      - uses: actions/checkout@v2
+      - name: Checkout main to get latest tag
+        uses: actions/checkout@v2
         with:
           ref: main
           fetch-depth: 0
-      - name: 'Get Previous tag'
-        id: previoustag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with: 
-            fallback: v0.0.0
 
-    # Get next valid semvers
-      - name: 'Get next versions'
+      - name: Get Previous tag
+        id: previous_tag
+        uses: Energinet-Datahub/.github/.github/actions/yaml-get@main
+        with: 
+            yaml_file: ${{ inputs.chart_folder }}/Chart.yaml
+            yaml_path: version
+
+      - name: Get next valid semvers
         id: semvers
         uses: "WyriHaximus/github-action-next-semvers@v1"
         with:
-          version: ${{ steps.previoustag.outputs.tag }}
+          version: ${{ steps.previous_tag.outputs.result }}
 
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Get helm chart version
-        run: | 
-          echo HELM_VERSION=$(grep "version: " ${{ inputs.chart_folder }}/Chart.yaml | cut -f2 -d' ') >> $GITHUB_ENV
-          
-      - name: Print version
-        run: echo ${{ env.HELM_VERSION }}
-        
+      - name: Get current tag
+        id: current_tag
+        uses: Energinet-Datahub/.github/.github/actions/yaml-get@main
+        with: 
+            yaml_file: ${{ inputs.chart_folder }}/Chart.yaml
+            yaml_path: version
+
       - name: Check versions
-        if: ${{ env.HELM_VERSION != steps.semvers.outputs.v_patch && env.HELM_VERSION != steps.semvers.outputs.v_minor && env.HELM_VERSION != steps.semvers.outputs.v_major }}
+        if: ${{ steps.current_tag.outputs.result != steps.semvers.outputs.patch && steps.current_tag.outputs.result != steps.semvers.outputs.minor && steps.current_tag.outputs.result != steps.semvers.outputs.major }}
         run: |
-          echo "The helm chart version ${{ env.HELM_VERSION }} must be an increment of the current version on main ${{ steps.previoustag.outputs.tag }}."
+          echo "The helm chart version ${{ steps.current_tag.outputs.result }} must be an increment of the current version on main ${{ steps.previous_tag.outputs.tag }}."
           exit 1
