@@ -1,0 +1,60 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Update environment chart
+description: creates a workflow dispatch to update the environment repository.
+
+inputs:
+  env_token:
+    description: The token used to update base env
+    required: true
+  env_repository:
+    description: The environment repository to target.
+    required: true
+  env_branch:
+    description: The branch on the environment repository to target.
+    required: false
+    default: main
+
+  release_name:
+    description: The name of the service and chart to update.
+    required: true
+  release_repository_url:
+    description: The repository to get the chart from, either a helm or git repository.
+    required: true
+  release_target_revision:
+    description: The chart version or GitHub tag to point to.
+    required: true
+  release_chart_path:
+    description: When referencing a git repository, the path to the chart is required.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Update helm chart in base env
+      uses: benc-uk/workflow-dispatch@v1.1
+      with:
+        workflow: Update helm chart version
+        token: ${{ inputs.env_token }}
+        repo: ${{ inputs.env_repository}}
+        ref: main
+        inputs: |
+          { 
+            "name": "${{ inputs.release_name }}", 
+            "targetBranch": "${{ inputs.env_branch }}",
+            "repoURL": "${{ inputs.release_repository_url }}", 
+            "targetRevision": "${{ inputs.release_target_revision }}", 
+            "path": "${{ inputs.release_chart_path }}"
+          }

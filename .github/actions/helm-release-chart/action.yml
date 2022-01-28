@@ -1,0 +1,107 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Package and release helm chart
+description: |
+  Packages and creates a release with the chart, 
+  and creates a workflow dispatch to pull into helm registry.
+inputs:
+  release_token: 
+    description: The token with access to create the release
+    required: true
+  dispatch_token: 
+    description: The token with access to create the workflow-dispatch call.
+    required: true
+  chart_folder:
+    description: Path to the folder containing the chart.
+    required: true
+  chart_repository:
+    description: The repository containing the chart repository
+    default: ${{ github.event.repository.owner }}/helm-charts
+    required: false
+  chart_version:
+    description: Override the chart version to a specific version
+    required: false
+
+outputs:
+  chart_name:
+    description: The name of the chart that was released.
+    value: ${{ steps.get_chart_info.outputs.name }}
+  chart_version:
+    description: The version of the chart that was released.
+    value: ${{ steps.get_chart_info.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - id: get_chart_info
+      name: Get info from Chart.yaml
+      shell: bash
+      run: |
+        echo ::set-output name=version::${{ inputs.chart_version }}
+        echo ::set-output name=name::$(grep ^"name: " chart/Chart.yaml | cut -f2 -d' ')
+
+    - id: generate_filename
+      name: Generate filename
+      shell: bash
+      run: |
+        echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
+        
+    - name: Update chart dependencies
+      shell: bash
+      run: helm dependency update ${{ inputs.chart_folder }}
+      
+    - name: Lint chart
+      shell: bash
+      run: helm lint ${{ inputs.chart_folder }}
+
+    - name: Packages chart
+      shell: bash
+      run: helm package --version ${{ steps.get_chart_info.outputs.version }} ${{ inputs.chart_folder }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.release_token }}
+      with:
+        tag_name: ${{ steps.get_chart_info.outputs.version }}
+        release_name: Release ${{ steps.get_chart_info.outputs.version }}
+        draft: false
+        prerelease: ${{ github.ref_name != 'main' }}
+
+    - name: Add chart.tar to release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.release_token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ steps.generate_filename.outputs.filename }}
+        asset_name: ${{ steps.generate_filename.outputs.filename }}
+        asset_content_type: application/zip
+
+    - name: Add chart to repository
+      uses: benc-uk/workflow-dispatch@v1.1
+      with:
+        workflow: Add chart via workflow dispatch
+        token: ${{ inputs.dispatch_token }}
+        inputs: |
+          { 
+            "repository": "${{ github.repository }}", 
+            "filename": "${{ steps.generate_filename.outputs.filename }}", 
+            "version": "${{ steps.get_chart_info.outputs.version }}"
+          }
+        ref: main
+        repo: ${{ github.repository_owner }}/helm-charts

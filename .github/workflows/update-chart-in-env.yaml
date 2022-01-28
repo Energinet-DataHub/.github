@@ -1,0 +1,66 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Update chart in environment repository.
+
+on:
+  workflow_call:
+    inputs:
+      env_repository:
+        description: The repository containing the environment 
+        required: false
+        type: string
+        default: ${{ github.repository_owner }}/eo-base-environment
+      env_branch:
+        description: The branch on the environment repository to target.
+        required: false
+        type: string
+        default: main
+      chart_name:
+        description: The name of the service and chart to update.
+        required: true
+        type: string
+      helm_repository:
+        description: The helm repository to get the chart from.
+        required: true
+        type: string
+      chart_version:
+        description: The chart version.
+        required: true
+        type: string
+
+    secrets:
+      UPDATE_ENV_TOKEN:
+        description: The token used to update the environment repository via a workflow dispatch
+        required: true
+
+jobs:
+  update_environment_chart:
+    name: Update production environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update helm chart in base env
+        uses: benc-uk/workflow-dispatch@v1.1
+        with:
+          workflow: Update helm chart version
+          token: ${{ secrets.UPDATE_ENV_TOKEN }}
+          repo: ${{ inputs.env_repository }}
+          ref: main
+          inputs: |
+            { 
+              "name": "${{ inputs.chart_name }}", 
+              "targetBranch": "${{ inputs.env_branch }}",
+              "repoURL": "${{ inputs.helm_repository }}", 
+              "targetRevision": "${{ inputs.chart_version }}"
+            }

@@ -1,0 +1,83 @@
+
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Run tests and linting
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: The version of python to use
+        type: string
+        required: true
+      ignore_lint_error:
+        description: Whether or not to ignore linting errors.
+        type: boolean
+        default: false
+        required: false
+      exclude:
+        description: Paths to exclude when linting, defaults to excluding './src/migrations/versions'
+        type: string
+        default: ./src/migrations/versions
+        required: false
+
+jobs:
+  py_lint:
+    name: Lint python code
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.ignore_lint_error }}
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Python and dependencies
+        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
+        with: 
+          python_version: ${{ inputs.python_version }}
+
+      - name: Analyzing the code with flake8
+        shell: bash
+        run: pipenv run lint-flake8 --exclude ${{ inputs.exclude }}
+
+  py_unit_test:
+    name: Run python unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Python and dependencies
+        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
+        with: 
+          python_version: ${{ inputs.python_version }}
+
+      - name: Running tests
+        shell: bash
+        run: |
+          pipenv run pytest tests -m unittest --tb=native
+
+  py_integration_test:
+    name: Run python intergation tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Python and dependencies
+        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
+        with: 
+          python_version: ${{ inputs.python_version }}
+
+      - name: Running tests
+        shell: bash
+        run: |
+          pipenv run pytest tests -m integrationtest --tb=native
