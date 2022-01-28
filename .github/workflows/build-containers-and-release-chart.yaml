@@ -77,14 +77,14 @@ jobs:
 
       - name: Build and push container image
         id: docker_build
-        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@helm_releases_action
+        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
         with: 
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image_name: ${{ steps.image_name.outputs.lowercase }}
           image_tag: ${{ matrix.containers.tag }}
 
       - name: Update container repo and tag in chart
-        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@helm_releases_action
+        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@main
         with: 
           deployment_name: ${{ matrix.containers.deployment_name }}
           image: ${{ steps.image_name.outputs.lowercase }}
@@ -103,7 +103,7 @@ jobs:
         
       - name: Release helm chart
         id: release_chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@helm_releases_action
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
         with:
           release_token: ${{ secrets.RELEASE_CHART_TOKEN }}
           dispatch_token: ${{ secrets.RELEASE_CHART_TOKEN }}

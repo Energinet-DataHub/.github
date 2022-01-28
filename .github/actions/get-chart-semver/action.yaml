@@ -40,7 +40,7 @@ runs:
 
     - name: Get chart version
       id: get_chart_version
-      uses: Energinet-DataHub/.github/.github/actions/yaml-get@helm_releases_action
+      uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
       with:
         yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.chart_folder }}/Chart.yaml
         yaml_path: version
