@@ -22,7 +22,7 @@ on:
           Json string containing the containers to be built.
           the format is:
           [
-            { deployment_name: "name1", dockerfile: "Dockerfile", tag: 'v1.2.3'  },
+            { deployment_name: "name1", dockerfile: "Dockerfile", tag: 'v1.2.3' },
             { deployment_name: "name2", dockerfile: "Dockerfile", tag: 'v1.3.1' }
           ]
         type: string
@@ -64,6 +64,10 @@ jobs:
         containers: ${{fromJson(inputs.containers)}} 
     steps:
       - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts/
 
       - name: Container image name
         id: image_name
