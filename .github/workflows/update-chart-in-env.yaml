@@ -27,12 +27,16 @@ on:
         required: false
         type: string
         default: main
-      chart_name:
-        description: The name of the service and chart to update.
+      app_name:
+        description: The name of the app in the environment.
         required: true
         type: string
       helm_repository:
         description: The helm repository to get the chart from.
+        required: true
+        type: string
+      chart_name:
+        description: The name of the chart.
         required: true
         type: string
       chart_version:
@@ -59,8 +63,9 @@ jobs:
           ref: main
           inputs: |
             { 
-              "name": "${{ inputs.chart_name }}", 
-              "targetBranch": "${{ inputs.env_branch }}",
-              "repoURL": "${{ inputs.helm_repository }}", 
-              "targetRevision": "${{ inputs.chart_version }}"
+              "target_branch": "${{ inputs.env_branch }}",
+              "app_name": "${{ inputs.app_name }}", 
+              "helm_repository": "${{ inputs.helm_repository }}", 
+              "chart_name": "${{ inputs.chart_name }}", 
+              "chart_version": "${{ inputs.chart_version }}"
             }
