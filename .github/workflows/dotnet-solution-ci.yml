@@ -90,7 +90,11 @@ jobs:
 
       - name: Setup Azure Cosmos DB Emulator
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
-        uses: southpolesteve/cosmos-emulator-github-action@v1
+        shell: pwsh
+        run: |
+          Write-Host "Start Cosmos DB Emulator"
+          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+          Start-CosmosDbEmulator
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
         if: ${{ inputs.USE_AZURITE == true }}
