@@ -95,6 +95,12 @@ jobs:
           Write-Host "Start Cosmos DB Emulator"
           Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
           Start-CosmosDbEmulator
+          $status = Get-CosmosDbEmulatorStatus
+          if ($status -ne 'Running')
+          {
+            throw "Cosmos DB Emulator did not start within expected time."
+          }
+          Write-Host "Cosmos DB Emulator is running."
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
         if: ${{ inputs.USE_AZURITE == true }}
