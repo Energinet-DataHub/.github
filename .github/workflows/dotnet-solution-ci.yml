@@ -92,7 +92,7 @@ jobs:
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         shell: pwsh
         run: |
-          Write-Host "Start Cosmos DB Emulator"
+          Write-Host "Start Cosmos DB Emulator..."
           Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
           Start-CosmosDbEmulator
           $status = Get-CosmosDbEmulatorStatus
