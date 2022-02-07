@@ -79,23 +79,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Setup .NET 3.1.x
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
+      # - name: Setup .NET 3.1.x
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: '3.1.x'
 
-      - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+      # - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
-      - name: Setup Azure Cosmos DB Emulator
-        if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Start Cosmos DB Emulator..."
-          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+      # - name: Setup Azure Cosmos DB Emulator
+      #   if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
+      #   shell: pwsh
+      #   run: |
+      #     Write-Host "Start Cosmos DB Emulator..."
+      #     Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+      #     Start-CosmosDbEmulator
 
       - name: Use Node v${{ env.NODE_VERSION }}
         uses: actions/setup-node@v2
@@ -112,7 +112,7 @@ jobs:
         uses: actions/cache@v2
         with:
           key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-          path: node_modules
+          path: ${GITHUB_WORKSPACE}/node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
         if: steps.cache-npm.outputs.cache-hit != 'true'
@@ -124,40 +124,40 @@ jobs:
         # if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
         run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
-      - name: Install SQL LocalDB 2019
-        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Downloading..."
-          Import-Module BitsTransfer
-          Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
-          Write-Host "Installing..."
-          Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
-          Write-Host "Checking version..."
-          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+      # - name: Install SQL LocalDB 2019
+      #   if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+      #   shell: pwsh
+      #   run: |
+      #     Write-Host "Downloading..."
+      #     Import-Module BitsTransfer
+      #     Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
+      #     Write-Host "Installing..."
+      #     Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
+      #     Write-Host "Checking version..."
+      #     sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
-      - name: Login to use Azure resources in integration tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        run: |
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+      # - name: Login to use Azure resources in integration tests
+      #   if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
+      #   run: |
+      #     az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
+      #     az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
-      - name: Cache NuGet packages
-        uses: actions/cache@v2
-        id: cache-nuget
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+      # - name: Cache NuGet packages
+      #   uses: actions/cache@v2
+      #   id: cache-nuget
+      #   with:
+      #     path: ~/.nuget/packages
+      #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+      #     restore-keys: |
+      #       ${{ runner.os }}-nuget-
 
-      - name: Restore NuGet packages
-        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+      # - name: Restore NuGet packages
+      #   run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
 
-      - name: Build solution
-        run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+      # - name: Build solution
+      #   run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
-      - name: Run tests and publish report
-        run: |
-          dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
+      # - name: Run tests and publish report
+      #   run: |
+      #     dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
+      #     dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
