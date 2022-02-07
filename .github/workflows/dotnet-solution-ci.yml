@@ -102,6 +102,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # TODO: I think this i maybe caching too much, and this path is probably not correct
+      # TODO: Talk to Alexander, he might have some input
       - name: Cache node_modules
         id: cache-npm
         uses: actions/cache@v2
