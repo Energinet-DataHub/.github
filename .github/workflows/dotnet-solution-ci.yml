@@ -102,17 +102,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
+      # - name: Get npm cache directory
+      #   id: npm-cache-dir
+      #   run: |
+      #     echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache npm installed packages
         id: cache-npm
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-npm-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+          path: node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
         if: steps.cache-npm.outputs.cache-hit != 'true'
