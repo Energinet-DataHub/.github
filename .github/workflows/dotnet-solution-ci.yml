@@ -103,12 +103,26 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Cache npm installed packages
+        id: cache-npm
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
-        if: ${{ inputs.USE_AZURITE == true }}
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        # if: ${{ inputs.USE_AZURITE == true }}
         run: npm install -g azurite@${{ env.AZURITE_VERSION }}
 
       - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        # if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
         run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
       # TODO: Spike - Disabled to work with caching
