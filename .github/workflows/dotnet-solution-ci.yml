@@ -100,8 +100,8 @@ jobs:
 
       - name: Use Node v${{ env.NODE_VERSION }}
         uses: actions/setup-node@v2
-          with:
-            node-version: '16'
+        with:
+          node-version: '16'
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
         if: ${{ inputs.USE_AZURITE == true }}
