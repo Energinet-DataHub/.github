@@ -112,7 +112,7 @@ jobs:
         id: cache-npm
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+          key: ${{ runner.os }}-npm-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
           path: ${{ steps.npm-cache-dir.outputs.dir }}
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
