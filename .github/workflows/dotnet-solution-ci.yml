@@ -116,23 +116,9 @@ jobs:
         run: |
           npm install azurite@${{ env.AZURITE_VERSION }}
 
-      - name: Test if Azurite is installed
-        run: |
-          cd ${{ env.PATH }}
-          azurite -v
-        env:
-          PATH: ${{ github.workspace }}\node_modules\.bin
-
       - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-
-      - name: Test if Azure Functions Core Tools is installed
-        run: |
-          cd ${{ env.PATH }}
-          func -v
-        env:
-          PATH: ${{ github.workspace }}\node_modules\.bin
 
       - name: Install SQL LocalDB 2019
         if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
