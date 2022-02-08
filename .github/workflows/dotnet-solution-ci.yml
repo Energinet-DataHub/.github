@@ -102,16 +102,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Verify environment before
-        run: |
-          echo ${{ github.workspace }}
-          npm config ls -l
-
       - name: Cache node modules
         id: cache-nodemodules
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}
+          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
           path: ${{ github.workspace }}\node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
@@ -120,10 +115,6 @@ jobs:
         run: |
           npm install azurite@${{ env.AZURITE_VERSION }}
 
-      - name: Verify environment after
-        run: |
-          ls
-
       - name: Test if Azurite is installed
         run: |
           cd ${{ env.PATH }}
@@ -131,10 +122,17 @@ jobs:
         env:
           PATH: ${{ github.workspace }}\node_modules\.bin
 
-      # - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-      #   if: steps.cache-npm.outputs.cache-hit != 'true'
-      #   # if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
-      #   run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        # if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
+        run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+
+      - name: Test if Azure Functions Core Tools is installed
+        run: |
+          cd ${{ env.PATH }}
+          func -v
+        env:
+          PATH: ${{ github.workspace }}\node_modules\.bin
 
       # - name: Install SQL LocalDB 2019
       #   if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
