@@ -25,7 +25,7 @@ on:
         type: string
       OPERATING_SYSTEM:
         required: false
-        default: 'windows-2019' #default: 'windows-2022'
+        default: 'windows-2022'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
@@ -81,10 +81,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Setup .NET 3.1.x
+      - name: Setup .NET 3.1.416
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '3.1.416'
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v1
