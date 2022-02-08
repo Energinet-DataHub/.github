@@ -129,7 +129,7 @@ jobs:
           cd ${{ env.PATH }}
           azurite -v
         env:
-          PATH: ${{ github.workspace }}\node_modules\azurite
+          PATH: ${{ github.workspace }}\node_modules\.bin
 
       # - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
       #   if: steps.cache-npm.outputs.cache-hit != 'true'
