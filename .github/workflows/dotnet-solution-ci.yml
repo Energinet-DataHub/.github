@@ -71,11 +71,11 @@ jobs:
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Necessary to provide secrets for authentication and authorization if needed
       AZURE_SECRETS_KEYVAULT_URL: ${{ secrets.AZURE_SECRETS_KEYVAULT_URL }}
+      # Set value used by AzuriteManager
+      AzuriteBlobFolderPath: '${{ github.workspace }}\node_modules\.bin\'
       # Only valid if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
       # Overrides settings in 'functionhost.settings.json'
-      NodeModulesFolderPath: '${{ github.workspace }}\node_modules'
-      AzuriteBlobFolderPath: '$env:NodeModulesFolderPath\.bin\'
-      FunctionAppHostPath: '$env:NodeModulesFolderPath\azure-functions-core-tools\bin\func.dll'
+      FunctionAppHostPath: '${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll'
 
     steps:
       - name: Checkout repository
