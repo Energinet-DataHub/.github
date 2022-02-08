@@ -103,7 +103,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Verify environment before
-        run:
+        run: |
           echo ${{ github.workspace }}
           npm config ls -l
 
@@ -121,12 +121,15 @@ jobs:
           npm install azurite@${{ env.AZURITE_VERSION }}
 
       - name: Verify environment after
-        run:
+        run: |
           ls
 
       - name: Test if Azurite is installed
         run: |
+          cd ${{ env.PATH }}
           azurite -v
+        env:
+          PATH: ${{ github.workspace }}\node_modules\azurite
 
       # - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
       #   if: steps.cache-npm.outputs.cache-hit != 'true'
