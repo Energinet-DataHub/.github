@@ -25,7 +25,7 @@ on:
         type: string
       OPERATING_SYSTEM:
         required: false
-        default: 'windows-latest'
+        default: 'windows-2022'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
@@ -102,23 +102,31 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Cache Azurite
-        id: cache-azurite
+      - name: Verify environment before
+        run:
+          echo ${{ github.workspace }}
+          npm config ls -l
+
+      - name: Cache node modules
+        id: cache-nodemodules
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}
-          path: C:\npm\prefix\node_modules\azurite
+          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}
+          path: ${{ github.workspace }}\node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
-        if: steps.cache-azurite.outputs.cache-hit != 'true'
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         # if: ${{ inputs.USE_AZURITE == true }}
         run: |
-          npm install -g azurite@${{ env.AZURITE_VERSION }}
+          npm install azurite@${{ env.AZURITE_VERSION }}
 
-      - name: Test if Azurite can start
+      - name: Verify environment after
+        run:
+          ls
+
+      - name: Test if Azurite is installed
         run: |
-          npm config ls -l
-          azurite
+          azurite -v
 
       # - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
       #   if: steps.cache-npm.outputs.cache-hit != 'true'
