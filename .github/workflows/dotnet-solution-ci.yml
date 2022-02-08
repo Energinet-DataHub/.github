@@ -108,7 +108,7 @@ jobs:
         id: cache-nodemodules
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-nodemodules-${{ env.AZURITE_VERSION }}-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+          key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
           path: ${{ github.workspace }}\node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
