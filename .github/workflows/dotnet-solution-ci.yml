@@ -25,17 +25,14 @@ on:
         type: string
       OPERATING_SYSTEM:
         required: false
-        default: 'windows-latest'
+        default: 'windows-2022'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
         type: boolean
-      USE_AZURITE:
-        required: false
-        default: false
-        type: boolean
-      USE_AZURE_FUNCTIONS_CORE_TOOLS:
+      # Use Azurite and Azure Functions Core Tools to support testing
+      USE_AZURE_FUNCTIONS_TOOLS:
         required: false
         default: false
         type: boolean
@@ -64,29 +61,39 @@ jobs:
     env:
       BUILD_CONFIGURATION: Release
       # Tool versions
+      NODE_VERSION: '16'
       AZURITE_VERSION: '3.15.0'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.3971'
       # Necessary to manage Azure resources for tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Necessary to provide secrets for authentication and authorization if needed
       AZURE_SECRETS_KEYVAULT_URL: ${{ secrets.AZURE_SECRETS_KEYVAULT_URL }}
-      # Only valid if USE_AZURE_FUNCTIONS_CORE_TOOLS is TRUE
+      #
+      # Only relevant if USE_AZURE_FUNCTIONS_TOOLS is TRUE
+      #
+      # Set value used by 'AzuriteManager'
+      AzuriteBlobFolderPath: '${{ github.workspace }}\node_modules\.bin\'
       # Overrides settings in 'functionhost.settings.json'
-      FunctionAppHostPath: 'C:\npm\prefix\node_modules\azure-functions-core-tools\bin\func.dll'
+      FunctionAppHostPath: '${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Setup .NET 3.1.x
+      # Use an cached .NET SDK version for better performance (for Windows see: https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md#net-core-sdk)
+      - name: Setup .NET 3.1.416
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '3.1.416'
+        env:
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
+        env:
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
       - name: Setup Azure Cosmos DB Emulator
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
@@ -96,13 +103,28 @@ jobs:
           Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
           Start-CosmosDbEmulator
 
+      - name: Use Node v${{ env.NODE_VERSION }}
+        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node modules
+        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+        id: cache-nodemodules
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+          path: ${{ github.workspace }}\node_modules
+
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
-        if: ${{ inputs.USE_AZURITE == true }}
-        run: npm install -g azurite@${{ env.AZURITE_VERSION }}
+        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        run: |
+          npm install azurite@${{ env.AZURITE_VERSION }}
 
       - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_CORE_TOOLS == true }}
-        run: npm install -g azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
       - name: Install SQL LocalDB 2019
         if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
