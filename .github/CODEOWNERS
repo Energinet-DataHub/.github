@@ -1,7 +1,5 @@
 *       @renetnielsen @djorgensendk @dstsyst
 
-.github/actions/get-chart-semver/*                          @Energinet-DataHub/fenris
-.github/actions/helm-release-chart/*                        @Energinet-DataHub/fenris
 /.github/actions/helm-release-chart/*                       @Energinet-DataHub/fenris
 /.github/actions/build-and-push-container/*                 @Energinet-DataHub/fenris
 /.github/actions/python-pipenv-install-dependencies/*       @Energinet-DataHub/fenris
