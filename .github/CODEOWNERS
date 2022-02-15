@@ -7,11 +7,13 @@
 /.github/actions/python-pipenv-install-dependencies/*       @Energinet-DataHub/fenris
 /.github/actions/update-chart-deployment-image/*            @Energinet-DataHub/fenris
 /.github/actions/update-environment-chart/*                 @Energinet-DataHub/fenris
-/.github/actions/get-chart-semver/*                         @Energinet-DataHub/fenris
+/.github/actions/get-semver/*                               @Energinet-DataHub/fenris
 /.github/actions/yaml-delete/*                              @Energinet-DataHub/fenris
 /.github/actions/yaml-get/*                                 @Energinet-DataHub/fenris
 /.github/actions/yaml-set/*                                 @Energinet-DataHub/fenris
+/.github/actions/yamlpath-install/*                         @Energinet-DataHub/fenris
 /.github/workflows/helm-chart-version-check.yaml            @Energinet-DataHub/fenris
 /.github/workflows/python-pipenv-validate.yaml              @Energinet-DataHub/fenris
 /.github/workflows/build-containers-and-release-chart.yaml  @Energinet-DataHub/fenris
 /.github/workflows/update-chart-in-env.yaml                 @Energinet-DataHub/fenris
+/.github/workflows/version-increment-check.yaml             @Energinet-DataHub/fenris
