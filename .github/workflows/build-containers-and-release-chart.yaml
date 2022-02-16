@@ -104,7 +104,7 @@ jobs:
           JSON='${{ inputs.containers }}'
           VALUES_FILE=${{ inputs.chart_folder }}/values.yaml
           echo $JSON | jq -c '.[]' | while read i; do
-              DEPLOYMENT_NAME=$(echo $i | jq .deployment_name)
+              DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
               TAG=$(echo $i | jq -r .tag)
               yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
           done
