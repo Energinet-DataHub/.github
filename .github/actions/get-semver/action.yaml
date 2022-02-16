@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Get chart semver
+name: Get semver plus pr
 description: |
-  Get semver from the chart + pr if pr.
+  Get semver from a path in a yaml file and if PR then append extra values.
 
 inputs:
-  chart_folder:
-    description: Path to the folder containing the chart.
+  yaml_file:
+    description: Path to the yaml file.
     required: true
+  yaml_path:
+    description: Path inside the yaml file.
+    required: true
+
   git_checkout_folder:
     description: Folder to checkout main-branch inputs.
     required: false
@@ -42,8 +46,8 @@ runs:
       id: get_chart_version
       uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
       with:
-        yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.chart_folder }}/Chart.yaml
-        yaml_path: version
+        yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.yaml_file }}
+        yaml_path: ${{ inputs.yaml_path }}
 
     - name: Generate semver
       id: generate_semver

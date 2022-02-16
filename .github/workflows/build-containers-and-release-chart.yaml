@@ -83,13 +83,6 @@ jobs:
           image_name: ${{ steps.image_name.outputs.lowercase }}
           image_tag: ${{ matrix.containers.tag }}
 
-      - name: Update container repo and tag in chart
-        uses: Energinet-DataHub/.github/.github/actions/update-chart-deployment-image@main
-        with: 
-          deployment_name: ${{ matrix.containers.deployment_name }}
-          image: ${{ steps.image_name.outputs.lowercase }}
-          tag: ${{ matrix.containers.tag }}
-
   release_chart:
     name: Release domain chart
     needs: [build_containers_and_update_chart]
@@ -100,6 +93,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: install yamlpath
+        uses: Energinet-DataHub/.github/.github/actions/yamlpath-install@main
+        
+      - name: If pr then override containers version in chart
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          JSON='${{ inputs.containers }}'
+          VALUES_FILE=${{ inputs.chart_folder }}/values.yaml
+          echo $JSON | jq -c '.[]' | while read i; do
+              DEPLOYMENT_NAME=$(echo $i | jq .deployment_name)
+              TAG=$(echo $i | jq .tag)
+              yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
+          done
         
       - name: Release helm chart
         id: release_chart
