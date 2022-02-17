@@ -44,8 +44,16 @@ jobs:
             yaml_file: ${{ inputs.yaml_file }}
             yaml_path: ${{ inputs.yaml_path }}
 
+      - name: Check if previous tag is valid semver
+        id: is_prev_tag_valid
+        uses: rubenesp87/semver-validation-action@cd30707b188980006854de19df716fc9cf39f37f
+        continue-on-error: true
+        with:
+          version: ${{ steps.previous_tag.outputs.result }}
+
       - name: Get next valid semvers
         id: semvers
+        if: steps.is_prev_tag_valid.outcome == 'success'
         uses: "WyriHaximus/github-action-next-semvers@v1"
         with:
           version: ${{ steps.previous_tag.outputs.result }}
@@ -61,8 +69,13 @@ jobs:
           yaml_file: ${{ inputs.yaml_file }}
           yaml_path: ${{ inputs.yaml_path }}
 
+      - name: Check if current tag is valid semver
+        uses: rubenesp87/semver-validation-action@cd30707b188980006854de19df716fc9cf39f37f
+        with:
+          version: ${{ steps.current_tag.outputs.result }}
+
       - name: Check versions
-        if: ${{ steps.current_tag.outputs.result != steps.semvers.outputs.patch && steps.current_tag.outputs.result != steps.semvers.outputs.minor && steps.current_tag.outputs.result != steps.semvers.outputs.major }}
+        if: ${{ steps.is_prev_tag_valid.outcome == 'success' && steps.current_tag.outputs.result != steps.semvers.outputs.patch && steps.current_tag.outputs.result != steps.semvers.outputs.minor && steps.current_tag.outputs.result != steps.semvers.outputs.major }}
         run: |
           echo "The version ${{ steps.current_tag.outputs.result }} must be an increment of the current version on main ${{ steps.previous_tag.outputs.tag }}."
           exit 1
