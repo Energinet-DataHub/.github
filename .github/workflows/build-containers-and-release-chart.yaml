@@ -22,8 +22,8 @@ on:
           Json string containing the containers to be built.
           the format is:
           [
-            { deployment_name: "name1", dockerfile: "Dockerfile", tag: 'v1.2.3' },
-            { deployment_name: "name2", dockerfile: "Dockerfile", tag: 'v1.3.1' }
+            { deployment_name: "app", dockerfile: "app/Dockerfile", image_name: 'eo-frontend-app', image_tag: 'v1.2.3' },
+            { deployment_name: "api", dockerfile: "api/Dockerfile", image_name: 'eo-auth-api', image_tag: 'v1.3.1' }
           ]
         type: string
         required: true
@@ -73,7 +73,7 @@ jobs:
         id: image_name
         uses: ASzc/change-string-case-action@v2
         with:
-          string: ghcr.io/${{ github.repository }}-${{ matrix.containers.deployment_name }}
+          string: ghcr.io/${{ github.repository_owner }}/${{ matrix.containers.image_name }}
 
       - name: Build and push container image
         id: docker_build
@@ -81,7 +81,7 @@ jobs:
         with: 
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image_name: ${{ steps.image_name.outputs.lowercase }}
-          image_tag: ${{ matrix.containers.tag }}
+          image_tag: ${{ matrix.containers.image_tag }}
 
   release_chart:
     name: Release domain chart
@@ -105,7 +105,7 @@ jobs:
           VALUES_FILE=${{ inputs.chart_folder }}/values.yaml
           echo $JSON | jq -c '.[]' | while read i; do
               DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
-              TAG=$(echo $i | jq -r .tag)
+              TAG=$(echo $i | jq -r .image_tag)
               yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
           done
         
