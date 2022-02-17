@@ -111,7 +111,7 @@ jobs:
         
       - name: Release helm chart
         id: release_chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@add-image_name-to-build
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
         with:
           release_token: ${{ secrets.RELEASE_CHART_TOKEN }}
           dispatch_token: ${{ secrets.RELEASE_CHART_TOKEN }}
