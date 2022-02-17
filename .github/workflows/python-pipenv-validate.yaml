@@ -49,6 +49,14 @@ jobs:
       - name: Analyzing the code with flake8
         shell: bash
         run: pipenv run lint-flake8 --exclude ${{ inputs.exclude }}
+      
+      - name: Analyzing the code with pylint
+        shell: bash
+        run: pipenv run lint-pylint
+      
+      - name: Analyzing the code with pycodestyle
+        shell: bash
+        run: pipenv run lint-pycodestyle
 
   py_unit_test:
     name: Run python unit tests
