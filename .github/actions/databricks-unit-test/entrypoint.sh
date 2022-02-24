@@ -16,7 +16,7 @@
 
 cd ./source/databricks/tests/
 #Build wheel
-python setup.py install
+python ../setup.py install
 # python coverage-threshold install
 pip install coverage-threshold
 coverage run --branch -m pytest .
