@@ -47,7 +47,7 @@ jobs:
       - name: Check if previous tag is valid semver
         id: is_prev_tag_valid
         uses: rubenesp87/semver-validation-action@cd30707b188980006854de19df716fc9cf39f37f
-        continue-on-error: true
+        continue-on-error: false
         with:
           version: ${{ steps.previous_tag.outputs.result }}
 
