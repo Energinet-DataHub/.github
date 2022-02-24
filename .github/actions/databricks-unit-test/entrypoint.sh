@@ -24,4 +24,4 @@ coverage run --branch -m pytest .
 coverage json
 # Create human reader friendly HTML report
 coverage html
-coverage-threshold --line-coverage-min 50
+coverage-threshold --line-coverage-min 40
