@@ -58,8 +58,8 @@ jobs:
         shell: bash
         run: pipenv run lint-pycodestyle
 
-  py_unit_test:
-    name: Run python unit tests
+  py_test:
+    name: Run python tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -72,20 +72,4 @@ jobs:
       - name: Running tests
         shell: bash
         run: |
-          pipenv run pytest tests -m unittest --tb=native
-
-  py_integration_test:
-    name: Run python intergation tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Install Python and dependencies
-        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
-        with: 
-          python_version: ${{ inputs.python_version }}
-
-      - name: Running tests
-        shell: bash
-        run: |
-          pipenv run pytest tests -m integrationtest --tb=native
+          pipenv run pytest tests --tb=native
