@@ -37,8 +37,8 @@ runs:
     - name: Run yaml get
       shell: bash
       run: |
-        RESULT=$(yaml-get --query ${{ inputs.yaml_path }} ${{ inputs.yaml_file }})
-        if [ "$RESULT" == "Please try --help for more information." ]
+        RESULT=$(yaml-get --query ${{ inputs.yaml_path }} ${{ inputs.yaml_file }} 2>&1)
+        if [[ "$RESULT" == "ERROR: File not found*" ]]
         then
           #FILE NOT FOUND - return empty
           echo "::set-output name=result::"
