@@ -29,17 +29,17 @@ on:
       BUILD_NUMBER:
         description: Parameter parsed to --build argument eg. --build=${BUILD_NUMBER}. If set, this will build a dev package for pypi using --build
         required: false
+        type: string
         default: ''
       VERBOSE:
         description: Set to true for verbose logging
         required: false
         default: false
         type: boolean
-
     secrets:
       PYPI_API_TOKEN:
         required: true
-        description: API Token used to publish to PyPi
+        description: API Token used to publish to PyPI
 
 jobs:
   publish_package:
