@@ -59,7 +59,12 @@ runs:
           echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}"
         elif ${{ github.event_name == 'pull_request' }}
         then
-          echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}-pr.${{ github.event.pull_request.number }}-$(git rev-parse --short ${{ github.sha }})"
+          if [ -z "${{ steps.get_chart_version.outputs.result }}" ]
+          then
+            echo "::set-output name=version::0.0.0-pr.${{ github.event.pull_request.number }}-$(git rev-parse --short ${{ github.sha }})"
+          else
+            echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}-pr.${{ github.event.pull_request.number }}-$(git rev-parse --short ${{ github.sha }})"
+          fi
         else
           echo Not supported on push to branches other than main
           exit 1
