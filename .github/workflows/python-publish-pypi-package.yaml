@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Run tests and linting
+name: Publish PyPI Package
 
 on:
   workflow_call:
@@ -26,15 +26,15 @@ on:
         description: The repository URL to use eg. https://test.pypi.org/legacy/ for testing
         type: string
         required: false
-      IS_BUILD:
-        description: If true, this will build a dev package for pypi using --build
-        type: boolean
+      BUILD_NUMBER:
+        description: Parameter parsed to --build argument eg. --build=${BUILD_NUMBER}. If set, this will build a dev package for pypi using --build
+        required: false
+        default: ''
+      VERBOSE:
+        description: Set to true for verbose logging
         required: false
         default: false
-      DEV_PARAM:
-        description: Parameter parsed to --build argument eg. --build=${dev_parm}. Only set this if IS_BUILD is true
-        type: string
-        required: false
+        type: boolean
 
     secrets:
       PYPI_API_TOKEN:
@@ -42,39 +42,24 @@ on:
         description: API Token used to publish to PyPi
 
 jobs:
-  py_lint:
-    name: Lint python code
+  publish_package:
+    name: Publish PyPI Package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Install Python and dependencies
+        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
+        with: 
+          python_version: ${{ inputs.PYTHON_VERSION }}
 
-      - name: Set up Python ${{ inputs.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ inputs.PYTHON_VERSION }}
-
-      - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pipenv wheel
-
-      - id: cache-pipenv
-        uses: actions/cache@v1
-        with:
-          path: ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-
-      - name: Install dependencies
-        run: |
-          pipenv install --deploy --dev
-
-      - name: Build prod tarball
-        if: ${{ inputs.IS_BUILD == false }}
+      - name: Build tarball for release
+        if: ${{ inputs.BUILD_NUMBER == '' }}
         run: python setup.py sdist
 
-      - name: Build dev tarball
-        if: ${{ inputs.IS_BUILD == true }}
-        run: python setup.py sdist --build=${{ inputs.DEV_PARAM }}
-
+      - name: Build tarball for pre-release
+        if: ${{ inputs.BUILD_NUMBER != '' }}
+        run: python setup.py sdist --build=${{ inputs.BUILD_NUMBER }}
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.2
@@ -82,3 +67,4 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
           repository_url: ${{ inputs.REPOSITORY_URL }}
+          verbose: ${{ inputs.VERBOSE }}
