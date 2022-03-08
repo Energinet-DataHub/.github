@@ -44,7 +44,7 @@ runs:
 
     - name: Get chart version
       id: get_chart_version
-      uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
+      uses: Energinet-DataHub/.github/.github/actions/yaml-get@get_semver_default
       with:
         yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.yaml_file }}
         yaml_path: ${{ inputs.yaml_path }}
