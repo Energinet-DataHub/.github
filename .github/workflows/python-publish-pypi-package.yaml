@@ -55,11 +55,11 @@ jobs:
 
       - name: Build tarball for release
         if: ${{ inputs.BUILD_NUMBER == '' }}
-        run: python setup.py sdist
+        run: pipenv run python setup.py sdist
 
       - name: Build tarball for pre-release
         if: ${{ inputs.BUILD_NUMBER != '' }}
-        run: python setup.py sdist --build=${{ inputs.BUILD_NUMBER }}
+        run: pipenv run python setup.py sdist --build=${{ inputs.BUILD_NUMBER }}
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.2
