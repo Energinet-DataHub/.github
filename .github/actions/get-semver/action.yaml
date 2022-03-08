@@ -59,7 +59,8 @@ runs:
           echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}"
         elif ${{ github.event_name == 'pull_request' }}
         then
-          if [ -z "${{ steps.get_chart_version.outputs.result }}" ]
+          # file not found
+          if [ "${{ steps.get_chart_version.outputs.result }}" == "Please try --help for more information." ]
           then
             echo "::set-output name=version::0.0.0-pr.${{ github.event.pull_request.number }}-$(git rev-parse --short ${{ github.sha }})"
           else
