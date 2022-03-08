@@ -45,3 +45,4 @@ runs:
           echo "::set-output name=result::"
         else:
           echo "::set-output name=result::$(yaml-get --query ${{ inputs.yaml_path }} ${{ inputs.yaml_file }})"
+        fi
