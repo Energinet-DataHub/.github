@@ -53,10 +53,6 @@ jobs:
         with: 
           python_version: ${{ inputs.PYTHON_VERSION }}
 
-      - name: Build tarball for release
-        if: ${{ inputs.BUILD_NUMBER == '' }}
-        run: pipenv run python setup.py sdist
-
       - name: Find current version
         if: ${{ inputs.BUILD_NUMBER != '' }}
         id: find_version
@@ -65,7 +61,7 @@ jobs:
           yaml_file: META.yaml
           yaml_path: package.version
 
-      - name: Set pre-release version
+      - name: Mark version as pre-release
         if: ${{ inputs.BUILD_NUMBER != '' }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
         with:
@@ -73,9 +69,8 @@ jobs:
           yaml_path: package.version
           value: ${{ steps.find_version.outputs.result }}.${{ inputs.BUILD_NUMBER }}
 
-      - name: Build tarball for pre-release
-        if: ${{ inputs.BUILD_NUMBER != '' }}
-        run: pipenv run python setup.py sdist --build=${{ inputs.BUILD_NUMBER }}
+      - name: Build tarball
+        run: pipenv run python setup.py sdist
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.2
