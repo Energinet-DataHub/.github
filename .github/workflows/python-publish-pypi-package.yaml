@@ -71,7 +71,7 @@ jobs:
         with:
           yaml_file: META.yaml
           yaml_path: package.version
-          value: ${{ steps.find_version.outputs.value }}.${{ inputs.BUILD_NUMBER }}
+          value: ${{ steps.find_version.outputs.result }}.${{ inputs.BUILD_NUMBER }}
 
       - name: Build tarball for pre-release
         if: ${{ inputs.BUILD_NUMBER != '' }}
