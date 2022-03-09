@@ -57,6 +57,22 @@ jobs:
         if: ${{ inputs.BUILD_NUMBER == '' }}
         run: pipenv run python setup.py sdist
 
+      - name: Find current version
+        if: ${{ inputs.BUILD_NUMBER != '' }}
+        id: find_version
+        uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
+        with:
+          yaml_file: META.yaml
+          yaml_path: package.version
+
+      - name: Set pre-release version
+        if: ${{ inputs.BUILD_NUMBER != '' }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        with:
+          yaml_file: META.yaml
+          yaml_path: package.version
+          value: ${{ steps.find_version.outputs.value }}.${{ inputs.BUILD_NUMBER }}
+
       - name: Build tarball for pre-release
         if: ${{ inputs.BUILD_NUMBER != '' }}
         run: pipenv run python setup.py sdist --build=${{ inputs.BUILD_NUMBER }}
