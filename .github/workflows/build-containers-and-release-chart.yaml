@@ -22,8 +22,19 @@ on:
           Json string containing the containers to be built.
           the format is:
           [
-            { deployment_name: "app", dockerfile: "app/Dockerfile", image_name: 'eo-frontend-app', image_tag: 'v1.2.3' },
-            { deployment_name: "api", dockerfile: "api/Dockerfile", image_name: 'eo-auth-api', image_tag: 'v1.3.1' }
+            { 
+              deployment_name: "app", 
+              dockerfile: "app/Dockerfile", 
+              image_name: 'eo-frontend-app', 
+              image_tag: 'v1.2.3', 
+              context: '.'
+            },
+            { 
+              deployment_name: "api", 
+              dockerfile: "api/Dockerfile", 
+              image_name: 'eo-auth-api', 
+              image_tag: 'v1.3.1' 
+            }
           ]
         type: string
         required: true
@@ -82,6 +93,7 @@ jobs:
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image_name: ${{ steps.image_name.outputs.lowercase }}
           image_tag: ${{ matrix.containers.image_tag }}
+          docker_context: ${{ matrix.containers.context && matrix.containers.context || '.'}}
 
   release_chart:
     name: Release domain chart
