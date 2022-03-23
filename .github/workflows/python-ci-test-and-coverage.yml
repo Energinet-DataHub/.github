@@ -51,3 +51,9 @@ jobs:
         with:
           name: ${{ inputs.ARTIFACT_NAME }}
           path: ${{ inputs.TEST_REPORT_PATH }}
+      
+      - name: Upload coverage to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          verbose: true
