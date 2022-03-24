@@ -14,14 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Exit immediately with failure status if any command fails
+set -eo pipefail
+
 cd ./source/databricks/tests/
 #Build wheel
 python ../setup.py install
 # python coverage-threshold install
 pip install coverage-threshold delta-spark
 coverage run --branch -m pytest .
-# Exit with failure status if tests failed
-if [ $? -ne 0 ]; then exit 1; fi
 # Create data for threshold evaluation
 coverage json
 # Create human reader friendly HTML report
