@@ -20,6 +20,8 @@ python ../setup.py install
 # python coverage-threshold install
 pip install coverage-threshold delta-spark
 coverage run --branch -m pytest .
+# Exit with failure status if tests failed
+if [ $? -ne 0 ]; then exit 1; fi
 # Create data for threshold evaluation
 coverage json
 # Create human reader friendly HTML report
