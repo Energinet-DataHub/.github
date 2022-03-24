@@ -176,5 +176,5 @@ jobs:
       - name: Publish artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ inputs.ARTIFACT_NAME }}
+          name: dotnettestartifact
           path: ${{ github.workspace }}\output
