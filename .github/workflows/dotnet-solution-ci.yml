@@ -40,6 +40,9 @@ on:
         required: false
         default: false
         type: boolean
+      ARTIFACT_NAME:
+        required: true
+        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -169,3 +172,9 @@ jobs:
         with:
           fail_ci_if_error: true
           verbose: true
+          
+      - name: Publish artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ inputs.ARTIFACT_NAME }}
+          path: ${{ github.workspace }}\output
