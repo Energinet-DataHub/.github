@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Create prerelease
+name: Publish test reports from release to CodeCov
 
 on:
   workflow_call:
@@ -24,6 +24,8 @@ on:
 jobs:
   upload_actifact_to_codecov:
     runs-on: ubuntu-latest
+    env:
+      DESTINATION_FOLDER_PATH: ${{ github.workspace }}/release
     steps:
       - name: Download release
         shell: bash
@@ -33,11 +35,11 @@ jobs:
       - name: Unzip release
         shell: bash
         run: |
-          unzip ${{ inputs.RELEASE_NAME }}.zip -d ${{ inputs.DESTINATION_FOLDER_PATH }}
+          unzip ${{ inputs.RELEASE_NAME }}.zip -d ${{ env.DESTINATION_FOLDER_PATH }}
       
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
-          directory: ${{ inputs.DESTINATION_FOLDER_PATH }}/testreports
+          directory: ${{ env.DESTINATION_FOLDER_PATH }}/testreports
           fail_ci_if_error: true
           verbose: true
