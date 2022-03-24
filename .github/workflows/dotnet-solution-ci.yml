@@ -40,9 +40,6 @@ on:
         required: false
         default: false
         type: boolean
-      ARTIFACT_NAME:
-        required: true
-        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
