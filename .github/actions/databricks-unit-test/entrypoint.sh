@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Exit immediately with failure status if any command fails
-set -eo pipefail
+set -e
 
 cd ./source/databricks/tests/
 #Build wheel
