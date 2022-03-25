@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Exit immediately with failure status if any command fails
+set -eo pipefail
+
 cd ./source/databricks/tests/
 #Build wheel
 python ../setup.py install
