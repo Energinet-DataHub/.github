@@ -18,6 +18,7 @@ on:
     inputs:
       RELEASE_REPOSITORY_PATH:
         required: true
+        type: string
 
 jobs:
   upload_actifact_to_codecov:
