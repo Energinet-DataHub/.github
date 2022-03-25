@@ -18,8 +18,6 @@ on:
     inputs:
       RELEASE_REPOSITORY_PATH:
         required: true
-      RELEASE_NAME:
-        required: true
 
 jobs:
   upload_actifact_to_codecov:
@@ -27,15 +25,30 @@ jobs:
     env:
       DESTINATION_FOLDER_PATH: ${{ github.workspace }}/release
     steps:
+      - name: Find associated pull request
+        uses: jwalton/gh-find-current-pr@v1
+        id: find_pull_request
+        with:
+          state: all
+    
+      - name: Fail if PR not found
+        if: steps.find_pull_request.outputs.pr == ''
+        run: exit 1
+
+      - name: Set RELEASE_VERSION
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+
       - name: Download release
         shell: bash
         run: |
-          wget https://github.com/${{ inputs.RELEASE_REPOSITORY_PATH }}/releases/download/${{ inputs.RELEASE_NAME }}/${{ inputs.RELEASE_NAME }}.zip
+          wget https://github.com/${{ inputs.RELEASE_REPOSITORY_PATH }}/releases/download/${{ env.RELEASE_VERSION }}/${{ env.RELEASE_VERSION }}.zip
 
       - name: Unzip release
         shell: bash
         run: |
-          unzip ${{ inputs.RELEASE_NAME }}.zip -d ${{ env.DESTINATION_FOLDER_PATH }}
+          unzip ${{ env.RELEASE_VERSION }}.zip -d ${{ env.DESTINATION_FOLDER_PATH }}
       
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
