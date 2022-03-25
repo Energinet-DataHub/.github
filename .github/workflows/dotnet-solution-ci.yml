@@ -165,9 +165,11 @@ jobs:
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
       - name: Find coverage artifacts
-        shell: bash
+        shell: powershell
         run: |
-          find . -iname "*.opencover.xml" -printf "%f\n" -exec cp --parents {} ${{ github.workspace }}\CoverageReport \;
+          $testReports = Get-ChildItem -Include "coverage.opencover.xml" -File -Recurse
+          $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ github.workspace }}\CoverageReport" -ChildPath $_.Directory.Name } -Force
+          $testReports | Copy-Item -Destination { Join-Path "${{ github.workspace }}\CoverageReport" -ChildPath $_.Directory.Name | Join-Path -ChildPath $_.Name } -Force -Recurse
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
