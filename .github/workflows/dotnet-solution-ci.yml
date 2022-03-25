@@ -165,8 +165,9 @@ jobs:
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
       - name: Find coverage artifacts
+        shell: bash
         run: |
-          find . -name "*coverage.opencover.xml" -type f -exec cp {} ${{ github.workspace }}\CoverageReport \;
+          find . -name "coverage.opencover.xml" -type f -exec cp {} ${{ github.workspace }}\CoverageReport \;
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
