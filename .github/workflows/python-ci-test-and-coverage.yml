@@ -22,9 +22,6 @@ on:
       IGNORE_ERRORS_AND_WARNING_FLAKE8:
         required: true
         type: string
-      ARTIFACT_NAME:
-        required: true
-        type: string
       TEST_REPORT_PATH:
         required: true
         type: string
