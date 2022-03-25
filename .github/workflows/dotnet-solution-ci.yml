@@ -167,7 +167,7 @@ jobs:
       - name: Find coverage artifacts
         shell: bash
         run: |
-          find . -iname "*.opencover.xml" -printf "%f\n" -exec cp {} ${{ github.workspace }}\CoverageReport \;
+          find . -iname "*.opencover.xml" -printf "%f\n" -exec cp --parents {} ${{ github.workspace }}\CoverageReport \;
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
