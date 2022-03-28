@@ -22,9 +22,6 @@ on:
       IGNORE_ERRORS_AND_WARNING_FLAKE8:
         required: true
         type: string
-      ARTIFACT_NAME:
-        required: true
-        type: string
       TEST_REPORT_PATH:
         required: true
         type: string
@@ -49,7 +46,7 @@ jobs:
       - name: Upload test report
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ inputs.ARTIFACT_NAME }}
+          name: pythontestartifact
           path: ${{ inputs.TEST_REPORT_PATH }}
       
       - name: Upload coverage to CodeCov

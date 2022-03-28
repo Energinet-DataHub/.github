@@ -1,0 +1,59 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Publish test reports from release to CodeCov
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE_REPOSITORY_PATH:
+        required: true
+        type: string
+
+jobs:
+  upload_actifact_to_codecov:
+    runs-on: ubuntu-latest
+    env:
+      DESTINATION_FOLDER_PATH: ${{ github.workspace }}/release
+    steps:
+      - name: Find associated pull request
+        uses: jwalton/gh-find-current-pr@v1
+        id: find_pull_request
+        with:
+          state: all
+    
+      - name: Fail if PR not found
+        if: steps.find_pull_request.outputs.pr == ''
+        run: exit 1
+
+      - name: Set RELEASE_VERSION
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+
+      - name: Download release
+        shell: bash
+        run: |
+          wget https://github.com/${{ inputs.RELEASE_REPOSITORY_PATH }}/releases/download/${{ env.RELEASE_VERSION }}/${{ env.RELEASE_VERSION }}.zip
+
+      - name: Unzip release
+        shell: bash
+        run: |
+          unzip ${{ env.RELEASE_VERSION }}.zip -d ${{ env.DESTINATION_FOLDER_PATH }}
+      
+      - name: Upload coverage to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          directory: ${{ env.DESTINATION_FOLDER_PATH }}/testreports
+          fail_ci_if_error: true
+          verbose: true
