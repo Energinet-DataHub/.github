@@ -60,6 +60,7 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
+      COVERAGE_REPORT_PATH: ${{ github.workspace }}\CoverageReport
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.15.0'
@@ -168,8 +169,8 @@ jobs:
         shell: powershell
         run: |
           $testReports = Get-ChildItem -Include "coverage.opencover.xml" -File -Recurse
-          $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ github.workspace }}\CoverageReport" -ChildPath $_.Directory.Name } -Force
-          $testReports | Copy-Item -Destination { Join-Path "${{ github.workspace }}\CoverageReport" -ChildPath $_.Directory.Name | Join-Path -ChildPath $_.Name } -Force -Recurse
+          $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name } -Force
+          $testReports | Copy-Item -Destination { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name | Join-Path -ChildPath $_.Name } -Force -Recurse
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
@@ -181,4 +182,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: dotnettestartifact
-          path: ${{ github.workspace }}\CoverageReport
+          path: ${{ env.COVERAGE_REPORT_PATH }}
