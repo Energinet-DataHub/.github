@@ -12,14 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-- name: PySpark execution
-  id: docker_build
-  uses: docker/build-push-action@v2
-  with:
-    context: ./
-    file: ./Dockerfile
-    builder: $
-    push: true
-    cache-from: type=local,src=/tmp/.buildx-cache
-    cache-to: type=local,dest=/tmp/.buildx-cache
+name: 'PySpark execution'
+description: 'This action allows you to execute code, written for Spark, Databricks or other similar engines.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
