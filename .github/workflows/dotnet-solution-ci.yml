@@ -164,28 +164,9 @@ jobs:
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
-
-      - name: Find coverage artifacts
-        shell: powershell
-        run: |
-          $testReports = Get-ChildItem -Include "coverage.opencover.xml" -File -Recurse
-          $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name } -Force
-          foreach ($testReport in $testReports)
-          {
-              $content = Get-Content -Path $testReport
-              $newContent = $content.replace('fullPath="${{ github.workspace }}\', 'fullPath="')
-              $newFilePath = "${{ env.COVERAGE_REPORT_PATH }}\" + $testReport.Directory.Name + "\" + $testReport.Name
-              $newContent | Out-File -FilePath $newFilePath
-          }
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
           fail_ci_if_error: true
           verbose: true
-          
-      - name: Publish artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: dotnettestartifact
-          path: ${{ env.COVERAGE_REPORT_PATH }}
