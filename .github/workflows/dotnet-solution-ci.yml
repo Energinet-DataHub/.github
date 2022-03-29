@@ -173,7 +173,7 @@ jobs:
           foreach ($testReport in $testReports)
           {
               $content = Get-Content -Path $testReport
-              $newContent = $content.replace('fullPath=${{ github.workspace }}', 'fullPath="source\')
+              $newContent = $content.replace('fullPath="${{ github.workspace }}', 'fullPath="source\')
               $newFilePath = "${{ env.COVERAGE_REPORT_PATH }}\" + $testReport.Directory.Name + "\" + $testReport.Name
               $newContent | Out-File -FilePath $newFilePath
           }
