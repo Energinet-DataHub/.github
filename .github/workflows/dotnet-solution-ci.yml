@@ -168,9 +168,16 @@ jobs:
       - name: Find coverage artifacts
         shell: powershell
         run: |
+          ${{ github.workspace }}
           $testReports = Get-ChildItem -Include "coverage.opencover.xml" -File -Recurse
           $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name } -Force
-          $testReports | Copy-Item -Destination { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name | Join-Path -ChildPath $_.Name } -Force -Recurse
+          foreach ($testReport in $testReports)
+          {
+              $content = Get-Content -Path $testReport
+              $newContent = $content.replace('fullPath=${{ github.workspace }}', 'fullPath="source\')
+              $newFilePath = "${{ env.COVERAGE_REPORT_PATH }}\" + $testReport.Directory.Name + "\" + $testReport.Name
+              $newContent | Out-File -FilePath $newFilePath
+          }
                 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
