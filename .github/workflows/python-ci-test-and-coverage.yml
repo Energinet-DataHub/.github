@@ -41,13 +41,7 @@ jobs:
           ignore: ${{ inputs.IGNORE_ERRORS_AND_WARNING_FLAKE8 }}
 
       - name: Run unit tests
-        uses: docker/build-push-action@v2
-        with:
-          file: Energinet-DataHub/.github/.github/actions/databricks-unit-test/Dockerfile@feature/databricks_unit_test
-          builder: $
-          push: true
-          cache-from: type=local, src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+        uses: Energinet-DataHub/.github/.github/actions/databricks-unit-test@feature/databricks_unit_test
 
       - name: Upload test report
         uses: actions/upload-artifact@v2
