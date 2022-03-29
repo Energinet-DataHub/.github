@@ -24,10 +24,13 @@ RUN ["ls", "-lah", "/"]
 
 ENV PYSPARK_SUBMIT_ARGS='--packages io.delta:delta-core_2.12:1.0.0 pyspark-shell'
 
+RUN wget -P $SPARK_HOME/jars https://repo1.maven.org/maven2/io/delta/delta-core_2.12/1.0.1/delta-core_2.12-1.0.1.jar
+
 RUN conda install --quiet --yes --satisfied-skip-solve \
     'rope=0.18.*' 'pytest=6.1.*' 'pylint=2.6.*' 'autopep8=1.5.*' 'configargparse=1.2.3' 'applicationinsights=0.11.9' 'coverage=5.3.*' \
     'pytest-mock=3.5.*' \
     && \
+    pip --no-cache-dir install delta-spark pytest-asyncio && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
