@@ -168,7 +168,6 @@ jobs:
       - name: Find coverage artifacts
         shell: powershell
         run: |
-          ${{ github.workspace }}
           $testReports = Get-ChildItem -Include "coverage.opencover.xml" -File -Recurse
           $testReports | New-Item -ItemType Directory -Path { Join-Path "${{ env.COVERAGE_REPORT_PATH }}" -ChildPath $_.Directory.Name } -Force
           foreach ($testReport in $testReports)
