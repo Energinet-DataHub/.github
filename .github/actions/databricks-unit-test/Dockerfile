@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM jupyter/pyspark-notebook:6b49f3337709
+FROM jupyter/pyspark-notebook:45bfe5a474fa
 
 COPY spark-defaults.conf /spark-defaults.conf
 COPY entrypoint.sh /entrypoint.sh
 
 USER root
+
+ARG spark_version="3.1.2"
 
 RUN chmod 777 /entrypoint.sh
 RUN ["ls", "-lah", "/"]
