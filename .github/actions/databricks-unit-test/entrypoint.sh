@@ -22,7 +22,7 @@ cd ./source/databricks/tests/
 python ../setup.py install
 # python coverage-threshold install
 pip install coverage-threshold delta-spark
-coverage run --branch -m pytest -vv -s .
+coverage run --branch -m pytest .
 # Create data for threshold evaluation
 coverage json
 # Create human reader friendly HTML report
