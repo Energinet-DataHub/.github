@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM jupyter/pyspark-notebook:latest
+FROM jupyter/pyspark-notebook:spark-3.1.2
 
 COPY spark-defaults.conf /spark-defaults.conf
 COPY entrypoint.sh /entrypoint.sh
