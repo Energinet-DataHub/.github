@@ -38,7 +38,7 @@ jobs:
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
-          DOTNET_INSTALL_DIR: '/usr/share/dotnet'
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
       - name: Build project
         shell: bash
