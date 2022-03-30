@@ -63,7 +63,7 @@ jobs:
       COVERAGE_REPORT_PATH: ${{ github.workspace }}\CoverageReport
       # Tool versions
       NODE_VERSION: '16'
-      AZURITE_VERSION: '3.15.0'
+      AZURITE_VERSION: '3.16.0'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.3971'
       # Necessary to manage Azure resources for tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
@@ -80,14 +80,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
-
-      # Use an cached .NET SDK version for better performance (for Windows see: https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md#net-core-sdk)
-      - name: Setup .NET 3.1.416
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.416'
-        env:
-          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v1
@@ -164,7 +156,7 @@ jobs:
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
-                
+
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
