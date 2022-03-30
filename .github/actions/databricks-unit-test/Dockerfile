@@ -33,6 +33,6 @@ RUN conda install --quiet --yes --satisfied-skip-solve \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
-RUN sudo ln -s `(realpath /spark-defaults.conf)` $SPARK_HOME/conf/spark-defaults.conf
+# RUN sudo ln -s `(realpath /spark-defaults.conf)` $SPARK_HOME/conf/spark-defaults.conf
 
 ENTRYPOINT ["/entrypoint.sh"]
