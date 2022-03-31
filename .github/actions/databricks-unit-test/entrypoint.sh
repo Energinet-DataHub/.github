@@ -19,12 +19,12 @@ set -e
 
 cd ./source/databricks/tests/
 #Build wheel
-python ../setup.py install
+sudo python ../setup.py install
 # python coverage-threshold install
-pip install coverage-threshold delta-spark
-coverage run --branch -m pytest .
+sudo  pip install coverage-threshold delta-spark
+sudo coverage run --branch -m pytest .
 # Create data for threshold evaluation
-coverage json
+sudo coverage json
 # Create human reader friendly HTML report
-coverage html
-coverage-threshold --line-coverage-min 30
+sudo coverage html
+sudo coverage-threshold --line-coverage-min 30
