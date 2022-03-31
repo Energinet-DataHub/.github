@@ -60,7 +60,6 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
-      COVERAGE_REPORT_PATH: ${{ github.workspace }}\CoverageReport
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.16.0'
