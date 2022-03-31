@@ -63,7 +63,7 @@ RUN ln -s "spark-${APACHE_SPARK_VERSION}-bin-without-hadoop" spark && \
 
 # Configure Spark
 ENV SPARK_HOME=/usr/local/spark \
-    HADOOP_HOME=/usr/local/hadoop
+    HADOOP_HOME=/usr/local/hadoop \
     PYSPARK_SUBMIT_ARGS='--packages io.delta:delta-core_2.12:1.0.0,org.apache.hadoop:hadoop-azure:3.3.2,org.apache.hadoop:hadoop-client:3.3.2 pyspark-shell'
 
 ENV PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH \
