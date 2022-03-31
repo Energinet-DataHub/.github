@@ -15,8 +15,8 @@ FROM jupyter/scipy-notebook:016833b15ceb
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 COPY entrypoint.sh /entrypoint.sh
-
 USER root
+
 
 RUN chmod 777 /entrypoint.sh
 
@@ -75,7 +75,7 @@ RUN wget -P $SPARK_HOME/jars https://repo1.maven.org/maven2/io/delta/delta-core_
 
 RUN wget -P $SPARK_HOME/jars https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.2/hadoop-azure-3.3.2.jar
 
-USER $NB_UID
+# USER $NB_UID
 
 ENV PATH=$JAVA_HOME/bin:$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH
 RUN echo "export SPARK_DIST_CLASSPATH=$(hadoop classpath)" >> $HOME/.bashrc
