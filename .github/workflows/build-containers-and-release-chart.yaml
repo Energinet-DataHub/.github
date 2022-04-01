@@ -100,6 +100,9 @@ jobs:
     name: Release domain chart
     needs: [build_containers_and_update_chart]
     runs-on: ubuntu-latest
+    if: |
+      always() && 
+      (needs.build_containers_and_update_chart.result == 'success' || (needs.build_containers_and_update_chart.result == 'skipped' && inputs.containers != '[]'))
     outputs:
       chart_name: ${{ steps.release_chart.outputs.chart_name }}
       chart_version: ${{ steps.release_chart.outputs.chart_version }}
