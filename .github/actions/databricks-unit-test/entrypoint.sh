@@ -16,10 +16,10 @@
 
 # Exit immediately with failure status if any command fails
 set -e
-cd .source/databricks/
+cd source/databricks/
 sudo chmod -R 777 .
 
-cd ./source/databricks/tests/
+cd tests/
 
 #Build wheel
 python ../setup.py install
