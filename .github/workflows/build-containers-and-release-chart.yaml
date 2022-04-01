@@ -52,7 +52,7 @@ on:
         required: false
         default: ${{ github.repository_owner }}/helm-charts
       skip_chart:
-        description: Variable to wether or not skip a chart
+        description: Variable for deciding if the creation of a chart should be skipped
         type: boolean
         required: false
         default: false
