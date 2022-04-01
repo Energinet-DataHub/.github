@@ -16,13 +16,10 @@
 
 # Exit immediately with failure status if any command fails
 set -e
-cd source/databricks/
-chmod -R 777 .
-
-cd tests/
+cd source/databricks/tests/
 
 #Build wheel
-python ../setup.py install
+# python ../setup.py install
 # python coverage-threshold install
 pip install coverage-threshold delta-spark
 coverage run --branch -m pytest .
