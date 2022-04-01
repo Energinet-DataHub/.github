@@ -4,7 +4,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 COPY entrypoint.sh /entrypoint.sh
 
 USER root
-RUN chmod 777 /entrypoint.sh
+RUN chmod 777 . -R
+
 
 ARG openjdk_version="8"
 
