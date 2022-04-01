@@ -17,7 +17,7 @@
 # Exit immediately with failure status if any command fails
 set -e
 cd source/databricks/
-sudo chmod -R 777 .
+chmod -R 777 .
 
 cd tests/
 
