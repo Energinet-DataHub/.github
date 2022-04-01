@@ -16,8 +16,11 @@
 
 # Exit immediately with failure status if any command fails
 set -e
+cd .source/databricks/
+sudo chmod -R 777 .
 
 cd ./source/databricks/tests/
+
 #Build wheel
 python ../setup.py install
 # python coverage-threshold install
