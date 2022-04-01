@@ -70,6 +70,7 @@ jobs:
   build_containers_and_update_chart:
     name: Build containers
     runs-on: ubuntu-latest
+    if: ${{ inputs.containers != '[]' }}
     strategy:
       matrix:
         containers: ${{fromJson(inputs.containers)}} 
