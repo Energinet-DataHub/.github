@@ -28,7 +28,11 @@ on:
 
 jobs:
   function_ci:
-    runs-on: ubuntu-latest
+    runs-on: windows-2022
+
+    env:
+      OUTPUT_PATH: '${{ github.workspace }}\output'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
@@ -38,14 +42,14 @@ jobs:
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
-          DOTNET_INSTALL_DIR: '/usr/share/dotnet'
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
       - name: Build/publish project
-        shell: bash
-        run: dotnet publish ${{ inputs.CSPROJ_FILE_PATH }} --configuration Release --output ${{ github.workspace }}\output
+        run: dotnet publish ${{ inputs.CSPROJ_FILE_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
 
       - name: Publish artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ inputs.ARTIFACT_NAME }}
-          path: ${{ github.workspace }}\output
+          name: ${{ inputs.ARTIFACT_NAME }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
