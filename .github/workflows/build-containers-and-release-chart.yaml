@@ -51,6 +51,11 @@ on:
         type: string
         required: false
         default: ${{ github.repository_owner }}/helm-charts
+      skip_chart:
+        description: Variable for deciding if the creation of a chart should be skipped
+        type: boolean
+        required: false
+        default: false
  
     secrets:
       RELEASE_CHART_TOKEN: 
@@ -101,7 +106,8 @@ jobs:
     needs: [build_containers_and_update_chart]
     runs-on: ubuntu-latest
     if: |
-      always() && 
+      always() &&
+      inputs.skip_chart == false &&
       (needs.build_containers_and_update_chart.result == 'success' || (needs.build_containers_and_update_chart.result == 'skipped' && inputs.containers == '[]'))
     outputs:
       chart_name: ${{ steps.release_chart.outputs.chart_name }}
