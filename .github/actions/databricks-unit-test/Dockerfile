@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook:016833b15ceb
+FROM jupyter/pyspark-notebook:spark-3.1.2
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 COPY entrypoint.sh /entrypoint.sh
