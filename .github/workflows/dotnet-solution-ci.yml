@@ -81,7 +81,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
@@ -97,7 +97,7 @@ jobs:
 
       - name: Use Node v${{ env.NODE_VERSION }}
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
 
