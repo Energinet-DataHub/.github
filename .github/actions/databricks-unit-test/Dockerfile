@@ -33,7 +33,7 @@ RUN mamba install --quiet --yes --satisfied-skip-solve \
     # mamba install --quiet --yes --satisfied-skip-solve -c anaconda  && \
     pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus protodf delta-spark pytest-asyncio flake8 black && \
     # mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && 
+    fix-permissions "${CONDA_DIR}"
     # fix-permissions "/home/${NB_USER}"
 
 ENV PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH \
