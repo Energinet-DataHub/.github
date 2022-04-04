@@ -31,7 +31,7 @@ RUN mamba install --quiet --yes --satisfied-skip-solve \
     'coverage=6.3.*' 'azure-storage-blob=12.8.*' 'pytest-mock=3.7.*' \
     && \
     # mamba install --quiet --yes --satisfied-skip-solve -c anaconda  && \
-    pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus protodf delta-spark pytest-asyncio flake8 black && \
+    pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus protodf delta-spark pytest-asyncio flake8 black dataclasses-json && \
     # mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}"
     # fix-permissions "/home/${NB_USER}"
