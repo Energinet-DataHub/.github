@@ -20,7 +20,7 @@ COPY entrypoint.sh /entrypoint.sh
 USER root
 RUN chmod 777 /entrypoint.sh
 COPY spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
-
+COPY spark-env.sh $SPARK_HOME/conf/spark-env.sh
 
 # Install Azurite (support wasb-protocol storage for Delta tables in integration tests)
 RUN apt-get update; \
