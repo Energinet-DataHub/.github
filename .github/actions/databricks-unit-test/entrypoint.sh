@@ -18,6 +18,7 @@
 set -e
 cd source/databricks/tests/
 
+env
 #Build wheel
 python ../setup.py install
 # python coverage-threshold install
