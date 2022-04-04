@@ -15,10 +15,10 @@
 FROM jupyter/pyspark-notebook:spark-3.1.2
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-#COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
 USER root
-# RUN chmod 777 /entrypoint.sh
+RUN chmod 777 /entrypoint.sh
 COPY spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
 
 
@@ -39,3 +39,5 @@ RUN mamba install --quiet --yes --satisfied-skip-solve \
 ENV PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH \
     PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-${py4j_version}-src.zip" \
     SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
+
+ENTRYPOINT ["/entrypoint.sh"]
