@@ -21,6 +21,7 @@ USER root
 RUN chmod 777 /entrypoint.sh
 COPY spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
 
+
 # Install Azurite (support wasb-protocol storage for Delta tables in integration tests)
 RUN apt-get update; \
     apt-get install -y npm && npm install -g n && n lts && hash -r && npm install -g azurite
@@ -36,7 +37,7 @@ RUN mamba install --quiet --yes --satisfied-skip-solve \
     fix-permissions "/home/${NB_USER}"
 
 ENV PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH \
-# PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-${py4j_version}-src.zip" \
+    PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
     SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
 
 ENTRYPOINT ["/entrypoint.sh"]
