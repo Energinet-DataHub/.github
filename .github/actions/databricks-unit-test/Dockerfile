@@ -26,20 +26,18 @@ COPY spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
 RUN apt-get update; \
     apt-get install -y npm && npm install -g n && n lts && hash -r && npm install -g azurite
 
-RUN mamba install --yes --satisfied-skip-solve \
-    'pyarrow=2.0.*' 'rope=0.18.*' 'pytest=6.1.*' 'autopep8=1.5.*' 'configargparse=1.2.3'  \
-    'coverage=5.3.*' 'azure-storage-blob=12.8.*' 'pytest-mock=3.5.*' \
+RUN mamba install --quiet --yes --satisfied-skip-solve \
+    'pyarrow=2.0.*' 'rope=0.18.*' 'pytest=7.1.*' 'autopep8=1.5.*' 'configargparse=1.2.3'  \
+    'coverage=6.3.*' 'azure-storage-blob=12.8.*' 'pytest-mock=3.7.*' \
     && \
-    mamba install --yes --satisfied-skip-solve -c anaconda 'protobuf=3.14.*' && \
+    # mamba install --quiet --yes --satisfied-skip-solve -c anaconda  && \
     pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus protodf delta-spark pytest-asyncio flake8 black && \
     # mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+    fix-permissions "${CONDA_DIR}" && 
+    # fix-permissions "/home/${NB_USER}"
 
 ENV PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH \
     PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
-    SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info" 
-#    PYSPARK_PYTHON=/usr/bin/python3 \
-#    PYSPARK_DRIVER_PYTHON=/usr/bin/python3
+    SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
 
 ENTRYPOINT ["/entrypoint.sh"]
