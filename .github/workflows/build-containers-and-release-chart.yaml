@@ -80,7 +80,7 @@ jobs:
       matrix:
         containers: ${{fromJson(inputs.containers)}} 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/download-artifact@v2
         with:
@@ -114,7 +114,7 @@ jobs:
       chart_version: ${{ steps.release_chart.outputs.chart_version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: install yamlpath
         uses: Energinet-DataHub/.github/.github/actions/yamlpath-install@main

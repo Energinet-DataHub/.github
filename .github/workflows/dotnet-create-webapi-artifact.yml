@@ -35,10 +35,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v3
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }} environment
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:

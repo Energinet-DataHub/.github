@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ inputs.ignore_lint_error }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Install Python and dependencies
         uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
@@ -62,7 +62,7 @@ jobs:
     name: Run python tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Install Python and dependencies
         uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
