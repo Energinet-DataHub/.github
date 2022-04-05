@@ -43,10 +43,10 @@ jobs:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
       - name: Checkout local repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Checkout remote repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: 'Energinet-DataHub/.github'
           path: ${{ env.REMOTE_REPO_PATH }}
@@ -127,10 +127,10 @@ jobs:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
     - name: Checkout local repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Checkout remote repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: 'Energinet-DataHub/.github'
         path: ${{ env.REMOTE_REPO_PATH }}
