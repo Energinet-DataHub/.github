@@ -18,11 +18,11 @@ on:
   workflow_call:
     inputs:
       yaml_file:
-        description: The yaml file to find the value in.
+        description: The path of the YAML version file in the head (feature) branch.
         required: true
         type: string
       yaml_path:
-        description: The yaml path in the file to compare the semver of.
+        description: The YAML path containing the version to compare between the head (feature) branch and the base (main) branch.
         required: true
         type: string
 
