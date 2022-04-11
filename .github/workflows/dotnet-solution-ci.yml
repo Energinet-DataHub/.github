@@ -87,51 +87,52 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-      - name: Setup Azure Cosmos DB Emulator
-        if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Start Cosmos DB Emulator..."
-          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+      # TODO: Re-enable when done testing new actions
+      # - name: Setup Azure Cosmos DB Emulator
+      #   if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
+      #   shell: pwsh
+      #   run: |
+      #     Write-Host "Start Cosmos DB Emulator..."
+      #     Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+      #     Start-CosmosDbEmulator
 
-      - name: Use Node v${{ env.NODE_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+      # - name: Use Node v${{ env.NODE_VERSION }}
+      #   if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ env.NODE_VERSION }}
 
-      - name: Cache node modules
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
-        id: cache-nodemodules
-        uses: actions/cache@v2
-        with:
-          key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-          path: ${{ github.workspace }}\node_modules
+      # - name: Cache node modules
+      #   if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+      #   id: cache-nodemodules
+      #   uses: actions/cache@v3
+      #   with:
+      #     key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      #     path: ${{ github.workspace }}\node_modules
 
-      - name: Install Azurite v${{ env.AZURITE_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
-        run: |
-          npm install azurite@${{ env.AZURITE_VERSION }}
+      # - name: Install Azurite v${{ env.AZURITE_VERSION }}
+      #   if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      #   run: |
+      #     npm install azurite@${{ env.AZURITE_VERSION }}
 
-      - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
-        run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      # - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      #   if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      #   run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
-      - name: Install SQL LocalDB 2019
-        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Downloading..."
-          Import-Module BitsTransfer
-          Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
-          Write-Host "Installing..."
-          Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
-          Write-Host "Checking version..."
-          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+      # - name: Install SQL LocalDB 2019
+      #   if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+      #   shell: pwsh
+      #   run: |
+      #     Write-Host "Downloading..."
+      #     Import-Module BitsTransfer
+      #     Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
+      #     Write-Host "Installing..."
+      #     Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
+      #     Write-Host "Checking version..."
+      #     sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
       - name: Cache NuGet packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-nuget
         with:
           path: ~/.nuget/packages
@@ -145,19 +146,24 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
-      - name: Login to use Azure resources in integration tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        run: |
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+      # TODO: Re-enable when done testing new actions
+      # - name: Login to use Azure resources in integration tests
+      #   if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
+      #   run: |
+      #     az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
+      #     az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
-      - name: Run tests and publish report
-        run: |
-          dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+      # - name: Run tests and publish report
+      #   run: |
+      #     dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
+      #     dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
-      - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          fail_ci_if_error: true
-          verbose: true
+      # - name: Upload coverage to CodeCov
+      #   uses: codecov/codecov-action@v2
+      #   with:
+      #     fail_ci_if_error: true
+      #     verbose: true
+
+      # Call action in source (caller) respoitory
+      - name: Create artifacts
+        uses: .github/actions/dotnet-create-artifacts
