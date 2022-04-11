@@ -162,6 +162,6 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-      # Call action in source (caller) respoitory
+      # Call action in source (caller) repository
       - name: Create artifacts
         uses: ./.github/actions/dotnet-create-artifacts
