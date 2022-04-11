@@ -20,14 +20,17 @@ inputs:
   yaml_file:
     description: Path to the version file.
     required: true
+    type: string
   yaml_path:
     description: Path inside the version file.
     required: true
+    type: string
 
   git_checkout_folder:
     description: Folder to checkout main-branch inputs.
     required: false
     default: git-main
+    type: string
 
 outputs:
   semver:
