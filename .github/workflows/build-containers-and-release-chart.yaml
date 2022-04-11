@@ -19,8 +19,9 @@ on:
     inputs:
       containers:
         description: |
-          Json string containing the containers to be built.
-          the format is:
+          JSON string containing the containers to be built.
+          Example:
+          ```json
           [
             { 
               deployment_name: "app", 
@@ -36,23 +37,24 @@ on:
               image_tag: 'v1.3.1' 
             }
           ]
+          ```
         type: string
         required: true
       chart_folder:
-        description: The folder containing the chart to release_name
+        description: The path to the folder containing the Helm charts for the services specified in `containers`.
         type: string
         required: true
       chart_version:
-        description: Override the chart version to a specific version
+        description: "Optional: Override the Helm chart version to a specific version"
         type: string
         required: false
       helm_repository:
-        description: The repository to publish the chart.
+        description: "Optional: The repository to publish the chart."
         type: string
         required: false
         default: ${{ github.repository_owner }}/helm-charts
       skip_chart:
-        description: Variable for deciding if the creation of a chart should be skipped
+        description: "Optional: Variable for deciding if the creation of a chart should be skipped"
         type: boolean
         required: false
         default: false
