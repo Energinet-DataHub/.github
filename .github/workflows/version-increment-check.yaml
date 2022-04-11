@@ -17,6 +17,10 @@ name: Version increment check
 on:
   workflow_call:
     inputs:
+      base_yaml_file:
+        description: "Optional: The path of the YAML version file in the base (main) branch."
+        required: false
+        type: string
       yaml_file:
         description: The path of the YAML version file in the head (feature) branch.
         required: true
@@ -41,7 +45,7 @@ jobs:
         id: previous_tag
         uses: Energinet-Datahub/.github/.github/actions/yaml-get@main
         with:
-          yaml_file: ${{ inputs.yaml_file }}
+          yaml_file: ${{ inputs.base_yaml_file || inputs.yaml_file }}
           yaml_path: ${{ inputs.yaml_path }}
 
       - name: Check if previous tag is valid semver
