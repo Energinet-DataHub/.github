@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Should skip?
         id: skip_check
-        uses: fkirc/skip-duplicate-actions@v1.4.0
+        uses: fkirc/skip-duplicate-actions@v3
         with:
           github_token: ${{ github.token }}
           paths: '[
