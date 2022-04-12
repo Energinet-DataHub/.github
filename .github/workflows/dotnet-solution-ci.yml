@@ -60,6 +60,7 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
+      OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.16.0'
@@ -163,5 +164,14 @@ jobs:
           verbose: true
 
       # Call action in source (caller) repository
-      - name: Create artifacts
-        uses: ./.github/actions/dotnet-create-artifacts
+      - name: Prepare outputs
+        uses: ./.github/actions/dotnet-prepare-outputs
+        with:
+          OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
+
+      - name: Upload dotnet artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
