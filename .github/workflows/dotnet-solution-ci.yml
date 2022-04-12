@@ -40,6 +40,10 @@ on:
         required: false
         default: false
         type: boolean
+      PREPARE_OUTPUTS:
+        required: false
+        default: false
+        type: boolean
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -165,11 +169,13 @@ jobs:
 
       # Call action in source (caller) repository
       - name: Prepare outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
 
       - name: Upload dotnet artifact
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
         uses: actions/upload-artifact@v3
         with:
           name: dotnet
