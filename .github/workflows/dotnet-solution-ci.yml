@@ -40,6 +40,7 @@ on:
         required: false
         default: false
         type: boolean
+      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
       PREPARE_OUTPUTS:
         required: false
         default: false
