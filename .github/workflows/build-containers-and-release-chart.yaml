@@ -17,10 +17,15 @@ name: Build containers, update and release chart
 on:
   workflow_call:
     inputs:
+      base_chart_folder:
+        description: "Optional: The path to the folder in the base (main) branch containing the Helm charts for the services specified in `containers`."
+        type: string
+        required: false
       containers:
         description: |
-          Json string containing the containers to be built.
-          the format is:
+          JSON string containing the containers to be built.
+          Example:
+          ```json
           [
             { 
               deployment_name: "app", 
@@ -36,36 +41,37 @@ on:
               image_tag: 'v1.3.1' 
             }
           ]
+          ```
         type: string
         required: true
       chart_folder:
-        description: The folder containing the chart to release_name
+        description: The path to the folder in the head (feature) branch containing the Helm charts for the services specified in `containers`.
         type: string
         required: true
       chart_version:
-        description: Override the chart version to a specific version
+        description: "Optional: Override the Helm chart version to a specific version"
         type: string
         required: false
       helm_repository:
-        description: The repository to publish the chart.
+        description: "Optional: The repository to publish the chart."
         type: string
         required: false
         default: ${{ github.repository_owner }}/helm-charts
       skip_chart:
-        description: Variable for deciding if the creation of a chart should be skipped
+        description: "Optional: Variable for deciding if the creation of a chart should be skipped"
         type: boolean
         required: false
         default: false
- 
+
     secrets:
-      RELEASE_CHART_TOKEN: 
+      RELEASE_CHART_TOKEN:
         description: |
           The token used to create the release and 
           release the chart with a workflow dispatch to 'inputs.helm_repository'.
         required: true
 
     outputs:
-      chart_name: 
+      chart_name:
         description:
         value: ${{ jobs.release_chart.outputs.chart_name }}
       chart_version:
@@ -78,7 +84,7 @@ jobs:
     if: ${{ inputs.containers != '[]' }}
     strategy:
       matrix:
-        containers: ${{fromJson(inputs.containers)}} 
+        containers: ${{fromJson(inputs.containers)}}
     steps:
       - uses: actions/checkout@v3
 
@@ -95,7 +101,7 @@ jobs:
       - name: Build and push container image
         id: docker_build
         uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
-        with: 
+        with:
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image_name: ${{ steps.image_name.outputs.lowercase }}
           image_tag: ${{ matrix.containers.image_tag }}
@@ -118,7 +124,7 @@ jobs:
 
       - name: install yamlpath
         uses: Energinet-DataHub/.github/.github/actions/yamlpath-install@main
-        
+
       - name: If pr then override containers version in chart
         if: github.event_name == 'pull_request'
         shell: bash
@@ -130,7 +136,7 @@ jobs:
               TAG=$(echo $i | jq -r .image_tag)
               yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
           done
-        
+
       - name: Release helm chart
         id: release_chart
         uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
