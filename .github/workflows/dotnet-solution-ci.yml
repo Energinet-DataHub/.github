@@ -40,6 +40,11 @@ on:
         required: false
         default: false
         type: boolean
+      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
+      PREPARE_OUTPUTS:
+        required: false
+        default: false
+        type: boolean
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -60,6 +65,7 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
+      OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.16.0'
@@ -104,7 +110,7 @@ jobs:
       - name: Cache node modules
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
         id: cache-nodemodules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
           path: ${{ github.workspace }}\node_modules
@@ -131,7 +137,7 @@ jobs:
           sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
 
       - name: Cache NuGet packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-nuget
         with:
           path: ~/.nuget/packages
@@ -146,7 +152,7 @@ jobs:
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Login to use Azure resources in integration tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
+        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
         run: |
           az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -161,3 +167,18 @@ jobs:
         with:
           fail_ci_if_error: true
           verbose: true
+
+      # Call action in source (caller) repository
+      - name: Prepare outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: ./.github/actions/dotnet-prepare-outputs
+        with:
+          OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
+
+      - name: Upload dotnet artifact
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
