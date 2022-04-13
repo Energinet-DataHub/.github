@@ -17,10 +17,6 @@ description: |
   Get semver from a path in a yaml file and if PR then append extra values.
 
 inputs:
-  base_yaml_file:
-    description: "Optional: Path to the version file in the base (main) branch."
-    required: false
-    type: string
   yaml_file:
     description: Path to the version file.
     required: true
@@ -29,7 +25,6 @@ inputs:
     description: Path inside the version file.
     required: true
     type: string
-
   git_checkout_folder:
     description: Folder to checkout main-branch inputs.
     required: false
@@ -44,16 +39,22 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Guard against non-supported events
+      if: ${{ github.event_name != 'push' && github.event_name != 'pull_request' }}
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setFailed('Only "push" and "pull_request" events are supported by this action.')
     - uses: actions/checkout@v3
       with:
         path: ${{ inputs.git_checkout_folder }}
-        ref: "main"
+        ref: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && github.ref || github.head_ref }}
 
     - name: Get chart version
       id: get_chart_version
       uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
       with:
-        yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.base_yaml_file || inputs.yaml_file }}
+        yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.yaml_file }}
         yaml_path: ${{ inputs.yaml_path }}
 
     - name: Generate semver
