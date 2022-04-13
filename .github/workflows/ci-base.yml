@@ -63,21 +63,18 @@ jobs:
       - name: Replace path in Spell Check config
         run: sed -i -e 's/..\/..\///g' ${{ github.workspace }}/spellcheck.yml
 
-      # Try fixing 'fatal: unsafe repository' from Markdown links check
-      - name: Add safe directory
-        run: git config --global --add safe.directory /github/workspace
-
-      # https://github.com/marketplace/actions/markdown-link-check
-      - name: Markdown links check
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          use-quiet-mode: 'yes'
-          use-verbose-mode: 'yes'
-          check-modified-files-only: 'yes'
-          config-file: './mlc_config.json'
-          base-branch: 'main'
-        continue-on-error: true
-        id: md-link-check
+      # TODO: Disabled for now as we get an error. See failed run: https://github.com/Energinet-DataHub/geh-aggregations/runs/6006085600?check_suite_focus=true
+      # # https://github.com/marketplace/actions/markdown-link-check
+      # - name: Markdown links check
+      #   uses: gaurav-nelson/github-action-markdown-link-check@v1
+      #   with:
+      #     use-quiet-mode: 'yes'
+      #     use-verbose-mode: 'yes'
+      #     check-modified-files-only: 'yes'
+      #     config-file: './mlc_config.json'
+      #     base-branch: 'main'
+      #   continue-on-error: true
+      #   id: md-link-check
 
       # https://github.com/marketplace/actions/github-spellcheck-action
       - name: Markdown spell check
@@ -101,12 +98,13 @@ jobs:
         run: |
           echo "Markdown check results: "
           fail=0
-          if [[ "${{steps.md-link-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-link-check.outcome}}" == "failure" ]]; then
-            fail=1
-            echo -e "- Markdown links check:   \e[31mFailure"
-          else
-            echo -e "- Markdown links check:   \e[32mSuccess"
-          fi
+          # TODO: Disabled for now as we get an error. See failed run: https://github.com/Energinet-DataHub/geh-aggregations/runs/6006085600?check_suite_focus=true
+          # if [[ "${{steps.md-link-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-link-check.outcome}}" == "failure" ]]; then
+          #   fail=1
+          #   echo -e "- Markdown links check:   \e[31mFailure"
+          # else
+          #   echo -e "- Markdown links check:   \e[32mSuccess"
+          # fi
           if [[ "${{steps.md-spell-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-spell-check.outcome}}" == "failure" ]]; then
             fail=1
             echo -e "- Markdown spell check:   \e[31mFailure"
