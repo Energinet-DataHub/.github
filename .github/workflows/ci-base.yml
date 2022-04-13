@@ -63,6 +63,10 @@ jobs:
       - name: Replace path in Spell Check config
         run: sed -i -e 's/..\/..\///g' ${{ github.workspace }}/spellcheck.yml
 
+      # Try fixing 'fatal: unsafe repository' from Markdown links check
+      - name: Add safe directory
+        run: git config --global --add safe.directory /github/workspace
+
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
         uses: gaurav-nelson/github-action-markdown-link-check@v1
