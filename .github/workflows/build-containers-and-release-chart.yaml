@@ -17,10 +17,6 @@ name: Build containers, update and release chart
 on:
   workflow_call:
     inputs:
-      base_chart_folder:
-        description: "Optional: The path to the folder in the base (main) branch containing the Helm charts for the services specified in `containers`."
-        type: string
-        required: false
       containers:
         description: |
           JSON string containing the containers to be built.
@@ -130,7 +126,7 @@ jobs:
         shell: bash
         run: |
           JSON='${{ inputs.containers }}'
-          VALUES_FILE=${{ inputs.base_chart_folder || inputs.chart_folder }}/values.yaml
+          VALUES_FILE=${{ inputs.chart_folder }}/values.yaml
           echo $JSON | jq -c '.[]' | while read i; do
               DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
               TAG=$(echo $i | jq -r .image_tag)
@@ -143,6 +139,6 @@ jobs:
         with:
           release_token: ${{ secrets.RELEASE_CHART_TOKEN }}
           dispatch_token: ${{ secrets.RELEASE_CHART_TOKEN }}
-          chart_folder: ${{ inputs.base_chart_folder || inputs.chart_folder }}
+          chart_folder: ${{ inputs.chart_folder }}
           chart_repository: ${{ inputs.helm_repository }}
           chart_version: ${{ inputs.chart_version }}
