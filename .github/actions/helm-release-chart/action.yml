@@ -116,9 +116,10 @@ runs:
 
     - name: Commit changes
       working-directory: ${{ env.helm-checkout-directory }}
-      uses: EndBug/add-and-commit@v7
+      uses: EndBug/add-and-commit@v9
       with:
         add: '["index.yaml", "${{ github.event.inputs.filename }}"]'
         message: Updated the helm registry with file ${{ steps.generate_filename.outputs.filename }}
         push: true
-        branch: ${{ inputs.chart_repository_branch }}
+        new_branch: ${{ inputs.chart_repository_branch }}
+        default_author: github_actions

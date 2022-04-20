@@ -14,58 +14,107 @@
 
 name: Update chart in environment repository.
 
-on:
-  workflow_call:
-    inputs:
-      env_repository:
-        description: The repository containing the environment 
-        required: false
-        type: string
-        default: ${{ github.repository_owner }}/eo-base-environment
-      env_branch:
-        description: The branch on the environment repository to target.
-        required: false
-        type: string
-        default: main
-      app_name:
-        description: The name of the app in the environment.
-        required: true
-        type: string
-      helm_repository:
-        description: The helm repository to get the chart from.
-        required: true
-        type: string
-      chart_name:
-        description: The name of the chart.
-        required: true
-        type: string
-      chart_version:
-        description: The chart version.
-        required: true
-        type: string
+inputs:
+  env_repository:
+    description: The repository containing the environment
+    required: false
+    type: string
+    default: ${{ github.repository_owner }}/eo-base-environment
+  env_branch:
+    description: The branch on the environment repository to target.
+    required: false
+    type: string
+    default: main
+  yggdrasil_config_file:
+    description: The config file to apply changes in.
+    required: false
+    type: string
+    default: yggdrasil/applications/eo/config.yaml
+  app_name:
+    description: The name of the app in the environment.
+    required: true
+    type: string
+  helm_repository:
+    description: The helm repository to get the chart from.
+    required: true
+    type: string
+  chart_name:
+    description: The name of the chart.
+    required: true
+    type: string
+  chart_version:
+    description: The chart version.
+    required: true
+    type: string
 
-    secrets:
-      UPDATE_ENV_TOKEN:
-        description: The token used to update the environment repository via a workflow dispatch
-        required: true
+secrets:
+  deploy_key:
+    description: A deploy key that has access to the environment repository.
+    required: true
+
+runs:
+  using: composite
+  env:
+    environment-checkout-directory: base-environment
 
 jobs:
   update_environment_chart:
     name: Update production environment
     runs-on: ubuntu-latest
     steps:
-      - name: Update helm chart in base env
-        uses: benc-uk/workflow-dispatch@v1.1
+      - name: Checkout base environment repository
+        uses: actions/checkout@v2
         with:
-          workflow: Update helm chart version
-          token: ${{ secrets.UPDATE_ENV_TOKEN }}
-          repo: ${{ inputs.env_repository }}
-          ref: main
-          inputs: |
-            { 
-              "target_branch": "${{ inputs.env_branch }}",
-              "app_name": "${{ inputs.app_name }}", 
-              "helm_repository": "${{ inputs.helm_repository }}", 
-              "chart_name": "${{ inputs.chart_name }}", 
-              "chart_version": "${{ inputs.chart_version }}"
-            }
+          path: ${{ env.environment-checkout-directory }}
+          repository: ${{ inputs.env_repository }}
+          ssh-key: ${{ inputs.deploy_key }}
+
+      - name: Switch branch if not main
+        working-directory: ${{ env.environment-checkout-directory }}
+        shell: bash
+        if: ${{ inputs.env_branch != 'main' }}
+        run: |
+          git fetch
+          git checkout ${{ inputs.env_branch }} 2>/dev/null || git checkout -b ${{ inputs.env_branch }}
+
+      - name: Set helm repository
+        working-directory: ${{ env.environment-checkout-directory }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        with:
+          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_path: apps[name="${{ inputs.app_name }}"].source.repoURL
+          value: ${{ inputs.helm_repository }}
+
+      - name: Set chart name
+        working-directory: ${{ env.environment-checkout-directory }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        with:
+          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_path: apps[name="${{ inputs.app_name }}"].source.chart
+          value: ${{ inputs.chart_name }}
+
+      - name: Set chart version
+        working-directory: ${{ env.environment-checkout-directory }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        with:
+          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_path: apps[name="${{ inputs.app_name }}"].source.targetRevision
+          value: ${{ inputs.chart_version }}
+
+      - name: Delete chart path if exists
+        working-directory: ${{ env.environment-checkout-directory }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-delete@main
+        with:
+          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_path: apps[name="${{ inputs.app_name }}"].source.path
+
+      - name: Branch - commit changes
+        working-directory: ${{ env.environment-checkout-directory }}
+        uses: EndBug/add-and-commit@v9
+        if: ${{ inputs.env_branch != 'main' }}
+        with:
+          add: ${{ inputs.yggdrasil_config_file }}
+          message: Bump ${{ inputs.app_name }} to new release ${{ inputs.chart_version }}
+          new_branch: ${{ inputs.env_branch }}
+          push: true
+          default_author: github_actions
