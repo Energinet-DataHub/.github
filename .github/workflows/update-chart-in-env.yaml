@@ -80,39 +80,39 @@ jobs:
           git checkout ${{ inputs.env_branch }} 2>/dev/null || git checkout -b ${{ inputs.env_branch }}
 
       - name: Set helm repository
-        working-directory: ${{ env.environment-checkout-directory }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        working-directory: ${{ env.environment-checkout-directory }}
         with:
           yaml_file: ${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.repoURL
           value: ${{ inputs.helm_repository }}
 
       - name: Set chart name
-        working-directory: ${{ env.environment-checkout-directory }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        working-directory: ${{ env.environment-checkout-directory }}
         with:
           yaml_file: ${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.chart
           value: ${{ inputs.chart_name }}
 
       - name: Set chart version
-        working-directory: ${{ env.environment-checkout-directory }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        working-directory: ${{ env.environment-checkout-directory }}
         with:
           yaml_file: ${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.targetRevision
           value: ${{ inputs.chart_version }}
 
       - name: Delete chart path if exists
-        working-directory: ${{ env.environment-checkout-directory }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-delete@main
+        working-directory: ${{ env.environment-checkout-directory }}
         with:
           yaml_file: ${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.path
 
       - name: Branch - commit changes
-        working-directory: ${{ env.environment-checkout-directory }}
         uses: EndBug/add-and-commit@v9
+        working-directory: ${{ env.environment-checkout-directory }}
         if: ${{ inputs.env_branch != 'main' }}
         with:
           add: ${{ inputs.yggdrasil_config_file }}
