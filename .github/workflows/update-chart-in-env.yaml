@@ -54,10 +54,10 @@ on:
         description: A deploy key that has access to the environment repository.
         required: true
 
-runs:
-  using: composite
-  env:
-    environment-checkout-directory: base-environment
+    runs:
+      using: composite
+      env:
+        environment-checkout-directory: base-environment
 
 jobs:
   update_environment_chart:
