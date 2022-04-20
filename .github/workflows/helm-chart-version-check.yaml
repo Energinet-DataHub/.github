@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout main to get latest tag
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           fetch-depth: 0
@@ -46,7 +46,7 @@ jobs:
         with:
           version: ${{ steps.previous_tag.outputs.result }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
 

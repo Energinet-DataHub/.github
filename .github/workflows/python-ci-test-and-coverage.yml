@@ -22,9 +22,6 @@ on:
       IGNORE_ERRORS_AND_WARNING_FLAKE8:
         required: true
         type: string
-      ARTIFACT_NAME:
-        required: true
-        type: string
       TEST_REPORT_PATH:
         required: true
         type: string
@@ -35,7 +32,7 @@ jobs:
     name: flake8 and unit test
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Static checks
         uses: TrueBrain/actions-flake8@master
@@ -44,10 +41,16 @@ jobs:
           ignore: ${{ inputs.IGNORE_ERRORS_AND_WARNING_FLAKE8 }}
 
       - name: Run unit tests
-        uses: Energinet-DataHub/.github/.github/actions/databricks-unit-test@5.0.3
+        uses: Energinet-DataHub/.github/.github/actions/databricks-unit-test@main
 
       - name: Upload test report
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ inputs.ARTIFACT_NAME }}
+          name: pythontestartifact
           path: ${{ inputs.TEST_REPORT_PATH }}
+      
+      - name: Upload coverage to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          verbose: true

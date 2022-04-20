@@ -14,11 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cd ./source/databricks/tests/
+# Exit immediately with failure status if any command fails
+set -e
+cd source/databricks/tests/
+
+# There env vars are important to ensure that the driver and worker nodes in spark are alligned
+export PYSPARK_PYTHON=/opt/conda/bin/python
+export PYSPARK_DRIVER_PYTHON=/opt/conda/bin/python
+
+
 #Build wheel
 python ../setup.py install
 # python coverage-threshold install
-pip install coverage-threshold delta-spark
+#pip install coverage-threshold delta-spark
 coverage run --branch -m pytest .
 # Create data for threshold evaluation
 coverage json
