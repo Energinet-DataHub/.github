@@ -81,38 +81,33 @@ jobs:
 
       - name: Set helm repository
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
-        working-directory: ${{ env.environment-checkout-directory }}
         with:
-          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.repoURL
           value: ${{ inputs.helm_repository }}
 
       - name: Set chart name
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
-        working-directory: ${{ env.environment-checkout-directory }}
         with:
-          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.chart
           value: ${{ inputs.chart_name }}
 
       - name: Set chart version
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
-        working-directory: ${{ env.environment-checkout-directory }}
         with:
-          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.targetRevision
           value: ${{ inputs.chart_version }}
 
       - name: Delete chart path if exists
         uses: Energinet-DataHub/.github/.github/actions/yaml-delete@main
-        working-directory: ${{ env.environment-checkout-directory }}
         with:
-          yaml_file: ${{ inputs.yggdrasil_config_file }}
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
           yaml_path: apps[name="${{ inputs.app_name }}"].source.path
 
       - name: Branch - commit changes
         uses: EndBug/add-and-commit@v9
-        working-directory: ${{ env.environment-checkout-directory }}
         if: ${{ inputs.env_branch != 'main' }}
         with:
           add: ${{ inputs.yggdrasil_config_file }}
@@ -120,3 +115,4 @@ jobs:
           new_branch: ${{ inputs.env_branch }}
           push: true
           default_author: github_actions
+          cwd: ${{ env.environment-checkout-directory }}
