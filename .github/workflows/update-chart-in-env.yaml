@@ -54,15 +54,12 @@ on:
         description: A deploy key that has access to the environment repository.
         required: true
 
-    runs:
-      using: composite
-      env:
-        environment-checkout-directory: base-environment
-
 jobs:
   update_environment_chart:
     name: Update production environment
     runs-on: ubuntu-latest
+    env:
+      environment-checkout-directory: base-environment
     steps:
       - name: Checkout base environment repository
         uses: actions/checkout@v2

@@ -115,7 +115,6 @@ runs:
       run: helm repo index .
 
     - name: Commit changes
-      working-directory: ${{ env.helm-checkout-directory }}
       uses: EndBug/add-and-commit@v9
       with:
         add: '["index.yaml", "${{ github.event.inputs.filename }}"]'
@@ -123,3 +122,4 @@ runs:
         push: true
         new_branch: ${{ inputs.chart_repository_branch }}
         default_author: github_actions
+        cwd: ${{ env.helm-checkout-directory }}
