@@ -14,43 +14,45 @@
 
 name: Update chart in environment repository.
 
-inputs:
-  env_repository:
-    description: The repository containing the environment
-    required: false
-    type: string
-    default: ${{ github.repository_owner }}/eo-base-environment
-  env_branch:
-    description: The branch on the environment repository to target.
-    required: false
-    type: string
-    default: main
-  yggdrasil_config_file:
-    description: The config file to apply changes in.
-    required: false
-    type: string
-    default: yggdrasil/applications/eo/config.yaml
-  app_name:
-    description: The name of the app in the environment.
-    required: true
-    type: string
-  helm_repository:
-    description: The helm repository to get the chart from.
-    required: true
-    type: string
-  chart_name:
-    description: The name of the chart.
-    required: true
-    type: string
-  chart_version:
-    description: The chart version.
-    required: true
-    type: string
+on:
+  workflow_call:
+    inputs:
+      env_repository:
+        description: The repository containing the environment
+        required: false
+        type: string
+        default: ${{ github.repository_owner }}/eo-base-environment
+      env_branch:
+        description: The branch on the environment repository to target.
+        required: false
+        type: string
+        default: main
+      yggdrasil_config_file:
+        description: The config file to apply changes in.
+        required: false
+        type: string
+        default: yggdrasil/applications/eo/config.yaml
+      app_name:
+        description: The name of the app in the environment.
+        required: true
+        type: string
+      helm_repository:
+        description: The helm repository to get the chart from.
+        required: true
+        type: string
+      chart_name:
+        description: The name of the chart.
+        required: true
+        type: string
+      chart_version:
+        description: The chart version.
+        required: true
+        type: string
 
-secrets:
-  deploy_key:
-    description: A deploy key that has access to the environment repository.
-    required: true
+    secrets:
+      deploy_key:
+        description: A deploy key that has access to the environment repository.
+        required: true
 
 runs:
   using: composite
