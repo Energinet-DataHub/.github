@@ -22,6 +22,11 @@ on:
         required: false
         type: string
         default: ${{ github.repository_owner }}/eo-base-environment
+      env_default_branch:
+        description: The default branch on the repository.
+        required: false
+        type: string
+        default: main
       env_branch:
         description: The branch on the environment repository to target.
         required: false
@@ -67,6 +72,7 @@ jobs:
           path: ${{ env.environment-checkout-directory }}
           repository: ${{ inputs.env_repository }}
           ssh-key: ${{ inputs.deploy_key }}
+          ref: ${{ inputs.env_default_branch }}
 
       - name: Switch branch if not main
         working-directory: ${{ env.environment-checkout-directory }}
