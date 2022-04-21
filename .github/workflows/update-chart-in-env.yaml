@@ -62,7 +62,7 @@ jobs:
       environment-checkout-directory: base-environment
     steps:
       - name: Checkout base environment repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{ env.environment-checkout-directory }}
           repository: ${{ inputs.env_repository }}
