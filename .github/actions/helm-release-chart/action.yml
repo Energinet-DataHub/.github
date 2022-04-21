@@ -31,7 +31,6 @@ inputs:
     description: The branch in which to add the chart.
     required: false
     default: 'gp-pages'
-secrets:
   deploy_key:
     description: A deploy key that has access to the chart repository.
     required: true
@@ -46,10 +45,13 @@ outputs:
 
 runs:
   using: composite
-  env:
-    helm-checkout-directory: helm-charts
-
   steps:
+    - id: helm_directory
+      name: Setup helm checkout directory
+      shell: bash
+      run: |
+        echo "helm-checkout-directory=helm-charts" >> $GITHUB_ENV
+
     - id: get_chart_info
       name: Get info from Chart.yaml
       shell: bash
@@ -106,11 +108,13 @@ runs:
         ref: ${{ inputs.chart_repository_branch }}
 
     - name: Download chart tarball
+      shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
       run: |
         wget https://github.com/${{ inputs.chart_repository }}/releases/download/${{ steps.get_chart_info.outputs.version }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
 
     - name: Update index file for helm registry
+      shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
       run: helm repo index .
 
