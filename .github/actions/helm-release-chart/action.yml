@@ -106,7 +106,7 @@ runs:
         repository: ${{ inputs.chart_repository }}
         ssh-key: ${{ inputs.deploy_key }}
         ref: ${{ inputs.chart_repository_branch }}
-        token:
+        token: ""
 
     - name: Download chart tarball
       shell: bash
