@@ -53,10 +53,11 @@ on:
         description: The chart version.
         required: true
         type: string
+
+    secrets:
       deploy_key:
         description: A deploy key that has access to the environment repository.
         required: true
-        type: string
 
 jobs:
   update_environment_chart:
@@ -70,7 +71,7 @@ jobs:
         with:
           path: ${{ env.environment-checkout-directory }}
           repository: ${{ inputs.env_repository }}
-          ssh-key: ${{ inputs.deploy_key }}
+          ssh-key: ${{ secrets.deploy_key }}
           ref: ${{ inputs.env_default_branch }}
 
       - name: Switch branch if not main
