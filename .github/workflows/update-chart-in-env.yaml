@@ -71,7 +71,7 @@ jobs:
         with:
           path: ${{ env.environment-checkout-directory }}
           repository: ${{ inputs.env_repository }}
-          ssh-key: ${{ inputs.deploy_key }}
+          ssh-key: ${{ secrets.deploy_key }}
           ref: ${{ inputs.env_default_branch }}
 
       - name: Switch branch if not main
