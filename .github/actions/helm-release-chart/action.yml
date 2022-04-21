@@ -94,7 +94,12 @@ runs:
         path: ${{ env.helm-checkout-directory }}
         repository: ${{ inputs.chart_repository }}
         ssh-key: ${{ inputs.deploy_key }}
-        ref: ${{ inputs.chart_repository_branch }}
+        # ref: ${{ inputs.chart_repository_branch }}
+
+    - name: Change to correct branch
+      shell: bash
+      working-directory: ${{ env.helm-checkout-directory }}
+      run: git checkout '${{ inputs.chart_repository_branch }}'
 
     - name: Add chart.tar to release
       id: upload-release-asset
