@@ -27,12 +27,22 @@ COPY spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
 RUN apt-get update; \
     apt-get install -y npm && npm install -g n && n lts && hash -r && npm install -g azurite
 
+# Install ODBC drivers for pyodbc
+# See https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver15
+RUN apt-get update && apt-get install -y gnupg && apt-get install -y curl
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN apt-get update
+ENV ACCEPT_EULA=Y
+RUN apt-get install -y msodbcsql18 unixodbc-dev
+
 # Install spark packages with mamba 
 RUN mamba install --quiet --yes --satisfied-skip-solve \
     'pyarrow=2.0.*' 'rope=0.18.*' 'pytest=7.1.*' 'autopep8=1.5.*' 'configargparse=1.2.3'  \
     'coverage=6.3.*' 'azure-storage-blob=12.8.*' 'pytest-mock=3.7.*'
 # Install python packages used in pyspark development 
-RUN pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus protodf delta-spark pytest-asyncio flake8 black dataclasses-json
+RUN pip --no-cache-dir install pyspelling azure-eventhub coverage-threshold ptvsd azure-servicebus \
+    protodf delta-spark pytest-asyncio flake8 black dataclasses-json pyodbc
 # Below will make everything in the directory owned by the group ${NB_GID}
 RUN fix-permissions "${CONDA_DIR}"
 
