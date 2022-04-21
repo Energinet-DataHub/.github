@@ -100,13 +100,12 @@ runs:
         asset_content_type: application/zip
 
     - name: Checkout chart repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: ${{ env.helm-checkout-directory }}
         repository: ${{ inputs.chart_repository }}
         ssh-key: ${{ inputs.deploy_key }}
         ref: ${{ inputs.chart_repository_branch }}
-        token: ""
 
     - name: Download chart tarball
       shell: bash
