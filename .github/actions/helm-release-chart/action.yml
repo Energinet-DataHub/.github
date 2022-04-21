@@ -64,7 +64,7 @@ runs:
       shell: bash
       run: |
         echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
-        
+
     - name: Update chart dependencies
       shell: bash
       run: helm dependency update ${{ inputs.chart_folder }}
