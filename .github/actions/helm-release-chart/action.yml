@@ -88,14 +88,6 @@ runs:
         draft: false
         prerelease: ${{ github.ref_name != 'main' }}
 
-    - name: Checkout chart repository
-      uses: actions/checkout@v3
-      with:
-        path: ${{ env.helm-checkout-directory }}
-        repository: ${{ inputs.chart_repository }}
-        ssh-key: ${{ inputs.deploy_key }}
-        ref: ${{ inputs.chart_repository_branch }}
-
     - name: Add chart.tar to release
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
@@ -107,11 +99,19 @@ runs:
         asset_name: ${{ steps.generate_filename.outputs.filename }}
         asset_content_type: application/zip
 
+    - name: Checkout chart repository
+      uses: actions/checkout@v3
+      with:
+        path: ${{ env.helm-checkout-directory }}
+        repository: ${{ inputs.chart_repository }}
+        ssh-key: ${{ inputs.deploy_key }}
+        ref: ${{ inputs.chart_repository_branch }}
+
     - name: Download chart tarball
       shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
       run: |
-        wget https://github.com/${{ inputs.chart_repository }}/releases/download/${{ steps.get_chart_info.outputs.version }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
+        wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_chart_info.outputs.version }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
 
     - name: Update index file for helm registry
       shell: bash
