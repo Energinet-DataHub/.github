@@ -135,7 +135,7 @@ jobs:
 
       - name: Release helm chart
         id: release_chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@feature/change-to-deploy-keys
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
         with:
           deploy_key: ${{ secrets.deploy_key }}
           chart_folder: ${{ inputs.chart_folder }}

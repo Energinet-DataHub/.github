@@ -47,7 +47,7 @@ runs:
   using: composite
   steps:
     - id: helm_directory
-      name: Setup helm checkout directory
+      name: Add helm checkout directory to env
       shell: bash
       run: |
         echo "helm-checkout-directory=helm-charts" >> $GITHUB_ENV
