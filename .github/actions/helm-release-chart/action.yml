@@ -17,12 +17,6 @@ description: |
   Packages and creates a release with the chart, 
   and creates a workflow dispatch to pull into helm registry.
 inputs:
-  release_token: 
-    description: The token with access to create the release
-    required: true
-  dispatch_token: 
-    description: The token with access to create the workflow-dispatch call.
-    required: true
   chart_folder:
     description: Path to the folder containing the chart.
     required: true
@@ -33,6 +27,13 @@ inputs:
   chart_version:
     description: Override the chart version to a specific version
     required: false
+  chart_repository_branch:
+    description: The branch in which to add the chart.
+    required: false
+    default: 'gh-pages'
+  deploy_key:
+    description: A deploy key that has access to the chart repository.
+    required: true
 
 outputs:
   chart_name:
@@ -45,6 +46,12 @@ outputs:
 runs:
   using: composite
   steps:
+    - id: helm_directory
+      name: Add helm checkout directory to env
+      shell: bash
+      run: |
+        echo "helm-checkout-directory=helm-charts" >> $GITHUB_ENV
+
     - id: get_chart_info
       name: Get info from Chart.yaml
       shell: bash
@@ -57,7 +64,7 @@ runs:
       shell: bash
       run: |
         echo ::set-output name=filename::${{ steps.get_chart_info.outputs.name }}-${{ steps.get_chart_info.outputs.version }}.tgz
-        
+
     - name: Update chart dependencies
       shell: bash
       run: helm dependency update ${{ inputs.chart_folder }}
@@ -74,7 +81,7 @@ runs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ inputs.release_token }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         tag_name: ${{ steps.get_chart_info.outputs.version }}
         release_name: Release ${{ steps.get_chart_info.outputs.version }}
@@ -85,23 +92,38 @@ runs:
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ inputs.release_token }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ steps.generate_filename.outputs.filename }}
         asset_name: ${{ steps.generate_filename.outputs.filename }}
         asset_content_type: application/zip
 
-    - name: Add chart to repository
-      uses: benc-uk/workflow-dispatch@v1.1
+    - name: Checkout chart repository
+      uses: actions/checkout@v3
       with:
-        workflow: Add chart via workflow dispatch
-        token: ${{ inputs.dispatch_token }}
-        inputs: |
-          { 
-            "repository": "${{ github.repository }}", 
-            "filename": "${{ steps.generate_filename.outputs.filename }}", 
-            "version": "${{ steps.get_chart_info.outputs.version }}"
-          }
-        ref: main
-        repo: ${{ github.repository_owner }}/helm-charts
+        path: ${{ env.helm-checkout-directory }}
+        repository: ${{ inputs.chart_repository }}
+        ssh-key: ${{ inputs.deploy_key }}
+        ref: ${{ inputs.chart_repository_branch }}
+
+    - name: Download chart tarball
+      shell: bash
+      working-directory: ${{ env.helm-checkout-directory }}
+      run: |
+        wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_chart_info.outputs.version }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
+
+    - name: Update index file for helm registry
+      shell: bash
+      working-directory: ${{ env.helm-checkout-directory }}
+      run: helm repo index .
+
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v9
+      with:
+        add: '["index.yaml", "${{ github.event.inputs.filename }}"]'
+        message: Updated the helm registry with file ${{ steps.generate_filename.outputs.filename }}
+        push: true
+        new_branch: ${{ inputs.chart_repository_branch }}
+        default_author: github_actions
+        cwd: ${{ env.helm-checkout-directory }}
