@@ -73,6 +73,7 @@ const get_run_id = async (octokit, workflow_id, unique_run_id) => {
   const workflow_runs_response = await octokit.rest.actions.listWorkflowRuns({
     owner,
     repo,
+    ref: 'main',
     workflow_id,
     per_page: 2,
   });
