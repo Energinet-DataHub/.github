@@ -74,7 +74,6 @@ const get_run_id = async (octokit, workflow_id, unique_run_id) => {
     owner,
     repo,
     workflow_id,
-    ref: 'renetnielsen/cd-status',
     per_page: 2,
   });
 

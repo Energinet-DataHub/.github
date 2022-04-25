@@ -62,7 +62,6 @@ jobs:
         with:
           repository: 'Energinet-DataHub/.github'
           token: ${{ secrets.PAT_TOKEN }}
-          ref: '6.4.0'
           path: remote
 
       - name: Find associated pull request
