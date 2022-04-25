@@ -17,7 +17,6 @@ const main = async () => {
       owner,
       repo,
       workflow_id,
-      ref: 'renetnielsen/cd-status',
       inputs: {
         RELEASE_NAME: release_name,
         UNIQUE_RUN_ID: unique_run_id,
