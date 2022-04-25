@@ -48,7 +48,7 @@ const monitor_workflow_run_status = async (octokit, workflow_run_id) => {
     });
 
     if (workflow_run?.data?.status === 'in_progress'){
-      console.log('Deployment still in progress. Delaying 30s, then re-fetching status');
+      console.log('Deployment in progress. Delaying 30s, then re-fetching status');
       await delay(30000);
     } else if (workflow_run?.data?.status === 'completed'){
       if (workflow_run?.data?.conclusion === 'failure') {
@@ -94,12 +94,12 @@ const get_run_id = async (octokit, workflow_id, unique_run_id) => {
 
       if (workflow_jobs_response?.data?.total_count > 0) {
         for (let workflow_run_job of workflow_jobs_response?.data?.jobs){
-          if (workflow_run_id) {
+          if (workflow_run_id) {
             break;
           }
 
           for (let workflow_run_job_step of workflow_run_job?.steps){
-            if (workflow_run_id) {
+            if (workflow_run_id) {
               break;
             }
 
