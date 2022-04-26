@@ -60,7 +60,7 @@ on:
         default: false
 
     secrets:
-      RELEASE_CHART_TOKEN:
+      deploy_key:
         description: |
           The token used to create the release and 
           release the chart with a workflow dispatch to 'inputs.helm_repository'.
@@ -137,8 +137,7 @@ jobs:
         id: release_chart
         uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
         with:
-          release_token: ${{ secrets.RELEASE_CHART_TOKEN }}
-          dispatch_token: ${{ secrets.RELEASE_CHART_TOKEN }}
+          deploy_key: ${{ secrets.deploy_key }}
           chart_folder: ${{ inputs.chart_folder }}
           chart_repository: ${{ inputs.helm_repository }}
           chart_version: ${{ inputs.chart_version }}
