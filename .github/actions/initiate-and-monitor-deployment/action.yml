@@ -52,9 +52,10 @@ runs:
       run: |
         node ${{ github.action_path }}/initiate-deployment.js ${{ inputs.PAT_TOKEN }} ${{ inputs.RELEASE_NAME }} ${{ inputs.DEPLOYMENT_WORKFLOW_ID }} ${{ inputs.DEPLOYMENT_REPOSITORY }} ${{ inputs.DEPLOYMENT_REPOSITORY_OWNER }} ${{ steps.unique-deployment-id.outputs.UNIQUE_DEPLOYMENT_ID }}
 
-    - name: Monitor deployment
-      shell: bash
-      run: |
-        node ${{ github.action_path }}/monitor-deployment.js ${{ inputs.PAT_TOKEN }} ${{ inputs.DEPLOYMENT_WORKFLOW_ID }} ${{ inputs.DEPLOYMENT_REPOSITORY }} ${{ inputs.DEPLOYMENT_REPOSITORY_OWNER }} ${{ steps.unique-deployment-id.outputs.UNIQUE_DEPLOYMENT_ID }}
+    # Temporarily disabled until we figure out why its pulling so many REST requests
+    # - name: Monitor deployment
+    #   shell: bash
+    #   run: |
+    #     node ${{ github.action_path }}/monitor-deployment.js ${{ inputs.PAT_TOKEN }} ${{ inputs.DEPLOYMENT_WORKFLOW_ID }} ${{ inputs.DEPLOYMENT_REPOSITORY }} ${{ inputs.DEPLOYMENT_REPOSITORY_OWNER }} ${{ steps.unique-deployment-id.outputs.UNIQUE_DEPLOYMENT_ID }}
 
         
