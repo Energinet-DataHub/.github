@@ -14,7 +14,7 @@
 
 name: Package and release helm chart
 description: |
-  Packages and creates a release with the chart, 
+  Packages and creates a release with the chart,
   and creates a workflow dispatch to pull into helm registry.
 inputs:
   chart_folder:
@@ -34,6 +34,11 @@ inputs:
   deploy_key:
     description: A deploy key that has access to the chart repository.
     required: true
+  include_image_name:
+    description: Add the name of the image to the name of a chart.
+    type: boolean
+    required: false
+    default: false
 
 outputs:
   chart_name:
@@ -58,6 +63,11 @@ runs:
       run: |
         echo ::set-output name=version::${{ inputs.chart_version }}
         echo ::set-output name=name::$(grep ^"name: " ${{ inputs.chart_folder }}/Chart.yaml | cut -f2 -d' ')
+        if [ {{ inputs.include_image_name }} ]; then
+          echo ::set-output name=tag_name::$(grep ^"name: " ${{ inputs.chart_folder }}/Chart.yaml | cut -f2 -d' ')-${{ inputs.chart_version }}
+        else
+          echo ::set-output name=tag_name::${{ inputs.chart_version }}
+        fi
 
     - id: generate_filename
       name: Generate filename
@@ -68,7 +78,7 @@ runs:
     - name: Update chart dependencies
       shell: bash
       run: helm dependency update ${{ inputs.chart_folder }}
-      
+
     - name: Lint chart
       shell: bash
       run: helm lint ${{ inputs.chart_folder }}
@@ -83,8 +93,8 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        tag_name: ${{ steps.get_chart_info.outputs.version }}
-        release_name: Release ${{ steps.get_chart_info.outputs.version }}
+        tag_name: ${{ steps.get_chart_info.outputs.tag_name }}
+        release_name: Release ${{ steps.get_chart_info.outputs.tag_name }}
         draft: false
         prerelease: ${{ github.ref_name != 'main' }}
 

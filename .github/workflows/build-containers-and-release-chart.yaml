@@ -23,18 +23,18 @@ on:
           Example:
           ```json
           [
-            { 
-              deployment_name: "app", 
-              dockerfile: "app/Dockerfile", 
-              image_name: 'eo-frontend-app', 
-              image_tag: 'v1.2.3', 
+            {
+              deployment_name: "app",
+              dockerfile: "app/Dockerfile",
+              image_name: 'eo-frontend-app',
+              image_tag: 'v1.2.3',
               context: '.'
             },
-            { 
-              deployment_name: "api", 
-              dockerfile: "api/Dockerfile", 
-              image_name: 'eo-auth-api', 
-              image_tag: 'v1.3.1' 
+            {
+              deployment_name: "api",
+              dockerfile: "api/Dockerfile",
+              image_name: 'eo-auth-api',
+              image_tag: 'v1.3.1'
             }
           ]
           ```
@@ -58,11 +58,16 @@ on:
         type: boolean
         required: false
         default: false
+      include_image_name:
+        description: "Optional: Variable for deciding if the name of the image should be prepended to the name of a chart"
+        type: boolean
+        required: false
+        default: false
 
     secrets:
       deploy_key:
         description: |
-          The token used to create the release and 
+          The token used to create the release and
           release the chart with a workflow dispatch to 'inputs.helm_repository'.
         required: true
 
@@ -141,3 +146,4 @@ jobs:
           chart_folder: ${{ inputs.chart_folder }}
           chart_repository: ${{ inputs.helm_repository }}
           chart_version: ${{ inputs.chart_version }}
+          include_image_name: ${{ inputs.include_image_name }}
