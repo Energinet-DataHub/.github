@@ -140,7 +140,7 @@ jobs:
 
       - name: Release helm chart
         id: release_chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@feature/451-include-domain
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
         with:
           deploy_key: ${{ secrets.deploy_key }}
           chart_folder: ${{ inputs.chart_folder }}
