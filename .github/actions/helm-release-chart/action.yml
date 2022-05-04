@@ -122,7 +122,7 @@ runs:
       shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
       run: |
-        wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_chart_info.outputs.version }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
+        wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_chart_info.outputs.tag_name }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
 
     - name: Update index file for helm registry
       shell: bash
