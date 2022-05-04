@@ -68,7 +68,7 @@ jobs:
       OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
       NODE_VERSION: '16'
-      AZURITE_VERSION: '3.17.0'
+      AZURITE_VERSION: '3.17.1'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.3971'
       # Necessary to manage Azure resources for tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
