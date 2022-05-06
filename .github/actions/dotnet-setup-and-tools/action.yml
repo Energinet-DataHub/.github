@@ -77,12 +77,15 @@ runs:
 
     - name: Install Azurite v${{ inputs.AZURITE_VERSION }}
       if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      shell: pwsh
       run: |
         npm install azurite@${{ inputs.AZURITE_VERSION }}
 
     - name: Install Azure Functions Core Tools v${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
       if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
-      run: npm install azure-functions-core-tools@${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      shell: pwsh
+      run: |
+        npm install azure-functions-core-tools@${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
     - name: Install SQL LocalDB 2019
       if: ${{ inputs.USE_SQLLOCALDB_2019 == 'true' }}
