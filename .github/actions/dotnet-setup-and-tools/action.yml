@@ -17,7 +17,6 @@ description: 'Setup .NET and other tools typically used when building and testin
 
 inputs:
   DOTNET_VERSION:
-    description: '.NET version to install'
     required: true
   # Cosmos DB emulator
   USE_COSMOS_DB_EMULATOR:
