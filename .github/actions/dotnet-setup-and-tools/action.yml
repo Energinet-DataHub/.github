@@ -1,0 +1,98 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Setup dotnet and tools
+description: 'Setup .NET and other tools typically used when building and testing .NET code'
+
+inputs:
+  DOTNET_VERSION:
+    description: '.NET version to install'
+    required: true
+  # Cosmos DB emulator
+  USE_COSMOS_DB_EMULATOR:
+    description: 'Install Cosmos DB emulator to support testing'
+    required: false
+    default: 'false'
+  # Node and modules
+  USE_AZURE_FUNCTIONS_TOOLS:
+    description: 'Install Azurite and Azure Functions Core Tools to support testing'
+    required: false
+    default: 'false'
+  NODE_VERSION:
+    required: false
+    default: '16'
+  AZURITE_VERSION:
+    required: false
+    default: '3.17.1'
+  AZURE_FUNCTIONS_CORE_TOOLS_VERSION:
+    required: false
+    default: '4.0.3971'
+  # SQL LocalDB 2019
+  USE_SQLLOCALDB_2019:
+    description: 'Install 2019 version of SQL LocalDB to support testing'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: ${{ inputs.DOTNET_VERSION }}
+      env:
+        DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+
+    - name: Setup Azure Cosmos DB Emulator
+      if: ${{ inputs.USE_COSMOS_DB_EMULATOR == 'true' }}
+      shell: pwsh
+      run: |
+        Write-Host "Start Cosmos DB Emulator..."
+        Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+        Start-CosmosDbEmulator
+
+    - name: Use Node v${{ inputs.NODE_VERSION }}
+      if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.NODE_VERSION }}
+
+    - name: Cache node modules
+      if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' }}
+      id: cache-nodemodules
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-azurite-${{ inputs.AZURITE_VERSION }}-func-${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+        path: ${{ github.workspace }}\node_modules
+
+    - name: Install Azurite v${{ inputs.AZURITE_VERSION }}
+      if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      run: |
+        npm install azurite@${{ inputs.AZURITE_VERSION }}
+
+    - name: Install Azure Functions Core Tools v${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+      if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      run: npm install azure-functions-core-tools@${{ inputs.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
+
+    - name: Install SQL LocalDB 2019
+      if: ${{ inputs.USE_SQLLOCALDB_2019 == 'true' }}
+      shell: pwsh
+      run: |
+        Write-Host "Downloading..."
+        Import-Module BitsTransfer
+        Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
+        Write-Host "Installing..."
+        Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
+        Write-Host "Checking version..."
+        sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
