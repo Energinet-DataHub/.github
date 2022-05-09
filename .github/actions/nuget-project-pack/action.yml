@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Get version suffix for NuGet packages
-description: 'Do not set version suffix if triggered on master/main branch; otherwise set as alpha release with GitHub run number'
+name: Pack project as NuGet package
+description: 'Pack a .NET project as either a pre-release (alpha) or release NuGet package'
 
-outputs:
-  version_suffix_property:
-    description: "Version suffix property for NuGet packages"
-    value: ${{ steps.determine_version_suffix.outputs.property }}
+inputs:
+  PROJECT_PATH:
+    required: true
+  BUILD_CONFIGURATION:
+    required: false
+    default: 'Release'
 
 runs:
   using: composite
@@ -38,3 +40,13 @@ runs:
         fi
       env:
         BRANCH: ${GITHUB_REF#refs/heads/}
+
+    - name: Pack project
+      shell: pwsh
+      run: |
+        dotnet pack ${{ inputs.PROJECT_PATH }} `
+          --configuration ${{ inputs.BUILD_CONFIGURATION }} `
+          --include-symbols `
+          -p:SymbolPackageFormat=snupkg `
+          -p:RepositoryCommit=${{ github.sha }} `
+          ${{ steps.get_version_suffix.outputs.version_suffix_property }}
