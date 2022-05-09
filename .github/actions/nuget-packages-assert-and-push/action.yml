@@ -20,6 +20,8 @@ inputs:
     required: true
   CONTENT_CHANGED:
     required: true
+  NUGET_TOKEN:
+    required: true
   NUPKG_RECURSE_PATH:
     required: true
 
@@ -36,7 +38,7 @@ runs:
       if: ${{ inputs.PUSH_PACKAGES == 'true' }}
       shell: pwsh
       run: |
-        dotnet nuget push ${{ env.NUPKG_FILTER_PATTERN }} --api-key ${{ secrets.NUGET_TOKEN }} --source ${{ env.NUGET_FEED_PATH }}
+        dotnet nuget push ${{ env.NUPKG_FILTER_PATTERN }} --api-key ${{ inputs.NUGET_TOKEN }} --source ${{ env.NUGET_FEED_PATH }}
       env:
         NUPKG_FILTER_PATTERN: '${{ inputs.NUPKG_RECURSE_PATH }}/**/*.nupkg'
         NUGET_FEED_PATH: 'https://api.nuget.org/v3/index.json'
