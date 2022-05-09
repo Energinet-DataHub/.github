@@ -28,7 +28,7 @@ inputs:
 runs:
   using: composite
   steps:
-    # TODO: Maybe the shared action (like get-version-suffix) and just have its step here directly(?)
+    # TODO: Maybe delete the shared action (like get-version-suffix) and just have its step here directly(?)
     - name: Check each NuGet package version does not exists (not looking at prereleases)
       if: ${{ inputs.PUSH_PACKAGES == 'true' || inputs.CONTENT_CHANGED == 'true'}}
       uses: Energinet-DataHub/.github/.github/actions/nuget-assert-release-version@7.3.0
