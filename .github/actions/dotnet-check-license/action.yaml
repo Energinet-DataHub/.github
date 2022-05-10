@@ -1,0 +1,26 @@
+name: Check Licenses
+
+inputs:
+  project-folder:
+    description: The folder containing the project to check.
+    required: true
+  allowed-licenses-file:
+    description: The file containing the licenses allowed.
+    required: false
+    default: .allowed-licenses.json
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1.9.0
+
+    - name: Install license tool
+      shell: bash
+      run: dotnet tool install --global dotnet-project-licenses --version 2.3.13
+
+    - name: Run license check
+      shell: bash
+      run: ~/.dotnet/tools/dotnet-project-licenses --allowed-license-types ${{ inputs.allowed-licenses-file }} -i ${{ inputs.project-folder }}
