@@ -8,6 +8,10 @@ inputs:
     description: The file containing the licenses allowed.
     required: false
     default: .allowed-licenses.json
+  license-mapping-file:
+    description: The file containing the licenses allowed.
+    required: false
+    default: .allowed-licenses.json
 
 runs:
   using: composite
@@ -21,6 +25,13 @@ runs:
       shell: bash
       run: dotnet tool install --global dotnet-project-licenses --version 2.3.13
 
+    - name: Add mapping argument
+      id: arguments
+      shell: bash
+      if: inputs.license-mapping-file
+      run: |
+        echo ::set-output name=arguments::--licenseurl-to-license-mappings ${{ inputs.license-mapping-file }}
+
     - name: Run license check
       shell: bash
-      run: ~/.dotnet/tools/dotnet-project-licenses --allowed-license-types ${{ inputs.allowed-licenses-file }} -i ${{ inputs.project-folder }}
+      run: ~/.dotnet/tools/dotnet-project-licenses -i ${{ inputs.project-folder }} --allowed-license-types ${{ inputs.allowed-licenses-file }} ${{ steps.arguments.outputs.arguments }}
