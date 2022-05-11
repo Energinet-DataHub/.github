@@ -1,0 +1,66 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Check Licenses
+inputs:
+  allowed-licenses-file:
+    description: |
+      The file containing the licenses allowed.
+      The contents should be a JSON array of strings. One for each valid license type.
+      Example:
+      ```json
+      [
+        "MIT License",
+        "BSD License",
+        "Apache Software License",
+      ]
+      ```
+    required: true
+  python-version:
+    description: The version of python to use
+    required: false
+    default: 3.8
+  pip-licenses-version:
+    description: The version of pip-licenses to use
+    required: false
+    default: 3.5.4
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install pipenv
+      shell: bash
+      run: |
+        python -m pip install --upgrade pipenv wheel
+
+    - name: Install pip-licenses ${{ inputs.pip-licenses-version }}
+      shell: bash
+      run: |
+        pip install 'pip-licenses==${{ inputs.pip-licenses-version }}'
+
+    - name: Resolve allowed licenses
+      id: allowed-licenses
+      shell: bash
+      run: |
+        echo ::set-output name=allowed-licenses::$(cat ${{ inputs.allowed-licenses-file }} | jq -r .[] | tr \\n \;)
+
+    - name: Run check
+      shell: bash
+      run: |
+        pip-licenses --allow-only="${{ steps.allowed-licenses.outputs.allowed-licenses }}"
