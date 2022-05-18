@@ -95,11 +95,16 @@ jobs:
 
       - name: Setup Azure Cosmos DB Emulator
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Start Cosmos DB Emulator..."
-          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Start Cosmos DB Emulator..."
+            Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+            Start-CosmosDbEmulator
 
       - name: Use Node v${{ env.NODE_VERSION }}
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
