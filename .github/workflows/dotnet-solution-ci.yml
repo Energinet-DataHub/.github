@@ -93,7 +93,7 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-      - name: Setup Azure Cosmos DB Emulator
+      - name: Setup Azure Cosmos DB Emulator (with retry)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         uses: nick-fields/retry@v2
         with:
