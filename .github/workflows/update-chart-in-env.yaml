@@ -111,11 +111,10 @@ jobs:
 
       - name: Branch - commit changes
         uses: EndBug/add-and-commit@v9
-        if: ${{ inputs.env_branch != 'main' }}
         with:
           add: ${{ inputs.yggdrasil_config_file }}
           message: Bump ${{ inputs.app_name }} to new release ${{ inputs.chart_version }}
           new_branch: ${{ inputs.env_branch }}
-          push: true
+          push: --force
           default_author: github_actions
           cwd: ${{ env.environment-checkout-directory }}
