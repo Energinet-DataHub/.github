@@ -53,13 +53,13 @@ runs:
       env:
         DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-    - name: Setup Azure Cosmos DB Emulator
+    - name: Start Azure Cosmos DB Emulator (no wait)
       if: ${{ inputs.USE_COSMOS_DB_EMULATOR == 'true' }}
       shell: pwsh
       run: |
         Write-Host "Start Cosmos DB Emulator..."
         Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-        Start-CosmosDbEmulator
+        Start-CosmosDbEmulator -NoWait
 
     - name: Use Node v${{ inputs.NODE_VERSION }}
       if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == 'true' }}
@@ -98,3 +98,21 @@ runs:
         Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
         Write-Host "Checking version..."
         sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+
+    - name: Await Azure Cosmos DB Emulator is running (with retry)
+      if: ${{ inputs.USE_COSMOS_DB_EMULATOR == 'true' }}
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: 1
+        retry_wait_seconds: 60
+        max_attempts: 6
+        retry_on: error
+        shell: pwsh
+        command: |
+          Write-Host "Polling Cosmos DB emulator status..."
+          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+          $status = Get-CosmosDbEmulatorStatus
+          Write-Host "Emulator status: $status"
+          if ($status -eq "StartPending") { Exit 1 }
+          if ($status -eq "Stopped") { Exit 1 }
+          if ($status -eq "Running") { Exit 0 }
