@@ -93,6 +93,9 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
+      # If the emulator is not started within 240 seconds the 'Start-CosmosDbEmulator' timeout.
+      # Instead of using retry on starting the emulator, we use '-NoWait' so we can split start
+      # and status polling. Doing that allows us to be in control of the timeout.
       - name: Start Azure Cosmos DB Emulator (no wait)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         shell: pwsh
@@ -151,6 +154,7 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
+      # Polling to await the emulator is ready for serving requests.
       - name: Await Azure Cosmos DB Emulator is running (with retry)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         uses: nick-fields/retry@v2
