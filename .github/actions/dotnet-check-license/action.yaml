@@ -19,7 +19,14 @@ inputs:
     required: false
     default: .allowed-licenses.json
   license-mapping-file:
-    description: The file containing the licenses allowed.
+    description: |
+      This file allows for mapping license URIs to license types.
+      Example:
+      ```json
+      {
+        "https://example.com/LICENSE.txt":"Apache-2.0"
+      }
+      ```
     required: false
 
 runs:

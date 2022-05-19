@@ -26,7 +26,8 @@ inputs:
         "Apache Software License",
       ]
       ```
-    required: true
+    required: false
+    default: .allowed-licenses.json
   python-version:
     description: The version of python to use
     required: false
