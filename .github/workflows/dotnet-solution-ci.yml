@@ -93,13 +93,16 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-      - name: Setup Azure Cosmos DB Emulator
+      # If the emulator is not started within 240 seconds the 'Start-CosmosDbEmulator' timeout.
+      # Instead of using retry on starting the emulator, we use '-NoWait' so we can split start
+      # and status polling. Doing that allows us to be in control of the timeout.
+      - name: Start Azure Cosmos DB Emulator (no wait)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
         shell: pwsh
         run: |
           Write-Host "Start Cosmos DB Emulator..."
           Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+          Start-CosmosDbEmulator -NoWait
 
       - name: Use Node v${{ env.NODE_VERSION }}
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
@@ -150,6 +153,25 @@ jobs:
 
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+      # Polling to await the emulator is ready for serving requests.
+      - name: Await Azure Cosmos DB Emulator is running (with retry)
+        if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 1
+          retry_wait_seconds: 60
+          max_attempts: 6
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Polling Cosmos DB emulator status..."
+            Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+            $status = Get-CosmosDbEmulatorStatus
+            Write-Host "Emulator status: $status"
+            if ($status -eq "StartPending") { Exit 1 }
+            if ($status -eq "Stopped") { Exit 1 }
+            if ($status -eq "Running") { Exit 0 }
 
       - name: Login to use Azure resources in integration tests
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
