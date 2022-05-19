@@ -5,11 +5,28 @@ inputs:
     description: The folder containing the project to check.
     required: true
   allowed-licenses-file:
-    description: The file containing the licenses allowed.
+    description: |
+      The file containing the licenses allowed.
+      The contents should be a JSON array of strings. One for each valid license type.
+      Example:
+      ```json
+      [
+        "MIT",
+        "MS-EULA",
+        "Apache-2.0"
+      ]
+      ```
     required: false
     default: .allowed-licenses.json
   license-mapping-file:
-    description: The file containing the licenses allowed.
+    description: |
+      This file allows for mapping license URIs to license types.
+      Example:
+      ```json
+      {
+        "https://example.com/LICENSE.txt":"Apache-2.0"
+      }
+      ```
     required: false
 
 runs:
