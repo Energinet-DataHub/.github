@@ -107,7 +107,7 @@ jobs:
             Write-Host "Start Cosmos DB Emulator..."
             Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
             $error.Clear()
-            Start-CosmosDbEmulator -NoUI -Timeout 30
+            Start-CosmosDbEmulator -NoUI -Timeout 240
             if ($error)
             {
               Write-Host "Failed"
