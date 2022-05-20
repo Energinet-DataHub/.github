@@ -93,7 +93,7 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-      # If the emulator is not started within 240 seconds the 'Start-CosmosDbEmulator' timeout.
+      # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
       - name: Setup Azure Cosmos DB Emulator (with retry)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
