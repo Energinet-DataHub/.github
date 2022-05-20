@@ -106,7 +106,13 @@ jobs:
           command: |
             Write-Host "Start Cosmos DB Emulator..."
             Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-            Start-CosmosDbEmulator
+            $error.Clear()
+            Start-CosmosDbEmulator -NoUI -Timeout 30
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
 
       # # If the emulator is not started within 240 seconds the 'Start-CosmosDbEmulator' timeout.
       # # Instead of using retry on starting the emulator, we use '-NoWait' so we can split start
