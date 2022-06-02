@@ -82,32 +82,28 @@ jobs:
           git fetch
           git checkout ${{ inputs.env_branch }} 2>/dev/null || git checkout -b ${{ inputs.env_branch }}
 
-      - name: Set helm repository
+      - name: Resolve simple app
+        shell: bash
+        id: simple-app
+        env:
+          APP_NAME: ${{ inputs.app_name }} # VERIFY
+        run: |
+          echo "::set-output name=name::${APP_NAME#eo-}"
+          echo "::set-output name=base-file::k8s/energy-origin-apps/base/${APP_NAME#eo-}.yaml"
+
+      - name: Validate simple app file
+        working-directory: ${{ env.environment-checkout-directory }}
+        shell: bash
+        run: |
+          # Disallow multiple manifests in simple app files
+          grep -v '^---' ${{ steps.simple-app.base-file }} >/dev/null
+
+      - name: Update targetRevision
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
         with:
-          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
-          yaml_path: apps[name="${{ inputs.app_name }}"].source.repoURL
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ steps.simple-app.base-file }}
+          yaml_path: spec.source.targetRevision
           value: ${{ inputs.helm_repository }}
-
-      - name: Set chart name
-        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
-        with:
-          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
-          yaml_path: apps[name="${{ inputs.app_name }}"].source.chart
-          value: ${{ inputs.chart_name }}
-
-      - name: Set chart version
-        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
-        with:
-          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
-          yaml_path: apps[name="${{ inputs.app_name }}"].source.targetRevision
-          value: ${{ inputs.chart_version }}
-
-      - name: Delete chart path if exists
-        uses: Energinet-DataHub/.github/.github/actions/yaml-delete@main
-        with:
-          yaml_file: ${{ env.environment-checkout-directory }}/${{ inputs.yggdrasil_config_file }}
-          yaml_path: apps[name="${{ inputs.app_name }}"].source.path
 
       - name: Branch - commit changes
         uses: EndBug/add-and-commit@v9
