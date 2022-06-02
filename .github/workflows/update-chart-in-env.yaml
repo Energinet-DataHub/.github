@@ -88,7 +88,6 @@ jobs:
         env:
           APP_NAME: ${{ inputs.app_name }}
         run: |
-          echo "::set-output name=name::${APP_NAME#eo-}"
           echo "::set-output name=base-file::k8s/energy-origin-apps/base/${APP_NAME#eo-}.yaml"
 
       - name: Validate simple app file
