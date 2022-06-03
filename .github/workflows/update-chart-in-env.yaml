@@ -95,12 +95,12 @@ jobs:
         shell: bash
         run: |
           # Disallow multiple manifests in simple app files
-          grep -v '^---' ${{ steps.simple-app.base-file }} >/dev/null
+          grep -v '^---' ${{ steps.simple-app.outputs.base-file }} >/dev/null
 
       - name: Update target revision
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
         with:
-          yaml_file: ${{ env.environment-checkout-directory }}/${{ steps.simple-app.base-file }}
+          yaml_file: ${{ env.environment-checkout-directory }}/${{ steps.simple-app.outputs.base-file }}
           yaml_path: spec.source.targetRevision
           value: ${{ inputs.chart_version }}
 
