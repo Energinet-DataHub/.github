@@ -1,0 +1,49 @@
+name: Semver - Add
+description: Add specific major/minor/patch values to a semver version.
+
+inputs:
+  version:
+    description: A valid semver version
+    required: true
+  major:
+    description: The amount to increment major version with
+    required: false
+    default: 0
+    type: number
+  minor:
+    description: The amount to increment minor version with
+    required: false
+    default: 0
+    type: number
+  patch:
+    description: The amount to increment patch version with
+    required: false
+    default: 0
+    type: number
+
+outputs:
+  result:
+    description: The updated version
+    value: ${{ steps.update-version.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Update version
+      id: update-version
+      shell: bash
+      run: |
+        VERSIONS=( ${${{ inputs.version }}//./ }
+
+        if [ ${#VERSIONS[@]} -ne 3 ]
+        then
+          echo "Version given does not match: major.minor.patch"
+          echo "Given version: ${{ inputs.version }}"
+          exit 1
+        fi
+
+        a[0]=((a[0]+${{ inputs.major }}))
+        a[1]=((a[1]+${{ inputs.minor }}))
+        a[2]=((a[2]+${{ inputs.patch }}))
+
+        echo "::set-output name=result::${a[0]}.${a[1]}.${a[2]}"

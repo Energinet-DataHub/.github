@@ -1,0 +1,72 @@
+name: Semver - Diff
+description: Diff two semver versions.
+
+inputs:
+  version-a:
+    description: A valid semver version
+    required: true
+  version-b:
+    description: A valid semver version
+    required: true
+  version-start:
+    description: Which number a minor or patch version is reset to, if a higher version has been increased
+    required: false
+    default: 0
+    type: number
+
+outputs:
+  result:
+    description: |
+      The logicial difference of the given versions.
+      Examples (given version-start is set to 0):
+        1.0.0 and 1.0.1 -> 0.0.1
+        1.0.0 and 1.1.1 -> 0.1.0
+        1.0.0 and 2.1.1 -> 1.0.0
+        1.0.1 and 1.0.0 -> 0.0.1
+        1.1.1 and 1.0.0 -> 0.1.0
+        2.1.1 and 1.0.0 -> 1.0.0
+        1.0.0 and 1.0.3 -> 0.0.3
+    value: ${{ steps.diff-versions.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Diff versions
+      id: diff-versions
+      shell: bash
+      run: |
+        AVERSIONS=( ${${{ inputs.version-a }}//./ }
+        BVERSIONS=( ${${{ inputs.version-b }}//./ }
+
+        if [ ${#AVERSIONS[@]} -ne 3 ]
+        then
+          echo "Version given does not match: major.minor.patch"
+          echo "Given version-a: ${{ inputs.version-a }}"
+          exit 1
+        fi
+
+        if [ ${#BVERSIONS[@]} -ne 3 ]
+        then
+          echo "Version given does not match: major.minor.patch"
+          echo "Given version-b: ${{ inputs.version-b }}"
+          exit 1
+        fi
+
+        AVERSIONS[0]=((AVERSIONS[0]-BVERSIONS[0]))
+        AVERSIONS[1]=((AVERSIONS[1]-BVERSIONS[0]))
+        AVERSIONS[2]=((AVERSIONS[2]-BVERSIONS[0]))
+
+        AVERSIONS[0]=${AVERSIONS[0]#-}
+        AVERSIONS[1]=${AVERSIONS[1]#-}
+        AVERSIONS[2]=${AVERSIONS[2]#-}
+
+        if [ AVERSIONS[0] -gt 0 ]
+        then
+          AVERSIONS[1]=${{ inputs.version-start }}
+          AVERSIONS[2]=${{ inputs.version-start }}
+        elif [ AVERSIONS[1] -gt 0 ]
+        then
+          AVERSIONS[2]=${{ inputs.version-start }}
+        fi
+
+        echo "::set-output name=result::${AVERSIONS[0]}.${AVERSIONS[1]}.${AVERSIONS[2]}"
