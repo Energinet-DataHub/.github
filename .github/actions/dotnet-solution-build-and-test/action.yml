@@ -19,7 +19,8 @@ inputs:
   SOLUTION_FILE_PATH:
     required: true
   USE_CODE_COVERAGE:
-    required: true
+    required: false
+    default: 'true'
   CODE_COVERAGE_FLAGS:
     required: false
     default: ''
