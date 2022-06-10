@@ -19,7 +19,8 @@ inputs:
   SOLUTION_FILE_PATH:
     required: true
   CODE_COVERAGE_FLAGS:
-    required: true
+    required: false
+    default: ''
   BUILD_CONFIGURATION:
     required: false
     default: 'Release'
@@ -65,6 +66,7 @@ runs:
         dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Upload coverage to CodeCov
+      if: ${{ inputs.CODE_COVERAGE_FLAGS != '' }}
       uses: codecov/codecov-action@v2
       with:
         flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
