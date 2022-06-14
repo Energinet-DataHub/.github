@@ -52,12 +52,14 @@ on:
         required: false
       AZURE_SPN_ID:
         required: false
-      AZURE_SPN_SECRET:
-        required: false
       AZURE_KEYVAULT_URL:
         required: false
       AZURE_SECRETS_KEYVAULT_URL:
         required: false
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   function_ci:
@@ -166,9 +168,11 @@ jobs:
 
       - name: Login to use Azure resources in integration tests
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        run: |
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_SPN_ID }}
+          tenant-id: ${{ inputs.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run tests and publish report
         run: |
