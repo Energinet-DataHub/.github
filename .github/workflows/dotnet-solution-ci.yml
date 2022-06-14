@@ -168,7 +168,6 @@ jobs:
 
       - name: Login to use Azure resources in integration tests
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        id: run-integration-tests
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_SPN_ID }}
