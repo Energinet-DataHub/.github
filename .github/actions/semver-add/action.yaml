@@ -30,17 +30,26 @@ runs:
       id: update-version
       shell: bash
       run: |
-        VERSIONS=( ${${{ inputs.version }}//./ }
+        VERSION=${{ inputs.version }}
+        MAJOR=${{ inputs.major }}
+        MINOR=${{ inputs.minor }}
+        PATCH=${{ inputs.patch }}
 
-        if [ ${#VERSIONS[@]} -ne 3 ]
+        COUNT=$(echo "$VERSION" | tr -cd "." | wc -c)
+
+        if [ $COUNT -lt 2 ]
         then
-          echo "Version given does not match: major.minor.patch"
-          echo "Given version: ${{ inputs.version }}"
-          exit 1
+            echo "Version given does not match: major.minor.patch"
+            echo "Given version: $VERSION"
+            exit 1
         fi
 
-        VERSIONS[0]=((VERSIONS[0]+${{ inputs.major }}))
-        VERSIONS[1]=((VERSIONS[1]+${{ inputs.minor }}))
-        VERSIONS[2]=((VERSIONS[2]+${{ inputs.patch }}))
+        V_0=$(echo "$VERSION" | cut -d. -f1)
+        V_1=$(echo "$VERSION" | cut -d. -f2)
+        V_2=$(echo "$VERSION" | cut -d. -f3)
 
-        echo "::set-output name=result::${VERSIONS[0]}.${VERSIONS[1]}.${VERSIONS[2]}"
+        V_0=$((V_0+MAJOR))
+        V_1=$((V_1+MINOR))
+        V_2=$((V_2+PATCH))
+
+        echo "::set-output name=result::${V_0}.${V_1}.${V_2}"

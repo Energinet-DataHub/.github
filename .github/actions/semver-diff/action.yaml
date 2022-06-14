@@ -26,6 +26,7 @@ outputs:
         2.1.1 and 1.0.0 -> 1.0.0
         1.0.0 and 1.0.3 -> 0.0.3
         1.0.0 and 1.0.0 -> 0.0.0
+        1.0.0 and 1.0.3-pr.123-aef09c8 -> 0.0.3
     value: ${{ steps.diff-versions.outputs.result }}
   major:
     description: The major part of the result
@@ -45,41 +46,53 @@ runs:
       id: diff-versions
       shell: bash
       run: |
-        A_VERSIONS=( ${${{ inputs.version-a }}//./ }
-        B_VERSIONS=( ${${{ inputs.version-b }}//./ }
+        ARGUMENT_A=${{ inputs.version-a }}
+        ARGUMENT_B=${{ inputs.version-b }}
+        ARGUMENT_START=${{ inputs.version-start }}
 
-        if [ ${#A_VERSIONS[@]} -ne 3 ]
+        COUNT_A=$(echo "$ARGUMENT_A" | tr -cd "." | wc -c)
+        COUNT_B=$(echo "$ARGUMENT_B" | tr -cd "." | wc -c)
+
+        if [ $COUNT_A -lt 2 ]
         then
-          echo "Version given does not match: major.minor.patch"
-          echo "Given version-a: ${{ inputs.version-a }}"
-          exit 1
+            echo "Version given does not match: major.minor.patch"
+            echo "Given version-a: $ARGUMENT_A"
+            exit 1
         fi
 
-        if [ ${#B_VERSIONS[@]} -ne 3 ]
+        if [ $COUNT_B -lt 2 ]
         then
-          echo "Version given does not match: major.minor.patch"
-          echo "Given version-b: ${{ inputs.version-b }}"
-          exit 1
+            echo "Version given does not match: major.minor.patch"
+            echo "Given version-b: $ARGUMENT_B"
+            exit 1
         fi
 
-        A_VERSIONS[0]=((A_VERSIONS[0]-B_VERSIONS[0]))
-        A_VERSIONS[1]=((A_VERSIONS[1]-B_VERSIONS[0]))
-        A_VERSIONS[2]=((A_VERSIONS[2]-B_VERSIONS[0]))
+        A_0=$(echo "$ARGUMENT_A" | cut -d. -f1)
+        A_1=$(echo "$ARGUMENT_A" | cut -d. -f2)
+        A_2=$(echo "$ARGUMENT_A" | cut -d. -f3)
 
-        A_VERSIONS[0]=${A_VERSIONS[0]#-}
-        A_VERSIONS[1]=${A_VERSIONS[1]#-}
-        A_VERSIONS[2]=${A_VERSIONS[2]#-}
+        B_0=$(echo "$ARGUMENT_B" | cut -d. -f1)
+        B_1=$(echo "$ARGUMENT_B" | cut -d. -f2)
+        B_2=$(echo "$ARGUMENT_B" | cut -d. -f3)
 
-        if [ A_VERSIONS[0] -gt 0 ]
+        V_0=$((A_0-B_0))
+        V_1=$((A_1-B_1))
+        V_2=$((A_2-B_2))
+
+        V_0=${V_0#-}
+        V_1=${V_1#-}
+        V_2=${V_2#-}
+
+        if [ $V_0 -gt 0 ]
         then
-          A_VERSIONS[1]=${{ inputs.version-start }}
-          A_VERSIONS[2]=${{ inputs.version-start }}
-        elif [ A_VERSIONS[1] -gt 0 ]
+            V_1="0"
+            V_2=0
+        elif [ $V_1 -gt 0 ]
         then
-          A_VERSIONS[2]=${{ inputs.version-start }}
+            V_2=0
         fi
 
-        echo "::set-output name=major::${A_VERSIONS[0]}"
-        echo "::set-output name=minor::${A_VERSIONS[1]}"
-        echo "::set-output name=patch::${A_VERSIONS[2]}"
-        echo "::set-output name=result::${A_VERSIONS[0]}.${A_VERSIONS[1]}.${A_VERSIONS[2]}"
+        echo "::set-output name=major::${V_0}"
+        echo "::set-output name=minor::${V_1}"
+        echo "::set-output name=patch::${V_2}"
+        echo "::set-output name=result::${V_0}.${V_1}.${V_2}"
