@@ -11,8 +11,7 @@ inputs:
   version-start:
     description: Which number a minor or patch version is reset to, if a higher version has been increased
     required: false
-    default: 0
-    type: number
+    default: "0"
 
 outputs:
   result:
@@ -26,6 +25,7 @@ outputs:
         1.1.1 and 1.0.0 -> 0.1.0
         2.1.1 and 1.0.0 -> 1.0.0
         1.0.0 and 1.0.3 -> 0.0.3
+        1.0.0 and 1.0.0 -> 0.0.0
     value: ${{ steps.diff-versions.outputs.result }}
 
 runs:
@@ -35,38 +35,38 @@ runs:
       id: diff-versions
       shell: bash
       run: |
-        AVERSIONS=( ${${{ inputs.version-a }}//./ }
-        BVERSIONS=( ${${{ inputs.version-b }}//./ }
+        A_VERSIONS=( ${${{ inputs.version-a }}//./ }
+        B_VERSIONS=( ${${{ inputs.version-b }}//./ }
 
-        if [ ${#AVERSIONS[@]} -ne 3 ]
+        if [ ${#A_VERSIONS[@]} -ne 3 ]
         then
           echo "Version given does not match: major.minor.patch"
           echo "Given version-a: ${{ inputs.version-a }}"
           exit 1
         fi
 
-        if [ ${#BVERSIONS[@]} -ne 3 ]
+        if [ ${#B_VERSIONS[@]} -ne 3 ]
         then
           echo "Version given does not match: major.minor.patch"
           echo "Given version-b: ${{ inputs.version-b }}"
           exit 1
         fi
 
-        AVERSIONS[0]=((AVERSIONS[0]-BVERSIONS[0]))
-        AVERSIONS[1]=((AVERSIONS[1]-BVERSIONS[0]))
-        AVERSIONS[2]=((AVERSIONS[2]-BVERSIONS[0]))
+        A_VERSIONS[0]=((A_VERSIONS[0]-B_VERSIONS[0]))
+        A_VERSIONS[1]=((A_VERSIONS[1]-B_VERSIONS[0]))
+        A_VERSIONS[2]=((A_VERSIONS[2]-B_VERSIONS[0]))
 
-        AVERSIONS[0]=${AVERSIONS[0]#-}
-        AVERSIONS[1]=${AVERSIONS[1]#-}
-        AVERSIONS[2]=${AVERSIONS[2]#-}
+        A_VERSIONS[0]=${A_VERSIONS[0]#-}
+        A_VERSIONS[1]=${A_VERSIONS[1]#-}
+        A_VERSIONS[2]=${A_VERSIONS[2]#-}
 
-        if [ AVERSIONS[0] -gt 0 ]
+        if [ A_VERSIONS[0] -gt 0 ]
         then
-          AVERSIONS[1]=${{ inputs.version-start }}
-          AVERSIONS[2]=${{ inputs.version-start }}
-        elif [ AVERSIONS[1] -gt 0 ]
+          A_VERSIONS[1]=${{ inputs.version-start }}
+          A_VERSIONS[2]=${{ inputs.version-start }}
+        elif [ A_VERSIONS[1] -gt 0 ]
         then
-          AVERSIONS[2]=${{ inputs.version-start }}
+          A_VERSIONS[2]=${{ inputs.version-start }}
         fi
 
-        echo "::set-output name=result::${AVERSIONS[0]}.${AVERSIONS[1]}.${AVERSIONS[2]}"
+        echo "::set-output name=result::${A_VERSIONS[0]}.${A_VERSIONS[1]}.${A_VERSIONS[2]}"

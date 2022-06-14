@@ -8,18 +8,15 @@ inputs:
   major:
     description: The amount to increment major version with
     required: false
-    default: 0
-    type: number
+    default: "0"
   minor:
     description: The amount to increment minor version with
     required: false
-    default: 0
-    type: number
+    default: "0"
   patch:
     description: The amount to increment patch version with
     required: false
-    default: 0
-    type: number
+    default: "0"
 
 outputs:
   result:
@@ -42,8 +39,8 @@ runs:
           exit 1
         fi
 
-        a[0]=((a[0]+${{ inputs.major }}))
-        a[1]=((a[1]+${{ inputs.minor }}))
-        a[2]=((a[2]+${{ inputs.patch }}))
+        VERSIONS[0]=((VERSIONS[0]+${{ inputs.major }}))
+        VERSIONS[1]=((VERSIONS[1]+${{ inputs.minor }}))
+        VERSIONS[2]=((VERSIONS[2]+${{ inputs.patch }}))
 
-        echo "::set-output name=result::${a[0]}.${a[1]}.${a[2]}"
+        echo "::set-output name=result::${VERSIONS[0]}.${VERSIONS[1]}.${VERSIONS[2]}"
