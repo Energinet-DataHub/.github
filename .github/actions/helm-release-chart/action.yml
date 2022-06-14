@@ -26,7 +26,7 @@ inputs:
     required: false
   chart_version:
     description: Override the chart version to a specific version
-    required: false
+    required: true
   chart_repository_branch:
     description: The branch in which to add the chart.
     required: false

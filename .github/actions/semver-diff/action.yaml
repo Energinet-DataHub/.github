@@ -27,6 +27,16 @@ outputs:
         1.0.0 and 1.0.3 -> 0.0.3
         1.0.0 and 1.0.0 -> 0.0.0
     value: ${{ steps.diff-versions.outputs.result }}
+  major:
+    description: The major part of the result
+    value: ${{ steps.diff-versions.outputs.major }}
+  minor:
+    description: The minor part of the result
+    value: ${{ steps.diff-versions.outputs.minor }}
+  patch:
+    description: The patch part of the result
+    value: ${{ steps.diff-versions.outputs.patch }}
+        
 
 runs:
   using: composite
@@ -69,4 +79,7 @@ runs:
           A_VERSIONS[2]=${{ inputs.version-start }}
         fi
 
+        echo "::set-output name=major::${A_VERSIONS[0]}"
+        echo "::set-output name=minor::${A_VERSIONS[1]}"
+        echo "::set-output name=patch::${A_VERSIONS[2]}"
         echo "::set-output name=result::${A_VERSIONS[0]}.${A_VERSIONS[1]}.${A_VERSIONS[2]}"
