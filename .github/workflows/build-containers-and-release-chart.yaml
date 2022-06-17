@@ -63,6 +63,11 @@ on:
         type: boolean
         required: false
         default: false
+      version_yaml_path_prefix:
+        description: "Prefix for version tag in values file."
+        type: string
+        required: false
+        default: "eo-base-helm-chart.deployments."
 
     secrets:
       deploy_key:
@@ -135,7 +140,7 @@ jobs:
           echo $JSON | jq -c '.[]' | while read i; do
               DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
               TAG=$(echo $i | jq -r .image_tag)
-              yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
+              yaml-set --change ${{ inputs.version_yaml_path_prefix }}${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
           done
 
       - name: Release helm chart
