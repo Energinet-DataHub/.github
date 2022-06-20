@@ -22,7 +22,7 @@ inputs:
     required: true
   chart_repository:
     description: The repository containing the chart repository
-    default: ${{ github.event.repository.owner }}/helm-charts
+    default: ${{ github.repository_owner }}/helm-charts
     required: false
   chart_version:
     description: Override the chart version to a specific version
