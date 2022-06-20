@@ -35,8 +35,8 @@ inputs:
     description: A deploy key that has access to the chart repository.
     required: true
   release_repository:
-    description: The directory in which to create/upload the released chart.
-    default: ${{ github.repository }}
+    description: The repository (not including owner) in which to create/upload the released chart.
+    default: ${{ github.event.repository.name }}
     required: false
   include_image_name:
     description: Add the name of the image to the name of a chart.
