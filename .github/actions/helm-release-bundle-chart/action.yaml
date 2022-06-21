@@ -45,6 +45,10 @@ inputs:
       The token used to create the release and
       release the chart with a workflow dispatch to 'inputs.helm-repository'.
     required: true
+  version_yaml_path_prefix:
+    description: "Prefix for version tag in values file."
+    required: false
+    default: "eo-base-helm-chart.deployments."
 
 outputs:
   chart-name:
@@ -69,7 +73,7 @@ runs:
         echo $JSON | jq -c '.[]' | while read i; do
             DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
             TAG=$(echo $i | jq -r .image_tag)
-            yaml-set --change eo-base-helm-chart.deployments.${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
+            yaml-set --change ${{ inputs.version_yaml_path_prefix }}${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
         done
 
     - name: Release helm chart

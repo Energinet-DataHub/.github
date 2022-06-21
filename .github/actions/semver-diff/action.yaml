@@ -37,7 +37,6 @@ outputs:
   patch:
     description: The patch part of the result
     value: ${{ steps.diff-versions.outputs.patch }}
-        
 
 runs:
   using: composite
