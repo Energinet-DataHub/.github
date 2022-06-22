@@ -96,7 +96,7 @@ jobs:
 
       - name: Build and push container image
         id: docker_build
-        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@feature/443-automatic-version-handling
+        uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
         with:
           dockerfile: ${{ matrix.containers.Dockerfile }}
           image-name: ${{ matrix.containers.image_name }}
@@ -120,7 +120,7 @@ jobs:
 
       - name: Release helm chart
         id: release-chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-bundle-chart@feature/443-automatic-version-handling
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-bundle-chart@main
         with:
           containers: ${{ inputs.containers }}
           deploy-key: ${{ secrets.deploy_key }}
