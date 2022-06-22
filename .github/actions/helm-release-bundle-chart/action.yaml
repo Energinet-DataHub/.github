@@ -32,7 +32,7 @@ inputs:
   chart-version:
     description: "Optional: Override the Helm chart version to a specific version"
     required: false
-  helm-repository:
+  chart-repository:
     description: "Optional: The repository to publish the chart."
     required: false
     default: ${{ github.repository_owner }}/helm-charts
@@ -43,7 +43,7 @@ inputs:
   deploy-key:
     description: |
       The token used to create the release and
-      release the chart with a workflow dispatch to 'inputs.helm-repository'.
+      release the chart with a workflow dispatch to 'inputs.chart-repository'.
     required: true
   version_yaml_path_prefix:
     description: "Prefix for version tag in values file."
@@ -82,6 +82,6 @@ runs:
       with:
         deploy_key: ${{ inputs.deploy-key }}
         chart_folder: ${{ inputs.chart-folder }}
-        chart_repository: ${{ inputs.helm-repository }}
+        chart_repository: ${{ inputs.chart-repository }}
         chart_version: ${{ inputs.chart-version }}
         include_image_name: ${{ inputs.include-image-name }}
