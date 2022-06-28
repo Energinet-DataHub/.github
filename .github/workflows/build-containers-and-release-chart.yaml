@@ -84,7 +84,7 @@ on:
         description:
         value: ${{ jobs.release_chart.outputs.chart_version }}
 jobs:
-  build_containers_and_update_chart:
+  build-containers-and-update-chart:
     name: Build containers
     runs-on: ubuntu-latest
     if: ${{ inputs.containers != '[]' }}
@@ -94,61 +94,37 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v2
-        with:
-          path: artifacts/
-
-      - name: Container image name
-        id: image_name
-        uses: ASzc/change-string-case-action@v2
-        with:
-          string: ghcr.io/${{ github.repository_owner }}/${{ matrix.containers.image_name }}
-
       - name: Build and push container image
         id: docker_build
         uses: Energinet-DataHub/.github/.github/actions/build-and-push-container@main
         with:
           dockerfile: ${{ matrix.containers.Dockerfile }}
-          image_name: ${{ steps.image_name.outputs.lowercase }}
-          image_tag: ${{ matrix.containers.image_tag }}
-          docker_context: ${{ matrix.containers.context && matrix.containers.context || '.'}}
+          image-name: ${{ matrix.containers.image_name }}
+          image-tag: ${{ matrix.containers.image_tag }}
+          docker-context: ${{ matrix.containers.context && matrix.containers.context || '.'}}
 
-  release_chart:
+  release-chart:
     name: Release domain chart
-    needs: [build_containers_and_update_chart]
+    needs: [build-containers-and-update-chart]
     runs-on: ubuntu-latest
     if: |
       always() &&
       inputs.skip_chart == false &&
       (needs.build_containers_and_update_chart.result == 'success' || (needs.build_containers_and_update_chart.result == 'skipped' && inputs.containers == '[]'))
     outputs:
-      chart_name: ${{ steps.release_chart.outputs.chart_name }}
-      chart_version: ${{ steps.release_chart.outputs.chart_version }}
+      chart_name: ${{ steps.release-chart.outputs.chart-name }}
+      chart_version: ${{ steps.release-chart.outputs.chart-version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: install yamlpath
-        uses: Energinet-DataHub/.github/.github/actions/yamlpath-install@main
-
-      - name: If pr then override containers version in chart
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          JSON='${{ inputs.containers }}'
-          VALUES_FILE=${{ inputs.chart_folder }}/values.yaml
-          echo $JSON | jq -c '.[]' | while read i; do
-              DEPLOYMENT_NAME=$(echo $i | jq -r .deployment_name)
-              TAG=$(echo $i | jq -r .image_tag)
-              yaml-set --change ${{ inputs.version_yaml_path_prefix }}${DEPLOYMENT_NAME}.image.tag --value $TAG $VALUES_FILE
-          done
-
       - name: Release helm chart
-        id: release_chart
-        uses: Energinet-DataHub/.github/.github/actions/helm-release-chart@main
+        id: release-chart
+        uses: Energinet-DataHub/.github/.github/actions/helm-release-bundle-chart@main
         with:
-          deploy_key: ${{ secrets.deploy_key }}
-          chart_folder: ${{ inputs.chart_folder }}
-          chart_repository: ${{ inputs.helm_repository }}
-          chart_version: ${{ inputs.chart_version }}
-          include_image_name: ${{ inputs.include_image_name }}
+          containers: ${{ inputs.containers }}
+          deploy-key: ${{ secrets.deploy_key }}
+          chart-folder: ${{ inputs.chart_folder }}
+          chart-repository: ${{ inputs.helm_repository }}
+          chart-version: ${{ inputs.chart_version }}
+          include-image-name: ${{ inputs.include_image_name }}
