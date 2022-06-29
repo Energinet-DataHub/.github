@@ -110,6 +110,8 @@ jobs:
       chart_version: ${{ inputs.chart_version }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Get info from Chart.yaml
         id: chart-info
         uses: Energinet-DataHub/.github/.github/actions/chart-info@main
