@@ -79,10 +79,10 @@ on:
     outputs:
       chart_name:
         description:
-        value: ${{ jobs.release_chart.outputs.chart_name }}
+        value: ${{ jobs.chart-info.outputs.chart_name }}
       chart_version:
         description:
-        value: ${{ jobs.release_chart.outputs.chart_version }}
+        value: ${{ jobs.chart-info.outputs.chart_version }}
 jobs:
   build-containers-and-update-chart:
     name: Build containers
