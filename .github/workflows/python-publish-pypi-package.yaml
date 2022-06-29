@@ -1,0 +1,81 @@
+
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Publish PyPI Package
+
+on:
+  workflow_call:
+    inputs:
+      PYTHON_VERSION:
+        description: The version of python to use
+        type: string
+        required: true
+      REPOSITORY_URL:
+        description: The repository URL to use eg. https://test.pypi.org/legacy/ for testing
+        type: string
+        required: false
+      BUILD_NUMBER:
+        description: Parameter parsed to --build argument eg. --build=${BUILD_NUMBER}. If set, this will build a dev package for pypi using --build
+        required: false
+        type: string
+        default: ''
+      VERBOSE:
+        description: Set to true for verbose logging
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      PYPI_API_TOKEN:
+        required: true
+        description: API Token used to publish to PyPI
+
+jobs:
+  publish_package:
+    name: Publish PyPI Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Python and dependencies
+        uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
+        with: 
+          python_version: ${{ inputs.PYTHON_VERSION }}
+
+      - name: Find current version
+        if: ${{ inputs.BUILD_NUMBER != '' }}
+        id: find_version
+        uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
+        with:
+          yaml_file: META.yaml
+          yaml_path: package.version
+
+      - name: Mark version as pre-release
+        if: ${{ inputs.BUILD_NUMBER != '' }}
+        uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
+        with:
+          yaml_file: META.yaml
+          yaml_path: package.version
+          value: ${{ steps.find_version.outputs.result }}.${{ inputs.BUILD_NUMBER }}
+
+      - name: Build tarball
+        run: pipenv run python setup.py sdist
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: ${{ inputs.REPOSITORY_URL }}
+          verbose: ${{ inputs.VERBOSE }}

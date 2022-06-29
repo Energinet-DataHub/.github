@@ -40,6 +40,11 @@ on:
         required: false
         default: false
         type: boolean
+      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
+      PREPARE_OUTPUTS:
+        required: false
+        default: false
+        type: boolean
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -47,12 +52,14 @@ on:
         required: false
       AZURE_SPN_ID:
         required: false
-      AZURE_SPN_SECRET:
-        required: false
       AZURE_KEYVAULT_URL:
         required: false
       AZURE_SECRETS_KEYVAULT_URL:
         required: false
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   function_ci:
@@ -60,9 +67,10 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
+      OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
       NODE_VERSION: '16'
-      AZURITE_VERSION: '3.15.0'
+      AZURITE_VERSION: '3.17.1'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.3971'
       # Necessary to manage Azure resources for tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
@@ -78,41 +86,46 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
-
-      # Use an cached .NET SDK version for better performance (for Windows see: https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md#net-core-sdk)
-      - name: Setup .NET 3.1.416
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.416'
-        env:
-          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+        uses: actions/checkout@v3
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
           DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
 
-      - name: Setup Azure Cosmos DB Emulator
+      # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
+      # We have added a retry action to see if this can mitigate builds failing on this account.
+      - name: Setup Azure Cosmos DB Emulator (with retry)
         if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
-        shell: pwsh
-        run: |
-          Write-Host "Start Cosmos DB Emulator..."
-          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Start Cosmos DB Emulator..."
+            Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+            $error.Clear()
+            Start-CosmosDbEmulator -NoUI -Timeout 240
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
 
       - name: Use Node v${{ env.NODE_VERSION }}
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Cache node modules
         if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
         id: cache-nodemodules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-azurite-${{ env.AZURITE_VERSION }}-func-${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
           path: ${{ github.workspace }}\node_modules
@@ -135,11 +148,29 @@ jobs:
           Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
           Write-Host "Installing..."
           Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
-          Write-Host "Checking version..."
-          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+
+      # If a connection cannot be established within <timeout> seconds it fails.
+      # We have added a retry action to see if this can mitigate builds failing on this account.
+      - name: Verify SQL LocalDB 2019 (with retry)
+        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Checking version..."
+            $error.Clear()
+            sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
 
       - name: Cache NuGet packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-nuget
         with:
           path: ~/.nuget/packages
@@ -154,12 +185,35 @@ jobs:
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Login to use Azure resources in integration tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' && env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        run: |
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_SPN_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run tests and publish report
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}/output
+          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+
+      - name: Upload coverage to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          verbose: true
+
+      # Call action in source (caller) repository
+      - name: Prepare outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: ./.github/actions/dotnet-prepare-outputs
+        with:
+          OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
+
+      - name: Upload dotnet artifact
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error

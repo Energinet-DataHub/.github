@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'PySpark execution'
-description: 'This action allows you to execute code, written for Spark, Databricks or other similar engines.'
+name: Checkout repository for preparing NuGet packages
+description: 'Checkout the repository in a way that allows us to use the action tj-actions/changed-files to detect file changes correctly'
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: composite
+  steps:
+    - name: Checkout repository (main branch)
+      if: ${{ github.ref_name == 'main' }}
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 2 # To retrieve the preceding commit on 'main'
+
+    - name: Checkout repository (feature branch)
+      if: ${{ github.ref_name != 'main' }}
+      uses: actions/checkout@v3

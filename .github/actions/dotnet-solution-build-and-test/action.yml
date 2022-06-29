@@ -1,0 +1,77 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build and test dotnet solution
+description: 'Build a .NET solution, run tests and upload code coverage'
+
+inputs:
+  SOLUTION_FILE_PATH:
+    required: true
+  USE_CODE_COVERAGE:
+    required: false
+    default: 'true'
+  CODE_COVERAGE_FLAGS:
+    required: false
+    default: ''
+  BUILD_CONFIGURATION:
+    required: false
+    default: 'Release'
+  # Setting either KeyVault url will login to Azure
+  AZURE_KEYVAULT_URL:
+    required: false
+  AZURE_SECRETS_KEYVAULT_URL:
+    required: false
+  # Settings required if we need to login to Azure
+  AZURE_TENANT_ID:
+    required: false
+  AZURE_SUBSCRIPTION_ID:
+    required: false
+  AZURE_SPN_ID:
+    required: false
+  AZURE_SPN_SECRET:
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Restore NuGet packages
+      shell: pwsh
+      run: |
+        dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+
+    - name: Build solution
+      shell: pwsh
+      run: |
+        dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
+
+    - name: Login to use Azure resources in integration tests
+      if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
+      shell: pwsh
+      run: |
+        az login --service-principal --username "${{ inputs.AZURE_SPN_ID }}" --password "${{ inputs.AZURE_SPN_SECRET }}" --tenant "${{ inputs.AZURE_TENANT_ID }}"
+        az account set --subscription "${{ inputs.AZURE_SUBSCRIPTION_ID }}"
+
+    - name: Run tests and publish report
+      shell: pwsh
+      run: |
+        dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
+        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+
+    - name: Upload coverage to CodeCov
+      if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
+      uses: codecov/codecov-action@v2
+      with:
+        flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
+        fail_ci_if_error: true
+        verbose: true

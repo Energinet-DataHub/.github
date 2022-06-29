@@ -1,0 +1,61 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Initiate and monitor deployment
+description: Dispatches a deployment request, and keeps checking the deployment status until the remote workflow has completed
+inputs:
+  PAT_TOKEN:
+    required: true
+  RELEASE_NAME:
+    required: true
+    description: Name of the release to be deployed
+  PULL_REQUEST_NUMBER:
+    required: true
+    description: Number of the pull request
+  DEPLOYMENT_WORKFLOW_ID:
+    description: Id of the workflow
+    required: true
+  DEPLOYMENT_REPOSITORY:
+    description: Name of the deployment repository
+    required: true
+  DEPLOYMENT_REPOSITORY_OWNER:
+    description: Owner of the deployment repository
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install npm packages
+      shell: bash
+      run: |
+        npm install @actions/core
+        npm install @actions/github
+
+    - name: Create Unique deployment id
+      id: unique-deployment-id
+      shell: bash
+      run: |
+        echo "::set-output name=UNIQUE_DEPLOYMENT_ID::$(openssl rand -hex 20)"
+
+    - name: Initiate deployment
+      shell: bash
+      run: |
+        node ${{ github.action_path }}/initiate-deployment.js ${{ inputs.PAT_TOKEN }} ${{ inputs.RELEASE_NAME }} ${{ inputs.DEPLOYMENT_WORKFLOW_ID }} ${{ inputs.DEPLOYMENT_REPOSITORY }} ${{ inputs.DEPLOYMENT_REPOSITORY_OWNER }} ${{ steps.unique-deployment-id.outputs.UNIQUE_DEPLOYMENT_ID }}
+
+    # Temporarily disabled until we figure out why its pulling so many REST requests
+    # - name: Monitor deployment
+    #   shell: bash
+    #   run: |
+    #     node ${{ github.action_path }}/monitor-deployment.js ${{ inputs.PAT_TOKEN }} ${{ inputs.DEPLOYMENT_WORKFLOW_ID }} ${{ inputs.DEPLOYMENT_REPOSITORY }} ${{ inputs.DEPLOYMENT_REPOSITORY_OWNER }} ${{ steps.unique-deployment-id.outputs.UNIQUE_DEPLOYMENT_ID }}
+
+        
