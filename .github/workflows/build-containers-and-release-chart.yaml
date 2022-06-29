@@ -79,10 +79,10 @@ on:
     outputs:
       chart_name:
         description:
-        value: ${{ jobs.release_chart.outputs.chart_name }}
+        value: ${{ jobs.chart-info.outputs.chart_name }}
       chart_version:
         description:
-        value: ${{ jobs.release_chart.outputs.chart_version }}
+        value: ${{ jobs.chart-info.outputs.chart_version }}
 jobs:
   build-containers-and-update-chart:
     name: Build containers
@@ -103,23 +103,34 @@ jobs:
           image-tag: ${{ matrix.containers.image_tag }}
           docker-context: ${{ matrix.containers.context && matrix.containers.context || '.'}}
 
+  chart-info:
+    name: Retrieve Chart Information
+    outputs:
+      chart_name: ${{ steps.chart-info.outputs.chart-name }}
+      chart_version: ${{ inputs.chart_version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get info from Chart.yaml
+        id: chart-info
+        uses: Energinet-DataHub/.github/.github/actions/chart-info@main
+        with:
+          chart-folder: ${{ inputs.chart_folder }}
+          chart-version: ${{ inputs.chart_version }}
+          include-image-name: ${{ inputs.include_image_name }}
+
   release-chart:
     name: Release domain chart
-    needs: [build-containers-and-update-chart]
+    needs: build-containers-and-update-chart
     runs-on: ubuntu-latest
     if: |
       always() &&
       inputs.skip_chart == false &&
       (needs.build_containers_and_update_chart.result == 'success' || (needs.build_containers_and_update_chart.result == 'skipped' && inputs.containers == '[]'))
-    outputs:
-      chart_name: ${{ steps.release-chart.outputs.chart-name }}
-      chart_version: ${{ steps.release-chart.outputs.chart-version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Release helm chart
-        id: release-chart
         uses: Energinet-DataHub/.github/.github/actions/helm-release-bundle-chart@main
         with:
           containers: ${{ inputs.containers }}
