@@ -52,12 +52,14 @@ on:
         required: false
       AZURE_SPN_ID:
         required: false
-      AZURE_SPN_SECRET:
-        required: false
       AZURE_KEYVAULT_URL:
         required: false
       AZURE_SECRETS_KEYVAULT_URL:
         required: false
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   function_ci:
@@ -146,8 +148,26 @@ jobs:
           Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
           Write-Host "Installing..."
           Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
-          Write-Host "Checking version..."
-          sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+
+      # If a connection cannot be established within <timeout> seconds it fails.
+      # We have added a retry action to see if this can mitigate builds failing on this account.
+      - name: Verify SQL LocalDB 2019 (with retry)
+        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Checking version..."
+            $error.Clear()
+            sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
 
       - name: Cache NuGet packages
         uses: actions/cache@v3
@@ -166,9 +186,11 @@ jobs:
 
       - name: Login to use Azure resources in integration tests
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
-        run: |
-          az login --service-principal --username "${{ secrets.AZURE_SPN_ID }}" --password "${{ secrets.AZURE_SPN_SECRET }}" --tenant "${{ secrets.AZURE_TENANT_ID }}"
-          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_SPN_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run tests and publish report
         run: |
