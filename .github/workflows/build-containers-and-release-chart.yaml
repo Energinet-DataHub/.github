@@ -120,7 +120,7 @@ jobs:
 
   release-chart:
     name: Release domain chart
-    needs: [build-containers-and-update-chart, chart-info]
+    needs: build-containers-and-update-chart
     runs-on: ubuntu-latest
     if: |
       always() &&
