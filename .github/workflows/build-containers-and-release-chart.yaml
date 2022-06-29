@@ -127,7 +127,7 @@ jobs:
     if: |
       always() &&
       inputs.skip_chart == false &&
-      (needs.build_containers_and_update_chart.result == 'success' || (needs.build_containers_and_update_chart.result == 'skipped' && inputs.containers == '[]'))
+      (needs.build-containers-and-update-chart.result == 'success' || (needs.build-containers-and-update-chart.result == 'skipped' && inputs.containers == '[]'))
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
