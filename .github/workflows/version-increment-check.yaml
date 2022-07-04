@@ -82,5 +82,5 @@ jobs:
       - name: Check versions
         if: ${{ steps.is_prev_tag_valid.outcome == 'success' && steps.current_tag.outputs.result != steps.semvers.outputs.patch && steps.current_tag.outputs.result != steps.semvers.outputs.minor && steps.current_tag.outputs.result != steps.semvers.outputs.major }}
         run: |
-          echo "The version ${{ steps.current_tag.outputs.result }} must be an increment of the current version on main ${{ steps.previous_tag.outputs.tag }}."
+          echo "The version ${{ steps.current_tag.outputs.result }} must be an increment of the current version on main ${{ steps.previous_tag.outputs.result }}."
           exit 1
