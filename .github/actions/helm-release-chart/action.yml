@@ -115,8 +115,10 @@ runs:
     - name: Download chart tarball
       shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
-        wget https://github.com/${{ github.repository }}/releases/download/${{ steps.chart-info.outputs.tag-name }}/${{ steps.generate_filename.outputs.filename }} -O ./${{ steps.generate_filename.outputs.filename }}
+        gh release download '${{ steps.chart-info.outputs.tag-name }}' --repo '${{ github.repository }}' --pattern '${{ steps.generate_filename.outputs.filename }}' --dir './'
 
     - name: Update index file for helm registry
       shell: bash
