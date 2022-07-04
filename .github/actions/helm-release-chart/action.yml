@@ -116,7 +116,7 @@ runs:
       shell: bash
       working-directory: ${{ env.helm-checkout-directory }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         gh release download '${{ steps.chart-info.outputs.tag-name }}' --repo '${{ github.repository }}' --pattern '${{ steps.generate_filename.outputs.filename }}' --dir './'
 
