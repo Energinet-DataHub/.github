@@ -38,6 +38,11 @@ jobs:
         with:
           repository: ${{ inputs.CALLER_REPOSITORY_PATH }}
           path: ${{ env.REPO_FOLDER_PATH }}
+          
+      - name: Create release folder 
+        shell: bash
+        run: |
+          mkdir -p ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Publish release content
         uses: ./remote_repo/.github/actions/publish-release-contents
