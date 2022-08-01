@@ -27,7 +27,7 @@ on:
         type: 'string'
       OPERATING_SYSTEM:
         required: false
-        default: 'windows-2022'
+        default: 'windows-latest'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
