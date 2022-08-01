@@ -36,7 +36,7 @@ inputs:
     default: '3.18.0'
   AZURE_FUNCTIONS_CORE_TOOLS_VERSION:
     required: false
-    default: '4.0.3971'
+    default: '4.0.4670'
   # SQL LocalDB 2019
   USE_SQLLOCALDB_2019:
     description: 'Install 2019 version of SQL LocalDB to support testing'
