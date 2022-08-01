@@ -21,11 +21,13 @@ on:
         required: true
         type: string
       DOTNET_VERSION:
-        required: true
-        type: string
+        description: 'Install specified .NET Core SDK version'
+        required: false
+        default: '6.0'
+        type: 'string'
       OPERATING_SYSTEM:
         required: false
-        default: 'windows-2022'
+        default: 'windows-latest'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
