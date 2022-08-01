@@ -20,8 +20,10 @@ on:
         required: true
         type: string
       DOTNET_VERSION:
-        required: true
-        type: string
+        description: 'Install specified .NET Core SDK version'
+        required: false
+        default: '6.0'
+        type: 'string'
       ARTIFACT_NAME:
         required: true
         type: string
