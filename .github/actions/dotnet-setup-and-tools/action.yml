@@ -33,7 +33,7 @@ inputs:
     default: '16'
   AZURITE_VERSION:
     required: false
-    default: '3.17.1'
+    default: '3.18.0'
   AZURE_FUNCTIONS_CORE_TOOLS_VERSION:
     required: false
     default: '4.0.3971'
