@@ -72,8 +72,8 @@ jobs:
       OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
       NODE_VERSION: '16'
-      AZURITE_VERSION: '3.17.1'
-      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.3971'
+      AZURITE_VERSION: '3.18.0'
+      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.4670'
       # Necessary to manage Azure resources for tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Necessary to provide secrets for authentication and authorization if needed
@@ -197,7 +197,7 @@ jobs:
       - name: Run tests and publish report
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --filter Category=UnitTest --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
