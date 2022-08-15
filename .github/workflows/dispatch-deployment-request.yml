@@ -24,6 +24,14 @@ on:
         required: true
         description: 'Path to local repository, syntax: {owner}/{repo}'
         type: string
+      RELEASE_NAME_PREFIX:
+        required: false
+        type: string
+        description: 'Use this variable if you want to prefix the release name'
+      CUSTOM_EVENT_TYPE:
+        required: false
+        type: string
+        description: 'Use this variable if you want to override the current event naming convention'
     secrets:
       PAT_TOKEN:
         required: true
@@ -37,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
-      EVENT_TYPE: '${{ inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
+      EVENT_TYPE: '${{ inputs.CUSTOM_EVENT_TYPE || inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
     steps:
       - name: Find associated pull request
         uses: jwalton/gh-find-current-pr@v1
@@ -52,7 +60,7 @@ jobs:
       - name: Set RELEASE_VERSION
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
