@@ -20,6 +20,10 @@ on:
         required: true
         type: string
         description: 'Path to local repository, syntax: {owner}/{repo}'
+      RELEASE_NAME_PREFIX:
+        required: false
+        type: string
+        description: 'Use this variable if you want to prefix the release name, for instance with multiple releases from same repository'
     secrets:
       PAT_TOKEN:
         required: true
@@ -31,7 +35,7 @@ jobs:
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
       REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
-      RELEASE_VERSION: ${{ github.event.pull_request.number }}
+      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -39,10 +43,19 @@ jobs:
           repository: ${{ inputs.CALLER_REPOSITORY_PATH }}
           path: ${{ env.REPO_FOLDER_PATH }}
 
-      - name: Publish release content
+      - name: Publish release content with multiple releases from same content
+        if: ${{ env.RELEASE_NAME_PREFIX != '' }}
         uses: ./remote_repo/.github/actions/publish-release-contents
         with:
-          RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
+          RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
+          REPO_FOLDER_PATH: ${{ env.REPO_FOLDER_PATH }}
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+
+      - name: Publish release content without multiple releases from same content
+        if: ${{ env.RELEASE_NAME_PREFIX == '' }}
+        uses: ./remote_repo/.github/actions/publish-release-contents
+        with:
+          RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
           REPO_FOLDER_PATH: ${{ env.REPO_FOLDER_PATH }}
 
       - name: Zip artifact

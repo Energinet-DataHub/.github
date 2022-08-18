@@ -19,6 +19,11 @@ on:
       PAT_TOKEN:
         required: true
         description: 'Personal access token'
+    inputs:
+      RELEASE_NAME_PREFIX:
+        required: false
+        type: string
+        description: 'Use this variable if you want to prefix the release name'
 
 jobs:
   publish_release:
@@ -34,7 +39,7 @@ jobs:
         if: steps.find_pull_request.outputs.pr != ''
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
 
       - name: Publish release
         if: steps.find_pull_request.outputs.pr != ''
