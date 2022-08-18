@@ -53,7 +53,7 @@ runs:
       run: |
         dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
     
-    - name: Az CLI login
+    - name: Login to use Azure resources in integration tests
       if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
       uses: azure/login@v1
       with:
