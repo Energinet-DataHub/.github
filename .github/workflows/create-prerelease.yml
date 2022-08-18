@@ -44,7 +44,7 @@ jobs:
           path: ${{ env.REPO_FOLDER_PATH }}
 
       - name: Publish release content with multiple releases from same content
-        if: ${{ env.RELEASE_NAME_PREFIX != '' }}
+        if: ${{ inputs.RELEASE_NAME_PREFIX != '' }}
         uses: ./remote_repo/.github/actions/publish-release-contents
         with:
           RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
@@ -52,7 +52,7 @@ jobs:
           RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
 
       - name: Publish release content without multiple releases from same content
-        if: ${{ env.RELEASE_NAME_PREFIX == '' }}
+        if: ${{ inputs.RELEASE_NAME_PREFIX == '' }}
         uses: ./remote_repo/.github/actions/publish-release-contents
         with:
           RELEASE_FOLDER_PATH: ${{ env.RELEASE_FOLDER_PATH }}
