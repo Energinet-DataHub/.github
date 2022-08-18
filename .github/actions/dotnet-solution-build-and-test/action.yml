@@ -39,8 +39,6 @@ inputs:
     required: false
   AZURE_SPN_ID:
     required: false
-  AZURE_SPN_SECRET:
-    required: false
 
 runs:
   using: composite
@@ -54,13 +52,14 @@ runs:
       shell: pwsh
       run: |
         dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
-
+    
     - name: Login to use Azure resources in integration tests
       if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
-      shell: pwsh
-      run: |
-        az login --service-principal --username "${{ inputs.AZURE_SPN_ID }}" --password "${{ inputs.AZURE_SPN_SECRET }}" --tenant "${{ inputs.AZURE_TENANT_ID }}"
-        az account set --subscription "${{ inputs.AZURE_SUBSCRIPTION_ID }}"
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.AZURE_SPN_ID }}
+        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
+        subscription-id: ${{ inputs.AZURE_SUBSCRIPTION_ID }}
 
     - name: Run tests and publish report
       shell: pwsh
