@@ -50,7 +50,7 @@ If a major version tag exists for the channel in which we just released a minor 
 4. Find the major version tag and click on its name (e.g. `v7`).
 
    - This will open the tag.
-   - Click the `Delete (icon)` and choose to delete the tag.
+   - Click `Delete` and choose to delete the tag.
 
 Then we can create the new major version tag for a specific commit:
 
