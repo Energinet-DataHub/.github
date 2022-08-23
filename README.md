@@ -24,9 +24,9 @@ First we must always create a specific version release, so developers can choose
 
 2. Click `Draft a new release` then fill in the formular:
 
-   - In `Choose a tag` specify the new semantic version (e.g. `7.5.2`) and select `Create new tag: <semantic version> on publish`.
+   - In `Choose a tag` specify the new semantic version (e.g. `7.5.2`) and select `Create new tag: <tag name> on publish`.
 
-   - In `Release title` specify the new semantic version (e.g. `7.5.2`).
+   - In `Release title` specify the tag name (e.g. `7.5.2`).
 
    - Click `Generate release notes` and see the description beeing filled out automatically with information about commits since the previous release.
 
@@ -38,25 +38,35 @@ Secondly we must create or update a major version tag (e.g. `v7`). This allows d
 
 If a major version tag exists for the channel in which we just released a minor or patch version then we must delete it first:
 
-1. Checkout the `main` branch and `pull` any changes to be fully up to date.
+1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
-2. Execute the following in a shell:
+2. Find the major version release and click on its name (e.g. `v7`).
 
-```bash
-git tag -d <tag name>
-git push origin :<tag name>
-```
+   - This will open the release.
+   - Click the `Delete (icon)` and choose to delete the release.
+
+3. Navigate to [Tags](https://github.com/Energinet-DataHub/.github/tags)
+
+4. Find the major version tag and click on its name (e.g. `v7`).
+
+   - This will open the tag.
+   - Click the `Delete (icon)` and choose to delete the tag.
 
 Then we can create the new major version tag for a specific commit:
 
-1. Execute the following in a shell:
+1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
-```bash
-git tag -a <tag name> -m "Release channel" <commit hash code>
-git push --tags
-```
+2. Click `Draft a new release` then fill in the formular:
 
-The major version tag is not listed as a `Release` in `GitHub` but can be found under [Tags](https://github.com/Energinet-DataHub/.github/tags).
+   - In `Choose a tag` specify the major version prefixed with `v` (e.g. `v7`) and select `Create new tag: <tag name> on publish`.
+
+   - In `Target` select `Recent Commits` and choose the commit hash code of the just released minor or patch version.
+
+   - In `Release title` specify the tag name (e.g. `v7`).
+
+   - In `Description` write `Latest release`.
+
+   - When everything looks good press `Publish release` to create the release.
 
 ## Workflows
 
