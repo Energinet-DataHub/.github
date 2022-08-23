@@ -14,7 +14,11 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Release procedure
 
-After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release:
+After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release.
+
+### Specific version release
+
+First we must always create a specific version release, so developers can choose to use a specific release should they choose to do so.
 
 1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
@@ -27,6 +31,30 @@ After we have merged a Pull Request, and created or updated any artifact within 
    - Click `Generate release notes` and see the description beeing filled out automatically with information about commits since the previous release.
 
    - When everything looks good press `Publish release` to create the release.
+
+### Major version tag
+
+Secondly we must create or update a major version tag (e.g. `v7`). This allows developers to opt in on automatically using the latest minor or patch version within the choosen major version channel.
+
+If a major version tag exists for the channel in which we just released a minor or patch version then we must delete it first:
+
+1. Checkout the `main` branch and `pull` any changes to be fully up to date.
+
+2. Execute the following in a shell:
+
+```bash
+git tag -d <tag name>
+git push origin :<tag name>
+```
+
+Then we can create the new major version tag for a specific commit:
+
+1. Execute the following in a shell:
+
+```bash
+git tag -f <tag name> <commit hash code>
+git push origin :<tag name>
+```
 
 ## Workflows
 
