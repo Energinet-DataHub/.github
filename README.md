@@ -56,7 +56,7 @@ git tag -a <tag name> -m "Release channel" <commit hash code>
 git push --tags
 ```
 
-The major version tag is listed as a `Release` in `GitHub` but can be found under [Tags](https://github.com/Energinet-DataHub/.github/tags).
+The major version tag is not listed as a `Release` in `GitHub` but can be found under [Tags](https://github.com/Energinet-DataHub/.github/tags).
 
 ## Workflows
 
