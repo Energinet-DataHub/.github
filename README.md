@@ -52,8 +52,8 @@ Then we can create the new major version tag for a specific commit:
 1. Execute the following in a shell:
 
 ```bash
-git tag -f <tag name> <commit hash code>
-git push origin :<tag name>
+git tag -a <tag name> -m "Release channel" <commit hash code>
+git push --tags
 ```
 
 ## Workflows
