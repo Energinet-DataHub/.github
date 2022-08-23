@@ -18,7 +18,7 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 ### Specific version release
 
-First we must always create a specific version release, so developers can choose to use a specific release should they choose to do so.
+First we must always create a specific version release, so developers can use a specific release should they choose to do so.
 
 1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
