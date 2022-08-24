@@ -47,6 +47,10 @@ on:
         required: false
         default: false
         type: boolean
+      CODE_COVERAGE_FLAGS:
+        required: false
+        default: ''
+        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -202,6 +206,7 @@ jobs:
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
+          flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
           fail_ci_if_error: true
           verbose: true
 
