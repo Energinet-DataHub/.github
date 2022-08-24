@@ -50,6 +50,7 @@ on:
       CODE_COVERAGE_FLAGS:
         required: false
         default: ''
+        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
