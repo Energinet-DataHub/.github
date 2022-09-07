@@ -28,7 +28,7 @@ on:
 
 jobs:
   python_ci:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: flake8 and unit test
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
         with:
           name: pythontestartifact
           path: ${{ inputs.TEST_REPORT_PATH }}
-      
+
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
