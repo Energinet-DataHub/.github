@@ -31,7 +31,7 @@ on:
 
 jobs:
   create_prerelease:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2004
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
       REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
