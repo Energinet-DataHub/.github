@@ -52,7 +52,7 @@ runs:
       shell: pwsh
       run: |
         dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
-    
+
     - name: Login to use Azure resources in integration tests
       if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
       uses: azure/login@v1
@@ -65,7 +65,7 @@ runs:
       shell: pwsh
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity quiet --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
