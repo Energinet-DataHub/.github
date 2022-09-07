@@ -50,7 +50,7 @@ jobs:
           path: ${{ inputs.TEST_REPORT_PATH }}
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true
           verbose: true
