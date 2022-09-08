@@ -54,7 +54,7 @@ jobs:
           python setup.py sdist bdist_wheel
 
       - name: Publish artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.ARTIFACT_NAME }}
           path: ${{ inputs.ARTIFACT_PATH }}

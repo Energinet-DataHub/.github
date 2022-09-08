@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/databricks-unit-test
 
       - name: Upload test report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pythontestartifact
           path: ${{ inputs.TEST_REPORT_PATH }}
