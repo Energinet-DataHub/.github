@@ -207,7 +207,7 @@ jobs:
         uses: Wandalen/wretry.action@v1.0.27
         with:
           action: codecov/codecov-action@v3
-          with:
+          with: |
             flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
             fail_ci_if_error: true
             verbose: true
