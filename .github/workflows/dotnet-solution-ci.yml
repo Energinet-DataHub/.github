@@ -204,7 +204,7 @@ jobs:
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity quiet --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
       - name: Upload coverage to CodeCov
-        uses: wandalen/wretry.action@v1.0.27
+        uses: Wandalen/wretry.action@v1.0.27
         with:
           action: codecov/codecov-action@v3
           with:

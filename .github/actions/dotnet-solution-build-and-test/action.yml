@@ -69,7 +69,7 @@ runs:
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
-      uses: wandalen/wretry.action@v1.0.27
+      uses: Wandalen/wretry.action@v1.0.27
       with:
         action: codecov/codecov-action@v3
         with:
