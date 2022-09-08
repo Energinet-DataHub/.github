@@ -69,8 +69,12 @@ runs:
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
-      uses: codecov/codecov-action@v3
+      uses: wandalen/wretry.action@v1.0.27
       with:
-        flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
-        fail_ci_if_error: true
-        verbose: true
+        action: codecov/codecov-action@v3
+        with:
+          flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
+          fail_ci_if_error: true
+          verbose: true
+        attempt_limit: 3
+        attempt_delay: 5000
