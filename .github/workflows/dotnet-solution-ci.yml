@@ -234,5 +234,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dotnet
-          path: ${{ env.OUTPUT_PATH }}/*.zip
+          path: ${{ env.OUTPUT_PATH }}/dotnet-outputs.zip
           if-no-files-found: error
