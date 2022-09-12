@@ -50,11 +50,7 @@ jobs:
           path: ${{ inputs.TEST_REPORT_PATH }}
 
       - name: Upload coverage to CodeCov
-        uses: Wandalen/wretry.action@v1.0.27
+        uses: codecov/codecov-action@v3
         with:
-          action: codecov/codecov-action@v3
-          with: |
-            fail_ci_if_error: true
-            verbose: true
-          attempt_limit: 3
-          attempt_delay: 5000
+          fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
+          verbose: true
