@@ -174,14 +174,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Wait for artifacts to be ready
-        uses: lewagon/wait-on-check-action@v1.0.0
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'dotnet_ci_build' # Must match name of the job in the producing workflow
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 15
-
       - name: Download dotnet artifact
         uses: actions/download-artifact@v3
         with:
