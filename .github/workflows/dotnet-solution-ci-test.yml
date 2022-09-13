@@ -63,7 +63,7 @@ permissions:
   contents: read
 
 jobs:
-  function_ci:
+  dotnet_ci_test:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
     env:
