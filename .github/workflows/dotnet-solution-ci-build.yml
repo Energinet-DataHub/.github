@@ -1,0 +1,97 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: .NET solution CI (build)
+
+on:
+  workflow_call:
+    inputs:
+      SOLUTION_FILE_PATH:
+        required: true
+        type: string
+      DOTNET_VERSION:
+        description: 'Install specified .NET Core SDK version'
+        required: false
+        default: '6.0'
+        type: 'string'
+      OPERATING_SYSTEM:
+        required: false
+        default: 'windows-latest'
+        type: string
+      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
+      PREPARE_OUTPUTS:
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  dotnet_ci_build:
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+
+    env:
+      BUILD_CONFIGURATION: Release
+      OUTPUT_PATH: ${{ github.workspace }}\output
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+        env:
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        id: cache-nuget
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore NuGet packages
+        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+
+      - name: Build solution
+        run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+      # Call action in source (caller) repository
+      - name: Prepare outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: ./.github/actions/dotnet-prepare-outputs
+        with:
+          OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
+
+      - name: Zip outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: zip
+          filename: dotnet-outputs.zip
+          directory: ${{ env.OUTPUT_PATH }}
+
+      - name: Upload dotnet artifact
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet
+          path: ${{ env.OUTPUT_PATH }}/dotnet-outputs.zip
+          if-no-files-found: error
