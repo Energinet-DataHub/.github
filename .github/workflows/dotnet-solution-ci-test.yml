@@ -182,7 +182,7 @@ jobs:
 
       - name: Unzip dotnet-outputs.zip
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-outputs.zip' '${{ env.ARTIFACTS_PATH }}''
+          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-outputs.zip' '${{ env.ARTIFACTS_PATH }}'
 
       - name: Run tests and publish report
         run: |
