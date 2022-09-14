@@ -67,7 +67,7 @@ jobs:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
+      ARTIFACTS_PATH: ${{ github.workspace }}\source
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.18.0'
