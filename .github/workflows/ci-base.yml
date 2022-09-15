@@ -23,7 +23,7 @@ on:
 jobs:
   skip_md_check:
     runs-on: ubuntu-latest
-    if: ${{ inputs.SKIP_FKIRC == 'true' }}
+    if: ${{ inputs.SKIP_FKIRC != 'true' }}
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
