@@ -15,10 +15,16 @@ name: Markdown Check
 
 on:
   workflow_call:
-
+    inputs:
+      SKIP_MARKDOWN_CHECK:
+        required: false
+        type: string
+        description: 'Set to true to skip checking Markdown files'
+        default: 'false'
 jobs:
   skip_md_check:
     runs-on: ubuntu-latest
+    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
