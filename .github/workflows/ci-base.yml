@@ -15,10 +15,15 @@ name: Markdown Check
 
 on:
   workflow_call:
-
+    inputs:
+      SKIP_FKIRC:
+        required: false
+        type: string
+        description: 'Skip fkirc/skip-duplicate-actions by setting this input to true'
 jobs:
   skip_md_check:
     runs-on: ubuntu-latest
+    if: ${{ inputs.SKIP_FKIRC == 'true' }}
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
