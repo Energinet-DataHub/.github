@@ -20,6 +20,7 @@ on:
         required: false
         type: string
         description: 'Set to true to skip checking Markdown files'
+        default: 'false'
 jobs:
   skip_md_check:
     runs-on: ubuntu-latest
