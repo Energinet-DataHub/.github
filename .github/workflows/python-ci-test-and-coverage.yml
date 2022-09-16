@@ -28,7 +28,7 @@ on:
 
 jobs:
   python_ci:
-    runs-on: buildjet-4vcpu-ubuntu-2004
+    runs-on: ubuntu-latest
     name: flake8 and unit test
     steps:
       - name: Checkout

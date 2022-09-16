@@ -35,7 +35,7 @@ on:
 
 jobs:
   wheel_ci:
-    runs-on: buildjet-4vcpu-ubuntu-2004
+    runs-on: ubuntu-latest
     name: Build python wheel for databricks
     steps:
       - name: Checkout
