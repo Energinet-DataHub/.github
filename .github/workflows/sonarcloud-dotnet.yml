@@ -23,7 +23,7 @@ on:
       DOTNET_VERSION:
         description: 'Install specified .NET Core SDK version'
         required: false
-        default: '6.0'
+        default: '6.0.400' # Reset to '6.0' when GitHub runners are updated to use latest 6.0
         type: 'string'
       SONAR_CLOUD_ORGANIZATION:
         required: true
@@ -47,7 +47,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      
+
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v2
         with:
