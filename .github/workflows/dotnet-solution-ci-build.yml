@@ -51,14 +51,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Prepare environment variables for OS
+        shell: bash
+        run: |
+          echo "Runner OS is $RUNNER_OS"
+          if [ $RUNNER_OS == 'Linux' ]; then
+            echo "DOTNET_INSTALL_DIR=/usr/share/dotnet" >> $GITHUB_ENV
+          elif [ $RUNNER_OS == 'Windows' ]; then
+            echo "DOTNET_INSTALL_DIR=C:\Program Files\dotnet" >> $GITHUB_ENV
+          else
+            echo "$RUNNER_OS is not supported"
+            exit 1
+          fi
+
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
-          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+          DOTNET_INSTALL_DIR: ${{ env.DOTNET_INSTALL_DIR }}
 
       - name: Cache NuGet packages
+        if: runner.os == 'Windows'
         uses: actions/cache@v3
         id: cache-nuget
         with:
