@@ -201,7 +201,7 @@ jobs:
           # TODO: Cleanup
           #dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
           # TODO: Change, just testing
-          if ( ${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} -ne '' )
+          if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne '' )
           {
             $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = ${{ env.ARTIFACTS_PATH }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}
           }
