@@ -22,10 +22,12 @@ on:
         required: true
         type: string
       ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME:
+        description: 'Name of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>'
         required: false
-        default: 'empty'
+        default: 'empty' # Cannot be '', it must contain a string that is also valid environment name
         type: string
       ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE:
+        description: 'Value of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>'
         required: false
         default: ''
         type: string
@@ -198,9 +200,11 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          # TODO: Cleanup
+          #
+          # TODO: Cleanup. Left for now as code coverage does not work, and we can see how it worked with normal dotnet test execution (where we did not use the binaries directly).
           #dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
-          # TODO: Change, just testing
+          #
+          # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
           {
             $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ env.ARTIFACTS_PATH }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
