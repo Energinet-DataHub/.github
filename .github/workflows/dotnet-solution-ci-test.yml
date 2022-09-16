@@ -18,7 +18,16 @@ on:
   workflow_call:
     inputs:
       TESTS_DLL_FILE_PATH:
+        description: 'Relative path from artifacts folder to test assembly'
         required: true
+        type: string
+      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME:
+        required: false
+        default: ''
+        type: string
+      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE:
+        required: false
+        default: ''
         type: string
       DOTNET_VERSION:
         description: 'Install specified .NET Core SDK version'
@@ -192,7 +201,10 @@ jobs:
           # TODO: Cleanup
           #dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
           # TODO: Change, just testing
-          $Env:ASPNETCORE_TEST_CONTENTROOT_ENERGINET_DATAHUB_WHOLESALE_WEBAPI = '${{ env.ARTIFACTS_PATH }}\dotnet\WebApi'
+          if ( ${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} -ne '' )
+          {
+            $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = ${{ env.ARTIFACTS_PATH }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}
+          }
           dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --logger:"console;verbosity=normal"
 
       - name: Upload coverage to CodeCov
