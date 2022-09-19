@@ -200,16 +200,12 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          #
-          # TODO: Cleanup. Left for now as code coverage does not work, and we can see how it worked with normal dotnet test execution (where we did not use the binaries directly).
-          #dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
-          #
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
           {
             $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ env.ARTIFACTS_PATH }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
           }
-          dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --logger:"console;verbosity=normal"
+          dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
