@@ -214,11 +214,20 @@ jobs:
           # Handle filter expression
           if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -eq 'empty' )
           {
-            dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+            dotnet test `
+              ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} `
+              --logger:"console;verbosity=normal" `
+              --collect:"XPlat Code Coverage" `
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           }
           else
           {
-            dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+            dotnet test `
+              ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} `
+              --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
+              --logger:"console;verbosity=normal" `
+              --collect:"XPlat Code Coverage" `
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           }
 
       - name: Upload coverage to CodeCov
