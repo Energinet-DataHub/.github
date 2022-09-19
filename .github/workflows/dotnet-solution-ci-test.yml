@@ -79,6 +79,7 @@ jobs:
 
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
+      TEST_RESULTS_PATH: ${{ github.workspace }}\TestResults
       # Tool versions
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.18.0'
@@ -211,5 +212,6 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
+          directory: ${{ env.TEST_RESULTS_PATH }}
           fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
           verbose: true
