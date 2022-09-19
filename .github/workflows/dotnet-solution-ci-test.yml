@@ -206,17 +206,20 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          # Prepare filter if not empty
-          if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -ne 'empty' )
-          {
-            $Env:FILTER = "--filter '${{ inputs.TESTS_FILTER_EXPRESSION }}'"
-          }
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
           {
             $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ env.ARTIFACTS_PATH }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
           }
-          dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} $Env:FILTER --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          # Handle filter expression
+          if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -eq 'empty' )
+          {
+            dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          }
+          else
+          {
+            dotnet test ${{ env.ARTIFACTS_PATH }}${{ inputs.TESTS_DLL_FILE_PATH }} --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' --logger:"console;verbosity=normal" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          }
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
