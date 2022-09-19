@@ -209,7 +209,7 @@ jobs:
           # Prepare filter if not empty
           if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -ne 'empty' )
           {
-            $Env:FILTER = '--filter ${{ inputs.TESTS_FILTER_EXPRESSION }}'
+            $Env:FILTER = "--filter ${{ inputs.TESTS_FILTER_EXPRESSION }}"
           }
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
