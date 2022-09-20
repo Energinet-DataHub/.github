@@ -204,10 +204,10 @@ jobs:
           dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
-          fail_ci_if_error: true
+          fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
           verbose: true
 
       # Call action in source (caller) repository

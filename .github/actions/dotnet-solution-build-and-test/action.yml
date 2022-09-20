@@ -52,7 +52,7 @@ runs:
       shell: pwsh
       run: |
         dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
-    
+
     - name: Login to use Azure resources in integration tests
       if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
       uses: azure/login@v1
@@ -69,8 +69,8 @@ runs:
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
         verbose: true

@@ -48,9 +48,9 @@ jobs:
         with:
           name: pythontestartifact
           path: ${{ inputs.TEST_REPORT_PATH }}
-      
+
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
           verbose: true
