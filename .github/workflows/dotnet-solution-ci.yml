@@ -217,10 +217,18 @@ jobs:
         with:
           OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
 
+      - name: Zip outputs
+        if: ${{ inputs.PREPARE_OUTPUTS == true }}
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: zip
+          filename: dotnet-outputs.zip
+          directory: ${{ env.OUTPUT_PATH }}
+
       - name: Upload dotnet artifact
         if: ${{ inputs.PREPARE_OUTPUTS == true }}
         uses: actions/upload-artifact@v3
         with:
           name: dotnet
-          path: ${{ env.OUTPUT_PATH }}
+          path: ${{ env.OUTPUT_PATH }}/dotnet-outputs.zip
           if-no-files-found: error
