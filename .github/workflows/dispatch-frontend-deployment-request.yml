@@ -20,18 +20,22 @@ on:
         required: true
         description: 'Name of the local repository'
         type: string
-      CALLER_REPOSITORY_PATH:
-        required: true
-        description: 'Path to local repository, syntax: {owner}/{repo}'
-        type: string
-      RELEASE_NAME_PREFIX:
+      DEPLOY_APPLICATION:
+        description: 'Deploy application'
+        type: boolean
         required: false
+      APPLICATION_RELEASE_NAME:
+        description: 'Application release (Defaults to LATEST)'
         type: string
-        description: 'Use this variable if you want to prefix the release name'
-      CUSTOM_EVENT_TYPE:
         required: false
+      DEPLOY_INFRASTRUCTURE:
+        description: 'Deploy infrastructure'
+        type: boolean
+        required: false
+      INFRASTRUCTURE_RELEASE_NAME:
+        description: 'Infrastructure release (Defaults to LATEST)'
         type: string
-        description: 'Use this variable if you want to override the current event naming convention'
+        required: false
     secrets:
       PAT_TOKEN:
         required: true
@@ -45,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
-      EVENT_TYPE: '${{ inputs.CUSTOM_EVENT_TYPE || inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
+      EVENT_TYPE: '${{ inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
     steps:
       - name: Find associated pull request
         uses: jwalton/gh-find-current-pr@v1
@@ -60,7 +64,7 @@ jobs:
       - name: Set RELEASE_VERSION
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
@@ -68,4 +72,4 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           repository: '${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}'
           event-type: ${{ env.EVENT_TYPE }}
-          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "tag_name": "${{ env.RELEASE_VERSION }}", "tag_name": "${{ env.RELEASE_VERSION }}", "tag_name": "${{ env.RELEASE_VERSION }}""}'
+          client-payload: '{"application_release_name": "${{ inputs.APPLICATION_RELEASE_NAME }}", "deploy_application": "${{ inputs.DEPLOY_APPLICATION }}", "infrastructure_release_name": "${{ inputs.INFRASTRUCTURE_RELEASE_NAME }}", "deploy_infrastructure": "${{ inputs.DEPLOY_INFRASTRUCTURE }}""}'
