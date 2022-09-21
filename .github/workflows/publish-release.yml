@@ -48,5 +48,4 @@ jobs:
           release_tag_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.RELEASE_VERSION }})
           release_id=$(echo $release_tag_response | jq '.id')
           publish_url="https://api.github.com/repos/${{ github.repository }}/releases/${release_id}"
-          publish_response=$(
-          -X PATCH -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" $publish_url -d '{"prerelease":"false","draft":"false","tag_name":"'${{ env.RELEASE_VERSION }}'"}')
+          publish_response=$(curl -X PATCH -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" $publish_url -d '{"prerelease":"false","draft":"false","tag_name":"'${{ env.RELEASE_VERSION }}'"}')
