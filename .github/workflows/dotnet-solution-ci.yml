@@ -26,15 +26,16 @@ on:
         default: '6.0'
         type: 'string'
       OPERATING_SYSTEM:
+        description: 'Must be a version of Windows, we do not support Linux for testing'
         required: false
-        default: 'windows-2022' # Must be a version of Windows, we do not support Linux for testing
+        default: 'windows-2022'
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
         type: boolean
-      # Use Azurite and Azure Functions Core Tools to support testing
       USE_AZURE_FUNCTIONS_TOOLS:
+        description: 'Use Azurite and Azure Functions Core Tools to support testing'
         required: false
         default: false
         type: boolean
@@ -42,8 +43,8 @@ on:
         required: false
         default: false
         type: boolean
-      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
       PREPARE_OUTPUTS:
+        description: 'Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository'
         required: false
         default: false
         type: boolean

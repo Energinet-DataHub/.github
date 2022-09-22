@@ -29,8 +29,8 @@ on:
         required: false
         default: 'ubuntu-22.04'
         type: string
-      # Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository
       PREPARE_OUTPUTS:
+        description: 'Setting this to 'true' will require an action 'dotnet-prepare-outputs' in the calling repository'
         required: false
         default: false
         type: boolean
