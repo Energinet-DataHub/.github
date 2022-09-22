@@ -25,10 +25,14 @@ on:
       TEST_REPORT_PATH:
         required: true
         type: string
+      OPERATING_SYSTEM:
+        required: false
+        default: 'ubuntu-22.04'
+        type: string
 
 jobs:
   python_ci:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     name: flake8 and unit test
     steps:
       - name: Checkout
