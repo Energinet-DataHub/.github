@@ -202,6 +202,8 @@ jobs:
         run: |
           Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-outputs.zip' '${{ env.ARTIFACTS_PATH }}'
 
+      # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
+      # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
       - name: Run tests and publish report
         shell: pwsh
         run: |
