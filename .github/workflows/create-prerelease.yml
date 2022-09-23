@@ -24,6 +24,7 @@ on:
         required: false
         type: string
         description: 'Use this variable if you want to prefix the release name, for instance with multiple releases from same repository'
+        default: dotnet
     secrets:
       PAT_TOKEN:
         required: true
@@ -35,7 +36,7 @@ jobs:
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
       REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
-      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}${{ github.event.pull_request.number }}
+      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
