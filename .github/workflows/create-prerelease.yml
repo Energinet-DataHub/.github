@@ -24,7 +24,7 @@ on:
         required: false
         type: string
         description: 'Use this variable if you want to prefix the release name, for instance with multiple releases from same repository'
-        default: dotnet
+        default: 'dotnet'
     secrets:
       PAT_TOKEN:
         required: true
