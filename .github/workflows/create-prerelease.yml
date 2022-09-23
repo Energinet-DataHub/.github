@@ -69,7 +69,7 @@ jobs:
         with:
           repo_token: ${{ secrets.PAT_TOKEN }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
-          prerelease: true
+          draft: true
           title: ${{ env.RELEASE_VERSION }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_VERSION }}.zip
