@@ -28,6 +28,7 @@ on:
         required: false
         type: string
         description: 'Use this variable if you want to prefix the release name'
+        default: 'dotnet'
       CUSTOM_EVENT_TYPE:
         required: false
         type: string
@@ -60,7 +61,7 @@ jobs:
       - name: Set RELEASE_VERSION
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
