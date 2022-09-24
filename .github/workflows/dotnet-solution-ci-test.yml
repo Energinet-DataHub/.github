@@ -46,6 +46,11 @@ on:
         required: false
         default: 'windows-2022'
         type: string
+      DOWNLOAD_ATTEMPT_LIMIT:
+        description: 'Number of times we retry downloading dotnet artifact (effectively waiting for thebuild job to complete)'
+        required: false
+        default: 12
+        type: number
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
@@ -203,11 +208,21 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download dotnet artifact
-        uses: actions/download-artifact@v3
+      - name: Wait for download to be possible
+        uses: Wandalen/wretry.action@v1.0.27
         with:
-          name: dotnet
-          path: ${{ env.ARTIFACTS_PATH }}
+          action: actions/download-artifact@v3
+          with: |
+            name: dotnet
+            path: ${{ env.ARTIFACTS_PATH }}
+          attempt_limit: ${{ inputs.DOWNLOAD_ATTEMPT_LIMIT }}
+          attempt_delay: 15000
+
+      # - name: Download dotnet artifact
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: dotnet
+      #     path: ${{ env.ARTIFACTS_PATH }}
 
       - name: Unzip dotnet-outputs.zip
         shell: pwsh
