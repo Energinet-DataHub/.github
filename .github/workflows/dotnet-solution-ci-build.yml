@@ -37,6 +37,7 @@ jobs:
     env:
       BUILD_CONFIGURATION: Release
       OUTPUT_PATH: ${{ github.workspace }}/output
+      TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
 
     steps:
       - name: Checkout repository
@@ -79,12 +80,32 @@ jobs:
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       # Call action in source (caller) repository
-      - name: Prepare outputs
+      - name: Prepare dotnet tests outputs
+        uses: ./.github/actions/dotnet-tests-prepare-outputs
+        with:
+          OUTPUT_PATH: ${{ env.TESTS_OUTPUT_PATH }}
+
+      - name: Zip dotnet tests outputs
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: zip
+          filename: dotnet-tests-outputs.zip
+          directory: ${{ env.TESTS_OUTPUT_PATH }}
+
+      - name: Upload dotnet-tests artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet-tests
+          path: ${{ env.TESTS_OUTPUT_PATH }}/dotnet-tests-outputs.zip
+          if-no-files-found: error
+
+      # Call action in source (caller) repository
+      - name: Prepare dotnet outputs
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           OUTPUT_PATH: ${{ env.OUTPUT_PATH }}
 
-      - name: Zip outputs
+      - name: Zip dotnet outputs
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
