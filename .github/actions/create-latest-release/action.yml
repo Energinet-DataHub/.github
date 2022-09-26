@@ -11,19 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: 'Create or update latest release'
-description: 'Creates a new _latest release or updates an existing one'
+name: Create _latest release
+description: Creates a _latest release
 inputs:
-  PAT_TOKEN:
-    description: 'Personal access token'
+  REPO_TOKEN:
+    description: 'Repository access token'
     required: true
-  ENVIRONMENT_REPOSITORY_PATH:
+  RELEASE_NAME:
     required: true
-    description: 'Caller repository path'
-  RELEASE_NAME_PREFIX:
-    required: false
     type: string
-    description: 'Use this variable if you want to prefix the release name'
+    description: 'Release name used as ref for the _latest release'
+  RELEASE_NAME_PREFIX:
+    required: true
+    type: string
+    description: 'Prefix to the _latest release name'
+  FILES:
+    description: 'Assets to upload to the release'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
