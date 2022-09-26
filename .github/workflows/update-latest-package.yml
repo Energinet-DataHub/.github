@@ -29,68 +29,78 @@ on:
         description: 'Use this variable if you want to prefix the release name'
 
 jobs:
-  define_job_variables:
+  run_action:
     runs-on: ubuntu-latest
-    outputs:
-      RELEASE_NAME: ${{ steps.set-outputs.outputs.RELEASE_NAME }}
-      LATEST_RELEASE_NAME: ${{ steps.set-outputs.outputs.LATEST_RELEASE_NAME }}
     steps:
       - name: Find associated pull request
-        uses: jwalton/gh-find-current-pr@v1
-        id: find_pull_request
+        uses: Energinet-DataHub/.github/.github/actions/create-or-update-latest-release@renetnielsen/create-update-latest-workflow
         with:
-          state: all
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          ENVIRONMENT_REPOSITORY_PATH: ${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}
+          RELEASE_NAME_PREFIX: ${{ secrets.RELEASE_NAME_PREFIX }}
 
-      - name: Set outputs
-        id: set-outputs
-        shell: bash
-        run: |
-          echo "::set-output name=RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}"
-          echo "::set-output name=LATEST_RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_latest"
+  # define_job_variables:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     RELEASE_NAME: ${{ steps.set-outputs.outputs.RELEASE_NAME }}
+  #     LATEST_RELEASE_NAME: ${{ steps.set-outputs.outputs.LATEST_RELEASE_NAME }}
+  #   steps:
+  #     - name: Find associated pull request
+  #       uses: jwalton/gh-find-current-pr@v1
+  #       id: find_pull_request
+  #       with:
+  #         state: all
 
-  create_latest_if_not_exists:
-    needs: define_job_variables
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check if latest release exists
-        shell: bash
-        run: |
-          latest_release_http_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }})
-          if [ $latest_release_http_code -eq 404 ]
-          then
-            echo "fetching release from associated pull request"
-            release_reference_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/tags/${{ needs.define_job_variables.outputs.RELEASE_NAME }})
-            release_sha=$(echo "$release_reference_response" | jq -r '.object.sha' | tr -d '"')
+  #     - name: Set outputs
+  #       id: set-outputs
+  #       shell: bash
+  #       run: |
+  #         echo "::set-output name=RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}"
+  #         echo "::set-output name=LATEST_RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_latest"
 
-            echo "creating new reference from $release_sha"
-            create_reference_response=$(curl -X POST -i -d "{\"ref\":\"refs/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\",\"sha\":\"$release_sha\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs)
-            echo $create_reference_response
+  # create_latest_if_not_exists:
+  #   needs: define_job_variables
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check if latest release exists
+  #       shell: bash
+  #       run: |
+  #         latest_release_http_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }})
+  #         if [ $latest_release_http_code -eq 404 ]
+  #         then
+  #           echo "fetching release from associated pull request"
+  #           release_reference_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/tags/${{ needs.define_job_variables.outputs.RELEASE_NAME }})
+  #           release_sha=$(echo "$release_reference_response" | jq -r '.object.sha' | tr -d '"')
 
-            echo "creating new release from reference created before"
-            create_release_response=$(curl -X POST -i -d "{\"tag_name\":\"${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\",\"name\":\"${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases)
-            echo $create_release_response
-          else
-            echo "${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }} already exists, returning"
-          fi
+  #           echo "creating new reference from $release_sha"
+  #           create_reference_response=$(curl -X POST -i -d "{\"ref\":\"refs/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\",\"sha\":\"$release_sha\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs)
+  #           echo $create_reference_response
 
-  update_latest_package:
-    needs: [define_job_variables, create_latest_if_not_exists]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fetch release id
-        shell: bash
-        id: fetch-release-id
-        run: |
-          release_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }})
-          release_id=$(echo "$release_response" | jq -r '.id' | tr -d '"')
-          echo "Release id: $release_id"
-          echo "::set-output name=RELEASE_ID::release_id"
+  #           echo "creating new release from reference created before"
+  #           create_release_response=$(curl -X POST -i -d "{\"tag_name\":\"${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\",\"name\":\"${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases)
+  #           echo $create_release_response
+  #         else
+  #           echo "${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }} already exists, returning"
+  #         fi
 
-      - name: Updating release description
-        shell: bash
-        run: |
-          update_release_response=$(curl -X PATCH -i -d "{\"body\":\"Related release ${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.fetch-release-id.outputs.RELEASE_ID }})
-          echo $update_release_response
+  # update_latest_package:
+  #   needs: [define_job_variables, create_latest_if_not_exists]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Fetch release id
+  #       shell: bash
+  #       id: fetch-release-id
+  #       run: |
+  #         release_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }})
+  #         release_id=$(echo "$release_response" | jq -r '.id' | tr -d '"')
+  #         echo "Release id: $release_id"
+  #         echo "::set-output name=RELEASE_ID::release_id"
+
+  #     - name: Updating release description
+  #       shell: bash
+  #       run: |
+  #         update_release_response=$(curl -X PATCH -i -d "{\"body\":\"Related release ${{ needs.define_job_variables.outputs.LATEST_RELEASE_NAME }}\"}" -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.fetch-release-id.outputs.RELEASE_ID }})
+  #         echo $update_release_response
 
 
   

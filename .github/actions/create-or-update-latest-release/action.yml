@@ -1,0 +1,29 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: 'Create or update latest release'
+description: 'Creates a new _latest release or updates an existing one'
+inputs:
+  PAT_TOKEN:
+    description: 'Personal access token'
+    required: true
+  ENVIRONMENT_REPOSITORY_PATH:
+    required: true
+    description: 'Caller repository path'
+  RELEASE_NAME_PREFIX:
+    required: false
+    type: string
+    description: 'Use this variable if you want to prefix the release name'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
