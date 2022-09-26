@@ -14,34 +14,43 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-try {
-  const [
-    patToken,
-    environmentRepositoryPath,
-    release
-  ]  = [
-    core.getInput('PAT_TOKEN'),
-    core.getInput('ENVIRONMENT_REPOSITORY_PATH'),
-    core.getInput('RELEASE_NAME_PREFIX')
-  ];
-  const octokit = github.getOctokit(token);
-
-  const relatedPullRequest = await findRelatedPullRequest(octokit);
-  console.log(relatedPullRequest);
-} catch (error) {
-  core.setFailed(error.message);
-}
-
 const findRelatedPullRequest = async (octokit) => {
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log('pr sha', github.context.relatedPullRequest.sha);
-  console.log('sha', github.context.sha);
-    // const sha = core.getInput('sha', { required: true });
+  const sha = github.context?.relatedPullRequest?.sha || github.context.sha;
+  if (!sha) {
+    throw new Error('Could not find a related sha');
+  }
 
-    // const context = github.context;
-    // const result = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
-    //     owner: context.repo.owner,
-    //     repo: context.repo.repo,
-    //     commit_sha: sha,
-    // });
+  const context = github.context;
+  const result = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      commit_sha: sha,
+  });
+
+  const prs = result.data.filter((el) => state === 'all' || el.state === 'open');
+  const pr = prs[0];
+
+  console.log(pr);
 }
+
+const main = async () => {
+  try {
+    const [
+      patToken,
+      environmentRepositoryPath,
+      release
+    ]  = [
+      core.getInput('PAT_TOKEN'),
+      core.getInput('ENVIRONMENT_REPOSITORY_PATH'),
+      core.getInput('RELEASE_NAME_PREFIX')
+    ];
+    const octokit = github.getOctokit(patToken);
+  
+    const relatedPullRequest = await findRelatedPullRequest(octokit);
+    console.log(relatedPullRequest);
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+}
+
+main();

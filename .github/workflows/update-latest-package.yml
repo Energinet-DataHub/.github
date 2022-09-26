@@ -39,6 +39,7 @@ jobs:
           ENVIRONMENT_REPOSITORY_PATH: ${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}
           RELEASE_NAME_PREFIX: ${{ secrets.RELEASE_NAME_PREFIX }}
 
+
   # define_job_variables:
   #   runs-on: ubuntu-latest
   #   outputs:
