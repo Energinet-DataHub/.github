@@ -14,6 +14,10 @@
 
 name: .NET solution CI (build)
 
+# This job will require two actions in the calling repository:
+#  - dotnet-prepare-outputs
+#  - dotnet-tests-prepare-outputs
+
 on:
   workflow_call:
     inputs:
