@@ -24,6 +24,7 @@ on:
         required: false
         type: string
         description: 'Use this variable if you want to prefix the release name'
+        default: 'dotnet'
 
 jobs:
   publish_release:
