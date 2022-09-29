@@ -37,6 +37,7 @@ jobs:
   create_prerelease:
     runs-on: ubuntu-latest
     env:
+      RELEASE_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
       RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
@@ -48,6 +49,7 @@ jobs:
           python-version: ${{ inputs.PYHTON_VERSION }}
           architecture: ${{ inputs.ARCHITECTURE }}
 
+      # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
         shell: bash
         working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
@@ -60,7 +62,7 @@ jobs:
         with:
           type: 'zip'
           filename: databricks.zip
-          directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
+          directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
         uses: marvinpinto/action-automatic-releases@v1.2.1
@@ -70,4 +72,4 @@ jobs:
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}
           files: |
-            ${{ inputs.WHEEL_WORKING_DIRECTORY }}/databricks.zip
+            ${{ env.RELEASE_FOLDER_PATH }}/databricks.zip
