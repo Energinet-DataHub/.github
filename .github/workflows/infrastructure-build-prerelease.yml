@@ -44,6 +44,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # IMPORTANT: We should copy the files before validating with TF; otherwise we get additional files in the release
+      - name: Copy infrastructure files
+        shell: bash
+        run: |
+          mkdir ${{ env.RELEASE_FOLDER_PATH }}
+          mkdir ${{ env.RELEASE_FOLDER_PATH }}/infrastructure
+          cp -fR ${{ inputs.INFRASTRUCTURE_PATH }}/main ${{ env.RELEASE_FOLDER_PATH }}/infrastructure/main 2>/dev/null || :
+          cp -fR ${{ inputs.INFRASTRUCTURE_PATH }}/env ${{ env.RELEASE_FOLDER_PATH }}/infrastructure/env 2>/dev/null || :
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.2.1
         with:
@@ -59,14 +68,6 @@ jobs:
         shell: bash
         working-directory: ${{ inputs.TERRAFORM_WORKING_DIRECTORY }}
         run: terraform validate
-
-      - name: Copy infrastructure files
-        shell: bash
-        run: |
-          mkdir ${{ env.RELEASE_FOLDER_PATH }}
-          mkdir ${{ env.RELEASE_FOLDER_PATH }}/infrastructure
-          cp -fR ${{ inputs.INFRASTRUCTURE_PATH }}/main ${{ env.RELEASE_FOLDER_PATH }}/infrastructure/main 2>/dev/null || :
-          cp -fR ${{ inputs.INFRASTRUCTURE_PATH }}/env ${{ env.RELEASE_FOLDER_PATH }}/infrastructure/env 2>/dev/null || :
 
       - name: Zip files for prerelease
         uses: thedoctor0/zip-release@0.6.2
