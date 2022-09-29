@@ -13,10 +13,11 @@
 # limitations under the License.
 
 name: Databricks build - prerelease
-description: |
-  This workflow will build a python wheel for databricks
-  and then create a prerelease package containing this wheel.
-  The prerelease name will be in the format 'databricks_<PR-number>'.
+
+# DESCRIPTION:
+# This workflow will build a python wheel for databricks
+# and then create a prerelease package containing this wheel.
+# The prerelease name will be in the format 'databricks_<PR-number>'.
 
 on:
   workflow_call:
