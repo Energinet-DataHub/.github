@@ -16,6 +16,7 @@ name: Infrastructure build - prerelease
 description: |
   This workflow will validate the infrastructure as code (terraform files)
   and then create a prerelease package containing these failes.
+  The prerelease name will be in the format 'infrastructure_<PR-number>'.
 
 on:
   workflow_call:
