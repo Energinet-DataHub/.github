@@ -13,6 +13,9 @@
 # limitations under the License.
 
 name: Infrastructure build - prerelease
+description: |
+  This workflow will validate the infrastructure as code (terraform files)
+  and then create a prerelease package containing these failes.
 
 on:
   workflow_call:
