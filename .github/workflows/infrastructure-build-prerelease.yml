@@ -35,9 +35,11 @@ on:
 jobs:
   create_prerelease:
     runs-on: ubuntu-latest
+
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
       RELEASE_VERSION: infrastructure_${{ github.event.pull_request.number }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

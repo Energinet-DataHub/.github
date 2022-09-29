@@ -36,9 +36,11 @@ on:
 jobs:
   create_prerelease:
     runs-on: ubuntu-latest
+
     env:
       RELEASE_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
       RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
