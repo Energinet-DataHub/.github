@@ -25,6 +25,11 @@ jobs:
   run_action:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: '8.8.0'
+
       - name: Find associated pull request
         uses: jwalton/gh-find-current-pr@v1
         id: find_pull_request
@@ -32,7 +37,7 @@ jobs:
           state: all
 
       - name: Create _latest release
-        uses: Energinet-DataHub/.github/.github/actions/create-latest-release@renetnielsen/create-update-latest-workflow
+        uses: .github/actions/create-latest-release
         with:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}
