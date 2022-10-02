@@ -46,6 +46,11 @@ on:
         required: false
         default: 'windows-2022'
         type: string
+      DOWNLOAD_ATTEMPT_LIMIT:
+        description: 'Number of times we retry downloading dotnet-tests artifact (effectively waiting for the build job to complete)'
+        required: false
+        default: 12
+        type: number
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
@@ -203,16 +208,20 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download dotnet artifact
-        uses: actions/download-artifact@v3
+      - name: Wait for dotnet-tests artifact to be ready for download
+        uses: Wandalen/wretry.action@v1.0.27
         with:
-          name: dotnet
-          path: ${{ env.ARTIFACTS_PATH }}
+          action: actions/download-artifact@v3
+          with: |
+            name: dotnet-tests
+            path: ${{ env.ARTIFACTS_PATH }}
+          attempt_limit: ${{ inputs.DOWNLOAD_ATTEMPT_LIMIT }}
+          attempt_delay: 15000
 
-      - name: Unzip dotnet-outputs.zip
+      - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-outputs.zip' '${{ env.ARTIFACTS_PATH }}'
+          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ env.ARTIFACTS_PATH }}'
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
