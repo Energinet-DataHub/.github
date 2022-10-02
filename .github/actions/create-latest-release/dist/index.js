@@ -14973,6 +14973,12 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             tag: app.args.releaseName,
             repoToken: app.args.repoToken,
         });
+        if (releaseAssets.length <= 0) {
+            throw new Error('No release assets found');
+        }
+        // Currently we support 1 asset with a specific name
+        // Therefor we override it to have the same name as the latest release
+        releaseAssets[0] = Object.assign(Object.assign({}, releaseAssets[0]), { name: `${app.args.latestReleaseName}.zip` });
         yield github_1.uploadReleaseAssets(app.octokit, {
             owner: app.context.owner,
             repo: app.context.repo,

@@ -50,6 +50,17 @@ const main = async () => {
       repoToken: app.args.repoToken,
     });
 
+    if (releaseAssets.length <= 0) {
+      throw new Error('No release assets found');
+    }
+
+    // Currently we support 1 asset with a specific name
+    // Therefor we override it to have the same name as the latest release
+    releaseAssets[0] = {
+      ...releaseAssets[0],
+      name: `${app.args.latestReleaseName}.zip`,
+    };
+
     await uploadReleaseAssets(app.octokit, {
       owner: app.context.owner,
       repo: app.context.repo,

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { GithubClient, ReleaseAsset } from '../types';
 
-type UploadReleaseArtifactParams = {
+type UploadReleaseAssetsParams = {
   owner: string;
   repo: string;
   uploadUrl: string;
@@ -15,7 +15,7 @@ type UploadReleaseArtifactParams = {
  * @param client The Github Octokit Client
  * @param params Parameters for uploading files to the release
  */
-export const uploadReleaseAssets = async (client: GithubClient, params: UploadReleaseArtifactParams) => {
+export const uploadReleaseAssets = async (client: GithubClient, params: UploadReleaseAssetsParams) => {
   core.startGroup('Uploading release artifacts');
   for (const asset of params.assets) {
     core.info(`Uploading ${asset.name}`);
