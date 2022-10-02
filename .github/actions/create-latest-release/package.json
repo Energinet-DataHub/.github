@@ -9,10 +9,7 @@
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/github": "^5.1.0",
-    "axios": "^0.27.2",
-    "globby": "^13.1.2",
-    "md5-file": "^5.0.0",
-    "path": "^0.12.7"
+    "axios": "^0.27.2"
   },
   "devDependencies": {
     "@types/node": "^18.7.23"
