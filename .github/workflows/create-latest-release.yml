@@ -19,7 +19,7 @@ on:
       RELEASE_NAME_PREFIX:
         required: true
         type: string
-        description: 'Prefix to the _latest release name'
+        description: 'Prefix to the _latest release name. Eg: "infrastructure", "dotnet", "databricks" or similar'
 
 jobs:
   run_action:
