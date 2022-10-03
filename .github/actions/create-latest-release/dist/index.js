@@ -15063,10 +15063,6 @@ const initializeAction = () => __awaiter(void 0, void 0, void 0, function* () {
         releaseName,
         latestReleaseName: `${releaseNamePrefix}_latest`,
     };
-    const inputFilesStr = core.getInput('files', { required: false });
-    if (inputFilesStr) {
-        args.files = inputFilesStr.split(/\r?\n/);
-    }
     core.info(`Relase name: ${args.releaseName}`);
     core.info(`Latest relase name: ${args.latestReleaseName}`);
     core.endGroup();

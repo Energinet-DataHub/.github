@@ -25,9 +25,6 @@ inputs:
     required: true
     type: string
     description: 'Prefix to the _latest release name'
-  FILES:
-    description: 'Assets to upload to the release'
-    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
