@@ -14858,7 +14858,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.uploadReleaseAssets = void 0;
 const core = __importStar(__nccwpck_require__(7341));
 /**
- * Function that creates the latest release if it does not exist
+ * Uploads the assets supplied to the releaseId
  *
  * @param client The Github Octokit Client
  * @param params Parameters for uploading files to the release

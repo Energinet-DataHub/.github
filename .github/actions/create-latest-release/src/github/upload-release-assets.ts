@@ -10,7 +10,7 @@ type UploadReleaseAssetsParams = {
 };
 
 /**
- * Function that creates the latest release if it does not exist
+ * Uploads the assets supplied to the releaseId
  *
  * @param client The Github Octokit Client
  * @param params Parameters for uploading files to the release
