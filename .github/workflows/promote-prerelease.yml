@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Promote prerelease to release
+name: Promote release and create new _latest
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ on:
       RELEASE_NAME_PREFIX:
         required: true
         type: string
-        description: 'Prefix to the release name. Eg: "infrastructure", "dotnet", "databricks" or similar'
+        description: 'Prefix to the release names. Eg: "infrastructure", "dotnet", "databricks" or similar'
 
 jobs:
   publish_release:
@@ -51,3 +51,10 @@ jobs:
           release_id=$(echo $release_tag_response | jq '.id')
           publish_url="https://api.github.com/repos/${{ github.repository }}/releases/${release_id}"
           publish_response=$(curl -X PATCH -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $publish_url -d '{"prerelease":"false","draft":"false","tag_name":"'${{ steps.set_release_name.outputs.RELEASE_NAME }}'"}')
+
+      - name: Create _latest release
+        uses: Energinet-DataHub/.github/.github/actions/create-latest-release@v8
+        with:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: ${{ steps.set_release_name.outputs.RELEASE_NAME }}
+          RELEASE_NAME_PREFIX: ${{ inputs.RELEASE_NAME_PREFIX }}
