@@ -42,6 +42,7 @@ export const createRelease = async (
     name: params.tag,
     draft: false,
     prerelease: false,
+    body: params.body,
   });
 
   core.endGroup();
