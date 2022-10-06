@@ -31,10 +31,14 @@ on:
       INFRASTRUCTURE_PATH:
         required: true
         type: string
+      OPERATING_SYSTEM:
+        required: false
+        default: 'ubuntu-22.04'
+        type: string
 
 jobs:
   create_prerelease:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
