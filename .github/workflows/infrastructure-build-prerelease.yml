@@ -39,6 +39,7 @@ jobs:
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
       RELEASE_VERSION: infrastructure_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: infrastructure.zip
 
     steps:
       - name: Checkout repository
@@ -73,7 +74,7 @@ jobs:
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
-          filename: infrastructure.zip
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
@@ -84,4 +85,4 @@ jobs:
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/infrastructure.zip
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}

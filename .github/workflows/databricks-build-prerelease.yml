@@ -40,6 +40,7 @@ jobs:
     env:
       RELEASE_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
       RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: databricks.zip
 
     steps:
       - name: Checkout
@@ -63,7 +64,7 @@ jobs:
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
-          filename: databricks.zip
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
@@ -74,4 +75,4 @@ jobs:
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/databricks.zip
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}

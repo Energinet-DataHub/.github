@@ -49,8 +49,10 @@ jobs:
     env:
       BUILD_CONFIGURATION: Release
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
+      TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
       RELEASE_VERSION: dotnet_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: dotnet.zip
 
     steps:
       - name: Checkout repository
@@ -102,14 +104,14 @@ jobs:
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
-          filename: dotnet-tests-outputs.zip
+          filename: ${{ env.TESTS_ZIP_FILENAME }}
           directory: ${{ env.TESTS_OUTPUT_PATH }}
 
       - name: Upload dotnet-tests artifact
         uses: actions/upload-artifact@v3
         with:
           name: dotnet-tests
-          path: ${{ env.TESTS_OUTPUT_PATH }}/dotnet-tests-outputs.zip
+          path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
           if-no-files-found: error
 
       # Call action in source (caller) repository
@@ -122,7 +124,7 @@ jobs:
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
-          filename: dotnet.zip
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
@@ -133,4 +135,4 @@ jobs:
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/dotnet.zip
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
