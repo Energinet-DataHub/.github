@@ -52,7 +52,7 @@ jobs:
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
       RELEASE_VERSION: dotnet_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: dotnet.zip
+      RELEASE_ZIP_FILENAME: dotnet_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout repository
