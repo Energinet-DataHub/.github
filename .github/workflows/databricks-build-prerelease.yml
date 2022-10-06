@@ -34,7 +34,7 @@ on:
         type: string
       OPERATING_SYSTEM:
         required: false
-        default: 'ubuntu-22.04'
+        default: 'ubuntu-20.04' # Tools for python is not available in arch x64 on 22.04
         type: string
 
 jobs:
