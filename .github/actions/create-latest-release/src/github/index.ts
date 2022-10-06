@@ -12,7 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 export * from './create-release-ref';
-export * from './upload-release-assets';
 export * from './delete-release';
 export * from './create-release';
-export * from './get-release-assets';

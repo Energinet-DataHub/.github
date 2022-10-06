@@ -16,11 +16,3 @@ import { PaginateInterface } from '@octokit/plugin-paginate-rest';
 import { Api } from '@octokit/plugin-rest-endpoint-methods/dist-types/types';
 
 export type GithubClient = Octokit & Api & { paginate: PaginateInterface };
-
-export type ReleaseAsset = {
-  id: number;
-  body: Buffer;
-  name: string;
-  size: number;
-  contentType: string;
-};
