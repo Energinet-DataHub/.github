@@ -9826,7 +9826,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             owner: app.context.owner,
             repo: app.context.repo,
             tag: app.args.latestReleaseName,
-            body: `RELEASE::${app.args.releaseName}`,
+            body: `RELEASE_NAME=${app.args.releaseName}`,
         });
     }
     catch (error) {
