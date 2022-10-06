@@ -40,7 +40,7 @@ const main = async () => {
       owner: app.context.owner,
       repo: app.context.repo,
       tag: app.args.latestReleaseName,
-      body: `RELEASE::${app.args.releaseName}`,
+      body: `RELEASE_NAME=${app.args.releaseName}`,
     });
   } catch (error: any) {
     core.setFailed(error.message);
