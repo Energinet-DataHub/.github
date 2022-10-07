@@ -78,16 +78,6 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: ${{ env.DOTNET_INSTALL_DIR }}
 
-      - name: Cache NuGet packages
-        if: runner.os == 'Windows'
-        uses: actions/cache@v3
-        id: cache-nuget
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
       - name: Restore NuGet packages
         run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
 
