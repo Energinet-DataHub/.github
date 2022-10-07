@@ -29,6 +29,10 @@ on:
         required: false
         default: 'ubuntu-22.04'
         type: string
+      USE_NEW_ACTIONNAME:
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   python_ci:
@@ -45,7 +49,12 @@ jobs:
           ignore: ${{ inputs.IGNORE_ERRORS_AND_WARNING_FLAKE8 }}
 
       - name: Run unit tests
+        if: ${{ inputs.USE_NEW_ACTIONNAME == true }}
         uses: ./.github/actions/python-unit-test
+
+      - name: Run unit tests
+        if: ${{ inputs.USE_NEW_ACTIONNAME == false }}
+        uses: ./.github/actions/databricks-unit-test
 
       - name: Upload test report
         uses: actions/upload-artifact@v3
