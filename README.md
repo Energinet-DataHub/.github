@@ -6,10 +6,11 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
+  - [Targeting .NET](#targeting-net)
   - [Create Prerelease](#create-prerelease)
   - [Dispatch Deployment Request](#dispatch-deployment-request)
   - [Publish release](#publish-release)
-  - [MD Check](#md-check)
+  - [Markdown Check](#markdown-check)
   - [License Check](#license-check)
 
 ## Release procedure
@@ -69,6 +70,11 @@ Then we can create the new major version tag for a specific commit:
    - When everything looks good press `Publish release` to create the release.
 
 ## Workflows
+
+### Targeting .NET
+
+- [.NET Solution CI (build)](./.github/workflows/dotnet-solution-ci-build.md)
+- [.NET Solution CI (test)](./.github/workflows/dotnet-solution-ci-test.md)
 
 ### Create Prerelease
 
