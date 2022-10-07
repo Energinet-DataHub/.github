@@ -18,9 +18,7 @@ import { GithubClient } from './types';
 type Config = {
   args: {
     repoToken: string;
-    environmentRepositoryPath: string;
     releaseNamePrefix: string;
-    files: string[];
     releaseName: string;
     latestReleaseName: string;
   };
@@ -46,9 +44,7 @@ export const initializeAction = async (): Promise<Config> => {
 
   const args = {
     repoToken,
-    environmentRepositoryPath: core.getInput('ENVIRONMENT_REPOSITORY_PATH'),
     releaseNamePrefix,
-    files: [] as string[],
     releaseName,
     latestReleaseName: `${releaseNamePrefix}_latest`,
   };

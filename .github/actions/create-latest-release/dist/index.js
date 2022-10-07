@@ -9899,9 +9899,7 @@ const initializeAction = () => __awaiter(void 0, void 0, void 0, function* () {
     const releaseNamePrefix = core.getInput('RELEASE_NAME_PREFIX');
     const args = {
         repoToken,
-        environmentRepositoryPath: core.getInput('ENVIRONMENT_REPOSITORY_PATH'),
         releaseNamePrefix,
-        files: [],
         releaseName,
         latestReleaseName: `${releaseNamePrefix}_latest`,
     };
