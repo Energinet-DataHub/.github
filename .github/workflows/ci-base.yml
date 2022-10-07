@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Markdown Check
+
+name: License and Markdown Check
 
 on:
   workflow_call:
@@ -21,9 +22,13 @@ on:
         type: string
         description: 'Set to true to skip checking Markdown files'
         default: 'false'
+      OPERATING_SYSTEM:
+        required: false
+        default: 'ubuntu-22.04'
+        type: string
 jobs:
   skip_md_check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -44,7 +49,7 @@ jobs:
     needs: skip_md_check
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     name: Markdown Check
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
@@ -128,7 +133,7 @@ jobs:
 
   check_license_lines:
     name: Check License Lines
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:

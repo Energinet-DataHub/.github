@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 name: Python CI Test and Coverage
 
 on:
@@ -45,7 +46,7 @@ jobs:
           ignore: ${{ inputs.IGNORE_ERRORS_AND_WARNING_FLAKE8 }}
 
       - name: Run unit tests
-        uses: ./.github/actions/databricks-unit-test
+        uses: ./.github/actions/python-unit-test
 
       - name: Upload test report
         uses: actions/upload-artifact@v3

@@ -1,0 +1,82 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Databricks build - prerelease
+
+# DESCRIPTION:
+# This workflow will build a python wheel for databricks
+# and then create a prerelease package containing this wheel.
+# The prerelease name will be in the format 'databricks_<PR-number>'.
+
+on:
+  workflow_call:
+    inputs:
+      PYHTON_VERSION:
+        required: true
+        type: string
+      ARCHITECTURE:
+        required: false
+        type: string
+        default: 'x64'
+      WHEEL_WORKING_DIRECTORY:
+        required: true
+        type: string
+      OPERATING_SYSTEM:
+        required: false
+        default: 'ubuntu-20.04' # Tools for python is not available in arch x64 on 22.04
+        type: string
+
+jobs:
+  create_prerelease:
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+
+    env:
+      RELEASE_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
+      RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: databricks_${{ github.event.pull_request.number }}.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.PYHTON_VERSION }}
+          architecture: ${{ inputs.ARCHITECTURE }}
+
+      # This creates the wheel in a subfolder "dist"
+      - name: Create Python Wheel for Databricks Jobs
+        shell: bash
+        working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
+        run: |
+          pip install wheel
+          python setup.py sdist bdist_wheel
+
+      - name: Zip files for prerelease
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: 'zip'
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
+          directory: ${{ env.RELEASE_FOLDER_PATH }}
+
+      - name: Create prelease
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ env.RELEASE_VERSION }}
+          prerelease: true
+          title: ${{ env.RELEASE_VERSION }}
+          files: |
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
