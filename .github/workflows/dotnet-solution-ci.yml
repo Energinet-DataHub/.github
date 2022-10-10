@@ -52,6 +52,10 @@ on:
         required: false
         default: ''
         type: string
+      ENVIRONMENT:
+        required: false
+        default: ''
+        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -72,7 +76,7 @@ jobs:
   function_ci:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
-    environment: AzureAuth
+    environment: ${{ inputs.ENVIRONMENT }}
 
     env:
       BUILD_CONFIGURATION: Release
