@@ -72,6 +72,8 @@ jobs:
   function_ci:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
+    environment: AzureAuth
+
     env:
       BUILD_CONFIGURATION: Release
       OUTPUT_PATH: ${{ github.workspace }}\output
