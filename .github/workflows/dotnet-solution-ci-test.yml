@@ -88,6 +88,8 @@ jobs:
   dotnet_ci_test:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
 
+    environment: AzureAuth
+
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
       TEST_RESULTS_PATH: ${{ github.workspace }}\TestResults
