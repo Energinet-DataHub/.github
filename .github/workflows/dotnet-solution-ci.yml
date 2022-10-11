@@ -52,6 +52,11 @@ on:
         required: false
         default: ''
         type: string
+      ENVIRONMENT:
+        description: 'Can be used to set environment for OIDC which is AzureAuth'
+        required: false
+        default: ''
+        type: string
     secrets:
       AZURE_TENANT_ID:
         required: false
@@ -71,6 +76,8 @@ permissions:
 jobs:
   function_ci:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
+
+    environment: ${{ inputs.ENVIRONMENT }}
 
     env:
       BUILD_CONFIGURATION: Release
