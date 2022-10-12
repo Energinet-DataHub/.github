@@ -1,0 +1,30 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Find current pull request
+description: Finds the pull request associated with the current commit.
+inputs:
+  github-token:
+    required: false
+    description: GitHub token used to create an authenticated client. Defaults to github provided token.
+    default: ${{ github.token }}
+outputs:
+  pull_request_number:
+    description: The pull request number if the pull request was found
+  sha:
+    required: false
+    description: SHA used to get the related pull request for. Defaults to current pull request SHA or the commit SHA.
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
