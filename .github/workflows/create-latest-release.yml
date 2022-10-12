@@ -25,8 +25,11 @@ jobs:
   run_action:
     runs-on: ubuntu-latest
     steps:
-      - name: Find related pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@find-pr-action
+      - name: Find associated pull request
+        uses: jwalton/gh-find-current-pr@v1
+        id: find_pull_request
+        with:
+          state: all
 
       - name: Create _latest release
         uses: Energinet-DataHub/.github/.github/actions/create-latest-release@8.8.0

@@ -32,7 +32,7 @@ let octokitClient: any | null = null; // Somehow we can't import the correct Git
 export const initializeAction = async (): Promise<Config> => {
   core.startGroup('Initializing action');
 
-  const githubToken = core.getInput('github-token');
+  const githubToken = core.getInput('github_token');
   if (!octokitClient) {
     octokitClient = github.getOctokit(githubToken);
   }

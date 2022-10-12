@@ -29,9 +29,9 @@ const main = async () => {
     });
 
     if (result.data && result.data.length > 0) {
-      const pullRequestNumber = result.data[0];
-      core.info(`setting output pull_request_number: ${pullRequestNumber}`);
-      core.setOutput('pull_request_number', pullRequestNumber);
+      const pullRequest = result.data[0];
+      core.info(`setting output pull_request_number: ${pullRequest.number}`);
+      core.setOutput('pull_request_number', pullRequest.number);
     } else {
       core.error('No pull request found');
       throw new Error('No pull request found');

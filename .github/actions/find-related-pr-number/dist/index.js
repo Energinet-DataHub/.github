@@ -9550,9 +9550,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             commit_sha: sha,
         });
         if (result.data && result.data.length > 0) {
-            const pullRequestNumber = result.data[0];
-            core.info(`setting output pull_request_number: ${pullRequestNumber}`);
-            core.setOutput('pull_request_number', pullRequestNumber);
+            const pullRequest = result.data[0];
+            core.info(`setting output pull_request_number: ${pullRequest.number}`);
+            core.setOutput('pull_request_number', pullRequest.number);
         }
         else {
             core.error('No pull request found');
@@ -9621,7 +9621,7 @@ const github = __importStar(__nccwpck_require__(8633));
 let octokitClient = null; // Somehow we can't import the correct Github Types
 const initializeAction = () => __awaiter(void 0, void 0, void 0, function* () {
     core.startGroup('Initializing action');
-    const githubToken = core.getInput('github-token');
+    const githubToken = core.getInput('github_token');
     if (!octokitClient) {
         octokitClient = github.getOctokit(githubToken);
     }
