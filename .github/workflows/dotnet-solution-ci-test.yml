@@ -96,7 +96,6 @@ jobs:
     environment: ${{ inputs.ENVIRONMENT }}
 
     env:
-      GITHUB_WORKSPACE: ${{ github.workspace }}
       ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
       TEST_RESULTS_PATH: ${{ github.workspace }}\TestResults
       # Tool versions
@@ -229,7 +228,7 @@ jobs:
       - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ env.GITHUB_WORKSPACE }}'
+          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
@@ -240,19 +239,19 @@ jobs:
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
           {
-            $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ env.GITHUB_WORKSPACE }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
+            $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ github.workspace }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
           }
           # Handle filter expression
           if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -eq 'empty' )
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ env.GITHUB_WORKSPACE }}${{ inputs.TESTS_DLL_FILE_PATH }} `
+              ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
               --logger:"console;verbosity=normal" `
           }
           else
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ env.GITHUB_WORKSPACE }}${{ inputs.TESTS_DLL_FILE_PATH }} `
+              ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
               --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
               --logger:"console;verbosity=normal" `
           }
