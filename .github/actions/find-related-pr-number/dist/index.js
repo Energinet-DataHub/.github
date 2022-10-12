@@ -9543,11 +9543,10 @@ const initialize_action_1 = __nccwpck_require__(5803);
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const app = yield initialize_action_1.initializeAction();
-        const sha = core.getInput('sha', { required: true });
         const result = yield app.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: app.context.owner,
             repo: app.context.repo,
-            commit_sha: sha,
+            commit_sha: app.args.sha,
         });
         if (result.data && result.data.length > 0) {
             const pullRequest = result.data[0];

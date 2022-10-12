@@ -20,12 +20,11 @@ import { initializeAction } from './initialize-action';
 const main = async () => {
   try {
     const app = await initializeAction();
-    const sha = core.getInput('sha', { required: true });
 
     const result = await app.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
       owner: app.context.owner,
       repo: app.context.repo,
-      commit_sha: sha,
+      commit_sha: app.args.sha,
     });
 
     if (result.data && result.data.length > 0) {
