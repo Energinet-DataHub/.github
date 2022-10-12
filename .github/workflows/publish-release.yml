@@ -30,19 +30,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find associated pull request
-        uses: jwalton/gh-find-current-pr@v1
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v8
         id: find_pull_request
-        with:
-          state: all
 
       - name: Set RELEASE_VERSION
-        if: steps.find_pull_request.outputs.pr != ''
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pr }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_ENV
 
       - name: Publish release
-        if: steps.find_pull_request.outputs.pr != ''
         shell: bash
         run: |
           release_tag_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.RELEASE_VERSION }})

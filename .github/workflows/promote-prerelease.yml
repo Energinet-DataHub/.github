@@ -26,23 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find associated pull request
-        uses: jwalton/gh-find-current-pr@v1
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v8
         id: find_pull_request
-        with:
-          state: all
-
-      - name: Check associated pull request output
-        if: steps.find_pull_request.outputs.pr == ''
-        shell: bash
-        run: |
-          echo "No pull request found"
-          exit 1
 
       - name: Set RELEASE_NAME
         id: set_release_name
         shell: bash
         run: |
-          echo "::set-output name=RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}"
+          echo "::set-output name=RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pull_request_number }}"
 
       - name: Publish release
         shell: bash
