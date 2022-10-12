@@ -9538,7 +9538,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7341));
 const initialize_action_1 = __nccwpck_require__(5803);
 /**
- * Function that creates the latest release if it does not exist
+ * Function that finds the related pull request from SHA
  */
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -9617,20 +9617,15 @@ exports.initializeAction = void 0;
 // limitations under the License.
 const core = __importStar(__nccwpck_require__(7341));
 const github = __importStar(__nccwpck_require__(8633));
-let octokitClient = null; // Somehow we can't import the correct Github Types
 const initializeAction = () => __awaiter(void 0, void 0, void 0, function* () {
     core.startGroup('Initializing action');
-    const githubToken = core.getInput('github_token');
-    if (!octokitClient) {
-        octokitClient = github.getOctokit(githubToken);
-    }
     const args = {
-        githubToken,
+        githubToken: core.getInput('github_token', { required: true }),
         sha: core.getInput('sha', { required: true }),
     };
     core.endGroup();
     return {
-        octokit: octokitClient,
+        octokit: github.getOctokit(args.githubToken),
         args,
         context: {
             repo: github.context.repo.repo,

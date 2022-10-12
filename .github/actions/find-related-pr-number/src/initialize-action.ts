@@ -27,25 +27,18 @@ type Config = {
   };
 };
 
-let octokitClient: any | null = null; // Somehow we can't import the correct Github Types
-
 export const initializeAction = async (): Promise<Config> => {
   core.startGroup('Initializing action');
 
-  const githubToken = core.getInput('github_token');
-  if (!octokitClient) {
-    octokitClient = github.getOctokit(githubToken);
-  }
-
   const args = {
-    githubToken,
+    githubToken: core.getInput('github_token', { required: true }),
     sha: core.getInput('sha', { required: true }),
   };
 
   core.endGroup();
 
   return {
-    octokit: octokitClient,
+    octokit: github.getOctokit(args.githubToken),
     args,
     context: {
       repo: github.context.repo.repo,

@@ -15,7 +15,7 @@ import * as core from '@actions/core';
 import { initializeAction } from './initialize-action';
 
 /**
- * Function that creates the latest release if it does not exist
+ * Function that finds the related pull request from SHA
  */
 const main = async () => {
   try {
