@@ -15,9 +15,9 @@
 name: Infrastructure build - prerelease
 
 # DESCRIPTION:
-# This workflow will validate the infrastructure as code (terraform files)
-# and then create a prerelease package containing the files.
-# The prerelease name will be in the format 'infrastructure_<PR-number>'.
+# This workflow will validate the infrastructure as code (terraform files).
+# If it is running as part of a PR it will also create a prerelease package containing
+# the files. The prerelease name will be in the format 'infrastructure_<PR-number>'.
 
 on:
   workflow_call:
@@ -75,6 +75,7 @@ jobs:
         run: terraform validate
 
       - name: Zip files for prerelease
+        if: github.event_name == 'pull_request'
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
@@ -82,6 +83,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
+        if: github.event_name == 'pull_request'
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
