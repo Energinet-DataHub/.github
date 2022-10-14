@@ -15,6 +15,9 @@
 name: Infrastructure build - prerelease
 
 # DESCRIPTION:
+#
+# Should only be used for pull requests.
+#
 # This workflow will validate the infrastructure as code (terraform files)
 # and then create a prerelease package containing the files.
 # The prerelease name will be in the format 'infrastructure_<PR-number>'.
