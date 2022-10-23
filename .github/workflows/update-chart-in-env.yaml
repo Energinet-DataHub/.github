@@ -88,7 +88,7 @@ jobs:
         env:
           APP_NAME: ${{ inputs.app_name }}
         run: |
-          echo "::set-output name=base-file::k8s/energy-origin-apps/${APP_NAME#eo-}/base/kustomization.yaml"
+          echo "base-file=k8s/energy-origin-apps/${APP_NAME#eo-}/base/kustomization.yaml" >>$GITHUB_OUTPUT
 
       - name: Validate simple app file
         working-directory: ${{ env.environment-checkout-directory }}

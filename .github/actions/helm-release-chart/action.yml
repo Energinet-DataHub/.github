@@ -68,7 +68,7 @@ runs:
       name: Generate filename
       shell: bash
       run: |
-        echo ::set-output name=filename::${{ steps.chart-info.outputs.chart-name }}-${{ inputs.chart_version }}.tgz
+        echo "filename=${{ steps.chart-info.outputs.chart-name }}-${{ inputs.chart_version }}.tgz" >>$GITHUB_OUTPUT
 
     - name: Update chart dependencies
       shell: bash
