@@ -246,14 +246,21 @@ jobs:
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
               ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
-              --logger:"console;verbosity=normal" `
+              --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
           else
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
               ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
               --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
-              --logger:"console;verbosity=normal" `
+              --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
+          }
+
+          $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
+          $testFailures
+          if ($testFailures.Count -gt 0)
+          {
+            Exit 1
           }
 
       - name: Upload coverage to CodeCov
