@@ -55,7 +55,6 @@ runs:
       shell: bash
       run: |
         echo "helm-checkout-directory=helm-charts" >> $GITHUB_ENV
-
     - name: Get info from Chart.yaml
       id: chart-info
       uses: Energinet-DataHub/.github/.github/actions/chart-info@main
@@ -68,8 +67,7 @@ runs:
       name: Generate filename
       shell: bash
       run: |
-        echo "filename=${{ steps.chart-info.outputs.chart-name }}-${{ inputs.chart_version }}.tgz" >>$GITHUB_OUTPUT
-
+        echo ::set-output name=filename::${{ steps.chart-info.outputs.chart-name }}-${{ inputs.chart_version }}.tgz
     - name: Update chart dependencies
       shell: bash
       run: helm dependency update ${{ inputs.chart_folder }}
@@ -119,7 +117,6 @@ runs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         gh release download '${{ steps.chart-info.outputs.tag-name }}' --repo '${{ github.repository }}' --pattern '${{ steps.generate_filename.outputs.filename }}' --dir './'
-
     - name: Update index file for helm registry
       shell: bash
       working-directory: ${{ env.helm-checkout-directory }}

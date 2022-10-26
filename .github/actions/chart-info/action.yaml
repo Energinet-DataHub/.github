@@ -29,9 +29,9 @@ runs:
       shell: bash
       run: |
         NAME=$(grep ^"name: " ${{ inputs.chart-folder }}/Chart.yaml | cut -f2 -d' ' | tr -d '\r')
-        echo "name=$NAME" >>$GITHUB_OUTPUT
+        echo ::set-output name=name::$NAME
         if [ ${{ inputs.include-image-name }} = "true" ]; then
-          echo "tag-name=$NAME-${{ inputs.chart-version }}" >>$GITHUB_OUTPUT
+          echo ::set-output name=tag-name::$NAME-${{ inputs.chart-version }}
         else
-          echo "tag-name=${{ inputs.chart-version }}" >>$GITHUB_OUTPUT
+          echo ::set-output name=tag-name::${{ inputs.chart-version }}
         fi

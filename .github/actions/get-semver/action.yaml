@@ -12,63 +12,122 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Get semver plus pr
+name: Package and release helm chart
 description: |
-  Get semver from a path in a yaml file and if PR then append extra values.
-
+  Packages and creates a release with the chart,
+  and commits chart into helm registry.
 inputs:
-  yaml_file:
-    description: Path to the version file.
+  chart_folder:
+    description: Path to the folder containing the chart.
     required: true
-    type: string
-  yaml_path:
-    description: Path inside the version file.
-    required: true
-    type: string
-  git_checkout_folder:
-    description: Folder to checkout main-branch inputs.
+  chart_repository:
+    description: The repository containing the chart repository
+    default: ${{ github.repository_owner }}/helm-charts
     required: false
-    default: git-main
-    type: string
+  chart_version:
+    description: Override the chart version to a specific version
+    required: true
+  chart_repository_branch:
+    description: The branch in which to add the chart.
+    required: false
+    default: 'gh-pages'
+  deploy_key:
+    description: A deploy key that has access to the chart repository.
+    required: true
+  include_image_name:
+    description: Add the name of the image to the name of a chart.
+    required: false
+    default: 'false'
 
 outputs:
-  semver:
-    description: The resulting semver
-    value: ${{ steps.generate_semver.outputs.version }}
+  chart_name:
+    description: The name of the chart that was released.
+    value: ${{ steps.chart-info.outputs.chart-name }}
+  chart_version:
+    description: The version of the chart that was released.
+    value: ${{ steps.chart-info.outputs.version }}
 
 runs:
   using: composite
   steps:
-    - name: Guard against non-supported events
-      if: ${{ github.event_name != 'push' && github.event_name != 'pull_request' }}
-      uses: actions/github-script@v6
-      with:
-        script: |
-          core.setFailed('Only "push" and "pull_request" events are supported by this action.')
-    - uses: actions/checkout@v3
-      with:
-        path: ${{ inputs.git_checkout_folder }}
-        ref: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && github.ref || github.head_ref }}
-
-    - name: Get chart version
-      id: get_chart_version
-      uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
-      with:
-        yaml_file: ${{ inputs.git_checkout_folder }}/${{ inputs.yaml_file }}
-        yaml_path: ${{ inputs.yaml_path }}
-
-    - name: Generate semver
-      id: generate_semver
+    - id: helm_directory
+      name: Add helm checkout directory to env
       shell: bash
       run: |
-        cd ${{ inputs.git_checkout_folder }}
-        if ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        then    
-          echo "version=${{ steps.get_chart_version.outputs.result }}" >>$GITHUB_OUTPUT
-        elif ${{ github.event_name == 'pull_request' }}
-        then
-          echo "version=${{ steps.get_chart_version.outputs.result }}-pr.${{ github.event.pull_request.number }}-$(git rev-parse --short ${{ github.sha }})" >>$GITHUB_OUTPUT
-        else
-          echo Not supported on push to branches other than main
-          exit 1
-        fi
+        echo "helm-checkout-directory=helm-charts" >> $GITHUB_ENV
+    - name: Get info from Chart.yaml
+      id: chart-info
+      uses: Energinet-DataHub/.github/.github/actions/chart-info@main
+      with:
+        chart-folder: ${{ inputs.chart_folder }}
+        chart-version: ${{ inputs.chart_version }}
+        include-image-name: ${{ inputs.include_image_name }}
+
+    - id: generate_filename
+      name: Generate filename
+      shell: bash
+      run: |
+        echo ::set-output name=filename::${{ steps.chart-info.outputs.chart-name }}-${{ inputs.chart_version }}.tgz
+    - name: Update chart dependencies
+      shell: bash
+      run: helm dependency update ${{ inputs.chart_folder }}
+
+    - name: Lint chart
+      shell: bash
+      run: helm lint ${{ inputs.chart_folder }}
+
+    - name: Packages chart
+      shell: bash
+      run: helm package --version ${{  inputs.chart_version }} ${{ inputs.chart_folder }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        tag_name: ${{ steps.chart-info.outputs.tag-name }}
+        release_name: Release ${{ steps.chart-info.outputs.tag-name }}
+        draft: false
+        prerelease: ${{ github.ref_name != 'main' }}
+
+    - name: Add chart.tar to release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ steps.generate_filename.outputs.filename }}
+        asset_name: ${{ steps.generate_filename.outputs.filename }}
+        asset_content_type: application/zip
+
+    - name: Checkout chart repository
+      uses: actions/checkout@v3
+      with:
+        path: ${{ env.helm-checkout-directory }}
+        repository: ${{ inputs.chart_repository }}
+        ssh-key: ${{ inputs.deploy_key }}
+        ref: ${{ inputs.chart_repository_branch }}
+
+    - name: Download chart tarball
+      shell: bash
+      working-directory: ${{ env.helm-checkout-directory }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        gh release download '${{ steps.chart-info.outputs.tag-name }}' --repo '${{ github.repository }}' --pattern '${{ steps.generate_filename.outputs.filename }}' --dir './'
+    - name: Update index file for helm registry
+      shell: bash
+      working-directory: ${{ env.helm-checkout-directory }}
+      run: helm repo index .
+
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v9
+      with:
+        add: '["index.yaml", "${{ steps.generate_filename.outputs.filename }}"]'
+        message: Updated the helm registry with file ${{ steps.generate_filename.outputs.filename }}
+        push: --force
+        new_branch: ${{ inputs.chart_repository_branch }}
+        default_author: github_actions
+        cwd: ${{ env.helm-checkout-directory }}
