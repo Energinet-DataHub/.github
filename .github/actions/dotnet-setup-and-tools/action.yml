@@ -50,7 +50,7 @@ runs:
   using: composite
   steps:
     - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ inputs.DOTNET_VERSION }}
       env:
