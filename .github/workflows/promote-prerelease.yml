@@ -33,7 +33,7 @@ jobs:
         id: set_release_name
         shell: bash
         run: |
-          echo "::set-output name=RELEASE_NAME::${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pull_request_number }}"
+          echo "RELEASE_NAME=${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >>$GITHUB_OUTPUT
 
       - name: Publish release
         shell: bash
