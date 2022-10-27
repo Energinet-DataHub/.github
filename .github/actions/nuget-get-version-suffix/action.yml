@@ -31,10 +31,10 @@ runs:
         if [[ ${{ env.BRANCH }} == 'master' || ${{ env.BRANCH }} == 'main' ]]
         then
           echo "Empty VersionSuffix"
-          echo "##[set-output name=property;]''"
+          echo "property=''" >>$GITHUB_OUTPUT
         else
           echo "Set VersionSuffix"
-          echo "##[set-output name=property;]'-p:VersionSuffix=-alpha-${{ github.run_number }}'"
+          echo "property=-p:VersionSuffix=-alpha-${{ github.run_number }}" >>$GITHUB_OUTPUT
         fi
       env:
         BRANCH: ${GITHUB_REF#refs/heads/}

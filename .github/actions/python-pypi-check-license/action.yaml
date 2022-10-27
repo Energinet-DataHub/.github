@@ -59,7 +59,7 @@ runs:
       id: allowed-licenses
       shell: bash
       run: |
-        echo ::set-output name=allowed-licenses::$(cat ${{ inputs.allowed-licenses-file }} | jq -r .[] | tr \\n \;)
+        echo "allowed-licenses=$(cat ${{ inputs.allowed-licenses-file }} | jq -r .[] | tr \\n \;)" >>$GITHUB_OUTPUT
 
     - name: Run check
       shell: bash
