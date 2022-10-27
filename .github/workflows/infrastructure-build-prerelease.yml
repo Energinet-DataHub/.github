@@ -38,12 +38,9 @@ on:
         required: false
         default: 'ubuntu-22.04'
         type: string
-      COPY_ADDITIONAL_INFRASTRUCTURE_FILES:
-        required: false
-        default: 'false'
-        type: string
       ADDITIONAL_INFRASTRUCTURE_PATH:
         required: false
+        default: ''
         type: string
 
 jobs:
@@ -69,7 +66,7 @@ jobs:
           cp -fR ${{ inputs.INFRASTRUCTURE_PATH }}/env ${{ env.RELEASE_FOLDER_PATH }}/infrastructure/env 2>/dev/null || :
       
       - name: Copy additional infrastructure files
-        if: ${{ inputs.COPY_ADDITIONAL_INFRASTRUCTURE_FILES == 'true' }}
+        if: ${{ inputs.ADDITIONAL_INFRASTRUCTURE_PATH != '' }}
         shell: bash
         run: |
           cp -fR ${{ inputs.ADDITIONAL_INFRASTRUCTURE_PATH }} ${{ env.RELEASE_FOLDER_PATH }} 2>/dev/null || :
