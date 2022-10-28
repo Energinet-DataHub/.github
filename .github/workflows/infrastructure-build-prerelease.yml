@@ -42,6 +42,10 @@ on:
         required: false
         default: ''
         type: string
+      ADDITIONAL_TERRAFORM_WORKING_DIRECTORY:
+        required: false
+        default: ''
+        type: string
 
 jobs:
   create_prerelease:
@@ -80,12 +84,28 @@ jobs:
       - name: Terraform init
         shell: bash
         working-directory: ${{ inputs.TERRAFORM_WORKING_DIRECTORY }}
-        run: terraform init -backend=false
+        run: |
+          terraform init -backend=false
 
       - name: Terraform validate
         shell: bash
         working-directory: ${{ inputs.TERRAFORM_WORKING_DIRECTORY }}
-        run: terraform validate
+        run: |
+          terraform validate
+
+      - name: Terraform init of additional infrastructure folder
+        if: ${{ inputs.ADDITIONAL_TERRAFORM_WORKING_DIRECTORY != '' }}
+        shell: bash
+        working-directory: ${{ inputs.ADDITIONAL_TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform init -backend=false
+
+      - name: Terraform validate of additional infrastructure folder
+        if: ${{ inputs.ADDITIONAL_TERRAFORM_WORKING_DIRECTORY != '' }}
+        shell: bash
+        working-directory: ${{ inputs.ADDITIONAL_TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform validate
 
       - name: Zip files for prerelease
         uses: thedoctor0/zip-release@0.6.2
