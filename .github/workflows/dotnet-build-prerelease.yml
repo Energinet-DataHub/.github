@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: .NET solution CI (build)
+name: .NET build - prerelease
 
 # DESCRIPTION:
 # This workflow will require two actions in the calling repository:
 #  - dotnet-prepare-outputs
 #  - dotnet-tests-prepare-outputs
 #
-# The workflow will build the dotnet code and create a prerelease
-# package containing the output.
-# The prerelease name will be in the format 'dotnet_<PR-number>'.
+# The workflow will build the dotnet code. If it is running as part
+# of a PR it will also create a prerelease package containing the
+# output. The prerelease name will be in the format 'dotnet_<PR-number>'.
 #
 # The workflow will also coordinate the creation of an artifact
 # 'dotnet-tests' containing outputs necessary for executing tests.
@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
@@ -116,11 +116,13 @@ jobs:
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
+        if: github.event_name == 'pull_request'
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           OUTPUT_PATH: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Zip files for prerelease
+        if: github.event_name == 'pull_request'
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
@@ -128,6 +130,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
+        if: github.event_name == 'pull_request'
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

@@ -26,14 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find associated pull request
-        uses: jwalton/gh-find-current-pr@v1
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v8
         id: find_pull_request
-        with:
-          state: all
 
       - name: Create _latest release
-        uses: Energinet-DataHub/.github/.github/actions/create-latest-release@8.8.0
+        uses: Energinet-DataHub/.github/.github/actions/create-latest-release@v8
         with:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_NAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pr }}
+          RELEASE_NAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pull_request_number }}
           RELEASE_NAME_PREFIX: ${{ inputs.RELEASE_NAME_PREFIX }}
