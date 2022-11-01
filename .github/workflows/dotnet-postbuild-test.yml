@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: .NET solution CI (test)
+name: .NET test
+
+# DESCRIPTION:
+# This workflow ...
 
 on:
   workflow_call:
