@@ -31,6 +31,10 @@ on:
       TERRAFORM_WORKING_DIRECTORY:
         required: true
         type: string
+      RELEASE_NAME_PREFIX:
+        required: false
+        default: 'infrastructure'
+        type: string
       INFRASTRUCTURE_PATH:
         required: true
         type: string
@@ -53,8 +57,8 @@ jobs:
 
     env:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/release
-      RELEASE_VERSION: infrastructure_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: infrastructure_${{ github.event.pull_request.number }}.zip
+      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout repository
