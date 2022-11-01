@@ -23,11 +23,13 @@ name: .NET test
 # and utilize parallel execution to reduce the overall workflow execution time.
 #
 # To prepare the 'dotnet-tests' artifact run the 'dotnet-solution-ci-build.yml'
-# workflow as a job in parallel of the "test" workflow. This allows some steps of
-# the "test" workflow to utilize the build time for setting up the job for executing
-# tests. The download step will then use a retry action to wait for the 'dotnet-tests'
-# artifact to be ready. If the build fails or takes too long, the test job will finally
-# fail as well.
+# workflow as a job in parallel of the test workflow. This allows steps of the
+# test workflow to utilize the build time for setting up the job for executing tests.
+#
+# The download step will use a retry action to wait for the 'dotnet-tests'
+# artifact to be ready. Each failing download attempt will be written to the build
+# log as an error, but can be ignored. If the build takes too long, the test
+# job will fail after the last retry attempt.
 
 on:
   workflow_call:
