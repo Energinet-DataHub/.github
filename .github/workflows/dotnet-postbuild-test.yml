@@ -15,7 +15,15 @@
 name: .NET test
 
 # DESCRIPTION:
-# This workflow ...
+# This workflow will run tests and code coverage of .NET xUnit test projects
+# that has been previously builded and uploaded as the 'dotnet-tests' artifact.
+#
+# To prepare the 'dotnet-tests' artifact run the 'dotnet-solution-ci-build.yml'
+# workflow as a job in parallel of the "test" workflow. This allows some steps of
+# the "test" workflow to utilize the build time for setting up the job for executing
+# tests. The download step will then use a retry action to wait for the 'dotnet-tests'
+# artifact to be ready for download. If the buildfails or takes too long, the test
+# job will finally fail as well.
 
 on:
   workflow_call:
