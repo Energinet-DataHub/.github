@@ -112,12 +112,24 @@ Files:
 
 These workflows are intended to run in parallel. While we build the .NET solution on one runner we can utilize this build time to setup other runners for the test execution.
 
+#### _Build_
+
 As it is more time effecient to build on Linux, we default to use Ubuntu for building the
-.NET solution. The caveat of this is that developers must be observant of the casing of folders and files in the repository as Linux is case-sensitive and Windows is not. This difference can lead to successful builds locally (on Windows) while it could fail on the build runner.
+.NET solution.
+
+The caveat of this is:
+
+- Developers must be observant of the casing of folders and files in the repository as Linux is case-sensitive and Windows is not. This difference can lead to successful builds locally (on Windows) while it could fail on the build runner.
+- An exception stacktrace from a .NET assembly builded on Linux uses the Linux path (if a path is given in the trace).
+
+#### _Test_
 
 We default to use Windows when testing as we currently also use Windows as the hosting system in Azure.
 
-For code coverage tools to work with the compiled tests we have to use `dotnet publish`. This is handled in the `dotnet-tests-prepare-outputs` action in each domain.
+For code coverage tools to work with the compiled tests we must use:
+
+- `dotnet publish` on each test project. This is handled in the `dotnet-tests-prepare-outputs` action in each domain.
+- `dotnet-coverage` to test and collect coverage of each test project. This is handled in the [dotnet-postbuild-test.yml](.github/workflows/dotnet-postbuild-test.yml) workflow.
 
 Example from a `dotnet-tests-prepare-outputs`:
 
@@ -159,6 +171,13 @@ Set `ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME` to an environment variable name 
 Where `<ASSEMBLY_NAME>` is the name of the assembly containing the type `TEntryPoint`, but using `_` instead of dot (.).
 
 Set `ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE` to the content root of the Web API/Application. This is usually the folder of the `*.csproj` file.
+
+Example from `opengeh-wholesale`:
+
+``` yml
+      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME: ASPNETCORE_TEST_CONTENTROOT_ENERGINET_DATAHUB_WHOLESALE_WEBAPI
+      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE: '\source\dotnet\Services\WebApi'
+```
 
 As a good practice also add a comment to the class inheriting from `WebApplicationFactory<TEntryPoint>` like in the following example from `opengeh-wholesale`:
 
