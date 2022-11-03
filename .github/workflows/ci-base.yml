@@ -153,4 +153,7 @@ jobs:
       run: rm -rf ${{ env.REMOTE_REPO_PATH }}
 
     - name: Check License Lines
-      uses: kt3k/license_checker@v1.0.3
+      shell: bash
+      run: |
+        yarn add @kt3k/license-checker@v3.2.2
+        npx @kt3k/license-checker
