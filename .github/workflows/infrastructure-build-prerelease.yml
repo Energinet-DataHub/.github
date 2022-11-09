@@ -50,6 +50,11 @@ on:
         required: false
         default: ''
         type: string
+    secrets:
+      PAT_TOKEN:
+        required: true
+        type: string
+        description: 'PAT token for system account to access modules in private repository'
 
 jobs:
   create_prerelease:
@@ -82,7 +87,7 @@ jobs:
       - name: Inject GITHUB_TOKEN into git configuration
         shell: bash
         run: |
-          git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+          git config --global url."https://oauth2:${{ secrets.PAT_TOKEN }}@github.com".insteadOf https://github.com
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.2.1
