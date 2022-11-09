@@ -41,6 +41,11 @@ on:
         required: false
         default: 'ubuntu-22.04'
         type: string
+      RELEASE_NAME_PREFIX:
+        required: false
+        type: string
+        description: 'Use this variable if you want to prefix the release name'
+        default: 'dotnet'
 
 jobs:
   create_prerelease:
@@ -51,8 +56,8 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      RELEASE_VERSION: dotnet_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: dotnet_${{ github.event.pull_request.number }}.zip
+      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout repository
