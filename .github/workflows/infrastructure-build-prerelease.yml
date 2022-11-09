@@ -53,7 +53,7 @@ on:
     secrets:
       PAT_TOKEN:
         required: true
-        description: 'PAT token for system account to access modules in private repository'
+        description: 'PAT token for system account with private repository scope to access modules in private repository'
 
 jobs:
   create_prerelease:
@@ -83,7 +83,7 @@ jobs:
         run: |
           cp -fR ${{ inputs.ADDITIONAL_INFRASTRUCTURE_PATH }} ${{ env.RELEASE_FOLDER_PATH }} 2>/dev/null || :
 
-      - name: Inject GITHUB_TOKEN into git configuration
+      - name: Inject PAT_TOKEN into git configuration
         shell: bash
         run: |
           git config --global url."https://oauth2:${{ secrets.PAT_TOKEN }}@github.com".insteadOf https://github.com
