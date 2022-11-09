@@ -79,6 +79,11 @@ jobs:
         run: |
           cp -fR ${{ inputs.ADDITIONAL_INFRASTRUCTURE_PATH }} ${{ env.RELEASE_FOLDER_PATH }} 2>/dev/null || :
 
+      - name: Inject GITHUB_TOKEN into git configuration
+        shell: bash
+        run: |
+          git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.2.1
         with:
