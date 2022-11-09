@@ -53,7 +53,6 @@ on:
     secrets:
       PAT_TOKEN:
         required: true
-        type: string
         description: 'PAT token for system account to access modules in private repository'
 
 jobs:
