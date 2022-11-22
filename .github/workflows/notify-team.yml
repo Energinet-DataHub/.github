@@ -66,6 +66,9 @@ jobs:
             TEAM_EMAIL=${{ secrets.EMAIL_VOLT }}
           fi
 
+          # TODO: Remove later, testing use of secrets, and emaling.
+          TEAM_EMAIL=${{ secrets.EMAIL_TEST }}
+
           echo "Determine SendGrid API Key"
           if [ ${{ inputs.IS_DEV_TEST }} == true]; then
             SENDGRID_INSTANCE_API_KEY=${{ secrets.SENDGRID_INSTANCE_API_KEY_DEV_TEST }}
