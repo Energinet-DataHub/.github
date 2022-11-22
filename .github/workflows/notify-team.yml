@@ -46,7 +46,6 @@ on:
 jobs:
   notify_team:
     runs-on: ubuntu-latest
-
     steps:
       - name: Send email
         shell: bash
