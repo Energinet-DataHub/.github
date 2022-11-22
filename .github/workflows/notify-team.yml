@@ -35,7 +35,8 @@ on:
         type: string
       BODY:
         description: 'Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.'
-        required: true
+        required: false
+        default: ''
         type: string
       IS_DEV_TEST:
         description: 'Determine if we should use the SendGrid instance in dev/test or preprod/prod.'
