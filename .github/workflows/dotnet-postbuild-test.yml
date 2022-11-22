@@ -12,7 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: .NET solution CI (test)
+name: .NET test
+
+# DESCRIPTION:
+# This workflow will run tests and code coverage of .NET xUnit test projects
+# that has been previously builded and uploaded as the 'dotnet-tests' artifact.
+#
+# It is intended to run tests in one .NET xUnit test project, and support
+# filters, so developers can split the execution of tests on multiple runners
+# and utilize parallel execution to reduce the overall workflow execution time.
+#
+# To prepare the 'dotnet-tests' artifact run the 'dotnet-solution-ci-build.yml'
+# workflow as a job in parallel of the test workflow. This allows steps of the
+# test workflow to utilize the build time for setting up the job for executing tests.
+#
+# The download step will use a retry action to wait for the 'dotnet-tests'
+# artifact to be ready. Each failing download attempt will be written to the build
+# log as an error, but can be ignored. If the build takes too long, the test
+# job will fail after the last retry attempt.
 
 on:
   workflow_call:
@@ -235,7 +252,7 @@ jobs:
       - name: Run tests and publish report
         shell: pwsh
         run: |
-          dotnet tool install --global dotnet-coverage
+          dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
           {
@@ -258,10 +275,6 @@ jobs:
 
           $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
           $testFailures
-          if ($testFailures.Count -gt 0)
-          {
-            Exit 1
-          }
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
