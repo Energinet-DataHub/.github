@@ -29,6 +29,7 @@ runs:
   using: composite
   steps:
     - name: Check each NuGet package version does not exists (not looking at prereleases)
+      if: ${{ inputs.PUSH_PACKAGES == 'true' || inputs.CONTENT_CHANGED == 'true'}}
       shell: pwsh
       run: |
         $path = "${{ inputs.NUPKG_RECURSE_PATH }}"
