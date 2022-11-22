@@ -66,9 +66,6 @@ jobs:
             TEAM_EMAIL=${{ secrets.EMAIL_VOLT }}
           fi
 
-          # TODO: Remove later, testing use of secrets, and emaling.
-          TEAM_EMAIL=${{ secrets.EMAIL_TEST }}
-
           echo "::add-mask::$TEAM_EMAIL"
           echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
 
