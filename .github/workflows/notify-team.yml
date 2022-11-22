@@ -48,10 +48,10 @@ jobs:
   notify_team:
     runs-on: ubuntu-latest
     steps:
-      - name: Send email
+      - name: Determine email
+        id: get_email
         shell: bash
         run: |
-          echo "Determine team email"
           if [ ${{ inputs.TEAM_NAME }} == 'Batman' ]; then
             TEAM_EMAIL=${{ secrets.EMAIL_BATMAN }}
           elif [ ${{ inputs.TEAM_NAME }} == 'Mandalorian' ]; then
@@ -69,15 +69,26 @@ jobs:
           # TODO: Remove later, testing use of secrets, and emaling.
           TEAM_EMAIL=${{ secrets.EMAIL_TEST }}
 
-          echo "Determine SendGrid API Key"
+          echo "::add-mask::$TEAM_EMAIL"
+          echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
+
+      - name: Determine SendGrid API Key
+        id: get_api_key
+        shell: bash
+        run: |
           if [ ${{ inputs.IS_DEV_TEST }} == true]; then
             SENDGRID_INSTANCE_API_KEY=${{ secrets.SENDGRID_INSTANCE_API_KEY_DEV_TEST }}
           else
             SENDGRID_INSTANCE_API_KEY=${{ secrets.SENDGRID_INSTANCE_API_KEY_PREPROD_PROD }}
           fi
 
-          echo "Send email"
+          echo "::add-mask::$SENDGRID_INSTANCE_API_KEY"
+          echo "SENDGRID_INSTANCE_API_KEY=$SENDGRID_INSTANCE_API_KEY" >>$GITHUB_OUTPUT
+
+      - name: Send email
+        shell: bash
+        run: |
           curl -s -o /dev/null -w "HttpStatus: %{http_code}" -X POST  https://api.sendgrid.com/v3/mail/send \
-            --header "Authorization: Bearer ${SENDGRID_INSTANCE_API_KEY}" \
+            --header "Authorization: Bearer ${{ steps.get_api_key.outputs.SENDGRID_INSTANCE_API_KEY }}" \
             --header "Content-Type: application/json" \
-            --data '{"personalizations":[{"to":[{"email":"${{ env.TEAM_EMAIL }}","name":"${{ inputs.TEAM_NAME }}"}]}],"from":{"email":"${{ secrets.EMAIL_SENDER }}","name":"DataHub Github"},"subject":"${{ inputs.SUBJECT }}","content":[{"type":"text/html","value":"Link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} ${{ inputs.BODY }}"}]}'
+            --data '{"personalizations":[{"to":[{"email":"${{ steps.get_email.outputs.TEAM_EMAIL }}","name":"${{ inputs.TEAM_NAME }}"}]}],"from":{"email":"${{ secrets.EMAIL_SENDER }}","name":"DataHub Github"},"subject":"${{ inputs.SUBJECT }}","content":[{"type":"text/html","value":"Link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} ${{ inputs.BODY }}"}]}'
