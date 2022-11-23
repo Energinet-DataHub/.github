@@ -64,6 +64,9 @@ jobs:
             TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
           elif [ ${{ inputs.TEAM_NAME }} == 'Volt' ]; then
             TEAM_EMAIL=${{ secrets.EMAIL_VOLT }}
+          else
+            # Fallback
+            TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
           fi
 
           echo "::add-mask::$TEAM_EMAIL"
