@@ -1,0 +1,76 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Notify team
+
+# DESCRIPTION:
+# This workflow is used to notify teams about failing deployments
+# by sending an email to their MS Team Channel.
+#
+# The workflow must be called using 'secrets: inherit' to get access
+# to necessary secrets.
+# See: https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
+
+on:
+  workflow_call:
+    inputs:
+      TEAM_NAME:
+        description: 'The name of the team who should receive the email. Used to determine the email address.'
+        required: true
+        type: string
+      SUBJECT:
+        description: 'The email subject. Should contain environment information when possible.'
+        required: true
+        type: string
+      BODY:
+        description: 'Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  notify_team:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine email
+        id: get_email
+        shell: bash
+        run: |
+          if [ ${{ inputs.TEAM_NAME }} == 'Batman' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_BATMAN }}
+          elif [ ${{ inputs.TEAM_NAME }} == 'Mandalorian' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_MANDALORIAN }}
+          elif [ ${{ inputs.TEAM_NAME }} == 'Titans' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_TITANS }}
+          elif [ ${{ inputs.TEAM_NAME }} == 'TexasRangers' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_TEXASRANGERS }}
+          elif [ ${{ inputs.TEAM_NAME }} == 'TheOutlaws' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
+          elif [ ${{ inputs.TEAM_NAME }} == 'Volt' ]; then
+            TEAM_EMAIL=${{ secrets.EMAIL_VOLT }}
+          else
+            # Fallback
+            TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
+          fi
+
+          echo "::add-mask::$TEAM_EMAIL"
+          echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
+
+      - name: Send email
+        shell: bash
+        run: |
+          curl -s -o /dev/null -w "HttpStatus: %{http_code}" -X POST  https://api.sendgrid.com/v3/mail/send \
+            --header "Authorization: Bearer ${{ secrets.SENDGRID_INSTANCE_SYSTEM_NOTIFICATIONS_API_KEY }}" \
+            --header "Content-Type: application/json" \
+            --data '{"personalizations":[{"to":[{"email":"${{ steps.get_email.outputs.TEAM_EMAIL }}","name":"${{ inputs.TEAM_NAME }}"}]}],"from":{"email":"${{ secrets.EMAIL_SENDER }}","name":"DataHub Github"},"subject":"${{ inputs.SUBJECT }}","content":[{"type":"text/html","value":"Link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} ${{ inputs.BODY }}"}]}'
