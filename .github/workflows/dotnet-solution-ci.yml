@@ -92,9 +92,9 @@ jobs:
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.19.0'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.4670'
-      # Necessary to manage Azure resources for tests
+      # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
-      # Necessary to provide secrets for authentication and authorization if needed
+      # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
       AZURE_B2CSECRETS_KEYVAULT_URL: ${{ secrets.AZURE_B2CSECRETS_KEYVAULT_URL }}
       #
       # Only relevant if USE_AZURE_FUNCTIONS_TOOLS is TRUE
