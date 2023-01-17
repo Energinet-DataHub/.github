@@ -27,7 +27,7 @@ inputs:
   BUILD_CONFIGURATION:
     required: false
     default: 'Release'
-  # Settings required if we need to login to Azure
+  # Secrets required if we need to login to Azure and use Azure resources from automated tests
   AZURE_TENANT_ID:
     required: false
   AZURE_SUBSCRIPTION_ID:
