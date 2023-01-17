@@ -20,6 +20,11 @@ on:
       SOLUTION_FILE_PATH:
         required: true
         type: string
+      TESTS_FILTER_EXPRESSION:
+        description: 'Filter expression to use with dotnet test'
+        required: false
+        default: 'empty'
+        type: string
       DOTNET_VERSION:
         description: 'Install specified .NET Core SDK version'
         required: false
@@ -101,6 +106,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Guard for Windows OS
+        shell: bash
+        run: |
+          echo "Runner OS is $RUNNER_OS"
+          if [ $RUNNER_OS == 'Windows' ]; then
+            echo "$RUNNER_OS is supported"
+          else
+            echo "$RUNNER_OS is not supported"
+            exit 1
+          fi
 
       - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v3
@@ -207,9 +223,25 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run tests and publish report
+        shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-          dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+          # Handle filter expression
+          if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -eq 'empty' )
+          {
+            dotnet test ${{ inputs.SOLUTION_FILE_PATH }} `
+              --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
+              --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --output ${{ github.workspace }}\output `
+          }
+          else
+          {
+            dotnet test ${{ inputs.SOLUTION_FILE_PATH }} `
+              --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
+              --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
+              --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --output ${{ github.workspace }}\output `
+          }
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
