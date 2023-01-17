@@ -215,7 +215,7 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
-      - name: Login to use Azure resources in integration tests
+      - name: Login to use Azure resources from automated tests
         if: ${{ secrets.AZURE_TENANT_ID != '' }}
         uses: azure/login@v1
         with:

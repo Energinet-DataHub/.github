@@ -225,7 +225,7 @@ jobs:
               Exit 1
             }
 
-      - name: Login to use Azure resources in integration tests
+      - name: Login to use Azure resources from automated tests
         if: ${{ secrets.AZURE_TENANT_ID != '' }}
         uses: azure/login@v1
         with:
