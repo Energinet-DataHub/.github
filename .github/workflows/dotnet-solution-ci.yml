@@ -64,8 +64,10 @@ on:
         type: string
     secrets:
       AZURE_KEYVAULT_URL:
+        description: 'Required if we need to manage Azure resources from automated tests'
         required: false
       AZURE_B2CSECRETS_KEYVAULT_URL:
+        description: 'Required if we need to retrieve B2C access tokens from automated tests'
         required: false
       # Secrets required if we need to login to Azure and use Azure resources from automated tests
       AZURE_TENANT_ID:
