@@ -27,12 +27,7 @@ inputs:
   BUILD_CONFIGURATION:
     required: false
     default: 'Release'
-  # Setting either KeyVault url will login to Azure
-  AZURE_KEYVAULT_URL:
-    required: false
-  AZURE_SECRETS_KEYVAULT_URL:
-    required: false
-  # Settings required if we need to login to Azure
+  # Secrets required if we need to login to Azure and use Azure resources from automated tests
   AZURE_TENANT_ID:
     required: false
   AZURE_SUBSCRIPTION_ID:
@@ -53,8 +48,8 @@ runs:
       run: |
         dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
 
-    - name: Login to use Azure resources in integration tests
-      if: ${{ inputs.AZURE_KEYVAULT_URL != '' || inputs.AZURE_SECRETS_KEYVAULT_URL != '' }}
+    - name: Login to use Azure resources from automated tests
+      if: ${{ inputs.AZURE_TENANT_ID != '' }}
       uses: azure/login@v1
       with:
         client-id: ${{ inputs.AZURE_SPN_ID }}

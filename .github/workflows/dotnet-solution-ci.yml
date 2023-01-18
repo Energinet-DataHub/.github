@@ -63,15 +63,18 @@ on:
         default: ''
         type: string
     secrets:
+      AZURE_KEYVAULT_URL:
+        description: 'Required if we need to manage Azure resources from automated tests'
+        required: false
+      AZURE_B2CSECRETS_KEYVAULT_URL:
+        description: 'Required if we need to retrieve B2C access tokens from automated tests'
+        required: false
+      # Secrets required if we need to login to Azure and use Azure resources from automated tests
       AZURE_TENANT_ID:
         required: false
       AZURE_SUBSCRIPTION_ID:
         required: false
       AZURE_SPN_ID:
-        required: false
-      AZURE_KEYVAULT_URL:
-        required: false
-      AZURE_SECRETS_KEYVAULT_URL:
         required: false
 
 permissions:
@@ -91,10 +94,10 @@ jobs:
       NODE_VERSION: '16'
       AZURITE_VERSION: '3.19.0'
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: '4.0.4670'
-      # Necessary to manage Azure resources for tests
+      # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
-      # Necessary to provide secrets for authentication and authorization if needed
-      AZURE_SECRETS_KEYVAULT_URL: ${{ secrets.AZURE_SECRETS_KEYVAULT_URL }}
+      # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
+      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ secrets.AZURE_B2CSECRETS_KEYVAULT_URL }}
       #
       # Only relevant if USE_AZURE_FUNCTIONS_TOOLS is TRUE
       #
@@ -214,8 +217,8 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
-      - name: Login to use Azure resources in integration tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_SECRETS_KEYVAULT_URL != '' }}
+      - name: Login to use Azure resources from automated tests
+        if: ${{ secrets.AZURE_TENANT_ID != '' }}
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_SPN_ID }}
