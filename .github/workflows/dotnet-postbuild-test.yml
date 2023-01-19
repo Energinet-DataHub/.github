@@ -228,7 +228,7 @@ jobs:
             }
 
       - name: Login to use Azure resources from automated tests
-        if: ${{ secrets.AZURE_TENANT_ID != '' }}
+        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_SPN_ID }}

@@ -218,7 +218,7 @@ jobs:
         run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Login to use Azure resources from automated tests
-        if: ${{ secrets.AZURE_TENANT_ID != '' }}
+        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_SPN_ID }}
