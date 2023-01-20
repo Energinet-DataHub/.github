@@ -17,6 +17,12 @@ This repository contains shared github items such as actions, workflows and much
 
 After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release.
 
+**Important:**
+
+1. We support up to two major versions at any given time.
+1. All changes (new functionality, improvements, maintenance) must be implemented in the latest major version.
+1. Only **important maintenance** (like updating .NET SDK version) should be implemented in the previous major version.
+
 ### Specific version release
 
 First we must always create a specific version release, so developers can use a specific release should they choose to do so.
