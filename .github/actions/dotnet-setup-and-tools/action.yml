@@ -19,7 +19,7 @@ inputs:
   DOTNET_VERSION:
     description: 'Install specified .NET Core SDK version'
     required: false
-    default: '6.0.404'
+    default: '6.0.405'
     type: 'string'
   # Cosmos DB emulator
   USE_COSMOS_DB_EMULATOR:
