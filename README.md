@@ -17,13 +17,30 @@ This repository contains shared github items such as actions, workflows and much
 
 After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release.
 
-**Important:**
+**Versioning:**
 
 1. We support up to two major versions at any given time.
-1. All changes (new functionality, improvements, maintenance) must be implemented in the latest major version.
-1. Only **important maintenance** (like updating .NET SDK version) should be implemented in the previous major version.
+1. The latest major version must contain all changes (new functionality, improvements, maintenance).
+1. The previous major version should only contain **important maintenance** changes.
 
-### Specific version release
+### Preparing a new major version
+
+When we implement a breaking change we must create a new major version.
+
+When creating a new major version we must handle the following:
+
+1. Delete any obsolete major version release, tag and version branch in GitHub (e.g. `v8`)
+1. Create the new major version release and tag following [Changes implemented in latest major version](#changes-implemented-in-latest-major-version) (e.g. `v10`)
+1. Shift the previous major version into maintenance mode (e.g. `v9`)
+    - Delete the previous major version release and tag in GitHub
+    - Create a root branch based on the last commit for that version and name it as the previous major version
+    - Create a branch policy for this new branch to ensure we use PR's for any changes
+
+From then on any important maintenance changes to the previous version must be implemented using a PR to the version branch.
+
+### Changes implemented in latest major version
+
+#### Specific version release
 
 First we must always create a specific version release, so developers can use a specific release should they choose to do so.
 
@@ -39,7 +56,7 @@ First we must always create a specific version release, so developers can use a 
 
    - When everything looks good press `Publish release` to create the release.
 
-### Major version tag
+#### Major version tag
 
 Secondly we must create or update a major version tag (e.g. `v7`). This allows developers to opt in on automatically using the latest minor or patch version within the choosen major version channel.
 
