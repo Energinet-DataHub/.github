@@ -17,15 +17,21 @@ name: License and Markdown Check
 on:
   workflow_call:
     inputs:
+      OPERATING_SYSTEM:
+        required: false
+        default: 'ubuntu-22.04'
+        type: string
       SKIP_MARKDOWN_CHECK:
         required: false
         type: string
         description: 'Set to true to skip checking Markdown files'
         default: 'false'
-      OPERATING_SYSTEM:
+      SKIP_LICENSE_CHECK:
         required: false
-        default: 'ubuntu-22.04'
         type: string
+        description: 'Set to true to skip checking License lines'
+        default: 'false'
+
 jobs:
   skip_md_check:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
@@ -133,6 +139,7 @@ jobs:
 
   check_license_lines:
     name: Check License Lines
+    if: ${{ inputs.SKIP_LICENSE_CHECK != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
