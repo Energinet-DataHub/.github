@@ -30,10 +30,6 @@ inputs:
     description: 'Branch on which tags will be created. Default: main'
     required: false
     default: 'main'
-  IS_DRYRUN:
-    description: 'True = Test whether tag already exists in repository. False: If tag does not exist, create it. Default = true'
-    required: false
-    default: 'true'
 
 runs:
   using: composite
@@ -46,9 +42,11 @@ runs:
         $patch = ${{ inputs.PATCH_VERSION }}
         $repo = "${{ inputs.REPOSITORY_PATH }}"
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
-        $isdryrun = "${{ inputs.IS_DRYRUN }}"
-              
-        Write-Host "Github event name is:" ${{ github.event_name }} 
+                
+        Write-Host "Github event name is:" ${{ github.event_name }}
+        $isdryrun = ('${{ github.event_name }}' -eq 'pull_request')
+        Write-Host "Is dryrun: $isdryrun"
+        
 
         if ($env:GH_TOKEN -eq '') {
           throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
