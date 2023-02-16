@@ -13,12 +13,12 @@
 # limitations under the License.
 
 param(
-    $Major,
-    $Minor,
-    $Patch,
-    $Repository,
-    $Targetbranch,
-    $IsDryrun
+    [int]$Major,
+    [int]$Minor,
+    [int]$Patch,
+    [string]$Repository,
+    [string]$Targetbranch,
+    [bool]$IsDryrun
 )
 Write-Host "IsDryrun: $IsDryrun"
 

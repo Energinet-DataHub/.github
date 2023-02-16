@@ -44,9 +44,9 @@ runs:
         $major = ${{ inputs.MAJOR_VERSION }}
         $minor = ${{ inputs.MINOR_VERSION }}
         $patch = ${{ inputs.PATCH_VERSION }}
-        $repo = ${{ inputs.REPOSITORY_PATH }}
-        $targetBranch = ${{ inputs.TARGET_BRANCH }}
-        $isdryrun = ${{ inputs.IS_DRYRUN }}
+        $repo = "${{ inputs.REPOSITORY_PATH }}"
+        $targetBranch = "${{ inputs.TARGET_BRANCH }}""
+        $isdryrun = "${{ inputs.IS_DRYRUN }}"
 
         ./create-release.ps1 -Major $major -Minor $minor -Patch $patch -Repository $repo -Targetbranch $targetbranch -IsDryrun $isdryrun
 
