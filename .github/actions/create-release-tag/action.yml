@@ -29,11 +29,10 @@ inputs:
   TARGET_BRANCH:
     description: 'Branch on which tags will be created. Default: main'
     required: false
-    default: main
+    default: 'main'
   IS_DRYRUN:
     description: 'True = Test whether tag already exists in repository. False: If tag does not exist, create it. Default = true'
     required: true
-    type: boolean
     default: 'true'
 
 runs:
