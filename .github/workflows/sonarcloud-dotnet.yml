@@ -23,7 +23,7 @@ on:
       DOTNET_VERSION:
         description: 'Install specified .NET Core SDK version'
         required: false
-        default: '6.0.405'
+        default: '6.0.406'
         type: 'string'
       SONAR_CLOUD_ORGANIZATION:
         required: true
