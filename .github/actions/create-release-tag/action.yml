@@ -67,7 +67,7 @@ runs:
 
         Write-Host 'Tag does not exist, all clear'
 
-        if (!$isdryrun) {
+        if ($isdryrun.ToLower() -eq 'false') {
 
             Write-Host "Deleting major version tag v$major"
             gh release delete "v$major" -y --cleanup-tag  -R $repo
