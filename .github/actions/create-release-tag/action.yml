@@ -48,8 +48,33 @@ runs:
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
         $isdryrun = ${{ inputs.IS_DRYRUN }}
         
-        ls
+        $semver = "$major.$minor.$patch"        
+        Write-Host "New version tag: $semver"
+        Write-Host "Major version tag is: v$major"
 
-        ./create-release.ps1 -Major $major -Minor $minor -Patch $patch -Repository $repo -Targetbranch $targetbranch -IsDryrun $isdryrun
+        $currentReleases = gh release list -L 10000 -R $repo | ConvertFrom-Csv -Delimiter "`t" -Header @('title','type','tagname','published')
+
+        foreach($release in $currentReleases)
+        {
+            if ($release.title -eq $semver) {
+                throw "Error: Cannot create release $semver in $repo as it already exists !"
+            }
+        }
+
+        Write-Host 'Tag does not exist, all clear'
+
+        if (!$isdryrun) {
+
+            Write-Host "Deleting major version tag v$major"
+            gh release delete "v$major" -y --cleanup-tag  -R $repo
+
+            Write-Host "Creating new major version tag v$major"
+            gh release create "v$major" --title "v$major" --notes "Latest release"  --target $targetBranch -R $repo
+
+            Write-Host "Creating $semver"
+            gh release create $semver --generate-notes --latest --title $semver --target $targetBranch -R $repo
+        }      
+
+        Write-Host "All done"
 
 
