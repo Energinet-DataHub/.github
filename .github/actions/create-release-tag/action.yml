@@ -47,7 +47,9 @@ runs:
         $repo = "${{ inputs.REPOSITORY_PATH }}"
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
         $isdryrun = "${{ inputs.IS_DRYRUN }}"
-        
+              
+        Write-Host "Github event name is:" ${{ github.event_name }} 
+
         if ($env:GH_TOKEN -eq '') {
           throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
         }
