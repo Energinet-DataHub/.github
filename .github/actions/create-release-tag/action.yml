@@ -47,6 +47,8 @@ runs:
         $repo = "${{ inputs.REPOSITORY_PATH }}"
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
         $isdryrun = ${{ inputs.IS_DRYRUN }}
+        
+        ls
 
         ./create-release.ps1 -Major $major -Minor $minor -Patch $patch -Repository $repo -Targetbranch $targetbranch -IsDryrun $isdryrun
 
