@@ -1,5 +1,5 @@
 
-name: Create release tag
+name: CI
 
 on:
   push:
