@@ -44,8 +44,8 @@ runs:
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
                 
         Write-Host "Github event name is:" ${{ github.event_name }}
-        $isdryrun = ('${{ github.event_name }}' -eq 'pull_request')
-        Write-Host "Is dryrun: $isdryrun"
+        $isPullRequest = ('${{ github.event_name }}' -eq 'pull_request')
+        Write-Host "Is PR: $isPullRequest"
         
 
         if ($env:GH_TOKEN -eq '') {
@@ -67,7 +67,7 @@ runs:
 
         Write-Host 'Tag does not exist, all clear'
 
-        if (!$isdryrun) {
+        if (!$isPullRequest) {
 
             Write-Host "Deleting major version tag v$major"
             gh release delete "v$major" -y --cleanup-tag  -R $repo
