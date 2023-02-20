@@ -1,0 +1,23 @@
+
+name: Create release tag
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  createrelease:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Create release
+      uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
+      with:
+        MAJOR_VERSION: 10
+        MINOR_VERSION: 2
+        PATCH_VERSION: 2
+        REPOSITORY_PATH: 'Energinet-DataHub/.github'
+      env: 
+        GH_TOKEN: ${{ github.token }}
