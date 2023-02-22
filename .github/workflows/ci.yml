@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
       
       - name: 'Yamllint on workflow files'
-        uses: karancode/yamllint-github-action@v2.1.0
+        uses: karancode/yamllint-github-action@v2.0.0
         with:
           yamllint_file_or_dir: '.github/workflows'
           yamllint_strict: false
