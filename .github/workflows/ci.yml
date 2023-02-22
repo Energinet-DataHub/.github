@@ -19,7 +19,7 @@ jobs:
         uses: karancode/yamllint-github-action@v2.0.0
         with:
           yamllint_file_or_dir: '.github/workflows'
-          yamllint_strict: false
+          yamllint_strict: true
   #yamllint_actions:
 
 
