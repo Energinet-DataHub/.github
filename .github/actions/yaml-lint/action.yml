@@ -59,14 +59,14 @@ runs:
                 if (!($inputKey -ceq $inputKey.ToLower())) {
                     Write-Host “Input variable '$inputKey' contains uppercase characters”
                    
-                    $$uppercaseVarsFound = $true
+                    $uppercaseVarsFound = $true
                 }
             }
         }
 
         $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
         Write-Host "Should fail step: $shouldFail"
-        if ($$uppercaseVarsFound -and $shouldFail) {
+        if ($uppercaseVarsFound -and $shouldFail) {
             throw 'One or more input variables contain uppercase characters'
             exit 1      
         } 
