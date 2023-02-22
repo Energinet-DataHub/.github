@@ -47,7 +47,7 @@ runs:
         Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
         $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
         Write-Host "Files found in $($folder): $($files.Length)"
-        $failStep = $false
+        $uppercaseVarsFound = $false
 
         foreach($file in $files) {
             Write-Host "Checking $($file.FullName)"
@@ -59,14 +59,14 @@ runs:
                 if (!($inputKey -ceq $inputKey.ToLower())) {
                     Write-Host “Input variable '$inputKey' contains uppercase characters”
                    
-                    $failStep = $true
+                    $$uppercaseVarsFound = $true
                 }
             }
         }
 
-        $shouldFail = (${{ inputs.fail_on_uppercase_input_params }} -eq 'true')
-
-        if ($failStep -and $shouldFail) {
+        $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
+        Write-Host "Should fail step: $shouldFail"
+        if ($$uppercaseVarsFound -and $shouldFail) {
             throw 'One or more input variables contain uppercase characters'
             exit 1      
         } 
