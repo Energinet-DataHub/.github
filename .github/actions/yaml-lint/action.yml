@@ -39,7 +39,7 @@ runs:
       run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
 
     - name: Github input variables in should be lowercase
-      #if: (${{ inputs.check_lowercase_input_params == 'true' }})
+      if: (${{ inputs.check_lowercase_input_params == 'true' }})
       shell: pwsh
       run: |
         $folder = "${{ inputs.yaml_file_or_folder }}"
