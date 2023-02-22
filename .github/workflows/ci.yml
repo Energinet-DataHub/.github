@@ -8,7 +8,23 @@ on:
     branches: [ "main" ]
 
 jobs:
+  yamllint_workflows:
+    name: YAML linting for workflow files
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout
+
+      - name: 'Yamllint on workflow directory'
+        uses: karancode/yamllint-github-action@v2.1.0
+        with:
+          yamllint_file_or_dir: '.github/workflows'
+          yamllint_strict: false
+  #yamllint_actions:
+
+
   createrelease:
+    name: Create release tag
     runs-on: ubuntu-latest
     steps:
 
