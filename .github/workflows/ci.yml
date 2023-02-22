@@ -19,7 +19,7 @@ jobs:
         run: pip install yamllint
 
       - name: Lint YAML files
-        run: yamllint .github/workflows
+        run: yamllint -f standard .github/workflows
   #yamllint_actions:
 
 
