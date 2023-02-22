@@ -19,7 +19,7 @@ inputs:
   yaml_file_or_folder:
     description: Path to the yaml file or folder to perform linting on
     required: true
-  check_lowercase_input_params:
+  fail_on_uppercase_input_params:
     description: Should we fail linting if input params in workflow and actions contain uppercase letters? Default is false
     required: false
     default: 'false'
@@ -39,7 +39,7 @@ runs:
       run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
 
     - name: Github input variables in should be lowercase
-      #if: ( ${{ inputs.check_lowercase_input_params }} == 'true' )
+      if: always()
       shell: pwsh
       run: |
         $folder = "${{ inputs.yaml_file_or_folder }}"
@@ -64,7 +64,9 @@ runs:
             }
         }
 
-        if ($failStep) {
+        $shouldFail = (${{ inputs.fail_on_uppercase_input_params }} -eq 'true')
+
+        if ($failStep -and $shouldFail) {
             throw 'One or more input variables contain uppercase characters'
             exit 1      
         } 
