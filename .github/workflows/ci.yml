@@ -12,16 +12,14 @@ jobs:
     name: YAML linting for workflow files
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Lint YAML files
-        run: yamllint -f colored .github/workflows
-  #yamllint_actions:
-
+    - name: YAML lint in workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
+      with:
+        yaml_file_or_folder: .github/workflows
+    - name: YAML lint in actions folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
+      with:
+        yaml_file_or_folder: .github/actions
 
   createrelease:
     name: Create release tag
