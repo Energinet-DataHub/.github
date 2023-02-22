@@ -12,12 +12,16 @@ jobs:
     name: YAML linting
     runs-on: ubuntu-latest
     steps:
-    - name: YAML lint in workflows folder
+    - name: Check workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
       with:
         yaml_file_or_folder: .github/workflows
 
-    - name: YAML lint in actions folder
+  yamllint_actions:
+    name: YAML lint in actions folder
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check actions folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
       with:
         yaml_file_or_folder: .github/actions
