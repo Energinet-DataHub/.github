@@ -15,11 +15,16 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       
-      - name: 'Yamllint on workflow files'
-        uses: karancode/yamllint-github-action@v2.0.0
-        with:
-          yamllint_file_or_dir: '.github/workflows'
-          yamllint_strict: true
+      # - name: 'Yamllint on workflow files'
+      #   uses: karancode/yamllint-github-action@v2.0.0
+      #   with:
+      #     yamllint_file_or_dir: '.github/workflows'
+      #     yamllint_strict: true
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: yamllint .github/workflows
   #yamllint_actions:
 
 
@@ -33,7 +38,7 @@ jobs:
       with:
         MAJOR_VERSION: 10
         MINOR_VERSION: 3
-        PATCH_VERSION: 0
+        PATCH_VERSION: 1
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env: 
         GH_TOKEN: ${{ github.token }}
