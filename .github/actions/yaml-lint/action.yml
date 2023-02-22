@@ -46,7 +46,7 @@ runs:
 
         Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
         $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-        Write-Host "Files found: $($files.Length)"
+        Write-Host "Files found in $folder: $($files.Length)"
         $failStep = $false
 
         foreach($file in $files) {
