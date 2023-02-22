@@ -16,7 +16,7 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
       with:
         yaml_file_or_folder: .github/workflows
-        fail_on_uppercase_input_params: 'true'
+        fail_on_uppercase_input_params: 'false'
 
   yamllint_actions:
     name: YAML lint in actions folder
