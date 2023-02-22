@@ -34,9 +34,9 @@ runs:
       shell: bash
       run: pip install yamllint
 
-    # - name: Lint YAML files
-    #   shell: bash
-    #   run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
+    - name: Lint YAML files
+      shell: bash
+      run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
 
     - name: Github input variables in should be lowercase
       #if: (${{ inputs.check_lowercase_input_params == 'true' }})
