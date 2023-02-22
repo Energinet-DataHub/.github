@@ -9,13 +9,14 @@ on:
 
 jobs:
   yamllint_workflows:
-    name: YAML linting for workflow files
+    name: YAML linting
     runs-on: ubuntu-latest
     steps:
     - name: YAML lint in workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
       with:
         yaml_file_or_folder: .github/workflows
+
     - name: YAML lint in actions folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/add-yamllint-for-workflows
       with:
