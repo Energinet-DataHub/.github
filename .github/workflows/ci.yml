@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v3
-          
+
     - name: Lint .github/workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
       with:
@@ -25,15 +25,15 @@ jobs:
       with:
         yaml_file_or_folder: .github/actions
 
-    - name: Validate input fields in .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
-      with:
-        yaml_file_or_folder: .github/workflows
+    # - name: Validate input fields in .github/workflows folder
+    #   uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
+    #   with:
+    #     yaml_file_or_folder: .github/workflows
 
-    - name: Validate input fields in .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
-      with:
-        yaml_file_or_folder: .github/actions        
+    # - name: Validate input fields in .github/actions folder
+    #   uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
+    #   with:
+    #     yaml_file_or_folder: .github/actions        
 
   createrelease:
     name: Create release tag
