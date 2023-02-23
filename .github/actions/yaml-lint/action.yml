@@ -29,4 +29,4 @@ runs:
 
     - name: Lint YAML files
       shell: bash
-      run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
+      run: yamllint -f colored -c ${{ env.GITHUB_ACTION_PATH}}/.yamllint ${{ inputs.yaml_file_or_folder }} 
