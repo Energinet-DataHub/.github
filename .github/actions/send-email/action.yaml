@@ -15,8 +15,23 @@
 name: Send email
 description: Send email to one or multiple recipients
 inputs:
-  email:
-    description: Should contain either a single email or a list of comma separated emails.
+  sendgrid-api-key:
+    description: A valid SendGrid API key.
+    required: true
+  team-name:
+    description: The name of the team who should receive the email. When sending to multiple recipients this name will be used for all of them.
+    required: true
+  to:
+    description: The email to-address. Should contain either a single email or a list of comma separated emails.
+    required: true
+  from:
+    description: The email from-address.
+    required: true
+  subject:
+    description: The email subject. Should contain environment information when possible.
+    required: true
+  content:
+    description: Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.
     required: true
 
 runs:
@@ -25,5 +40,5 @@ runs:
     - name: Run PowerShell script
       shell: pwsh
       run: |
-        ${{ github.action_path }}/Send-EMail.ps1 -EMail ${{ inputs.email }}
+        ${{ github.action_path }}/Send-EMail.ps1
 
