@@ -68,6 +68,9 @@ jobs:
           echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
 
       - name: Send email
+
+
+      - name: Send email
         shell: bash
         run: |
           curl -s -o /dev/null -w "HttpStatus: %{http_code}" -X POST  https://api.sendgrid.com/v3/mail/send \
