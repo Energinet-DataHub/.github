@@ -9,23 +9,28 @@ on:
 
 jobs:
   yamllint_workflows:
-    name: YAML linting in workflows folder
+    name: YAML linting and name validation
     runs-on: ubuntu-latest
     steps:
     - name: Check workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
       with:
         yaml_file_or_folder: .github/workflows
-        fail_on_uppercase_input_params: 'false'
 
-  yamllint_actions:
-    name: YAML lint in actions folder
-    runs-on: ubuntu-latest
-    steps:
     - name: Check actions folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
       with:
         yaml_file_or_folder: .github/actions
+
+    - name: Validate input fields in workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
+      with:
+        yaml_file_or_folder: .github/actions
+
+    - name: Validate input fields in actions folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
+      with:
+        yaml_file_or_folder: .github/actions        
 
   createrelease:
     name: Create release tag
