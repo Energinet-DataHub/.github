@@ -27,5 +27,4 @@ rules:
     allow-non-breakable-inline-mappings: true
   trailing-spaces: disable
   truthy: disable
-  
-  
+...
