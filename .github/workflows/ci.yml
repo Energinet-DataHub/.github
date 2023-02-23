@@ -25,7 +25,7 @@ jobs:
     - name: Validate input fields in workflows folder
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
       with:
-        yaml_file_or_folder: .github/actions
+        yaml_file_or_folder: .github/workflows
 
     - name: Validate input fields in actions folder
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@kerbou/apply-yamllint-to-github
