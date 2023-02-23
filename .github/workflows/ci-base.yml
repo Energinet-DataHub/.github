@@ -164,3 +164,11 @@ jobs:
       run: |
         yarn add @kt3k/license-checker@v3.2.2
         npx @kt3k/license-checker
+
+  github_actions_yaml_linting_and_input_name_validation:
+    name: YAML linting and input name validation for Github workflows and actions
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3

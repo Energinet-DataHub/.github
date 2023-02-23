@@ -19,17 +19,10 @@ inputs:
   yaml_file_or_folder:
     description: Path to the yaml file or folder to perform linting on
     required: true
-  # fail_on_uppercase_input_params:
-  #   description: Should we fail linting if input params in workflow and actions contain uppercase letters? Default is false
-  #   required: false
-  #   default: 'false'
 
 runs:
   using: composite
   steps:
-    - name: 'Checkout'
-      uses: actions/checkout@v3
-
     - name: Install yamllint
       shell: bash
       run: pip install yamllint
@@ -37,36 +30,3 @@ runs:
     - name: Lint YAML files
       shell: bash
       run: yamllint -f colored ${{ inputs.yaml_file_or_folder }} 
-
-    # - name: Github action input variables in should be lowercase
-    #   if: always()
-    #   shell: pwsh
-    #   run: |
-    #     $folder = "${{ inputs.yaml_file_or_folder }}"
-
-    #     Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
-    #     $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-    #     Write-Host "Files found in $($folder): $($files.Length)"
-    #     $uppercaseVarsFound = $false
-
-    #     foreach($file in $files) {
-    #         Write-Host "Checking $($file.FullName)"
-    #         $yaml = Get-Content -Path $file.FullName | Out-String
-    #         $yaml = $yaml.Replace('{{', '').Replace('}}', '')
-    #         $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
-
-    #         foreach($inputKey in ($null -ne $jsonObj.on.workflow_call.inputs ? $jsonObj.on.workflow_call.inputs.Keys : $jsonObj.inputs.Keys)) {
-    #             if (!($inputKey -ceq $inputKey.ToLower())) {
-    #                 Write-Host “Input variable '$inputKey' contains uppercase characters”
-                   
-    #                 $uppercaseVarsFound = $true
-    #             }
-    #         }
-    #     }
-
-    #     $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
-    #     Write-Host "Should fail step: $shouldFail"
-    #     if ($uppercaseVarsFound -and $shouldFail) {
-    #         throw 'One or more input variables contain uppercase characters'
-    #         exit 1      
-    #     } 
