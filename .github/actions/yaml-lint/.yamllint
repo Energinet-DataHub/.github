@@ -28,3 +28,4 @@ rules:
   trailing-spaces: disable
   truthy: disable
   
+  
