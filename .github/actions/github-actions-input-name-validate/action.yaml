@@ -1,0 +1,65 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Github workflows and actions input name validation
+description: Validate that all input fields in workflows and actions are lowercase
+
+inputs:
+  yaml_file_or_folder:
+    description: Path to the yaml file or folder to perform input field validation on
+    required: true
+  fail_on_uppercase_input_params:
+    description: Should the step fail if input name validation fails? Default is 'false'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+
+    - name: Github input variables should be lowercase
+      if: always()
+      shell: pwsh
+      run: |
+        $folder = "${{ inputs.yaml_file_or_folder }}"
+
+        Install-Module -Name powershell-yaml -Force
+        $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
+        Write-Host "Files found in $($folder): $($files.Length)"
+        $uppercaseVarsFound = $false
+
+        foreach($file in $files) {
+            Write-Host "Checking $($file.FullName)"
+            $yaml = Get-Content -Path $file.FullName | Out-String
+            $yaml = $yaml.Replace('{{', '').Replace('}}', '')
+            $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+
+            $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
+            foreach($inputKey in $inputKeys) {
+                if (!($inputKey -ceq $inputKey.ToLower())) {
+                    Write-Host “Input variable '$inputKey' contains uppercase characters”
+                   
+                    $uppercaseVarsFound = $true
+                }
+            }
+        }
+
+        $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
+        Write-Host "Should fail step: $shouldFail"
+        if ($uppercaseVarsFound -and $shouldFail) {
+            throw 'One or more input variables contain uppercase characters'
+            exit 1      
+        } 
+
+
