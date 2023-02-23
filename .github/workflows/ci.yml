@@ -21,7 +21,7 @@ jobs:
         yaml_file_or_folder: .github/workflows
 
     - name: Run yamllint on  .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@kerbou/apply-yamllint-in-github-repo
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@@main
       with:
         yaml_file_or_folder: .github/actions
 
