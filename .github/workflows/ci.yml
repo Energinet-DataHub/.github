@@ -35,7 +35,7 @@ jobs:
       with:
         yaml_file_or_folder: .github/actions
 
-  powershell_workflows:
+  powershell_verification:
     name: Verify PowerShell scripts
     runs-on: ubuntu-latest
     steps:
