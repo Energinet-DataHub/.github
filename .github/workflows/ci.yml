@@ -12,6 +12,9 @@ jobs:
     name: YAML linting and name validation
     runs-on: ubuntu-latest
     steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+          
     - name: Lint .github/workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
       with:
