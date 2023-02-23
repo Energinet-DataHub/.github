@@ -44,6 +44,7 @@ jobs:
 
     - name: Run Pester tests
       shell: pwsh
+      working-directory: .github/actions
       run: |
         Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
 
