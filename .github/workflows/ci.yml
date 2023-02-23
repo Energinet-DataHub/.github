@@ -33,7 +33,12 @@ jobs:
     - name: Validate input fields in .github/actions folder
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
       with:
-        yaml_file_or_folder: .github/actions        
+        yaml_file_or_folder: .github/actions
+
+    - name: Run Pester tests
+      shell: pwsh
+      run: |
+        Invoke-Pester -Output 'Detailed' -CI
 
   createrelease:
     name: Create release tag
@@ -47,5 +52,5 @@ jobs:
         MINOR_VERSION: 3
         PATCH_VERSION: 5
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
-      env: 
+      env:
         GH_TOKEN: ${{ github.token }}
