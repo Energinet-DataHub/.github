@@ -56,8 +56,8 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
       with:
         MAJOR_VERSION: 10
-        MINOR_VERSION: 3
-        PATCH_VERSION: 5
+        MINOR_VERSION: 4
+        PATCH_VERSION: 0
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env:
         GH_TOKEN: ${{ github.token }}
