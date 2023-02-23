@@ -45,7 +45,7 @@ jobs:
     - name: Run Pester tests
       shell: pwsh
       run: |
-        Invoke-Pester -Output 'Detailed' -CI
+        Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
 
   createrelease:
     name: Create release tag
