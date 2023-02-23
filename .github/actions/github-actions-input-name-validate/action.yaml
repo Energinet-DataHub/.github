@@ -45,7 +45,7 @@ runs:
             $yaml = $yaml.Replace('{{', '').Replace('}}', '')
             $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
 
-            $inputKeys = $jsonObj.on.workflow_call.inputs ?? $jsonObj.inputs.Keys
+            $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
             foreach($inputKey in $inputKeys) {
                 if (!($inputKey -ceq $inputKey.ToLower())) {
                     Write-Host “Input variable '$inputKey' contains uppercase characters”
