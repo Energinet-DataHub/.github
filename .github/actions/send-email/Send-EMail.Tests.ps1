@@ -15,12 +15,16 @@
 Describe "When dot-sourcing the script" {
     BeforeAll {
         . $PSScriptRoot/Send-EMail.ps1
+
+        Mock Invoke-WebRequest {}
     }
 
-    Context "Given Send-EMail is called with all parameters" {
-        It "Should not fail" {
+    Context "Given Send-EMail is called with a single to-email-address" {
+        It "Should build a SendGrid request body with one to-email-address" {
             # Act
             Send-EMail `
+                -GitHubRepository "anonymous" `
+                -GitHubRunId "anonymous" `
                 -SendGridApiKey "anonymous" `
                 -TeamName "anonymous" `
                 -To "to@test.com" `

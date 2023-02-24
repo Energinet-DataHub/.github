@@ -22,6 +22,14 @@
 #>
 function Send-EMail {
     param (
+        # The value of the GitHub repository variable.
+        [Parameter(Mandatory = $true)]
+        [string]
+        $GitHubRepository,
+        # The value of the GitHub run id variable.
+        [Parameter(Mandatory = $true)]
+        [string]
+        $GitHubRunId,
         # A valid SendGrid API key.
         [Parameter(Mandatory = $true)]
         [string]
@@ -48,14 +56,43 @@ function Send-EMail {
         $Content = ""
     )
 
-    Write-Host "To: '$To'"
+    Write-Host "Sending email from '$GitHubRepository' for build with id '$GitHubRunId'"
 
-    # #     curl -s -o /dev/null -w "HttpStatus: %{http_code}" -X POST  https://api.sendgrid.com/v3/mail/send \
-    # #       --header "Authorization: Bearer ${{ secrets.SENDGRID_INSTANCE_SYSTEM_NOTIFICATIONS_API_KEY }}" \
-    # #       --header "Content-Type: application/json" \
-    # #       --data '{"personalizations":[
-    # #         {"to":[{"email":"${{ steps.get_email.outputs.TEAM_EMAIL }}","name":"${{ inputs.TEAM_NAME }}"}]}],
-    # #         "from":{"email":"${{ secrets.EMAIL_SENDER }}","name":"DataHub Github"},
-    # #         "subject":"${{ inputs.SUBJECT }}",
-    # #         "content":[{"type":"text/html","value":"<a href=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} target=_blank>Link to Github job run</a>  ${{ inputs.BODY }}"}]}'
+    $finalTo = ""
+    $finalContent = "<a href=https://github.com/$GitHubRepository/actions/runs/$GitHubRunId target=_blank>Link to Github job run</a> $Content"
+
+    $body = @"
+    {
+        "personalizations": [
+            {
+                "to": $finalTo
+            }
+        ],
+        "from": {
+            "email": "$From",
+            "name": "DataHub Github"
+        },
+        "subject": "$Subject",
+        "content": [
+            {
+                "type": "text/html",
+                "value": "$finalContent"
+            }
+        ]
+    }
+"@
+
+    try {
+        $response = Invoke-WebRequest -Uri 'https://api.sendgrid.com/v3/mail/send' -Method Post `
+            -Headers @{Authorization = "Bearer $SendgridApiKey" } `
+            -ContentType 'application/json' -Body $body
+
+        Write-Host "Response: $response"
+    }
+    catch {
+        $errorMessage = $_.Exception.Message
+        throw "Could not send email. Error: $errorMessage"
+    }
+
+    Write-Host "Sent email"
 }

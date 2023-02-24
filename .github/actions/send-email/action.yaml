@@ -43,6 +43,8 @@ runs:
       run: |
         . ${{ github.action_path }}/Send-EMail.ps1
         Send-EMail `
+          -GitHubRepository "${{ github.repository }}"
+          -GitHubRunId "${{ github.run_id }}"
           -SendGridApiKey "${{ inputs.sendgrid-api-key }}" `
           -TeamName "${{ inputs.team-name }}" `
           -To "${{ inputs.to }}" `
