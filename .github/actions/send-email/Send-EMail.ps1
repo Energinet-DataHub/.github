@@ -58,7 +58,7 @@ function Send-EMail {
 
     Write-Host "Sending email from '$GitHubRepository' for build with run id '$GitHubRunId'"
 
-    $finalTo = ""
+    $finalTo = Build-ToEMail -TeamName $TeamName -To $To
     $finalContent = "<a href=https://github.com/$GitHubRepository/actions/runs/$GitHubRunId target=_blank>Link to Github job run</a> $Content"
 
     $body = @"
@@ -95,4 +95,24 @@ function Send-EMail {
     }
 
     Write-Host "Sent email"
+}
+
+<#
+    .SYNOPSIS
+    Build the 'to' part of the body for the SendGrid send mail request.
+#>
+function Build-ToEMail {
+    param (
+        # The name of the team who should receive the email. When sending to multiple recipients this name will be used for all of them.
+        [Parameter(Mandatory = $true)]
+        [string]
+        $TeamName,
+        # The email to-address. Should contain either a single email or a list of comma separated emails.
+        [Parameter(Mandatory = $true)]
+        [string]
+        $To
+    )
+
+    $emails = $To.Split(',')
+
 }
