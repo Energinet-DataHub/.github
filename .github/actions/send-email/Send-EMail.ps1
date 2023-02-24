@@ -80,6 +80,7 @@ function Send-EMail {
         ]
     }
 "@
+    Write-Host "Body: $body"
 
     try {
         $response = Invoke-WebRequest -Uri 'https://api.sendgrid.com/v3/mail/send' -Method Post `
