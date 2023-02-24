@@ -15,7 +15,7 @@ jobs:
     uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@kerbou/add-yamllint-to-cibase
     with:
       skip_yaml_lint: false
-      fail_ci_on_ghaction_input_name_validation_error: false
+      fail_ci_on_ghaction_input_name_validation_error: true
 
   createrelease:
     name: Create release tag
