@@ -82,11 +82,9 @@ function Send-EMail {
 "@
 
     try {
-        $response = Invoke-WebRequest -Uri 'https://api.sendgrid.com/v3/mail/send' -Method Post `
+        Invoke-WebRequest -Uri 'https://api.sendgrid.com/v3/mail/send' -Method Post `
             -Headers @{Authorization = "Bearer $SendgridApiKey" } `
             -ContentType 'application/json' -Body $body
-
-        Write-Host "Response: $response"
     }
     catch {
         $errorMessage = $_.Exception.Message
