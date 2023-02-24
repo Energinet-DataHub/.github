@@ -45,7 +45,7 @@ param (
     # Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.
     [Parameter(Mandatory = $false)]
     [string]
-    $Content
+    $Content = ""
 )
 
 Write-Host "To: '$To'"
