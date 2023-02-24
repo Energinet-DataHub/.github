@@ -10,6 +10,8 @@ on:
 jobs:      
   ci_base:
     uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@v10
+    with:
+      
 
   createrelease:
     name: Create release tag
