@@ -22,7 +22,7 @@ inputs:
     description: The name of the team who should receive the email. When sending to multiple recipients this name will be used for all of them.
     required: true
   to:
-    description: The email to-address. Should contain either a single email or a list of comma separated emails.
+    description: The email to-address. Must contain either a single email or a list of comma separated emails.
     required: true
   from:
     description: The email from-address.

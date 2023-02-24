@@ -37,7 +37,7 @@ function Send-EMail {
         [Parameter(Mandatory = $true)]
         [string]
         $TeamName,
-        # The email to-address. Should contain either a single email or a list of comma separated emails.
+        # The email to-address. Must contain either a single email or a list of comma separated emails.
         [Parameter(Mandatory = $true)]
         [string]
         $To,
@@ -106,7 +106,7 @@ function Build-ToEMail {
         [Parameter(Mandatory = $true)]
         [string]
         $TeamName,
-        # The email to-address. Should contain either a single email or a list of comma separated emails.
+        # The email to-address. Must contain either a single email or a list of comma separated emails.
         [Parameter(Mandatory = $true)]
         [string]
         $To
