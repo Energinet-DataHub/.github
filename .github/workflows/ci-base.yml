@@ -31,6 +31,11 @@ on:
         type: string
         description: 'Set to true to skip checking License lines'
         default: 'false'
+      SKIP_YAML_LINT:
+        required: false
+        type: string
+        description: 'Set to true to skip YAML linting for Github actions and workflows in repository'
+        default: 'true'        
 
 jobs:
   skip_md_check:
@@ -167,8 +172,25 @@ jobs:
 
   github_actions_yaml_linting_and_input_name_validation:
     name: YAML linting and input name validation for Github workflows and actions
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    if: ${{ inputs.SKIP_YAML_LINT != 'true' }}
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Run yamllint on .github/workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      with:
+        yaml_file_or_folder: .github/workflows
+
+    - name: Run yamllint on  .github/actions folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      with:
+        yaml_file_or_folder: .github/actions
+
+    - name: Validate input fields in .github/workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+      with:
+        yaml_file_or_folder: .github/workflows
+
+    - name: Validate input fields in .github/actions folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+      with:
+        yaml_file_or_folder: .github/actions

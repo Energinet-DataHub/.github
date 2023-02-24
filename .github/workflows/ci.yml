@@ -7,33 +7,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
-jobs:
-  yamllint_workflows:
-    name: Check YAML consistency
-    runs-on: ubuntu-latest
-    steps:
-    - name: 'Checkout'
-      uses: actions/checkout@v3
-
-    - name: Run yamllint on .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
-      with:
-        yaml_file_or_folder: .github/workflows
-
-    - name: Run yamllint on  .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
-      with:
-        yaml_file_or_folder: .github/actions
-
-    - name: Validate input fields in .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
-      with:
-        yaml_file_or_folder: .github/workflows
-
-    - name: Validate input fields in .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
-      with:
-        yaml_file_or_folder: .github/actions        
+jobs:      
+  ci_base:
+    uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@v10
 
   createrelease:
     name: Create release tag
@@ -44,8 +20,8 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
       with:
         MAJOR_VERSION: 10
-        MINOR_VERSION: 3
-        PATCH_VERSION: 5
+        MINOR_VERSION: 4
+        PATCH_VERSION: 0
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env: 
         GH_TOKEN: ${{ github.token }}
