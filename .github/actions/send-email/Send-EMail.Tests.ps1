@@ -14,13 +14,13 @@
 
 Describe "When running script" {
     BeforeAll {
-        Set-Alias -Name Sut -Value $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+        . $PSScriptRoot/Send-EMail.ps1
     }
 
     Context "Given script is called with all parameters" {
         It "Should not fail" {
             # Act
-            Sut `
+            Send-EMail `
                 -SendGridApiKey "anonymous" `
                 -TeamName "anonymous" `
                 -To "to@test.com" `

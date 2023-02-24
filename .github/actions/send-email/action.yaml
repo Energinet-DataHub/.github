@@ -41,7 +41,8 @@ runs:
     - name: Run PowerShell script
       shell: pwsh
       run: |
-        ${{ github.action_path }}/Send-EMail.ps1 `
+        . ${{ github.action_path }}/Send-EMail.ps1
+        Send-EMail `
           -SendGridApiKey "${{ inputs.sendgrid-api-key }}" `
           -TeamName "${{ inputs.team-name }}" `
           -To "${{ inputs.to }}" `
