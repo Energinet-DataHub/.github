@@ -173,7 +173,7 @@ jobs:
   github_actions_yaml_linting_and_input_name_validation:
     name: YAML linting and input name validation for Github workflows and actions
     if: ${{ inputs.SKIP_YAML_LINT != 'true' }}
-    
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}    
     steps:
     - name: Run yamllint on .github/workflows folder
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
