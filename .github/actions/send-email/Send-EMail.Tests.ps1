@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Describe "When running script" {
+Describe "When dot-sourcing the script" {
     BeforeAll {
         . $PSScriptRoot/Send-EMail.ps1
     }
 
-    Context "Given script is called with all parameters" {
+    Context "Given Send-EMail is called with all parameters" {
         It "Should not fail" {
             # Act
             Send-EMail `
