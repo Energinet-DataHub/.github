@@ -31,7 +31,7 @@ on:
         type: string
         description: 'Set to true to skip checking License lines'
         default: 'false'
-      SKIP_YAML_LINT:
+      skip_yaml_lint:
         required: false
         type: string
         description: 'Set to true to skip YAML linting for Github actions and workflows in repository'
@@ -172,7 +172,7 @@ jobs:
 
   github_actions_yaml_linting_and_input_name_validation:
     name: YAML linting and input name validation for Github workflows and actions
-    if: ${{ inputs.SKIP_YAML_LINT != 'true' }}
+    if: ${{ inputs.skip_yaml_lint != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}    
     steps:
     - name: Run yamllint on .github/workflows folder
