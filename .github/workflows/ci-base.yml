@@ -77,13 +77,10 @@ jobs:
         run: |
           cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/.markdownlint.json ${{ github.workspace }}/.markdownlint.json
           cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/mlc_config.json ${{ github.workspace }}/mlc_config.json
-          cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/md-check/spellcheck.yml ${{ github.workspace }}/spellcheck.yml
 
       - name: Cleanup remote
         run: rm -rf ${{ env.REMOTE_REPO_PATH }}
 
-      - name: Replace path in Spell Check config
-        run: sed -i -e 's/..\/..\///g' ${{ github.workspace }}/spellcheck.yml
 
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
@@ -119,6 +116,7 @@ jobs:
           else
             echo -e "- Markdown links check:   \e[32mSuccess"
           fi
+          
           if [[ "${{steps.md-lint-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-lint-check.outcome}}" == "failure" ]]; then
             fail=1
             echo -e "- Markdown lint check:    \e[31mFailure"
