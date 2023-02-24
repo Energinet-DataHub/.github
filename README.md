@@ -1,6 +1,6 @@
 # .github
 
-This repository contains shared github items such as actions, workflows and much more
+This repository contains shared github items such as actions, workflows and much more.
 
 ## Overview
 
