@@ -8,10 +8,11 @@ on:
     branches: [ "main" ]
 
 jobs:      
+  #
+  # License and Markdown Check
+  #
   ci_base:
-    runs-on: ubuntu-latest
-    uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@kerbou/add-yamllint-to-cibase
-
+    uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@v10
   createrelease:
     name: Create release tag
     runs-on: ubuntu-latest
