@@ -19,7 +19,7 @@ Describe "When dot-sourcing the script" {
         Mock Invoke-WebRequest {}
     }
 
-    Context "Given Build-ToEMail is called with a single to-email-address" {
+    Context "Given Build-ToEMail is called with a single 'to' email address" {
         It "Should build a minified JSON array with one email address" {
             $teamName = "TheOutlaws"
             $to = "to@test.com"
@@ -44,8 +44,8 @@ Describe "When dot-sourcing the script" {
         }
     }
 
-    Context "Given Build-ToEMail is called with a list of comma-separated to-email-addresses" {
-        It "Should build a minified JSON array with multiple email-addresses sharing the team-name value" {
+    Context "Given Build-ToEMail is called with a list of comma-separated 'to' email addresses" {
+        It "Should build a minified JSON array with multiple email addresses sharing the team name value" {
             $teamName = "TheOutlaws"
             $to = "one@test.com, two@test.com, three@test.com"
 

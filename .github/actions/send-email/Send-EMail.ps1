@@ -99,7 +99,7 @@ function Send-EMail {
 
 <#
     .SYNOPSIS
-    Build the 'to' part of the body for the SendGrid send mail request.
+    Build the 'to' part of the JSON body for the SendGrid 'send mail' request.
 #>
 function Build-ToEMail {
     param (
@@ -113,6 +113,18 @@ function Build-ToEMail {
         $To
     )
 
-    $emails = $To.Split(',')
+    $emails = $To.Split(',').Trim()
+    $eMailAndNameArray = $emails | ForEach-Object { [PSCustomObject]@{
+            email = $PSItem
+            name  = $TeamName
+        } }
 
+    $eMailAndNameArrayAsJson = ConvertTo-Json $eMailAndNameArray -AsArray
+
+    # Minified JSON is easier to compare in tests
+    $eMailAndNameArrayAsJson = ($eMailAndNameArrayAsJson
+        | ConvertFrom-Json
+        | ConvertTo-Json -Depth 10 -Compress)
+
+    return ($eMailAndNameArrayAsJson)
 }
