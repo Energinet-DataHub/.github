@@ -68,7 +68,7 @@ jobs:
           echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
 
       - name: Send email
-        uses: Energinet-DataHub/.github/.github/actions/send-email #@xdast # TODO: Update ref to v10 when merged
+        uses: Energinet-DataHub/.github/.github/actions/send-email@xdast # TODO: Update ref to v10 when merged
         with:
           sendgrid-api-key: ${{ secrets.SENDGRID_INSTANCE_SYSTEM_NOTIFICATIONS_API_KEY }}
           team-name: ${{ inputs.TEAM_NAME }}
