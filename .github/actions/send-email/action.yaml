@@ -40,5 +40,10 @@ runs:
     - name: Run PowerShell script
       shell: pwsh
       run: |
-        ${{ github.action_path }}/Send-EMail.ps1
-
+        ${{ github.action_path }}/Send-EMail.ps1 `
+          -To ${{ inputs.to }} `
+          -To ${{ inputs.to }} `
+          -To ${{ inputs.to }} `
+          -To ${{ inputs.to }} `
+          -To ${{ inputs.to }} `
+          -To ${{ inputs.to }}
