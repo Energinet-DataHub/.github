@@ -17,8 +17,7 @@
     Send emails using SendGrid.
 
     .DESCRIPTION
-    The script sends emails using SendGrid. The input can either be a single email
-    or a list of comma separated emails.
+    The script sends emails using SendGrid. It supports sending to one or multiple recipients.
 #>
 function Send-EMail {
     param (
