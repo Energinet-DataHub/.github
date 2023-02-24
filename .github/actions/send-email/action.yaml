@@ -41,9 +41,9 @@ runs:
       shell: pwsh
       run: |
         ${{ github.action_path }}/Send-EMail.ps1 `
+          -SendGridApiKey ${{ inputs.sendgrid-api-key }} `
+          -TeamName ${{ inputs.team-name }} `
           -To ${{ inputs.to }} `
-          -To ${{ inputs.to }} `
-          -To ${{ inputs.to }} `
-          -To ${{ inputs.to }} `
-          -To ${{ inputs.to }} `
-          -To ${{ inputs.to }}
+          -From ${{ inputs.from }} `
+          -Subject ${{ inputs.subject }} `
+          -Content ${{ inputs.content }}
