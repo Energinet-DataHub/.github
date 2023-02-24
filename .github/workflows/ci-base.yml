@@ -36,7 +36,7 @@ on:
         type: string
         description: 'Set to true to skip YAML linting for Github actions and workflows in repository'
         default: 'true'  
-      skip_input_name_validation:
+      fail_ci_on_input_name_validation_error:
         required: false
         type: string
         description: 'Set to true to skip input name validation for Github actions and workflows in repository'
@@ -193,8 +193,10 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
       with:
         yaml_file_or_folder: .github/workflows
+        fail_on_uppercase_input_params: ${{ inputs.fail_ci_on_input_name_validation_error }}
 
     - name: Validate input fields in .github/actions folder
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
       with:
         yaml_file_or_folder: .github/actions
+        fail_on_uppercase_input_params: ${{ inputs.fail_ci_on_input_name_validation_error }}
