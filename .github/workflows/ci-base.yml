@@ -40,7 +40,7 @@ on:
         required: false
         type: string
         description: 'Set to true to skip input name validation for Github actions and workflows in repository'
-        default: 'true'  
+        default: 'false'  
 
 
 jobs:
