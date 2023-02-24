@@ -56,7 +56,7 @@ function Send-EMail {
         $Content = ""
     )
 
-    Write-Host "Sending email from '$GitHubRepository' for build with id '$GitHubRunId'"
+    Write-Host "Sending email from '$GitHubRepository' for build with run id '$GitHubRunId'"
 
     $finalTo = ""
     $finalContent = "<a href=https://github.com/$GitHubRepository/actions/runs/$GitHubRunId target=_blank>Link to Github job run</a> $Content"
