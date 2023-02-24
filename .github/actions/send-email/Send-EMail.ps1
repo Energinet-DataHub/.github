@@ -80,7 +80,6 @@ function Send-EMail {
         ]
     }
 "@
-    Write-Host "Body: $body"
 
     try {
         $response = Invoke-WebRequest -Uri 'https://api.sendgrid.com/v3/mail/send' -Method Post `
@@ -119,12 +118,14 @@ function Build-ToEMail {
             name  = $TeamName
         } }
 
-    $eMailAndNameArrayAsJson = ConvertTo-Json $eMailAndNameArray -AsArray
-
-    # Minified JSON is easier to compare in tests
-    $eMailAndNameArrayAsJson = ($eMailAndNameArrayAsJson
-        | ConvertFrom-Json
-        | ConvertTo-Json -Depth 10 -Compress)
-
-    return ($eMailAndNameArrayAsJson)
+    if ($emails.Count -eq 1) {
+        # -AsArray ensures that arrays with 1 element are converted correctly
+        # See https://stackoverflow.com/questions/18662967/convertto-json-an-array-with-a-single-item for details
+        [string]$eMailAndNameArrayAsJson = ConvertTo-Json $eMailAndNameArray -Depth 5 -Compress -AsArray
+        return ($eMailAndNameArrayAsJson)
+    }
+    else {
+        [string]$eMailAndNameArrayAsJson = ConvertTo-Json $eMailAndNameArray -Depth 5 -Compress
+        return ($eMailAndNameArrayAsJson)
+    }
 }
