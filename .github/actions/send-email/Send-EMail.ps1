@@ -49,3 +49,12 @@ param (
 )
 
 Write-Host "To: '$To'"
+
+# #     curl -s -o /dev/null -w "HttpStatus: %{http_code}" -X POST  https://api.sendgrid.com/v3/mail/send \
+# #       --header "Authorization: Bearer ${{ secrets.SENDGRID_INSTANCE_SYSTEM_NOTIFICATIONS_API_KEY }}" \
+# #       --header "Content-Type: application/json" \
+# #       --data '{"personalizations":[
+# #         {"to":[{"email":"${{ steps.get_email.outputs.TEAM_EMAIL }}","name":"${{ inputs.TEAM_NAME }}"}]}],
+# #         "from":{"email":"${{ secrets.EMAIL_SENDER }}","name":"DataHub Github"},
+# #         "subject":"${{ inputs.SUBJECT }}",
+# #         "content":[{"type":"text/html","value":"<a href=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} target=_blank>Link to Github job run</a>  ${{ inputs.BODY }}"}]}'
