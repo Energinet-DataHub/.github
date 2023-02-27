@@ -8,14 +8,13 @@ on:
     branches: [ "main" ]
 
 jobs:      
-  # #
-  # # License and Markdown Check
-  # #   
-  # ci_base:
-  #   uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@v10
-  #   with:
-  #     skip_yaml_lint: false
-  #     fail_ci_on_ghaction_input_name_validation_error: false
+  #
+  # License and Markdown Check
+  #   
+  ci_base:
+    uses: ./.github/workflows/ci-base.yml
+    with:
+      skip_yaml_lint: false
 
   createrelease:
     name: Create release tag
@@ -23,7 +22,7 @@ jobs:
     steps:
 
     - name: Create release
-      uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
+      uses: ./.github/actions/create-release-tag
       with:
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
