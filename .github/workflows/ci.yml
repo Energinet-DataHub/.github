@@ -16,7 +16,6 @@ jobs:
     with:
       skip_yaml_lint: false
 
-  createrelease:
     name: Create release tag
     runs-on: ubuntu-latest
     steps:
