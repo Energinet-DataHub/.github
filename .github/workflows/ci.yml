@@ -31,6 +31,14 @@ on:
       - main
 
 jobs:
+  #
+  # License and Markdown Check
+  #
+  ci_base:
+    uses: ./.github/workflows/ci-base.yml
+    with:
+      skip_yaml_lint: false
+
   yamllint_workflows:
     name: Check YAML consistency
     runs-on: ubuntu-latest
@@ -75,13 +83,15 @@ jobs:
     name: Create release tag
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     - name: Create release
       uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
       with:
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
-        PATCH_VERSION: 1
+        PATCH_VERSION: 2
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env:
         GH_TOKEN: ${{ github.token }}
