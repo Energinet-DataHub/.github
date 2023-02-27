@@ -16,10 +16,13 @@ jobs:
     with:
       skip_yaml_lint: false
 
+  createrelease:
     name: Create release tag
     runs-on: ubuntu-latest
     steps:
-
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
     - name: Create release
       uses: ./.github/actions/create-release-tag
       with:
