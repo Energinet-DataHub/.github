@@ -36,7 +36,7 @@ on:
         type: string
         description: 'Set to true to skip YAML linting for Github actions and workflows in repository'
         default: 'true'  
-      fail_ci_on_ghaction_input_name_validation_error:
+      skip_input_name_validation:
         required: false
         type: string
         description: 'Set to true to skip input name validation for Github actions and workflows in repository'
@@ -171,12 +171,12 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Run yamllint on .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      uses: .github/actions/yaml-lint
       with:
         yaml_file_or_folder: .github/workflows
 
     - name: Run yamllint on  .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      uses: .github/actions/yaml-lint
       with:
         yaml_file_or_folder: .github/actions
 
@@ -193,10 +193,10 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
       with:
         yaml_file_or_folder: .github/workflows
-        fail_on_uppercase_input_params: ${{ inputs.fail_ci_on_ghaction_input_name_validation_error }}
+        fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
 
     - name: Validate input fields in .github/actions folder
       uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
       with:
         yaml_file_or_folder: .github/actions
-        fail_on_uppercase_input_params: ${{ inputs.fail_ci_on_ghaction_input_name_validation_error }}
+        fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
