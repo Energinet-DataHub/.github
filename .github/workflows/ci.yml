@@ -81,7 +81,7 @@ jobs:
       with:
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
-        PATCH_VERSION: 0
+        PATCH_VERSION: 1
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env:
         GH_TOKEN: ${{ github.token }}
