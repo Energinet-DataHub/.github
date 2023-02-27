@@ -1,20 +1,83 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-name: CI
+name: .github - CI
+
+# DESCRIPTION:
+#
+# This workflow handles the following:
+#  * Verifies YAML files (workflows/actions) conduct to the defined coding standard.
+#  * Runs Pester tests located within "actions" folders.
+#  * PR: Verifies a release does not exists with the given semantic version.
+#  * Merge to main: Creates a new release with the given semantic version.
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
-jobs:      
+jobs:
   #
   # License and Markdown Check
-  #   
+  #
   ci_base:
     uses: ./.github/workflows/ci-base.yml
     with:
       skip_yaml_lint: false
+
+  yamllint_workflows:
+    name: Check YAML consistency
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Run yamllint on .github/workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      with:
+        yaml_file_or_folder: .github/workflows
+
+    - name: Run yamllint on  .github/actions folder
+      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+      with:
+        yaml_file_or_folder: .github/actions
+
+    - name: Validate input fields in .github/workflows folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+      with:
+        yaml_file_or_folder: .github/workflows
+
+    - name: Validate input fields in .github/actions folder
+      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+      with:
+        yaml_file_or_folder: .github/actions
+
+  powershell_verification:
+    name: Verify PowerShell scripts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Run Pester tests
+      shell: pwsh
+      working-directory: .github/actions
+      run: |
+        Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
 
   createrelease:
     name: Create release tag
@@ -22,13 +85,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      
+
     - name: Create release
       uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
       with:
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
-        PATCH_VERSION: 0
+        PATCH_VERSION: 2
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
-      env: 
+      env:
         GH_TOKEN: ${{ github.token }}
