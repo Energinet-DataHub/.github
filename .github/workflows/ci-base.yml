@@ -34,13 +34,13 @@ on:
       skip_yaml_lint:
         required: false
         type: string
-        description: 'Set to true to skip YAML linting for Github actions and workflows in repository'
+        description: 'Set to true to skip YAML linting for Github actions and workflows in repository. Default is true'
         default: 'true'  
       skip_input_name_validation:
         required: false
         type: string
-        description: 'Set to true to skip input name validation for Github actions and workflows in repository'
-        default: 'false'  
+        description: 'Set to true to skip input name validation for Github actions and workflows in repository. Default is true'
+        default: 'true'  
 
 
 jobs:
