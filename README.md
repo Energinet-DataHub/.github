@@ -6,12 +6,9 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
-    - [Create Prerelease](#create-prerelease)
-    - [Dispatch Deployment Request](#dispatch-deployment-request)
-    - [Publish release](#publish-release)
-    - [Markdown Check](#markdown-check)
-    - [License Check](#license-check)
-    - [.NET build and test](#net-build-and-test)
+  - [Create Prerelease](#create-prerelease)
+  - [Dispatch Deployment Request](#dispatch-deployment-request)
+  - [.NET build and test](#net-build-and-test)
 
 ## Release procedure
 
@@ -27,10 +24,13 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 When we implement a breaking change we must create a new major version.
 
+Please be aware: As we are currently the only consumers of .github and geh-terraform-modules artifacts, we have implemented a retention schedule for versions older than two major versions back meaning that they will be deleted automatically
+
+This means that if you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository will be deleted the following night.
+
 When creating a new major version we must handle the following:
 
-1. Delete any obsolete major version release, tag and version branch in GitHub (e.g. `v8`)
-1. Create the new major version release and tag following [Changes implemented in latest major version](#changes-implemented-in-latest-major-version) (e.g. `v10`)
+1. Create the new major version release and tag following [Create major version tag](#create-major-version-tag) (e.g. `v10`)
 1. Shift the previous major version into maintenance mode (e.g. `v9`)
     - Delete the previous major version release and tag in GitHub
     - Create a root branch based on the last commit for that version and name it as the previous major version
@@ -38,25 +38,7 @@ When creating a new major version we must handle the following:
 
 From then on any important maintenance changes to the previous version must be implemented using a PR to the version branch.
 
-### Changes implemented in latest major version
-
-#### Specific version release
-
-First we must always create a specific version release, so developers can use a specific release should they choose to do so.
-
-1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
-
-2. Click `Draft a new release` then fill in the formular:
-
-   - In `Choose a tag` specify the new semantic version (e.g. `7.5.2`) and select `Create new tag: <tag name> on publish`.
-
-   - In `Release title` specify the tag name (e.g. `7.5.2`).
-
-   - Click `Generate release notes` and see the description beeing filled out automatically with information about commits since the previous release.
-
-   - When everything looks good press `Publish release` to create the release.
-
-#### Major version tag
+#### Create major version tag
 
 Secondly we must create or update a major version tag (e.g. `v7`). This allows developers to opt in on automatically using the latest minor or patch version within the choosen major version channel.
 
@@ -93,8 +75,6 @@ Then we can create the new major version tag for a specific commit:
    - When everything looks good press `Publish release` to create the release.
 
 ## Workflows
-
-### Create Prerelease
 
 ### Dispatch deployment request
 
