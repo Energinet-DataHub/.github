@@ -24,15 +24,14 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 When we implement a breaking change we must create a new major version.
 
-As we are currently the only consumers of .github and geh-terraform-modules artifacts, we have implemented a retention schedule for versions older than two major versions back meaning that **they will be deleted automatically on a nightly schedule**.
+As we are currently the only consumers of `.github` and `geh-terraform-modules` artifacts, we have implemented a retention schedule for versions older than two major versions back meaning that **they will be deleted automatically on a nightly schedule**.
 
+---
+> :warning: **TL;DR: If you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository WILL BE DELETED the following night !!**
 
-> :warning: **Beware !!**: This means that if you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository will be deleted the following night.
+You **MUST** ensure that we do not reference major versions of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories
 
-
-
-
-You **must** ensure that we do not reference major versions of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories
+---
 
 When creating a new major version we must handle the following:
 
@@ -44,7 +43,7 @@ When creating a new major version we must handle the following:
 
 From then on any important maintenance changes to the previous version must be implemented using a PR to the version branch.
 
-#### Create major version tag
+### Create major version tag
 
 Secondly we must create or update a major version tag (e.g. `v7`). This allows developers to opt in on automatically using the latest minor or patch version within the choosen major version channel.
 
