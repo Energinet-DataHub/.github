@@ -29,7 +29,7 @@ As we are currently the only consumers of `.github` and `geh-terraform-modules` 
 ---
 > :warning: **TL;DR: If you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository WILL BE DELETED the following night !!**
 
-You **MUST** ensure that we do not reference major versions of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories
+You **MUST** ensure that we do not reference releases of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories !
 
 ---
 
