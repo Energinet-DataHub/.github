@@ -6,7 +6,6 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
-  - [Create Prerelease](#create-prerelease)
   - [Dispatch Deployment Request](#dispatch-deployment-request)
   - [.NET build and test](#net-build-and-test)
 
