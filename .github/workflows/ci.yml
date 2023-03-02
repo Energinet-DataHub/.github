@@ -89,7 +89,9 @@ jobs:
     - name: Create release
       uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
       with:
-        MAJOR_VERSION: 10  #BE AWARE --> Updating to a new major version will automatically delete old versions. See
+        # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
+        # See https://github.com/Energinet-DataHub/.github/tree/kerbou/update-docs-on-release-strategy#release-procedure for details
+        MAJOR_VERSION: 10
         MINOR_VERSION: 4
         PATCH_VERSION: 5
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
