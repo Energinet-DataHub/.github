@@ -24,12 +24,12 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 When we implement a breaking change we must create a new major version.
 
-As we are currently the only consumers of `.github` and `geh-terraform-modules` artifacts, we have implemented a retention schedule for versions older than two major versions back meaning that **they will be deleted automatically on a nightly schedule**.
-
 ---
-> :warning: **TL;DR: If you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository WILL BE DELETED the following night !!**
+> :warning: **If you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository WILL BE DELETED !!**
 
 You **MUST** ensure that we do not reference releases of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories !
+
+Bonusinfo: This schedule runs every night out of dh3-automation
 
 ---
 
