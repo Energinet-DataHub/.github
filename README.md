@@ -6,12 +6,9 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
-    - [Create Prerelease](#create-prerelease)
     - [Dispatch Deployment Request](#dispatch-deployment-request)
-    - [Publish release](#publish-release)
-    - [Markdown Check](#markdown-check)
-    - [License Check](#license-check)
     - [.NET build and test](#net-build-and-test)
+    - [Notify Team](#notify-team)
 
 ## Release procedure
 
@@ -94,14 +91,14 @@ Then we can create the new major version tag for a specific commit:
 
 ## Workflows
 
-### Create Prerelease
-
 ### Dispatch deployment request
 
 File: [dispath-deployment-request.yml](.github/workflows/dispatch-deployment-request.yml)
 
-This workflow will find the associated pull request to a commit, if no pull request is found it will abort.
-If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
+This workflow will find the associated pull request to a commit:
+
+- If no pull request is found it will abort.
+- If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
 
 ### .NET build and test
 
@@ -190,3 +187,21 @@ As a good practice also add a comment to the class inheriting from `WebApplicati
     /// </summary>
     public class WebApiFactory : WebApplicationFactory<Startup>
 ```
+
+### Notify Team
+
+File: [notify-team.yml](.github/workflows/notify-team.yml)
+
+> Ideally we would not have to implement a workflow like this, but at the moment we do not feel GitHub allows us to configure notifications specific enough for us to get important notifications and avoid noisy notifications.
+
+The purpose of this workflow is to notify a team through emails, if a workflow fails.
+
+We would prefer to notify teams by emailing to their Microsoft Team Channel, but as these kind of emails are often blocked, we have implemented the workflow so it also supports emailing a list of recipients. This means teams can give us their team members emails and we can configure it to email them directly.
+
+#### _Details_
+
+The workflow uses SendGrid to send emails.
+
+When called with a known `TEAM_NAME` it looks up a corresponding GitHub secret to determine who should receive the email notification. This secret must contain either a single email address, or a comma-separated list of emails (no whitespaces allowed).
+
+The secrets are created as organizational secrets in the Energinet organization, and can be managed by The Outlaws.
