@@ -7,6 +7,7 @@ This repository contains shared github items such as actions, workflows and much
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
     - [Dispatch Deployment Request](#dispatch-deployment-request)
+    - [License and linting validation](#license-and-linting-validation)
     - [.NET build and test](#net-build-and-test)
     - [Notify Team](#notify-team)
 
@@ -89,6 +90,23 @@ This workflow will find the associated pull request to a commit:
 
 - If no pull request is found it will abort.
 - If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
+
+### License and linting validation
+
+File: [ci-base.yml](.github/workflows/ci-base.yml)
+
+This workflow validates the files in a repository for a common set of basic rules, and should be used as part of the pull request verification on all repositories.
+
+A given repository might be able to skip certain features but at least some of the features are relevant for all repositories.
+
+Features:
+
+- Check files for license lines (header).
+- Perform markdown linting.
+- Perform YAML linting of GitHub actions/workflows.
+- Perform input name validation of GitHub actions/workflows.
+
+Teams should ensure developers configure their local development environment to follow the same rules as what will be forced by the workflow. All rules can be configured using VS Code and extensions. Internal contributors can get more information on the subject by looing in the guidelines documented by The Outlaws.
 
 ### .NET build and test
 
