@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: License and Markdown Check
+name: License and linting validation
+
+# DESCRIPTION:
+# This workflow is used to validate basic rules that is relevant for all
+# repositories. A given repository might be able to skip certain rules but
+# at least some of the rules are relevant for all repositories.
 
 on:
   workflow_call:
@@ -24,23 +29,23 @@ on:
       SKIP_MARKDOWN_CHECK:
         required: false
         type: string
-        description: 'Set to true to skip checking Markdown files'
+        description: 'Set to true to skip checking Markdown files.'
         default: 'false'
       SKIP_LICENSE_CHECK:
         required: false
         type: string
-        description: 'Set to true to skip checking License lines'
+        description: 'Set to true to skip checking License lines. All public repositories should run license check.'
         default: 'false'
       skip_yaml_lint:
         required: false
         type: string
-        description: 'Set to true to skip YAML linting for Github actions and workflows in repository. Default is true'
-        default: 'true'  
+        description: 'Set to true to skip YAML linting for Github actions and workflows in repository.'
+        default: 'true'
       skip_input_name_validation:
         required: false
         type: string
-        description: 'Set to true to skip input name validation for Github actions and workflows in repository. Default is true'
-        default: 'true'  
+        description: 'Set to true to skip input name validation for Github actions and workflows in repository.'
+        default: 'true'
 
 
 jobs:
@@ -122,7 +127,7 @@ jobs:
           else
             echo -e "- Markdown links check:   \e[32mSuccess"
           fi
-          
+
           if [[ "${{steps.md-lint-check.conclusion}}" == "failure" ]] || [[ "${{steps.md-lint-check.outcome}}" == "failure" ]]; then
             fail=1
             echo -e "- Markdown lint check:    \e[31mFailure"
@@ -165,7 +170,7 @@ jobs:
   github_actions_yaml_linting:
     name: YAML linting for Github workflows and actions
     if: ${{ inputs.skip_yaml_lint != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}    
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -184,7 +189,7 @@ jobs:
   github_actions_input_name_validation:
     name: Input name validation for Github workflows and actions
     if: ${{ inputs.skip_input_name_validation != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}    
+    runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
