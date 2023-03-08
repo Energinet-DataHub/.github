@@ -15,15 +15,8 @@ jobs:
       SKIP_LICENSE_CHECK: true
       skip_yaml_lint: false
 
-  #
-  # Detect changes to start relevant workflows
-  #
-  changes:
-    uses: ./.github/workflows/detect-changes.yml
-
   powershell_verification:
     name: Run Pester tests in actions-folder
-    needs: changes
     if: ${{ needs.changes.outputs.actions == 'true' }}
     runs-on: ubuntu-latest
     steps:
