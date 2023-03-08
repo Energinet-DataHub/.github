@@ -17,7 +17,6 @@ jobs:
 
   powershell_verification:
     name: Run Pester tests in actions-folder
-    if: ${{ needs.changes.outputs.actions == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
