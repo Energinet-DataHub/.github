@@ -30,8 +30,6 @@ jobs:
       id: filter
       with:
         filters: |
-          workflows:
-            - '.github/workflows/**'
           actions:
             - '.github/actions/**'
 
