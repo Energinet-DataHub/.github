@@ -106,7 +106,7 @@ Features:
 - Perform YAML linting of GitHub actions/workflows.
 - Perform input name validation of GitHub actions/workflows.
 
-Teams should ensure developers configure their local development environment to follow the same rules as what will be forced by the workflow. All rules can be configured using VS Code and extensions. Internal contributors can get more information on the subject by looing in the guidelines documented by The Outlaws.
+Teams should ensure developers configure their local development environment to follow the same rules as what will be forced by the workflow. All rules can be configured using VS Code and extensions. Internal contributors can get more information on the subject by looking in the guidelines documented by The Outlaws.
 
 ### .NET build and test
 
