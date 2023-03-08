@@ -14,7 +14,7 @@
 
 name: Build and push docker containers to ghcr.io
 description: |
-  This action will ensure the image name is lowercased and that any artifacts are available
+  This action will ensure the image name is lowercased and that any artifacts are available.
 
 inputs:
   dockerfile:
