@@ -47,7 +47,6 @@ on:
         description: 'Set to true to skip input name validation for Github actions and workflows in repository.'
         default: 'true'
 
-
 jobs:
   skip_md_check:
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
@@ -91,7 +90,6 @@ jobs:
 
       - name: Cleanup remote
         run: rm -rf ${{ env.REMOTE_REPO_PATH }}
-
 
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
@@ -184,7 +182,6 @@ jobs:
       uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
       with:
         yaml_file_or_folder: .github/actions
-
 
   github_actions_input_name_validation:
     name: Input name validation for Github workflows and actions
