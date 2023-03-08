@@ -36,7 +36,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Create release
-      uses: Energinet-DataHub/.github/.github/actions/create-release-tag@v10
+      uses: /.github/actions/create-release-tag
       with:
         # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
         # See https://github.com/Energinet-DataHub/.github#release-procedure for details
