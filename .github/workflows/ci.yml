@@ -93,7 +93,7 @@ jobs:
         # See https://github.com/Energinet-DataHub/.github#release-procedure for details
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
-        PATCH_VERSION: 6
+        PATCH_VERSION: 7
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env:
         GH_TOKEN: ${{ github.token }}
