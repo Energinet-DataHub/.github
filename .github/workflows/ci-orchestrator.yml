@@ -1,31 +1,6 @@
-# Copyright 2020 Energinet DataHub A/S
-#
-# Licensed under the Apache License, Version 2.0 (the "License2");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-name: .github - CI
-
-# DESCRIPTION:
-#
-# This workflow handles the following:
-#  * Verifies YAML files (workflows/actions) conduct to the defined coding standard.
-#  * Runs Pester tests located within "actions" folders.
-#  * PR: Verifies a release does not exists with the given semantic version.
-#  * Merge to main: Creates a new release with the given semantic version.
+name: CI orchestrator
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -35,9 +10,15 @@ jobs:
   # License and Markdown Check
   #
   ci_base:
-    uses: ./.github/workflows/ci-base.yml
+    uses: Energinet-DataHub/.github/.github/workflows/ci-base.yml@v10
     with:
-      skip_yaml_lint: false
+      SKIP_LICENSE_CHECK: true
+
+  #
+  # Detect changes to start relevant workflows
+  #
+  changes:
+    uses: ./.github/workflows/detect-changes.yml
 
   yamllint_workflows:
     name: Check YAML consistency
@@ -93,7 +74,27 @@ jobs:
         # See https://github.com/Energinet-DataHub/.github#release-procedure for details
         MAJOR_VERSION: 10
         MINOR_VERSION: 4
-        PATCH_VERSION: 6
+        PATCH_VERSION: 7
         REPOSITORY_PATH: 'Energinet-DataHub/.github'
       env:
         GH_TOKEN: ${{ github.token }}
+
+
+  allow_merge_ci_orchestrator:
+    runs-on: ubuntu-latest
+    needs: [
+      ci_base,
+      yamllint_workflows,
+      powershell_verification,
+      createrelease
+    ]
+    if: |
+      always()
+    steps:
+      - name: Verify if merge is allowed
+        run: |
+          echo "${{ toJSON(needs) }}"
+          if [[ ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }} = true ]]; then
+              echo "Failed"
+              exit 1
+          fi
