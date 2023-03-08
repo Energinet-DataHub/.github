@@ -22,6 +22,7 @@ jobs:
 
   yamllint_workflows:
     name: Check YAML consistency
+    needs: changes
     if: ${{ (needs.changes.outputs.workflows == 'true') || (needs.changes.outputs.actions == 'true') }}
     runs-on: ubuntu-latest
     steps:
@@ -50,6 +51,7 @@ jobs:
 
   powershell_verification:
     name: Verify PowerShell scripts
+    needs: changes
     if: ${{ needs.changes.outputs.actions == 'true' }}
     runs-on: ubuntu-latest
     steps:
