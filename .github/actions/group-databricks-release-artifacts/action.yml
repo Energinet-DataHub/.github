@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name:
-description:
+name: Group Databricks release artifacts
+description: |
+  Grouping of Databricks release artifacts depending on wheter additional assets should be included
 inputs:
   SHOULD_INCLUDE_ASSETS:
-    description: 'Path in release where wheel file exists'
+    description: 'Declares if assets (i.e. dashboards and alerts) should be included in release'
     required: true
     type: boolean
 
@@ -23,6 +24,6 @@ runs:
   using: 'composite'
   steps:
     - name: Group artifacts
-    - shell: pwsh
-    run: |
-      Group-Artifacts -DistPath '.\test-files\dist' -DashboardPath '.\test-files\dashboards' -Destination '.\test-files\artifacts' -ShouldIncludeAssets $SHOULD_INCLUDE_ASSETS
+      shell: pwsh
+      run: |
+        Group-Artifacts -DistPath '.\test-files\dist' -DashboardPath '.\test-files\dashboards' -Destination '.\test-files\artifacts' -ShouldIncludeAssets $SHOULD_INCLUDE_ASSETS
