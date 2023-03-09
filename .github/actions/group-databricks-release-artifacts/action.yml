@@ -25,4 +25,4 @@ runs:
     - name: Group artifacts
     - shell: pwsh
     run: |
-      Group-Artifacts
+      Group-Artifacts -DistPath '.\test-files\dist' -DashboardPath '.\test-files\dashboards' -Destination '.\test-files\artifacts' -ShouldIncludeAssets $SHOULD_INCLUDE_ASSETS
