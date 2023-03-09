@@ -27,7 +27,7 @@ jobs:
       run: |
         Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
 
-  createrelease:
+  create_release:
     name: Create release tag
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +51,7 @@ jobs:
     needs: [
       ci_base,
       powershell_verification,
-      createrelease
+      create_release
     ]
     if: |
       always()
