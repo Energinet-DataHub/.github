@@ -72,7 +72,7 @@ jobs:
           python setup.py sdist bdist_wheel
 
       - name: Group release artifacts
-        uses: Energinet-DataHub/.github/.github/actions/group-databricks-release-artifacts
+        uses: Energinet-DataHub/.github/.github/actions/group-databricks-release-artifacts@v10
         with:
           include_assets: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
 
