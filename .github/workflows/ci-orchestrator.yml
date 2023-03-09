@@ -1,0 +1,69 @@
+name: CI orchestrator
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+
+jobs:
+  #
+  # License and Markdown Check
+  #
+  ci_base:
+    uses: ./.github/workflows/ci-base.yml
+    with:
+      skip_yaml_lint: false
+
+  powershell_verification:
+    name: Run Pester tests in actions-folder
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Run Pester tests
+      shell: pwsh
+      working-directory: .github/actions
+      run: |
+        Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
+
+  create_release:
+    name: Create release tag
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Create release
+      uses: ./.github/actions/create-release-tag
+      with:
+        # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
+        # See https://github.com/Energinet-DataHub/.github#release-procedure for details
+        MAJOR_VERSION: 10
+        MINOR_VERSION: 4
+        PATCH_VERSION: 9
+        REPOSITORY_PATH: 'Energinet-DataHub/.github'
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+  allow_merge_ci_orchestrator:
+    runs-on: ubuntu-latest
+    needs: [
+      ci_base,
+      powershell_verification,
+      create_release
+    ]
+    if: |
+      always()
+    steps:
+      - name: Verify if merge is allowed
+        run: |
+          echo "${{ toJSON(needs) }}"
+          if [[ ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }} = true ]]; then
+              echo "Failed"
+              exit 1
+          fi
