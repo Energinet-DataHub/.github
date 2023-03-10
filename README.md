@@ -10,7 +10,7 @@ This repository contains shared github items such as actions, workflows and much
     - [License and linting validation](#license-and-linting-validation)
     - [.NET build and test](#net-build-and-test)
     - [Notify Team](#notify-team)
-    - [Structurizr](#Structurizr diagrams)
+    - [Structurizr](#structurizr-diagrams)
 
 ## Release procedure
 
