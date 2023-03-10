@@ -12,6 +12,10 @@ This repository contains shared github items such as actions, workflows and much
     - [Notify Team](#notify-team)
     - [Structurizr](#structurizr-diagrams)
 
+## Prepare release
+
+All releases are tagged by the CI workflow. To increment the semver-version tag, the variables in [ci-orchestrator.yml](.github/workflows/ci-orchestrator.yml) must be adjusted accordingly to the change.
+
 ## Release procedure
 
 After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release.
