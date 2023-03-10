@@ -36,13 +36,13 @@ jobs:
           mkdir "${diagrams_folder}"
           cd "${diagrams_folder}"
           npm i puppeteer
-          curl https://raw.githubusercontent.com/structurizr/puppeteer/master/export-diagrams.js --output export-diagrams.js          
-          
+          curl https://raw.githubusercontent.com/structurizr/puppeteer/master/export-diagrams.js --output export-diagrams.js
+
       - name: Render diagrams
         run: |
           diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
           readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
-          cd "${diagrams_folder}" 
+          cd "${diagrams_folder}"
           set -e
           for dsl in "${dsl_files[@]}"
           do
@@ -53,7 +53,7 @@ jobs:
             mkdir "$foldername"
             mv -f *.png "$foldername/"
           done
-          
+
       - name: Commit files
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
