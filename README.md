@@ -213,3 +213,39 @@ The workflow uses SendGrid to send emails.
 When called with a known `TEAM_NAME` it looks up a corresponding GitHub secret to determine who should receive the email notification. This secret must contain either a single email address, or a comma-separated list of emails (no whitespaces allowed).
 
 The secrets are created as organizational secrets in the Energinet organization, and can be managed by The Outlaws.
+
+### Structurizr diagrams
+
+File: [structurizr.yml](.github/workflows/structurizr.yml)
+
+The workflow renders all views in a structurizr workspace. The diagrams are placed in a user-defined folder and auto-committed to the current branch.
+
+Inputs:
+
+- dsl: required - comma seperated list of dsl's to render
+- output_folder: optional - folder where diagrams are placed (default: diagrams)
+
+Permissions:
+
+- contents: write - needed for auto-commiting diagrams to current branch
+
+Example:
+
+``` yml
+name: Render C4 models with structurizr
+
+on:
+  pull_request:
+    branches:
+      main
+
+jobs:
+  render-c4:
+    permissions:
+      contents: write
+
+    uses: ./.github/workflows/structurizr.yml
+    with:
+      dsl: 'source/datahub3-model/model.dsl'
+      output_folder: 'c4-diagrams'
+```
