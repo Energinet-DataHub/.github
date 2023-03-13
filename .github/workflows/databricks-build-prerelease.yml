@@ -35,6 +35,10 @@ on:
       WHEEL_WORKING_DIRECTORY:
         required: true
         type: string
+      SHOULD_INCLUDE_ASSETS:
+        required: false
+        type: boolean
+        default: false
       OPERATING_SYSTEM:
         required: false
         default: 'ubuntu-20.04' # Tools for python is not available in arch x64 on 22.04
@@ -66,6 +70,10 @@ jobs:
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
+
+      - name: Include Databricks assets in release
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        uses: ./.github/add-databricks-release-assets
 
       - name: Zip files for prerelease
         uses: thedoctor0/zip-release@0.6.2
