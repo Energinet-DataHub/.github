@@ -1,0 +1,61 @@
+on:
+  workflow_call:
+    inputs:
+      dsl:
+        required: true
+        type: string
+        description: paths delimetered by ','
+      output_folder:
+        required: false
+        type: string
+        default: 'diagrams'
+        description: Folder where diagrams are rendered to. Caution - the folder is rebuilt on every invocation
+
+jobs:
+  render_structurizr_diagrams:
+    runs-on: ubuntu-latest
+    services:
+      structurizr-lite:
+        image: structurizr/lite:3000
+        ports:
+          - 8080:8080
+        volumes:
+          - ${{ github.workspace }}:/usr/local/structurizr
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+
+      - name: Setup repo
+        run: |
+          diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
+          echo $diagrams_folder
+          rm -rf "${diagrams_folder}"
+          mkdir "${diagrams_folder}"
+          cd "${diagrams_folder}"
+          npm i puppeteer
+          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
+
+      - name: Render diagrams
+        run: |
+          diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
+          readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
+          cd "${diagrams_folder}"
+          set -e
+          for dsl in "${dsl_files[@]}"
+          do
+            cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
+            ! node export-diagrams.js http://localhost:8080/workspace/diagrams png | grep png
+            rm *-key.png
+            foldername=$(basename $dsl .dsl)
+            mkdir "$foldername"
+            mv -f *.png "$foldername/"
+          done
+
+      - name: Commit files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Auto generated diagrams
+          file_pattern: ${{ github.workspace }}/${{ inputs.output_folder }}/**/*.png
