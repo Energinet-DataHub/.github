@@ -50,6 +50,7 @@ jobs:
 
     env:
       RELEASE_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/dist
+      RELEASE_WITH_ASSETS_FOLDER_PATH: ${{ inputs.WHEEL_WORKING_DIRECTORY }}/artifacts
       RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
       RELEASE_ZIP_FILENAME: databricks_${{ github.event.pull_request.number }}.zip
 
@@ -78,6 +79,7 @@ jobs:
           wheel_working_directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
 
       - name: Zip files for prerelease
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'false' }}
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
@@ -85,6 +87,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prelease
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'false' }}
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -93,3 +96,22 @@ jobs:
           title: ${{ env.RELEASE_VERSION }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
+
+      - name: Zip files for prerelease
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: 'zip'
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
+          directory: ${{ env.RELEASE_WITH_ASSETS_FOLDER_PATH }}
+
+      - name: Create prelease
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ env.RELEASE_VERSION }}
+          prerelease: true
+          title: ${{ env.RELEASE_VERSION }}
+          files: |
+            ${{ env.RELEASE_WITH_ASSETS_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
