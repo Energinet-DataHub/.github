@@ -36,7 +36,7 @@ jobs:
           mkdir "${diagrams_folder}"
           cd "${diagrams_folder}"
           npm i puppeteer
-          curl https://raw.githubusercontent.com/structurizr/puppeteer/master/export-diagrams.js --output export-diagrams.js
+          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
       - name: Render diagrams
         run: |
