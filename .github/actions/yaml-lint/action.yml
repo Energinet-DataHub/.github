@@ -17,13 +17,13 @@ description: Sets the value in a yaml file.
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform linting on
+    description: Path to the yaml file or folder to perform linting on. If folder does not exist then validation is not performed.
     required: true
 
 runs:
   using: composite
   steps:
-    - name: Lint YAML files if folder exists
+    - name: Lint YAML files
       shell: pwsh
       run: |
         if ((Test-Path -Path ${{ inputs.yaml_file_or_folder }}) -eq $true)
