@@ -14,7 +14,7 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Prepare release
 
-All releases are tagged by the CI workflow. To increment the semver-version tag, the variables in [ci-orchestrator.yml](.github/workflows/ci-orchestrator.yml) must be adjusted accordingly to the change.
+All releases are tagged by the CI workflow. To increment the semver-version tag, the variables in [create-release-tag.yml](.github/workflows/create-release-tag.yml) must be adjusted accordingly to the change.
 
 ## Release procedure
 
