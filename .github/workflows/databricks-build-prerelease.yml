@@ -74,6 +74,8 @@ jobs:
       - name: Include Databricks assets in release
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
         uses: ./.github/add-databricks-release-assets
+        with:
+          wheel_working_directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
 
       - name: Zip files for prerelease
         uses: thedoctor0/zip-release@0.6.2
