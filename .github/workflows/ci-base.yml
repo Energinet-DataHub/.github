@@ -125,61 +125,61 @@ jobs:
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
-    - name: Checkout local repo
-      uses: actions/checkout@v3
+      - name: Checkout local repo
+        uses: actions/checkout@v3
 
-    - name: Checkout remote repository
-      uses: actions/checkout@v3
-      with:
-        repository: 'Energinet-DataHub/.github'
-        path: ${{ env.REMOTE_REPO_PATH }}
+      - name: Checkout remote repository
+        uses: actions/checkout@v3
+        with:
+          repository: 'Energinet-DataHub/.github'
+          path: ${{ env.REMOTE_REPO_PATH }}
 
-    - name: Copy configuration files
-      run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
+      - name: Copy configuration files
+        run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
 
-    - name: Cleanup remote
-      run: rm -rf ${{ env.REMOTE_REPO_PATH }}
+      - name: Cleanup remote
+        run: rm -rf ${{ env.REMOTE_REPO_PATH }}
 
-    - name: Check License Lines
-      shell: bash
-      run: |
-        yarn add @kt3k/license-checker@v3.2.2
-        npx @kt3k/license-checker
+      - name: Check License Lines
+        shell: bash
+        run: |
+          yarn add @kt3k/license-checker@v3.2.2
+          npx @kt3k/license-checker
 
   github_actions_yaml_linting:
     name: YAML linting for Github workflows and actions
     if: ${{ inputs.skip_yaml_lint != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Run yamllint on .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
-      with:
-        yaml_file_or_folder: .github/workflows
+      - name: Run yamllint on .github/workflows folder
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@xdast-v11 # TODO: Use major version
+        with:
+          yaml_file_or_folder: .github/workflows
 
-    - name: Run yamllint on  .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
-      with:
-        yaml_file_or_folder: .github/actions
+      - name: Run yamllint on  .github/actions folder
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@xdast-v11 # TODO: Use major version
+        with:
+          yaml_file_or_folder: .github/actions
 
   github_actions_input_name_validation:
     name: Input name validation for Github workflows and actions
     if: ${{ inputs.skip_input_name_validation != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Validate input fields in .github/workflows folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
-      with:
-        yaml_file_or_folder: .github/workflows
-        fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
+      - name: Validate input fields in .github/workflows folder
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+        with:
+          yaml_file_or_folder: .github/workflows
+          fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
 
-    - name: Validate input fields in .github/actions folder
-      uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
-      with:
-        yaml_file_or_folder: .github/actions
-        fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
+      - name: Validate input fields in .github/actions folder
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
+        with:
+          yaml_file_or_folder: .github/actions
+          fail_on_uppercase_input_params: ${{ inputs.skip_input_name_validation }}
