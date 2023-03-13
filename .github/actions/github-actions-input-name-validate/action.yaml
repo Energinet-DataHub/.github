@@ -13,53 +13,52 @@
 # limitations under the License.
 
 name: Github workflows and actions input name validation
-description: Validate that all input fields in workflows and actions are lowercase
+description: Validate that all input fields in workflows and actions are lowercase.
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform input field validation on
+    description: Path to the yaml file or folder to perform input field validation on. If folder does not exist then validation is not performed.
     required: true
   fail_on_uppercase_input_params:
-    description: Should the step fail if input name validation fails? Default is 'false'
+    description: Determine if the step should fail if input name validation fails.
     required: false
     default: 'false'
 
 runs:
   using: composite
   steps:
-
     - name: Github input variables should be lowercase
-      if: always()
       shell: pwsh
       run: |
         $folder = "${{ inputs.yaml_file_or_folder }}"
 
-        Install-Module -Name powershell-yaml -Force
-        $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-        Write-Host "Files found in $($folder): $($files.Length)"
-        $uppercaseVarsFound = $false
+        if ((Test-Path -Path $folder) -eq $true)
+        {
+          Install-Module -Name powershell-yaml -Force
+          $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
+          Write-Host "Files found in $($folder): $($files.Length)"
+          $uppercaseVarsFound = $false
 
-        foreach($file in $files) {
-            Write-Host "Checking $($file.FullName)"
-            $yaml = Get-Content -Path $file.FullName | Out-String
-            $yaml = $yaml.Replace('{{', '').Replace('}}', '')
-            $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+          foreach($file in $files) {
+              Write-Host "Checking $($file.FullName)"
+              $yaml = Get-Content -Path $file.FullName | Out-String
+              $yaml = $yaml.Replace('{{', '').Replace('}}', '')
+              $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
 
-            $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-            foreach($inputKey in $inputKeys) {
-                if (!($inputKey -ceq $inputKey.ToLower())) {
-                    Write-Host “Input variable '$inputKey' contains uppercase characters”
-                   
-                    $uppercaseVarsFound = $true
-                }
-            }
+              $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
+              foreach($inputKey in $inputKeys) {
+                  if (!($inputKey -ceq $inputKey.ToLower())) {
+                      Write-Host “Input variable '$inputKey' contains uppercase characters”
+
+                      $uppercaseVarsFound = $true
+                  }
+              }
+          }
+
+          $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
+          Write-Host "Should fail step: $shouldFail"
+          if ($uppercaseVarsFound -and $shouldFail) {
+              throw 'One or more input variables contain uppercase characters'
+              exit 1
+          }
         }
-
-        $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
-        Write-Host "Should fail step: $shouldFail"
-        if ($uppercaseVarsFound -and $shouldFail) {
-            throw 'One or more input variables contain uppercase characters'
-            exit 1      
-        } 
-
-
