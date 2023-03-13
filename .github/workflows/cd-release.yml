@@ -1,0 +1,13 @@
+name: CD Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  #
+  # Automatic Release (create release tag)
+  #
+  create_release:
+    uses: ./.github/workflows/create-release-tag.yml
