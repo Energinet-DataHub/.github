@@ -48,27 +48,8 @@ on:
         default: 'true'
 
 jobs:
-  skip_md_check:
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
-    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - name: Should skip?
-        id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3
-        with:
-          github_token: ${{ github.token }}
-          paths: '[
-            "**.md",
-            "**.MD",
-            "**.Md",
-            "**.mD"
-          ]'
-
   md_check:
-    needs: skip_md_check
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
     name: Markdown Check
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     env:
