@@ -155,12 +155,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run yamllint on .github/workflows folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@xdast-v11 # TODO: Use major version
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
         with:
           yaml_file_or_folder: .github/workflows
 
       - name: Run yamllint on  .github/actions folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@xdast-v11 # TODO: Use major version
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
         with:
           yaml_file_or_folder: .github/actions
 
@@ -173,13 +173,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Validate input fields in .github/workflows folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@xdast-v11 # TODO: Use major version
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/workflows
           fail_on_uppercase_input_params: 'false'
 
       - name: Validate input fields in .github/actions folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@xdast-v11 # TODO: Use major version
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/actions
           fail_on_uppercase_input_params: 'false'
