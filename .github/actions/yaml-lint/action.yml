@@ -35,4 +35,9 @@ runs:
         }
 
         pip install yamllint
+
+        # By default the script will exit with a return code 1 only when there is one or more error(s).
+        # See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
         yamllint -f colored -c ${{ github.action_path }}/.yamllint $folder
+
+        Write-Host "YAML linting completed."
