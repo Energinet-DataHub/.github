@@ -26,8 +26,13 @@ runs:
     - name: Lint YAML files
       shell: pwsh
       run: |
-        if ((Test-Path -Path ${{ inputs.yaml_file_or_folder }}) -eq $true)
+        $folder = "${{ inputs.yaml_file_or_folder }}"
+
+        if ((Test-Path -Path $folder) -eq $false)
         {
-          pip install yamllint
-          yamllint -f colored -c ${{ github.action_path }}/.yamllint ${{ inputs.yaml_file_or_folder }}
+          Write-Warning "Skipping YAML linting. Folder '$($folder)' not found."
+          exit 0
         }
+
+        pip install yamllint
+        yamllint -f colored -c ${{ github.action_path }}/.yamllint $folder

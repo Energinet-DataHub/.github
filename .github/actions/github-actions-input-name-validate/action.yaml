@@ -32,33 +32,36 @@ runs:
       run: |
         $folder = "${{ inputs.yaml_file_or_folder }}"
 
-        if ((Test-Path -Path $folder) -eq $true)
+        if ((Test-Path -Path $folder) -eq $false)
         {
-          Install-Module -Name powershell-yaml -Force
-          $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-          Write-Host "Files found in $($folder): $($files.Length)"
-          $uppercaseVarsFound = $false
+          Write-Warning "Skipping input name validation. Folder '$($folder)' not found."
+          exit 0
+        }
 
-          foreach($file in $files) {
-              Write-Host "Checking $($file.FullName)"
-              $yaml = Get-Content -Path $file.FullName | Out-String
-              $yaml = $yaml.Replace('{{', '').Replace('}}', '')
-              $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+        Install-Module -Name powershell-yaml -Force
+        $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
+        Write-Host "Files found in $($folder): $($files.Length)"
+        $uppercaseVarsFound = $false
 
-              $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-              foreach($inputKey in $inputKeys) {
-                  if (!($inputKey -ceq $inputKey.ToLower())) {
-                      Write-Host “Input variable '$inputKey' contains uppercase characters”
+        foreach($file in $files) {
+            Write-Host "Checking $($file.FullName)"
+            $yaml = Get-Content -Path $file.FullName | Out-String
+            $yaml = $yaml.Replace('{{', '').Replace('}}', '')
+            $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
 
-                      $uppercaseVarsFound = $true
-                  }
-              }
-          }
+            $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
+            foreach($inputKey in $inputKeys) {
+                if (!($inputKey -ceq $inputKey.ToLower())) {
+                    Write-Host “Input variable '$inputKey' contains uppercase characters”
 
-          $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
-          Write-Host "Should fail step: $shouldFail"
-          if ($uppercaseVarsFound -and $shouldFail) {
-              throw 'One or more input variables contain uppercase characters'
-              exit 1
-          }
+                    $uppercaseVarsFound = $true
+                }
+            }
+        }
+
+        $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
+        Write-Host "Should fail step: $shouldFail"
+        if ($uppercaseVarsFound -and $shouldFail) {
+            throw 'One or more input variables contain uppercase characters'
+            exit 1
         }
