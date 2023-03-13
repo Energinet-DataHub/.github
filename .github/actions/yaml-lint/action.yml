@@ -23,10 +23,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install yamllint
-      shell: bash
-      run: pip install yamllint
-
-    - name: Lint YAML files
-      shell: bash
-      run: yamllint -f colored -c $GITHUB_ACTION_PATH/.yamllint ${{ inputs.yaml_file_or_folder }} 
+    - name: Lint YAML files if folder exists
+      shell: pwsh
+      run: |
+        if ((Test-Path -Path ${{ inputs.yaml_file_or_folder }}) -eq $true)
+        {
+          pip install yamllint
+          yamllint -f colored -c $GITHUB_ACTION_PATH/.yamllint ${{ inputs.yaml_file_or_folder }}
+        }
