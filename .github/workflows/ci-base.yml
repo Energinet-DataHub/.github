@@ -49,8 +49,8 @@ on:
 
 jobs:
   md_check:
-    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
     name: Markdown Check
+    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
