@@ -29,5 +29,5 @@ runs:
         if ((Test-Path -Path ${{ inputs.yaml_file_or_folder }}) -eq $true)
         {
           pip install yamllint
-          yamllint -f colored -c $GITHUB_ACTION_PATH/.yamllint ${{ inputs.yaml_file_or_folder }}
+          yamllint -f colored -c ${{ github.action_path }}/.yamllint ${{ inputs.yaml_file_or_folder }}
         }
