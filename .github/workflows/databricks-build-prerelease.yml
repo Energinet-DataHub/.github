@@ -86,7 +86,7 @@ jobs:
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
-      - name: Create prelease
+      - name: Create prerelease
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'false' }}
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
@@ -105,7 +105,7 @@ jobs:
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_WITH_ASSETS_FOLDER_PATH }}
 
-      - name: Create prelease
+      - name: Create prerelease
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
