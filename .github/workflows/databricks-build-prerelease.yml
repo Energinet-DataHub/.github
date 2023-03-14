@@ -73,13 +73,13 @@ jobs:
           python setup.py sdist bdist_wheel
 
       - name: Include Databricks assets in release
-        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
         uses: ./.github/add-databricks-release-assets
         with:
           wheel_working_directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
 
       - name: Zip files for prerelease
-        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'false' }}
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == false }}
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
@@ -87,7 +87,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'false' }}
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == false }}
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -98,7 +98,7 @@ jobs:
             ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
 
       - name: Zip files for prerelease
-        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: 'zip'
@@ -106,7 +106,7 @@ jobs:
           directory: ${{ env.RELEASE_WITH_ASSETS_FOLDER_PATH }}
 
       - name: Create prerelease
-        if: ${{ inputs.SHOULD_INCLUDE_ASSETS == 'true' }}
+        if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
