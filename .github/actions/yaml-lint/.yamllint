@@ -41,8 +41,13 @@ rules:
     max: 150
     allow-non-breakable-inline-mappings: true
   new-line-at-end-of-file: enable # Default
-  new-lines: enable # Default
+  new-lines: disable # Custom
   octal-values: disable # Default
-  quoted-strings: disable # Default
+  quoted-strings: # Custom # quoted-strings: disable # Default
+    quote-type: double
+    required: only-when-needed
+    extra-required: []
+    extra-allowed: []
+    allow-quoted-quotes: false
   trailing-spaces: enable # Default
   truthy: disable # Custom
