@@ -17,12 +17,12 @@ description: Validate that all input fields in workflows and actions are lowerca
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform input field validation on. If folder does not exist then validation is not performed.
+    description: Path to the folder to perform input field validation on. If folder does not exist then validation is not performed.
     required: true
   fail_on_uppercase_input_params:
     description: Determine if the step should fail if input name validation fails.
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: composite

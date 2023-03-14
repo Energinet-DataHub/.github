@@ -20,7 +20,7 @@ description: |
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform linting on. If folder does not exist then validation is not performed.
+    description: Path to the yaml file or folder to perform linting on. If target does not exist then validation is not performed.
     required: true
 
 runs:
@@ -29,15 +29,15 @@ runs:
     - name: Lint YAML files
       shell: pwsh
       run: |
-        $folder = "${{ inputs.yaml_file_or_folder }}"
+        $target = "${{ inputs.yaml_file_or_folder }}"
 
-        if ((Test-Path -Path $folder) -eq $false)
+        if ((Test-Path -Path $target) -eq $false)
         {
-          Write-Warning "Skipping YAML linting. Folder '$($folder)' not found."
+          Write-Warning "Skipping YAML linting. Target '$($target)' not found."
           exit 0
         }
 
         pip install yamllint
-        yamllint -f colored -c ${{ github.action_path }}/.yamllint $folder
+        yamllint -f colored -c ${{ github.action_path }}/.yamllint $target
 
         Write-Host "YAML linting completed."
