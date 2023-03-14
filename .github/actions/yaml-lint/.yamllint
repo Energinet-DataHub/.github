@@ -12,63 +12,37 @@ yaml-files:
   - ".yamllint"
 
 rules:
-  braces: enable
-  brackets: enable
-  colons: enable
-  commas: enable
-  comments:
+  braces: enable # Default
+  brackets: enable # Default
+  colons: enable # Default
+  commas: enable # Default
+  comments: # Custom
     level: warning
     require-starting-space: true
     ignore-shebangs: true
     min-spaces-from-content: 1
-  comments-indentation:
+  comments-indentation: # Default
     level: warning
-  document-end: disable
-  document-start: disable
-  empty-lines: enable
-  empty-values: disable
-  float-values: disable
-  hyphens: enable
-  indentation:
-    indent-sequences: consistent
-  key-duplicates: enable
-  key-ordering: disable
-  line-length:
+  document-end: disable # Default
+  document-start: disable # Custom
+  empty-lines: enable # Default
+  empty-values: disable # Default
+  float-values: disable # Default
+  hyphens: enable # Default
+  indentation: # Custom
+    level: warning
+    spaces: consistent
+    indent-sequences: consistent # Conflicts with YAML Red Hat formatting of arrays on multiple lines
+    check-multi-line-strings: false
+  key-duplicates: enable # Default
+  key-ordering: disable # Default
+  line-length: # Custom
     level: warning
     max: 150
     allow-non-breakable-inline-mappings: true
-  new-line-at-end-of-file: enable
-  new-lines: enable
-  octal-values: disable
-  quoted-strings: disable
-  trailing-spaces: enable
-  truthy: disable
-# extends: default
-
-# rules:
-#   braces:
-#     level: warning
-#     max-spaces-inside: 1
-#   brackets:
-#     level: warning
-#     max-spaces-inside: 1
-#   colons:
-#     level: warning
-#   commas:
-#     level: warning
-#   comments: disable
-#   comments-indentation: disable
-#   document-start: disable
-#   empty-lines:
-#     level: warning
-#   hyphens:
-#     level: warning
-#   indentation:
-#     level: warning
-#     indent-sequences: consistent
-#   line-length:
-#     max: 150
-#     level: warning
-#     allow-non-breakable-inline-mappings: true
-#   trailing-spaces: disable
-#   truthy: disable
+  new-line-at-end-of-file: enable # Default
+  new-lines: enable # Default
+  octal-values: disable # Default
+  quoted-strings: disable # Default
+  trailing-spaces: enable # Default
+  truthy: disable # Custom
