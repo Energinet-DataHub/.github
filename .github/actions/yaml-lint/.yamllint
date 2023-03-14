@@ -1,37 +1,74 @@
 #
-# Extends default configuration.
+# Uses a custom configuration.
 # See also: https://yamllint.readthedocs.io/en/stable/configuration.html#default-configuration
 #
 # By default the script will exit with a return code 1 only when there is one or more error(s).
 # See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 #
 
-extends: default
+yaml-files:
+  - "*.yaml"
+  - "*.yml"
+  - ".yamllint"
 
 rules:
-  braces:
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  comments:
     level: warning
-    max-spaces-inside: 1
-  brackets:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+  comments-indentation:
     level: warning
-    max-spaces-inside: 1
-  colons:
-    level: warning
-  commas:
-    level: warning
-  comments: disable
-  comments-indentation: disable
+  document-end: disable
   document-start: disable
-  empty-lines:
-    level: warning
-  hyphens:
-    level: warning
+  empty-lines: enable
+  empty-values: disable
+  float-values: disable
+  hyphens: enable
   indentation:
-    level: warning
     indent-sequences: consistent
+  key-duplicates: enable
+  key-ordering: disable
   line-length:
-    max: 150
     level: warning
+    max: 150
     allow-non-breakable-inline-mappings: true
-  trailing-spaces: disable
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  octal-values: disable
+  quoted-strings: disable
+  trailing-spaces: enable
   truthy: disable
+# extends: default
+
+# rules:
+#   braces:
+#     level: warning
+#     max-spaces-inside: 1
+#   brackets:
+#     level: warning
+#     max-spaces-inside: 1
+#   colons:
+#     level: warning
+#   commas:
+#     level: warning
+#   comments: disable
+#   comments-indentation: disable
+#   document-start: disable
+#   empty-lines:
+#     level: warning
+#   hyphens:
+#     level: warning
+#   indentation:
+#     level: warning
+#     indent-sequences: consistent
+#   line-length:
+#     max: 150
+#     level: warning
+#     allow-non-breakable-inline-mappings: true
+#   trailing-spaces: disable
+#   truthy: disable
