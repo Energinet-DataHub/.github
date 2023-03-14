@@ -1,3 +1,11 @@
+#
+# Extends default configuration.
+# See also: https://yamllint.readthedocs.io/en/stable/configuration.html#default-configuration
+#
+# By default the script will exit with a return code 1 only when there is one or more error(s).
+# See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
+#
+
 extends: default
 
 rules:
@@ -27,4 +35,3 @@ rules:
     allow-non-breakable-inline-mappings: true
   trailing-spaces: disable
   truthy: disable
-...
