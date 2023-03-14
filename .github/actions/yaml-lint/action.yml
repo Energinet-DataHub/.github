@@ -13,20 +13,31 @@
 # limitations under the License.
 
 name: YAML linting
-description: Sets the value in a yaml file.
+description: |
+  Call yamllint to lint the YAML according to the '.yamllint' configuration.
+  By default 'yamllint' will exit with a return code 1 only when there is one or more error(s).
+  See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform linting on
+    description: Path to the yaml file or folder to perform linting on. If target does not exist then validation is not performed.
     required: true
 
 runs:
   using: composite
   steps:
-    - name: Install yamllint
-      shell: bash
-      run: pip install yamllint
-
     - name: Lint YAML files
-      shell: bash
-      run: yamllint -f colored -c $GITHUB_ACTION_PATH/.yamllint ${{ inputs.yaml_file_or_folder }} 
+      shell: pwsh
+      run: |
+        $target = "${{ inputs.yaml_file_or_folder }}"
+
+        if ((Test-Path -Path $target) -eq $false)
+        {
+          Write-Warning "Skipping YAML linting. Target '$($target)' not found."
+          exit 0
+        }
+
+        pip install yamllint
+        yamllint -f colored -c ${{ github.action_path }}/.yamllint $target
+
+        Write-Host "YAML linting completed."
