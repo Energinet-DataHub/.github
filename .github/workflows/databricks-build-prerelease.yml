@@ -74,7 +74,7 @@ jobs:
 
       - name: Include Databricks assets in release
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
-        uses: ./.github/actions/add-databricks-release-assets
+        uses: .github/actions/add-databricks-release-assets
         with:
           wheel_working_directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
 
