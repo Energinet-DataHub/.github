@@ -15,7 +15,7 @@
 name: YAML linting
 description: |
   Call yamllint to lint the YAML according to the '.yamllint' configuration.
-  By default 'yamllint' will exit with a return code 1 only when there is one or more error(s).
+  We use 'strict mode' to fail the build on all warnings and errors.
   See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 
 inputs:
@@ -38,6 +38,6 @@ runs:
         }
 
         pip install yamllint
-        yamllint -f colored -c ${{ github.action_path }}/.yamllint $target
+        yamllint -s -f colored -c ${{ github.action_path }}/.yamllint $target
 
         Write-Host "YAML linting completed."
