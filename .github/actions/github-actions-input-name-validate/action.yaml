@@ -21,11 +21,6 @@ inputs:
       Path to the folder to perform input parameter validation on.
       If folder does not exist then validation is not performed.
     required: true
-  fail_on_uppercase_input_params:
-    description: |
-      Determine if the step should fail if input name validation fails.
-    required: false
-    default: "false"
 
 runs:
   using: composite
@@ -43,14 +38,5 @@ runs:
 
         Install-Module -Name PowerShell-Yaml -Force
 
-        . ${{ github.action_path }}/Test-GitHubActionsInputNames.ps1
-        $isValid = Test-GitHubActionsInputNames -FolderPath $folder
-        Write-Host "Is valid: $isValid"
-
-        $shouldFail = ('${{ inputs.fail_on_uppercase_input_params }}' -eq 'true')
-        Write-Host "Should fail: $shouldFail"
-
-        if (-not $isValid -and $shouldFail) {
-            throw 'One or more input parameters contain uppercase characters'
-            exit 1
-        }
+        . ${{ github.action_path }}/Assert-GitHubActionsInputNames.ps1
+        Assert-GitHubActionsInputNames -FolderPath $folder
