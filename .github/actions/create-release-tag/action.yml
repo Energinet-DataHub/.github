@@ -11,25 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: 'Create release tag'
-description: 'Create new release tag in repository'
+name: "Create release tag"
+description: "Create new release tag in repository"
 inputs:
   MAJOR_VERSION:
-    description: 'Major version'
-    required: true    
+    description: "Major version"
+    required: true
   MINOR_VERSION:
-    description: 'Minor version'
+    description: "Minor version"
     required: true
   PATCH_VERSION:
-    description: 'Patch version'
+    description: "Patch version"
     required: true
   REPOSITORY_PATH:
     description: 'Path to repository, i.e. Energinet-DataHub\geh-terraform-modules'
     required: true
   TARGET_BRANCH:
-    description: 'Branch on which tags will be created. Default: main'
+    description: "Branch on which tags will be created. Default: main"
     required: false
-    default: 'main'
+    default: "main"
 
 runs:
   using: composite
@@ -42,17 +42,17 @@ runs:
         $patch = ${{ inputs.PATCH_VERSION }}
         $repo = "${{ inputs.REPOSITORY_PATH }}"
         $targetBranch = "${{ inputs.TARGET_BRANCH }}"
-                
+
         Write-Host "Github event name is:" ${{ github.event_name }}
         $isPullRequest = ('${{ github.event_name }}' -eq 'pull_request')
         Write-Host "Is PR: $isPullRequest"
-        
+
 
         if ($env:GH_TOKEN -eq '') {
           throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
         }
 
-        $semver = "$major.$minor.$patch"        
+        $semver = "$major.$minor.$patch"
         Write-Host "New version tag: $semver"
         Write-Host "Major version tag is: v$major"
 
@@ -79,8 +79,6 @@ runs:
             gh release create $semver --generate-notes --latest --title $semver --target $targetBranch -R $repo
         } else {
           Write-Host 'This was a dry-run, no changes have been made'
-        }     
+        }
 
         Write-Host "All done"
-
-

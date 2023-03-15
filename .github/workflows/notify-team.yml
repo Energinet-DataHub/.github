@@ -26,17 +26,17 @@ on:
   workflow_call:
     inputs:
       TEAM_NAME:
-        description: 'The name of the team who should receive the email. Used to determine the email address.'
+        description: "The name of the team who should receive the email. Used to determine the email address."
         required: true
         type: string
       SUBJECT:
-        description: 'The email subject. Should contain environment information when possible.'
+        description: "The email subject. Should contain environment information when possible."
         required: true
         type: string
       BODY:
-        description: 'Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.'
+        description: "Additional content for the email body. Apart from this the email body will also always contain a link to the failed build."
         required: false
-        default: ''
+        default: ""
         type: string
 
 jobs:

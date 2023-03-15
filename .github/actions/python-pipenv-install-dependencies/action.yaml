@@ -14,7 +14,7 @@
 
 name: Install pipenv and dependencies.
 description: |
-  Installs python and pipenv to a specific version, 
+  Installs python and pipenv to a specific version,
   and install requirements from the pipfile
 
 inputs:
@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: |
         python -m pip install --upgrade pipenv wheel
-        
+
     - id: cache-pipenv
       uses: actions/cache@v1
       with:

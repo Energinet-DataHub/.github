@@ -63,7 +63,7 @@ runs:
       run: |
         cd ${{ inputs.git_checkout_folder }}
         if ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        then    
+        then
           echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}"
         elif ${{ github.event_name == 'pull_request' }}
         then

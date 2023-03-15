@@ -33,7 +33,7 @@ inputs:
   content:
     description: Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.
     required: false
-    default: ''
+    default: ""
 
 runs:
   using: composite

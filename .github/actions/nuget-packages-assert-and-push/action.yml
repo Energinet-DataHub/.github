@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: Assert versions and push NuGet packages
-description: 'Assert versions of NuGet packages and push them to NuGet.org'
+description: "Assert versions of NuGet packages and push them to NuGet.org"
 
 inputs:
   PUSH_PACKAGES:
@@ -96,5 +96,5 @@ runs:
       run: |
         dotnet nuget push ${{ env.NUPKG_FILTER_PATTERN }} --api-key ${{ inputs.NUGET_TOKEN }} --source ${{ env.NUGET_FEED_PATH }}
       env:
-        NUPKG_FILTER_PATTERN: '${{ inputs.NUPKG_RECURSE_PATH }}/**/*.nupkg'
-        NUGET_FEED_PATH: 'https://api.nuget.org/v3/index.json'
+        NUPKG_FILTER_PATTERN: "${{ inputs.NUPKG_RECURSE_PATH }}/**/*.nupkg"
+        NUGET_FEED_PATH: "https://api.nuget.org/v3/index.json"

@@ -1,4 +1,3 @@
-
 # Copyright 2020 Energinet DataHub A/S
 #
 # Licensed under the Apache License, Version 2.0 (the "License2");
@@ -30,7 +29,7 @@ on:
         description: Parameter parsed to --build argument eg. --build=${BUILD_NUMBER}. If set, this will build a dev package for pypi using --build
         required: false
         type: string
-        default: ''
+        default: ""
       VERBOSE:
         description: Set to true for verbose logging
         required: false
@@ -47,10 +46,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Install Python and dependencies
         uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
-        with: 
+        with:
           python_version: ${{ inputs.PYTHON_VERSION }}
 
       - name: Find current version

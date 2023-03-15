@@ -31,7 +31,7 @@ on:
       ARCHITECTURE:
         required: false
         type: string
-        default: 'x64'
+        default: "x64"
       WHEEL_WORKING_DIRECTORY:
         required: true
         type: string
@@ -41,7 +41,7 @@ on:
         default: false
       OPERATING_SYSTEM:
         required: false
-        default: 'ubuntu-20.04' # Tools for python is not available in arch x64 on 22.04
+        default: "ubuntu-20.04" # Tools for python is not available in arch x64 on 22.04
         type: string
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS == false }}
         uses: thedoctor0/zip-release@0.6.2
         with:
-          type: 'zip'
+          type: "zip"
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
@@ -101,7 +101,7 @@ jobs:
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
         uses: thedoctor0/zip-release@0.6.2
         with:
-          type: 'zip'
+          type: "zip"
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_WITH_ASSETS_FOLDER_PATH }}
 

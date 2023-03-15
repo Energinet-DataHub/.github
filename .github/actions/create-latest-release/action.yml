@@ -15,16 +15,16 @@ name: Create _latest release
 description: Creates a _latest release
 inputs:
   REPO_TOKEN:
-    description: 'Repository access token'
+    description: "Repository access token"
     required: true
   RELEASE_NAME:
     required: true
     type: string
-    description: 'Release name used as ref for the _latest release'
+    description: "Release name used as ref for the _latest release"
   RELEASE_NAME_PREFIX:
     required: true
     type: string
-    description: 'Prefix to the _latest release name'
+    description: "Prefix to the _latest release name"
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
