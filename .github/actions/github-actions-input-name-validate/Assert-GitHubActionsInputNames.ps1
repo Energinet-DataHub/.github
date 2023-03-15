@@ -53,6 +53,6 @@ function Assert-GitHubActionsInputNames {
     }
 
     if (-not $isValid) {
-        Write-Error 'One or more input parameters contain uppercase characters'
+        throw 'One or more input parameters contain uppercase characters'
     }
 }
