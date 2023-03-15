@@ -11,42 +11,40 @@ yaml-files:
   - "*.yml"
   - ".yamllint"
 
-# TODO: Remove each Default/Custom comment when we have decided on rules
 rules:
-  braces: enable # Default
-  brackets: enable # Default
-  colons: enable # Default
-  commas: enable # Default
-  comments: # Custom
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  comments:
     require-starting-space: true
     ignore-shebangs: true
     min-spaces-from-content: 1
-  comments-indentation: enable # Custom
-  document-end: disable # Default
-  document-start: disable # Custom
-  empty-lines: enable # Default
-  empty-values: disable # Default
-  float-values: disable # Default
-  hyphens: enable # Default
-  indentation: # Custom
-    level: warning
+  comments-indentation: enable
+  document-end: disable
+  document-start: disable
+  empty-lines: enable
+  empty-values: disable
+  float-values: disable
+  hyphens: enable
+  indentation:
     spaces: consistent
-    indent-sequences: consistent # Conflicts with YAML Red Hat formatting of arrays on multiple lines
+    indent-sequences: consistent
     check-multi-line-strings: false
-  key-duplicates: enable # Default
-  key-ordering: disable # Default
-  line-length: # Custom
+  key-duplicates: enable
+  key-ordering: disable
+  line-length:
     level: warning
     max: 150
     allow-non-breakable-inline-mappings: true
-  new-line-at-end-of-file: enable # Default
-  new-lines: disable # Custom
-  octal-values: disable # Default
-  quoted-strings: # Custom # quoted-strings: disable # Default
+  new-line-at-end-of-file: enable
+  new-lines: disable
+  octal-values: disable
+  quoted-strings:
     quote-type: double
     required: only-when-needed
     extra-required: []
     extra-allowed: []
     allow-quoted-quotes: false
-  trailing-spaces: enable # Default
-  truthy: disable # Custom
+  trailing-spaces: enable
+  truthy: disable
