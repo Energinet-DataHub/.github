@@ -16,14 +16,13 @@ Import-Module PowerShell-Yaml -Force
 
 <#
     .SYNOPSIS
-    Determines whether all input parameters in GitHub action and workflow files are valid.
+    Assert all input parameters in GitHub action and workflow files are valid.
 
     .DESCRIPTION
-    Determines whether all input parameters in GitHub action and workflow files are lowercase.
-    It validates the definitions as well as any usage of all input patameters.
-    It returns `$True` if all input parameters are valid; otherwise `$False`.
+    Assert all input parameters in GitHub action and workflow files are lowercase.
+    It asserts the definitions as well as any usage of all input patameters.
 #>
-function Test-GitHubActionsInputNames {
+function Assert-GitHubActionsInputNames {
     param (
         # The folder path in which to search for relevant files to validate.
         [Parameter(Mandatory = $true)]
