@@ -15,7 +15,7 @@
 name: YAML linting
 description: |
   Call yamllint to lint the YAML according to the '.yamllint' configuration.
-  By default 'yamllint' will exit with a return code 1 only when there is one or more error(s).
+  Errors and warnings will be written to the output, but only errors will fail the build.
   See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 
 inputs:

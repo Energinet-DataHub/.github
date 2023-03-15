@@ -1,37 +1,50 @@
 #
-# Extends default configuration.
+# Uses a custom configuration.
 # See also: https://yamllint.readthedocs.io/en/stable/configuration.html#default-configuration
 #
 # By default the script will exit with a return code 1 only when there is one or more error(s).
 # See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 #
 
-extends: default
+yaml-files:
+  - "*.yaml"
+  - "*.yml"
+  - ".yamllint"
 
 rules:
-  braces:
-    level: warning
-    max-spaces-inside: 1
-  brackets:
-    level: warning
-    max-spaces-inside: 1
-  colons:
-    level: warning
-  commas:
-    level: warning
-  comments: disable
-  comments-indentation: disable
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+  comments-indentation: enable
+  document-end: disable
   document-start: disable
-  empty-lines:
-    level: warning
-  hyphens:
-    level: warning
+  empty-lines: enable
+  empty-values: disable
+  float-values: disable
+  hyphens: enable
   indentation:
-    level: warning
+    spaces: consistent
     indent-sequences: consistent
+    check-multi-line-strings: false
+  key-duplicates: enable
+  key-ordering: disable
   line-length:
-    max: 150
     level: warning
+    max: 150
     allow-non-breakable-inline-mappings: true
-  trailing-spaces: disable
+  new-line-at-end-of-file: enable
+  new-lines: disable
+  octal-values: disable
+  quoted-strings:
+    quote-type: double
+    required: only-when-needed
+    extra-required: []
+    extra-allowed: []
+    allow-quoted-quotes: false
+  trailing-spaces: enable
   truthy: disable
