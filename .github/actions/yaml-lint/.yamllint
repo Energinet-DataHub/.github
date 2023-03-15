@@ -18,12 +18,10 @@ rules:
   colons: enable # Default
   commas: enable # Default
   comments: # Custom
-    level: warning
     require-starting-space: true
     ignore-shebangs: true
     min-spaces-from-content: 1
-  comments-indentation: # Default
-    level: warning
+  comments-indentation: enable # Custom
   document-end: disable # Default
   document-start: disable # Custom
   empty-lines: enable # Default
