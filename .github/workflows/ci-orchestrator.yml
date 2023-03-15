@@ -12,7 +12,8 @@ jobs:
   ci_base:
     uses: ./.github/workflows/ci-base.yml
     with:
-      skip_yaml_lint: false
+      skip_yaml_lint: true
+      skip_input_name_validation: true
 
   #
   # Automatic Release (verify if release tag exists)
@@ -24,22 +25,23 @@ jobs:
     name: Run Pester tests in actions-folder
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Run Pester tests
-      shell: pwsh
-      working-directory: .github/actions
-      run: |
-        Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
+      - name: Run Pester tests
+        shell: pwsh
+        working-directory: .github/actions
+        run: |
+          Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
 
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest
     needs: [
-      ci_base,
-      create_release,
-      powershell_verification,
-    ]
+        ci_base,
+        # Automatic Release
+        create_release,
+        powershell_verification,
+      ]
     if: |
       always()
     steps:

@@ -24,28 +24,28 @@ on:
     inputs:
       OPERATING_SYSTEM:
         required: false
-        default: 'ubuntu-22.04'
+        default: "ubuntu-22.04"
         type: string
       SKIP_MARKDOWN_CHECK:
         required: false
         type: string
-        description: 'Set to true to skip checking Markdown files.'
-        default: 'false'
+        description: "Set to true to skip checking Markdown files."
+        default: "false"
       SKIP_LICENSE_CHECK:
         required: false
         type: string
-        description: 'Set to true to skip checking License lines. All public repositories should run license check.'
-        default: 'false'
+        description: "Set to true to skip checking License lines. All public repositories should run license check."
+        default: "false"
       skip_yaml_lint:
         required: false
         type: string
-        description: 'Set to true to skip YAML linting for Github actions and workflows in repository.'
-        default: 'true'
+        description: "Set to true to skip YAML linting for Github actions and workflows in repository."
+        default: "true"
       skip_input_name_validation:
         required: false
         type: string
-        description: 'Set to true to skip input name validation for Github actions and workflows in repository.'
-        default: 'true'
+        description: "Set to true to skip input name validation for Github actions and workflows in repository."
+        default: "true"
 
 jobs:
   md_check:
@@ -61,7 +61,7 @@ jobs:
       - name: Checkout remote repository
         uses: actions/checkout@v3
         with:
-          repository: 'Energinet-DataHub/.github'
+          repository: "Energinet-DataHub/.github"
           path: ${{ env.REMOTE_REPO_PATH }}
 
       - name: Copy configuration files
@@ -76,11 +76,11 @@ jobs:
       - name: Markdown links check
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
-          use-quiet-mode: 'yes'
-          use-verbose-mode: 'yes'
-          check-modified-files-only: 'yes'
-          config-file: './mlc_config.json'
-          base-branch: 'main'
+          use-quiet-mode: "yes"
+          use-verbose-mode: "yes"
+          check-modified-files-only: "yes"
+          config-file: "./mlc_config.json"
+          base-branch: "main"
         continue-on-error: true
         id: md-link-check
 
@@ -92,7 +92,7 @@ jobs:
       - name: Markdown lint check
         uses: avto-dev/markdown-lint@v1
         with:
-          args: './'
+          args: "./"
         continue-on-error: true
         id: md-lint-check
 
@@ -131,7 +131,7 @@ jobs:
       - name: Checkout remote repository
         uses: actions/checkout@v3
         with:
-          repository: 'Energinet-DataHub/.github'
+          repository: "Energinet-DataHub/.github"
           path: ${{ env.REMOTE_REPO_PATH }}
 
       - name: Copy configuration files
@@ -176,10 +176,10 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/workflows
-          fail_on_uppercase_input_params: 'false'
+          fail_on_uppercase_input_params: "true"
 
       - name: Validate input fields in .github/actions folder
         uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/actions
-          fail_on_uppercase_input_params: 'false'
+          fail_on_uppercase_input_params: "true"
