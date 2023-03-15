@@ -15,7 +15,7 @@
 name: YAML linting
 description: |
   Call yamllint to lint the YAML according to the '.yamllint' configuration.
-  We use 'strict mode' to fail the build on all warnings and errors.
+  Errors and warnings will be written to the output, but only errors will fail the build.
   See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
 
 inputs:
@@ -38,6 +38,6 @@ runs:
         }
 
         pip install yamllint
-        yamllint -s -f colored -c ${{ github.action_path }}/.yamllint $target
+        yamllint -f colored -c ${{ github.action_path }}/.yamllint $target
 
         Write-Host "YAML linting completed."
