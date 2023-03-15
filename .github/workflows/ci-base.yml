@@ -155,12 +155,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run yamllint on .github/workflows folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@dstenroejl/input-name-validation # TODO: Fix before merge
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
         with:
           yaml_file_or_folder: .github/workflows
 
       - name: Run yamllint on  .github/actions folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@dstenroejl/input-name-validation # TODO: Fix before merge
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
         with:
           yaml_file_or_folder: .github/actions
 
