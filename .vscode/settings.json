@@ -6,5 +6,6 @@
         "MD007": {
             "indent": 4
         }
-    }
+    },
+    "redhat.telemetry.enabled": false
 }
