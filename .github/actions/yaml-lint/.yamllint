@@ -11,6 +11,7 @@ yaml-files:
   - "*.yml"
   - ".yamllint"
 
+# TODO: Remove each Default/Custom comment when we have decided on rules
 rules:
   braces: enable # Default
   brackets: enable # Default
