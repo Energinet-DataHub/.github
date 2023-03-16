@@ -178,6 +178,7 @@ jobs:
         id: get_version_suffix
 
       # TODO: Remove when done testing
+      # CONCLUSION: Usage here is case-insensitive
       - name: Print output value
         shell: pwsh
         run: |
