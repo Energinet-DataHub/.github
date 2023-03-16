@@ -13,10 +13,10 @@
 # limitations under the License.
 
 name: Get version suffix for NuGet packages
-description: 'Do not set version suffix if triggered on master/main branch; otherwise set as alpha release with GitHub run number'
+description: "Do not set version suffix if triggered on master/main branch; otherwise set as alpha release with GitHub run number"
 
 outputs:
-  version_suffix_property:
+  version_suffix_PROPERTY:
     description: "Version suffix property for NuGet packages"
     value: ${{ steps.determine_version_suffix.outputs.property }}
 
