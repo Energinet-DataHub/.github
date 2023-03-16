@@ -16,9 +16,9 @@ name: Get version suffix for NuGet packages
 description: "Do not set version suffix if triggered on master/main branch; otherwise set as alpha release with GitHub run number"
 
 outputs:
-  version_suffix_PROPERTY: # CONCLUSION: Naming here is case-insensitive
+  version_suffix_property:
     description: "Version suffix property for NuGet packages"
-    value: ${{ steps.determine_version_suffix.outputs.PROperty }} # CONCLUSION: Naming here is case-insensitive
+    value: ${{ steps.determine_version_suffix.outputs.property }}
 
 runs:
   using: composite
@@ -31,10 +31,10 @@ runs:
         if [[ ${{ env.BRANCH }} == 'master' || ${{ env.BRANCH }} == 'main' ]]
         then
           echo "Empty VersionSuffix"
-          echo "PROPERTY=''" >>$GITHUB_OUTPUT
+          echo "property=''" >>$GITHUB_OUTPUT
         else
           echo "Set VersionSuffix"
-          echo "PROPERTY=-p:VersionSuffix=-alpha-${{ github.run_number }}" >>$GITHUB_OUTPUT
+          echo "property=-p:VersionSuffix=-alpha-${{ github.run_number }}" >>$GITHUB_OUTPUT
         fi
       env:
         BRANCH: ${GITHUB_REF#refs/heads/}
