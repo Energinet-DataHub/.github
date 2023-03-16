@@ -174,7 +174,7 @@ jobs:
 
       # TODO: Remove when done testing
       - name: Test use of outputs
-        uses: ./.github/actions/nuget-get-version-suffix
+        uses: Energinet-DataHub/.github/.github/actions/nuget-get-version-suffix@dstenroejl/enhance-input-validation
         id: get_version_suffix
 
       # TODO: Remove when done testing
