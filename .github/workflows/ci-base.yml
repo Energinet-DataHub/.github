@@ -181,7 +181,7 @@ jobs:
       - name: Print output value
         shell: pwsh
         run: |
-          Write-Host "Output: '${{ steps.get_version_suffix.outputs.version_suffix_property }}'"
+          Write-Host "Output: '${{ steps.get_version_suffix.outputs.VERSION_suffix_property }}'"
 
       - name: Validate input fields in .github/workflows folder
         uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@dstenroejl/enhance-input-validation # TODO: Set to v10 before merge
