@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Github workflows and actions input name validation
-description: Validate that all input parameters in workflows and actions are lowercase.
+name: Validate casing in Github workflows and actions
+description: Validate that inputs, outputs and secrets used in DH3 GitHub actions and workflows are lowercase.
 
 inputs:
-  yaml_file_or_folder:
+  folder:
     description: |
-      Path to the folder to perform input parameter validation on.
-      If folder does not exist then validation is not performed.
+      Path to the folder from which to recursively load YAML files and
+      perform casing validation on.
+      If the folder does not exist then validation is not performed.
     required: true
 
 runs:
@@ -28,15 +29,15 @@ runs:
     - name: Run PowerShell script
       shell: pwsh
       run: |
-        $folder = "${{ inputs.yaml_file_or_folder }}"
+        $folder = "${{ inputs.folder }}"
 
         if ((Test-Path -Path $folder) -eq $false)
         {
-          Write-Warning "Skipping input name validation. Folder '$($folder)' not found."
+          Write-Warning "Skipping casing validation. Folder '$($folder)' not found."
           exit 0
         }
 
         Install-Module -Name PowerShell-Yaml -Force
 
-        . ${{ github.action_path }}/Assert-GitHubActionsInputNames.ps1
-        Assert-GitHubActionsInputNames -FolderPath $folder
+        . ${{ github.action_path }}/Assert-GitHubActionsCasing.ps1
+        Assert-GitHubActionsCasing -FolderPath $folder

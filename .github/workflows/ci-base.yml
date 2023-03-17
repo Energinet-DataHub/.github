@@ -176,10 +176,8 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/workflows
-          fail_on_uppercase_input_params: "true"
 
       - name: Validate input fields in .github/actions folder
         uses: Energinet-DataHub/.github/.github/actions/github-actions-input-name-validate@v10
         with:
           yaml_file_or_folder: .github/actions
-          fail_on_uppercase_input_params: "true"
