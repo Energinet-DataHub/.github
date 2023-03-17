@@ -25,7 +25,7 @@ Import-Module PowerShell-Yaml -Force
 function Assert-GitHubActionsCasing {
     param (
         # The folder path in which to recursively search for relevant files to validate.
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $FolderPath
     )
