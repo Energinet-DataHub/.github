@@ -2,20 +2,20 @@
 # Test file for testing casing validation of GitHub actions
 #
 
-name: Valid action
+name: Invalid action
 description: |
-  This action is used for testing and should be valid with respect to
+  This action is used for testing and should be INVALID with respect to
   casing of inputs and outputs fields.
 inputs:
-  first_input:
+  first_INPUT:
     description: First input
     required: true
-  second_input:
+  SECOND_input:
     description: Second input
     required: false
     default: ""
 outputs:
-  first_output:
+  first_OUTPUT:
     description: First output
     value: ${{ steps.determine_output.outputs.my_output }}
 
@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: |
         # Write inputs
-        echo ${{ inputs.first_input }}
-        echo ${{ inputs.second_input }}
+        echo ${{ inputs.first_INPUT }}
+        echo ${{ inputs.SECOND_input }}
         # Set outputs
         echo "my_output='output-data'" >>$GITHUB_OUTPUT
