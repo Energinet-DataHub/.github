@@ -6,6 +6,7 @@ name: Invalid action
 description: |
   This action is used for testing and should be INVALID with respect to
   casing of inputs and outputs fields.
+
 inputs:
   first_INPUT:
     description: First input

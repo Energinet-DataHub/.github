@@ -23,6 +23,7 @@ Describe "When dot-sourcing the script" {
     Context "Given Assert-GitHubActionsCasing is called with '<folderPath>'" -ForEach @(
         @{ FolderPath = "$PSScriptRoot/test-files/actions/action-valid"; ExpectedCount = 1 }
         @{ FolderPath = "$PSScriptRoot/test-files/actions"; ExpectedCount = 2 }
+        @{ FolderPath = "$PSScriptRoot/test-files"; ExpectedCount = 4 }
     ) {
         BeforeAll {
             Mock Test-GitHubFile {}
@@ -94,6 +95,69 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Not -Invoke Write-Host -ParameterFilter {
+                $Object -and $Object.StartsWith("Secret definition")
+            }
+        }
+    }
+
+    Context "Given Assert-GitHubActionsCasing is given valid workflow file" {
+        BeforeAll {
+            $script:folderPath = "$PSScriptRoot/test-files/workflows/workflow-valid"
+        }
+
+        It "Should not throw" {
+            # Act
+            Assert-GitHubActionsCasing -FolderPath $script:folderPath
+        }
+    }
+
+    Context "Given Assert-GitHubActionsCasing is given invalid workflow file" {
+        BeforeAll {
+            $script:folderPath = "$PSScriptRoot/test-files/workflows/workflow-invalid"
+        }
+
+        It "Should throw" {
+            # Act
+            {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            } | Should -Throw 'One or more fields contain uppercase characters'
+        }
+
+        It "Should find 2 invalid input definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Input definition")
+            }
+        }
+
+        It "Should find 1 invalid output definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Output definition")
+            }
+        }
+
+        It "Should find 1 invalid secret definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
                 $Object -and $Object.StartsWith("Secret definition")
             }
         }

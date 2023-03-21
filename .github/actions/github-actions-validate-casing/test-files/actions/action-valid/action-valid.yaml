@@ -6,6 +6,7 @@ name: Valid action
 description: |
   This action is used for testing and should be VALID with respect to
   casing of inputs and outputs fields.
+
 inputs:
   first_input:
     description: First input
