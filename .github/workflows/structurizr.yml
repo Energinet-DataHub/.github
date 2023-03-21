@@ -77,7 +77,7 @@ jobs:
           done
 
       - name: Commit files
-        if: steps.diagrams-changed.outputs.any_changed }} = 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
