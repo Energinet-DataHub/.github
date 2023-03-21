@@ -16,9 +16,27 @@ Describe "When dot-sourcing the script" {
     BeforeAll {
         Install-Module -Name PowerShell-Yaml -Force
         . $PSScriptRoot/Assert-GitHubActionsCasing.ps1
+
+        Mock Write-Host {}
     }
 
-    Context "Given Assert-GitHubActionsCasing is called with foldertree containing a single action file " {
+    Context "Given Assert-GitHubActionsCasing is called with '<folderPath>'" -ForEach @(
+        @{ FolderPath = "$PSScriptRoot/test-files/actions/action-valid"; ExpectedCount = 1 }
+        @{ FolderPath = "$PSScriptRoot/test-files/actions"; ExpectedCount = 2 }
+    ) {
+        BeforeAll {
+            Mock Test-GitHubFile {}
+        }
+
+        It "Should find <expectedCount> file(s)" {
+            # Act
+            Assert-GitHubActionsCasing -FolderPath $folderPath
+
+            Should -Invoke Test-GitHubFile -Times $expectedCount -Exactly
+        }
+    }
+
+    Context "Given Assert-GitHubActionsCasing is given valid action file" {
         BeforeAll {
             $script:folderPath = "$PSScriptRoot/test-files/actions/action-valid"
         }
@@ -29,9 +47,9 @@ Describe "When dot-sourcing the script" {
         }
     }
 
-    Context "Given Assert-GitHubActionsCasing is called with foldertree containing multiple action files" {
+    Context "Given Assert-GitHubActionsCasing is given invalid action file" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/actions"
+            $script:folderPath = "$PSScriptRoot/test-files/actions/action-invalid"
         }
 
         It "Should throw" {
