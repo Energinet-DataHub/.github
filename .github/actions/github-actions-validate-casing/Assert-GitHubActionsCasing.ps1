@@ -70,11 +70,6 @@ function Test-GitHubFile {
 
     # Definitions available in workflows and actions
     $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-    $outputKeys = $jsonObj.on.workflow_call.outputs.Keys ?? $jsonObj.outputs.Keys
-
-    # Definitions only available in workflows
-    $secretKeys = $jsonObj.on.workflow_call.secrets.Keys
-
     foreach ($key in $inputKeys) {
         if (!($key -ceq $key.ToLower())) {
             Write-Host “Input definition '$key' contains uppercase characters”
@@ -82,6 +77,7 @@ function Test-GitHubFile {
         }
     }
 
+    $outputKeys = $jsonObj.on.workflow_call.outputs.Keys ?? $jsonObj.outputs.Keys
     foreach ($key in $outputKeys) {
         if (!($key -ceq $key.ToLower())) {
             Write-Host “Output definition '$key' contains uppercase characters”
@@ -89,9 +85,17 @@ function Test-GitHubFile {
         }
     }
 
-    foreach ($key in $secretKeys) {
+    # Definitions only available in workflows
+    foreach ($key in $jsonObj.on.workflow_call.secrets.Keys) {
         if (!($key -ceq $key.ToLower())) {
             Write-Host “Secret definition '$key' contains uppercase characters”
+            $isValid = $false
+        }
+    }
+
+    foreach ($key in $jsonObj.on.workflow_dispatch.inputs.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            Write-Host “Workflow dispatch input definition '$key' contains uppercase characters”
             $isValid = $false
         }
     }

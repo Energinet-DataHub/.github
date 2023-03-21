@@ -25,6 +25,11 @@ on:
       FIRST_secret:
         required: true
         description: First secret
+  workflow_dispatch:
+    inputs:
+      FIRST_DISPATCH:
+        description: First dispatch input
+        required: false
 
 jobs:
   changes:

@@ -161,5 +161,18 @@ Describe "When dot-sourcing the script" {
                 $Object -and $Object.StartsWith("Secret definition")
             }
         }
+
+        It "Should find 1 invalid workflow dispatch input definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Workflow dispatch input definition")
+            }
+        }
     }
 }
