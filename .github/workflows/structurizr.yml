@@ -48,15 +48,14 @@ jobs:
         id: diagrams-changed
         uses: tj-actions/changed-files@v35
         with:
-          files_separator: ","
           since_last_remote_commit: true
           files: |
-            ${{ inputs.dsl }}
+            **/*.dsl
 
       - name: Run step if any file(s) changed
-        if: steps.diagrams-changed.outputs.any_changed == 'true'
         run: |
           echo "One or more files changed."
+          echo "Any DSL files that have changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
           echo "List all the files that have changed: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
       - name: Render diagrams
