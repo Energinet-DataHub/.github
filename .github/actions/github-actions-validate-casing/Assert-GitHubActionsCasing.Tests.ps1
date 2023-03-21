@@ -19,16 +19,26 @@ Describe "When dot-sourcing the script" {
     }
 
     Context "Given Assert-GitHubActionsCasing is called with foldertree containing a single file " {
+        BeforeAll {
+            $script:folderPath = "$PSScriptRoot/test-files/action-valid"
+        }
+
         It "Should not throw" {
             # Act
-            Assert-GitHubActionsCasing -FolderPath "$PSScriptRoot/test-files/action-valid"
+            Assert-GitHubActionsCasing -FolderPath $script:folderPath
         }
     }
 
     Context "Given Assert-GitHubActionsCasing is called with foldertree containing multiple files" {
+        BeforeAll {
+            $script:folderPath = "$PSScriptRoot/test-files"
+        }
+
         It "Should throw" {
             # Act
-            Assert-GitHubActionsCasing -FolderPath "$PSScriptRoot/test-files"
+            {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            } | Should -Throw 'One or more fields contain uppercase characters'
         }
     }
 }

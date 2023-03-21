@@ -53,6 +53,6 @@ function Assert-GitHubActionsCasing {
     }
 
     if (-not $isValid) {
-        throw 'One or more parameters contain uppercase characters'
+        throw 'One or more fields contain uppercase characters'
     }
 }
