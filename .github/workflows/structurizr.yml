@@ -54,13 +54,13 @@ jobs:
             ${{ inputs.dsl }}
 
       - name: Run step if any file(s) changed
-        if: steps.diagrams-changed.outputs.any_changed }} = 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         run: |
           echo "One or more files changed."
           echo "List all the files that have changed: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
       - name: Render diagrams
-        if: steps.diagrams-changed.outputs.any_changed }} = 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         run: |
           diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
           readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
