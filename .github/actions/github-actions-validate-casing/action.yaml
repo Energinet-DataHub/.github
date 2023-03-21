@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Validate casing in Github workflows and actions
+name: Validate casing in Github actions and workflows
 description: Validate that inputs, outputs and secrets used in DH3 GitHub actions and workflows are lowercase.
 
 inputs:

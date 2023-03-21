@@ -41,10 +41,16 @@ on:
         type: string
         description: "Set to true to skip YAML linting for Github actions and workflows in repository."
         default: "true"
+      # TODO: Remove when new parameter 'skip_actions_casing_validation' is in use all over
       skip_input_name_validation:
         required: false
         type: string
         description: "Set to true to skip input name validation for Github actions and workflows in repository."
+        default: "true"
+      skip_actions_casing_validation:
+        required: false
+        type: string
+        description: "Set to true to skip casing validation for Github actions and workflows in repository."
         default: "true"
 
 jobs:
@@ -147,37 +153,27 @@ jobs:
           npx @kt3k/license-checker
 
   github_actions_yaml_linting:
-    name: YAML linting for Github workflows and actions
+    name: YAML linting for Github actions and workflows
     if: ${{ inputs.skip_yaml_lint != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run yamllint on .github/workflows folder
+      - name: Run yamllint on .github folder
         uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
         with:
-          yaml_file_or_folder: .github/workflows
-
-      - name: Run yamllint on  .github/actions folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
-        with:
-          yaml_file_or_folder: .github/actions
+          yaml_file_or_folder: .github
 
   github_actions_validate_casing:
-    name: Validate casing in Github workflows and actions
-    if: ${{ inputs.skip_input_name_validation != 'true' }}
+    name: Validate casing in Github actions and workflows
+    if: ${{ inputs.skip_input_name_validation != 'true' || inputs.skip_actions_casing_validation != 'true' }}
     runs-on: ${{ inputs.OPERATING_SYSTEM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Validate casing in custom workflows
+      - name: Run casing validation on .github folder
         uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v10
         with:
-          folder: .github/workflows
-
-      - name: Validate casing in custom actions
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v10
-        with:
-          folder: .github/actions
+          folder: .github
