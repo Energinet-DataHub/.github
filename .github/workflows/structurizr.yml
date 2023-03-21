@@ -44,7 +44,7 @@ jobs:
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
-      - name: Diagram DSL files have changed
+      - name: Determine if diagram files have changed
         id: diagrams-changed
         uses: tj-actions/changed-files@v35
         with:
