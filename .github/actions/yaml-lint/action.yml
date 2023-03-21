@@ -20,7 +20,10 @@ description: |
 
 inputs:
   yaml_file_or_folder:
-    description: Path to the yaml file or folder to perform linting on. If target does not exist then validation is not performed.
+    description: |
+      Path to the yaml file or folder to perform linting on.
+      If target is a folder then linting is performed recursively.
+      If target does not exist then validation is not performed.
     required: true
 
 runs:

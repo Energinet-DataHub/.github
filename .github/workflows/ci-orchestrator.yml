@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/ci-base.yml
     with:
       skip_yaml_lint: true
-      skip_input_name_validation: true
+      skip_actions_casing_validation: true
 
   #
   # Automatic Release (verify if release tag exists)
