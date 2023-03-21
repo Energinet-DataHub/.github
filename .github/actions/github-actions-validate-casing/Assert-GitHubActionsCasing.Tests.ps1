@@ -14,11 +14,19 @@
 
 Describe "When dot-sourcing the script" {
     BeforeAll {
+        Install-Module -Name PowerShell-Yaml -Force
         . $PSScriptRoot/Assert-GitHubActionsCasing.ps1
     }
 
-    Context "Given Assert-GitHubActionsCasing is called with folder" {
+    Context "Given Assert-GitHubActionsCasing is called with foldertree containing a single file " {
         It "Should not throw" {
+            # Act
+            Assert-GitHubActionsCasing -FolderPath "$PSScriptRoot/test-files/action-valid"
+        }
+    }
+
+    Context "Given Assert-GitHubActionsCasing is called with foldertree containing multiple files" {
+        It "Should throw" {
             # Act
             Assert-GitHubActionsCasing -FolderPath "$PSScriptRoot/test-files"
         }

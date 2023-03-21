@@ -31,8 +31,8 @@ function Assert-GitHubActionsCasing {
     )
     $isValid = $true
 
-    $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-    Write-Host "Files found in $($folder): $($files.Length)"
+    [Object[]]$files = Get-ChildItem -Path $FolderPath -Recurse -File -Include ('*.yml', '*.yaml')
+    Write-Host "Files found in $($FolderPath): $($files.Length)"
 
     foreach ($file in $files) {
         Write-Host "Checking $($file.FullName)"
