@@ -58,5 +58,44 @@ Describe "When dot-sourcing the script" {
                 Assert-GitHubActionsCasing -FolderPath $script:folderPath
             } | Should -Throw 'One or more fields contain uppercase characters'
         }
+
+        It "Should find 2 invalid input definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Input definition")
+            }
+        }
+
+        It "Should find 1 invalid output definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Output definition")
+            }
+        }
+
+        It "Should not find any secret definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Not -Invoke Write-Host -ParameterFilter {
+                $Object -and $Object.StartsWith("Secret definition")
+            }
+        }
     }
 }
