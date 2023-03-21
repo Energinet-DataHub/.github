@@ -18,9 +18,9 @@ Describe "When dot-sourcing the script" {
         . $PSScriptRoot/Assert-GitHubActionsCasing.ps1
     }
 
-    Context "Given Assert-GitHubActionsCasing is called with foldertree containing a single file " {
+    Context "Given Assert-GitHubActionsCasing is called with foldertree containing a single action file " {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/action-valid"
+            $script:folderPath = "$PSScriptRoot/test-files/actions/action-valid"
         }
 
         It "Should not throw" {
@@ -29,9 +29,9 @@ Describe "When dot-sourcing the script" {
         }
     }
 
-    Context "Given Assert-GitHubActionsCasing is called with foldertree containing multiple files" {
+    Context "Given Assert-GitHubActionsCasing is called with foldertree containing multiple action files" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files"
+            $script:folderPath = "$PSScriptRoot/test-files/actions"
         }
 
         It "Should throw" {
