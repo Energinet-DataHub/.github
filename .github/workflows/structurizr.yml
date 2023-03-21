@@ -52,9 +52,8 @@ jobs:
           files: |
             **/*.dsl
 
-      - name: Run step if any file(s) changed
+      - name: Write out any changes to DSL files - based on `diagrams-changed`-step
         run: |
-          echo "One or more files changed."
           echo "Any DSL files that have changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
           echo "List all the files that have changed: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
