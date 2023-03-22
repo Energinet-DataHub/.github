@@ -74,7 +74,7 @@ jobs:
       # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
         shell: bash
-        # working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
+        working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
