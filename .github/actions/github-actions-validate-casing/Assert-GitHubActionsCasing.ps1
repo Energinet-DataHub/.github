@@ -70,7 +70,8 @@ function Test-GitHubFile {
         Add-CompositeActionFailures -YamlObject $yamlObject -Failures $failures
     }
     elseif (Test-WorkflowYaml -YamlObject $yamlObject) {
-        Add-WorkflowFailures -YamlObject $yamlObject -Failures $failures
+        Add-WorkflowOnFailures -YamlObject $yamlObject -Failures $failures
+        Add-WorkflowJobsFailures -YamlObject $yamlObject -Failures $failures
     }
 
     foreach ($failure in $failures) {
@@ -128,7 +129,7 @@ function Test-WorkflowYaml {
      - inputs
      - outputs
 
-    The following 'steps' definitions are validated:
+    The following 'runs.steps' definitions are validated:
      - with
 #>
 function Add-CompositeActionFailures {
@@ -165,7 +166,7 @@ function Add-CompositeActionFailures {
 
 <#
     .SYNOPSIS
-    Validate workflow YAML and add any failures found to the current list of failures.
+    Validate workflow 'on.*' YAML and add any failures found to the current list of failures.
 
     .DESCRIPTION
     The following definitions are validated:
@@ -173,14 +174,8 @@ function Add-CompositeActionFailures {
      - workflow_call.inputs
      - workflow_call.secrets
      - workflow_call.outputs
-
-    The following 'jobs' definitions are validated:
-     - with
-     - secrets (list of keys or 'inherit')
-     - outputs
-     - steps.with (inline jobs calling actions)
 #>
-function Add-WorkflowFailures {
+function Add-WorkflowOnFailures {
     param (
         # YAML as object (hashtables)
         [Parameter(Mandatory)]
@@ -216,6 +211,31 @@ function Add-WorkflowFailures {
             [void]$Failures.Add(“Workflow Dispatch Input definition '$key' contains uppercase characters”)
         }
     }
+}
+
+<#
+    .SYNOPSIS
+    Validate workflow 'jobs.*' YAML and add any failures found to the current list of failures.
+
+    .DESCRIPTION
+    The following 'jobs' definitions are validated:
+     - with
+     - secrets (list of keys or 'inherit')
+     - outputs
+     - steps.with (inline jobs calling actions)
+#>
+function Add-WorkflowJobsFailures {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject,
+        # List of failures, to which we should add any additionally failures found
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
 
     foreach ($job in $YamlObject.jobs.Values) {
         foreach ($key in $job.with.Keys) {
