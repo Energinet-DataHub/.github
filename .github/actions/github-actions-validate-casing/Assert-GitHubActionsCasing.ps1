@@ -49,6 +49,17 @@ function Assert-GitHubActionsCasing {
 <#
     .SYNOPSIS
     Test if all field definitions for given GitHub action or workflow file is lowercase.
+
+    .DESCRIPTION
+    For workflows the following definitions are tested:
+     - workflow_dispatch.inputs
+     - workflow_call.inputs
+     - workflow_call.secrets
+     - workflow_call.outputs
+
+    For actions the following definitions are tested:
+     - inputs
+     - outputs
 #>
 function Test-GitHubFile {
     param (
