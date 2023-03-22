@@ -76,19 +76,17 @@ function Test-GitHubFile {
 
     [Object]$yamlObject = (ConvertFrom-Yaml -Yaml $yaml)
 
-    [boolean] $isValid = $true
+    $failures = @()
     if (Test-CompositeActionYaml -YamlObject $yamlObject) {
         foreach ($key in $yamlObject.inputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Action Input definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Action Input definition '$key' contains uppercase characters”
             }
         }
 
         foreach ($key in $yamlObject.outputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Action Output definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Action Output definition '$key' contains uppercase characters”
             }
         }
 
@@ -96,33 +94,34 @@ function Test-GitHubFile {
     elseif (Test-WorkflowYaml -YamlObject $yamlObject) {
         foreach ($key in $yamlObject.on.workflow_call.inputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Workflow Input definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Workflow Input definition '$key' contains uppercase characters”
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_call.outputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Workflow Output definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Workflow Output definition '$key' contains uppercase characters”
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_call.secrets.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Workflow Secret definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Workflow Secret definition '$key' contains uppercase characters”
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                Write-Host “Workflow Dispatch Input definition '$key' contains uppercase characters”
-                $isValid = $false
+                $failures += “Workflow Dispatch Input definition '$key' contains uppercase characters”
             }
         }
     }
 
+    foreach ($failure in $failures) {
+        Write-Host $failure
+    }
+
+    [boolean]$isValid = ($failures.Count -eq 0)
     return $isValid
 }
 
