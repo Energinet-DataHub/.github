@@ -71,45 +71,95 @@ function Test-GitHubFile {
     Write-Host "Checking $($file.FullName)"
 
     [string]$yaml = Get-Content -Path $file.FullName | Out-String
-
     # Remove characters which hinders our YAML convertion
     $yaml = $yaml.Replace('{{', '').Replace('}}', '')
 
-    $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+    [Object]$yamlObject = (ConvertFrom-Yaml -Yaml $yaml)
 
     [boolean] $isValid = $true
-
-    # Definitions available in workflows and actions
-    $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-    foreach ($key in $inputKeys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Input definition '$key' contains uppercase characters”
-            $isValid = $false
+    if (Test-CompositeActionYaml -YamlObject $yamlObject) {
+        foreach ($key in $yamlObject.inputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Action Input definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
         }
-    }
 
-    $outputKeys = $jsonObj.on.workflow_call.outputs.Keys ?? $jsonObj.outputs.Keys
-    foreach ($key in $outputKeys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Output definition '$key' contains uppercase characters”
-            $isValid = $false
+        foreach ($key in $yamlObject.outputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Action Output definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
         }
-    }
 
-    # Definitions only available in workflows
-    foreach ($key in $jsonObj.on.workflow_call.secrets.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Secret definition '$key' contains uppercase characters”
-            $isValid = $false
+    }
+    elseif (Test-WorkflowYaml -YamlObject $yamlObject) {
+        foreach ($key in $yamlObject.on.workflow_call.inputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Workflow Input definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
         }
-    }
 
-    foreach ($key in $jsonObj.on.workflow_dispatch.inputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Workflow dispatch input definition '$key' contains uppercase characters”
-            $isValid = $false
+        foreach ($key in $yamlObject.on.workflow_call.outputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Workflow Output definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
+        }
+
+        foreach ($key in $yamlObject.on.workflow_call.secrets.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Workflow Secret definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
+        }
+
+        foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                Write-Host “Workflow Dispatch Input definition '$key' contains uppercase characters”
+                $isValid = $false
+            }
         }
     }
 
     return $isValid
+}
+
+<#
+    .SYNOPSIS
+    Return '$true' if YAML is a composite action; otherwise '$false'.
+#>
+function Test-CompositeActionYaml {
+    param (
+        # YAML as object (hashtable)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject
+    )
+
+    if ("composite" -eq $yamlObject.runs.using) {
+        return $true
+    }
+
+    return $false
+}
+
+<#
+    .SYNOPSIS
+    Return '$true' if YAML is a workflow; otherwise '$false'.
+#>
+function Test-WorkflowYaml {
+    param (
+        # YAML as object (hashtable)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject
+    )
+
+    if ($null -ne $yamlObject.jobs) {
+        return $true
+    }
+
+    return $false
 }
