@@ -63,16 +63,6 @@ jobs:
           python-version: ${{ inputs.PYHTON_VERSION }}
           architecture: ${{ inputs.ARCHITECTURE }}
 
-      - name: Prepare release folder
-        shell: pwsh
-        working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
-        run: |
-          $artifacts_folder_path = './artifacts'
-          if ((Test-Path -Path artifacts_folder_path) -eq $true) {
-            Remove-Item -Recurse -Force artifacts_folder_path
-          }
-          New-Item -Path artifacts_folder_path -ItemType 'directory'
-
       # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
         shell: bash
@@ -80,12 +70,8 @@ jobs:
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
-
-      - name: Move wheel to release folder
-        shell: pwsh
-        working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
-        run: |
-          Move-Item -Path './dist' -Destination './artifacts'
+          mkdir "./artifacts"
+          mv dist "./artifacts"
 
       - name: Include Databricks assets in release
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
