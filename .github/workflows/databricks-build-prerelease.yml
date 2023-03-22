@@ -67,9 +67,11 @@ jobs:
         shell: pwsh
         working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
         run: |
-          if ((Test-Path -Path './artifacts') -eq $false) {
-              New-Item -Path './artifacts' -ItemType 'directory'
+          $artifacts_folder_path = './artifacts'
+          if ((Test-Path -Path artifacts_folder_path) -eq $true) {
+            Remove-Item -Recurse -Force artifacts_folder_path
           }
+          New-Item -Path artifacts_folder_path -ItemType 'directory'
 
       # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
