@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+using namespace System.Collections.Generic
+
 Import-Module PowerShell-Yaml -Force
 
 <#
@@ -76,43 +78,32 @@ function Test-GitHubFile {
 
     [Object]$yamlObject = (ConvertFrom-Yaml -Yaml $yaml)
 
-    $failures = @()
+    [List[string]]$failures = [List[string]]::new()
     if (Test-CompositeActionYaml -YamlObject $yamlObject) {
-        foreach ($key in $yamlObject.inputs.Keys) {
-            if (!($key -ceq $key.ToLower())) {
-                $failures += “Action Input definition '$key' contains uppercase characters”
-            }
-        }
-
-        foreach ($key in $yamlObject.outputs.Keys) {
-            if (!($key -ceq $key.ToLower())) {
-                $failures += “Action Output definition '$key' contains uppercase characters”
-            }
-        }
-
+        Add-CompositeActionFailures -YamlObject $yamlObject -Failures $failures
     }
     elseif (Test-WorkflowYaml -YamlObject $yamlObject) {
         foreach ($key in $yamlObject.on.workflow_call.inputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                $failures += “Workflow Input definition '$key' contains uppercase characters”
+                [void]$Failures.Add(“Workflow Input definition '$key' contains uppercase characters”)
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_call.outputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                $failures += “Workflow Output definition '$key' contains uppercase characters”
+                [void]$Failures.Add(“Workflow Output definition '$key' contains uppercase characters”)
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_call.secrets.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                $failures += “Workflow Secret definition '$key' contains uppercase characters”
+                [void]$Failures.Add(“Workflow Secret definition '$key' contains uppercase characters”)
             }
         }
 
         foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
             if (!($key -ceq $key.ToLower())) {
-                $failures += “Workflow Dispatch Input definition '$key' contains uppercase characters”
+                [void]$Failures.Add(“Workflow Dispatch Input definition '$key' contains uppercase characters”)
             }
         }
     }
@@ -131,7 +122,7 @@ function Test-GitHubFile {
 #>
 function Test-CompositeActionYaml {
     param (
-        # YAML as object (hashtable)
+        # YAML as object (hashtables)
         [Parameter(Mandatory)]
         [Object]
         $YamlObject
@@ -150,7 +141,7 @@ function Test-CompositeActionYaml {
 #>
 function Test-WorkflowYaml {
     param (
-        # YAML as object (hashtable)
+        # YAML as object (hashtables)
         [Parameter(Mandatory)]
         [Object]
         $YamlObject
@@ -161,4 +152,30 @@ function Test-WorkflowYaml {
     }
 
     return $false
+}
+
+function Add-CompositeActionFailures {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject,
+        # List of failures, to which we should add any additionally failures found
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    foreach ($key in $YamlObject.inputs.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            [void]$Failures.Add(“Action Input definition '$key' contains uppercase characters”)
+        }
+    }
+
+    foreach ($key in $YamlObject.outputs.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            [void]$Failures.Add(“Action Output definition '$key' contains uppercase characters”)
+        }
+    }
 }
