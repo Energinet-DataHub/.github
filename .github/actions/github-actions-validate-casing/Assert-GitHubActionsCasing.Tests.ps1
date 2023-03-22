@@ -86,7 +86,7 @@ Describe "When dot-sourcing the script" {
             }
         }
 
-        It "Should not find any secret definition" {
+        It "Should find 2 invalid step with definitions" {
             # Act
             try {
                 Assert-GitHubActionsCasing -FolderPath $script:folderPath
@@ -94,8 +94,8 @@ Describe "When dot-sourcing the script" {
             catch {
             }
 
-            Should -Not -Invoke Write-Host -ParameterFilter {
-                $Object -and $Object.StartsWith("Action Secret definition")
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Action Step With definition")
             }
         }
     }

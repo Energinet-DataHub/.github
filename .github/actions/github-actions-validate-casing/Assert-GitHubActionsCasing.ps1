@@ -127,6 +127,9 @@ function Test-WorkflowYaml {
     The following definitions are validated:
      - inputs
      - outputs
+
+    The following 'steps' definitions are validated:
+     - with
 #>
 function Add-CompositeActionFailures {
     param (
@@ -150,6 +153,12 @@ function Add-CompositeActionFailures {
     foreach ($key in $YamlObject.outputs.Keys) {
         if (!($key -ceq $key.ToLower())) {
             [void]$Failures.Add(“Action Output definition '$key' contains uppercase characters”)
+        }
+    }
+
+    foreach ($key in $YamlObject.runs.steps.with.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            [void]$Failures.Add(“Action Step With definition '$key' contains uppercase characters”)
         }
     }
 }
