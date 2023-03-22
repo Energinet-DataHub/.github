@@ -173,6 +173,12 @@ function Add-CompositeActionFailures {
      - workflow_call.inputs
      - workflow_call.secrets
      - workflow_call.outputs
+
+    The following 'jobs' definitions are validated:
+     - with
+     - secrets (list of keys or 'inherit')
+     - outputs
+     - steps.with (inline jobs calling actions)
 #>
 function Add-WorkflowFailures {
     param (
@@ -208,6 +214,43 @@ function Add-WorkflowFailures {
     foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
         if (!($key -ceq $key.ToLower())) {
             [void]$Failures.Add(“Workflow Dispatch Input definition '$key' contains uppercase characters”)
+        }
+    }
+
+    foreach ($job in $YamlObject.jobs.Values) {
+        foreach ($key in $job.with.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                [void]$Failures.Add(“Job With definition '$key' contains uppercase characters”)
+            }
+        }
+
+        foreach ($key in $job.outputs.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                [void]$Failures.Add(“Job Output definition '$key' contains uppercase characters”)
+            }
+        }
+
+        if ($null -ne $job.secrets) {
+            if ($job.secrets.GetType().Name -eq "Hashtable") {
+                foreach ($key in $job.secrets.Keys) {
+                    if (!($key -ceq $key.ToLower())) {
+                        [void]$Failures.Add(“Job Secret definition '$key' contains uppercase characters”)
+                    }
+                }
+            }
+            else {
+                $value = $job.secrets
+                if (!($value -ceq $value.ToLower())) {
+                    [void]$Failures.Add(“Job Secret definition '$value' contains uppercase characters”)
+                }
+            }
+        }
+
+        # Inline job
+        foreach ($key in $job.steps.with.Keys) {
+            if (!($key -ceq $key.ToLower())) {
+                [void]$Failures.Add(“Job Step With definition '$key' contains uppercase characters”)
+            }
         }
     }
 }
