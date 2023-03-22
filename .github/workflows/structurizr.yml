@@ -44,10 +44,11 @@ jobs:
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
-      - name: Determine if diagram files have changed
+      - name: Determine if any DSL files have changed since last pushed commit to the remote branch
         id: diagrams-changed
         uses: tj-actions/changed-files@v35
         with:
+          # Specifies that the action must check all commits pushed to the remote branch together for changes to files with the dsl-file format
           since_last_remote_commit: true
           files: |
             **/*.dsl
