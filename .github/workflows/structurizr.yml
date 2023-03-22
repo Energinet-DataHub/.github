@@ -9,7 +9,7 @@ on:
         required: false
         type: string
         default: "diagrams"
-        description: Folder where diagrams are rendered to. Caution - the folder is rebuilt on every invocation
+        description: Temporary folder where diagrams are rendered to.
     secrets:
       pat_token:
         required: true
