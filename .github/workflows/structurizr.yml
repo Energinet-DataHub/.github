@@ -1,15 +1,51 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Render C4 diagrams using Structurizr
+
+# DESCRIPTION:
+# This workflow is used to render C4 diagrams (*.dsl-files) to PNG images using Structurizr.
+#
+# The workflow must be called using 'secrets: inherit' to get access PAT token with `repo`
+# and `workflow` scopes. The accessible secret must be named pat_token_repo_workflow
+# See: https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
+#
+# The rendered diagrams are committed to the feature branch using the `git-auto-commit-action`-action.
+# To avoid an infinite loop of rendered diagrams being committed to the feature branch, the
+# `tj-actions/changed-files`-action is used to determine if any *.dsl-files are changed by the recent
+# push to the remote feature branch.
+# The `tj-actions/changed-files`-action is called with the `since_last_remote_commit`-property set to `true`.
+# That means if multiple commits are pushed to the remote branch at the same time, all commits will be
+# checked for changes to any *.dsl-files. If `since_last_remote_commit` is false (default value),
+# only the latest commit being pushed is checked - thereby not checking any intermediate commits.
+
 on:
   workflow_call:
     inputs:
       dsl:
+        description: paths delimetered by ','
         required: true
         type: string
-        description: paths delimetered by ','
       output_folder:
+        description: Temporary folder where diagrams are rendered to.
         required: false
         type: string
-        default: 'diagrams'
-        description: Folder where diagrams are rendered to. Caution - the folder is rebuilt on every invocation
+        default: "diagrams"
+    secrets:
+      pat_token_repo_workflow:
+        description: PAT token with `repo` and `workflow` scopes to re-trigger workflows if rendered diagrams are pushed
+        required: true
 
 jobs:
   render_structurizr_diagrams:
@@ -24,11 +60,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
+          # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
+          # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
+          token: ${{ secrets.pat_token_repo_workflow }}
 
       - name: Setup node
         uses: actions/setup-node@v3
 
       - name: Setup repo
+        shell: bash
         run: |
           diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
           echo $diagrams_folder
@@ -38,7 +80,23 @@ jobs:
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
+      - name: Determine if any DSL files have changed since last pushed commit to the remote branch
+        id: diagrams-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          since_last_remote_commit: true
+          files: |
+            **/*.dsl
+
+      - name: Write out any changes to DSL files - based on `diagrams-changed`-step
+        shell: bash
+        run: |
+          echo "Any DSL files that have changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
+          echo "List all the files that have changed: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
+
       - name: Render diagrams
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
+        shell: bash
         run: |
           diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
           readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
@@ -55,6 +113,7 @@ jobs:
           done
 
       - name: Commit files
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams

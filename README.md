@@ -227,30 +227,25 @@ The workflow renders all views in a structurizr workspace. The diagrams are plac
 
 Inputs:
 
-- dsl: required - comma seperated list of dsl's to render
-- output_folder: optional - folder where diagrams are placed (default: diagrams)
+- dsl: required - comma seperated list of dsl's to render.
+- output_folder: optional - folder where diagrams are placed (default: diagrams).
 
-Permissions:
+Secrets:
 
-- contents: write - needed for auto-commiting diagrams to current branch
+- pat_token_repo_workflow: PAT token with `repo` and `workflow` scopes used for the repository checkout.
 
 Example:
 
 ``` yml
-name: Render C4 models with structurizr
+name: Render C4 models with Structurizr
 
 on:
-  pull_request:
-    branches:
-      main
+  workflow_call: {}
 
 jobs:
-  render-c4:
-    permissions:
-      contents: write
-
-    uses: ./.github/workflows/structurizr.yml
+  render_c4:
+    uses: Energinet-DataHub/.github/.github/workflows/structurizr.yml@v10
     with:
-      dsl: 'source/datahub3-model/model.dsl'
-      output_folder: 'c4-diagrams'
+      dsl: "source/datahub3-model/model.dsl"
+    secrets: inherit
 ```
