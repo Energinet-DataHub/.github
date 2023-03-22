@@ -174,5 +174,57 @@ Describe "When dot-sourcing the script" {
                 $Object -and $Object.StartsWith("Workflow Dispatch Input definition")
             }
         }
+
+        It "Should find 2 invalid job with definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job With definition")
+            }
+        }
+
+        It "Should find 1 invalid job output definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Output definition")
+            }
+        }
+
+        It "Should find 2 invalid job secret definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Secret definition")
+            }
+        }
+
+        It "Should find 1 invalid job step with definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Step With definition")
+            }
+        }
     }
 }
