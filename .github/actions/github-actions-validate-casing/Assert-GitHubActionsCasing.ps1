@@ -20,7 +20,7 @@ Import-Module PowerShell-Yaml -Force
 
     .DESCRIPTION
     Assert all inputs, outputs and secrets used in DH3 GitHub action and workflow files are lowercase.
-    It asserts the definitions as well as any usage of the parameters, but only for DH3 custom actions and workflows.
+    It only asserts the definitions, not any usage of the fields.
 #>
 function Assert-GitHubActionsCasing {
     param (
@@ -31,28 +31,74 @@ function Assert-GitHubActionsCasing {
     )
     $isValid = $true
 
-    $files = Get-ChildItem -Path $folder -Recurse -File -Include ('*.yml', '*.yaml')
-    Write-Host "Files found in $($folder): $($files.Length)"
+    [Object[]]$files = Get-ChildItem -Path $FolderPath -Recurse -File -Include ('*.yml', '*.yaml')
+    Write-Host "Files found in $($FolderPath): $($files.Length)"
 
+    [boolean] $isValid = $true
     foreach ($file in $files) {
-        Write-Host "Checking $($file.FullName)"
-
-        $yaml = Get-Content -Path $file.FullName | Out-String
-
-        $yaml = $yaml.Replace('{{', '').Replace('}}', '')
-        $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
-        $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-
-        foreach ($inputKey in $inputKeys) {
-            if (!($inputKey -ceq $inputKey.ToLower())) {
-                Write-Host “Input variable '$inputKey' contains uppercase characters”
-
-                $isValid = $false
-            }
+        if ($false -eq (Test-GitHubFile -File $file)) {
+            $isValid = $false
         }
     }
 
     if (-not $isValid) {
-        throw 'One or more parameters contain uppercase characters'
+        throw 'One or more fields contain uppercase characters'
     }
+}
+
+<#
+    .SYNOPSIS
+    Test if all field definitions for given GitHub action or workflow file is lowercase.
+#>
+function Test-GitHubFile {
+    param (
+        # The file object of the file to validate.
+        [Parameter(Mandatory)]
+        [Object]
+        $File
+    )
+    Write-Host "Checking $($file.FullName)"
+
+    [string]$yaml = Get-Content -Path $file.FullName | Out-String
+
+    # Remove characters which hinders our YAML convertion
+    $yaml = $yaml.Replace('{{', '').Replace('}}', '')
+
+    $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+
+    [boolean] $isValid = $true
+
+    # Definitions available in workflows and actions
+    $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
+    foreach ($key in $inputKeys) {
+        if (!($key -ceq $key.ToLower())) {
+            Write-Host “Input definition '$key' contains uppercase characters”
+            $isValid = $false
+        }
+    }
+
+    $outputKeys = $jsonObj.on.workflow_call.outputs.Keys ?? $jsonObj.outputs.Keys
+    foreach ($key in $outputKeys) {
+        if (!($key -ceq $key.ToLower())) {
+            Write-Host “Output definition '$key' contains uppercase characters”
+            $isValid = $false
+        }
+    }
+
+    # Definitions only available in workflows
+    foreach ($key in $jsonObj.on.workflow_call.secrets.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            Write-Host “Secret definition '$key' contains uppercase characters”
+            $isValid = $false
+        }
+    }
+
+    foreach ($key in $jsonObj.on.workflow_dispatch.inputs.Keys) {
+        if (!($key -ceq $key.ToLower())) {
+            Write-Host “Workflow dispatch input definition '$key' contains uppercase characters”
+            $isValid = $false
+        }
+    }
+
+    return $isValid
 }
