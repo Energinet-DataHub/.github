@@ -243,7 +243,7 @@ on:
   workflow_call: {}
 
 jobs:
-  render-c4:
+  render_c4:
     uses: Energinet-DataHub/.github/.github/workflows/structurizr.yml@v10
     with:
       dsl: "source/datahub3-model/model.dsl"
