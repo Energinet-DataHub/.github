@@ -1,0 +1,50 @@
+#
+# Test file for testing casing validation of GitHub workflows
+#
+
+name: Invalid workflow
+description: |
+  This workflow is used for testing and should be INVALID with respect to
+  casing of inputs, outputs and secrets fields.
+
+on:
+  workflow_call:
+    inputs:
+      first_INPUT:
+        description: First input
+        required: true
+      SECOND_input:
+        description: Second input
+        required: false
+        default: ""
+    outputs:
+      first_OUTPUT:
+        description: First output
+        value: ${{ jobs.changes.outputs.magic }}
+    secrets:
+      FIRST_secret:
+        required: true
+        description: First secret
+  workflow_dispatch:
+    inputs:
+      FIRST_DISPATCH:
+        description: First dispatch input
+        required: false
+
+jobs:
+  changes:
+    name: Determine magic
+    runs-on: ubuntu-latest
+    outputs:
+      magic: ${{ steps.filter.outputs.magic }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Detect file changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            magic:
+              - '.github/workflows/magic-*.yml'
