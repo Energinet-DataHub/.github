@@ -78,8 +78,8 @@ jobs:
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
-          mkdir "./artifact"
-          mv dist "./artifact"
+          mkdir "./artifacts"
+          mv dist "./artifacts"
 
       - name: Include Databricks assets in release
         if: ${{ inputs.SHOULD_INCLUDE_ASSETS }}
