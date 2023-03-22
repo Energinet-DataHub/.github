@@ -33,7 +33,7 @@ runs:
         # Set outputs
         echo "my_output='output-data'" >>$GITHUB_OUTPUT
 
-    - name: Second step
+    - name: Zip folder
       uses: thedoctor0/zip-release@master
       with:
         TYPE: zip
