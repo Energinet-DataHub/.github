@@ -63,14 +63,6 @@ jobs:
           python-version: ${{ inputs.PYHTON_VERSION }}
           architecture: ${{ inputs.ARCHITECTURE }}
 
-      # - name: Prepare release folder
-      #   shell: pwsh
-      #   working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
-      #   run: |
-      #     if ((Test-Path -Path './artifacts') -eq $false) {
-      #         New-Item -Path './artifacts' -ItemType 'directory'
-      #     }
-
       # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
         shell: bash
