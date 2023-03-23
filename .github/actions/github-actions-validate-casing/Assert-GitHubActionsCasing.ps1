@@ -32,7 +32,7 @@ function Assert-GitHubActionsCasing {
         $FolderPath
     )
     [Object[]]$files = Get-ChildItem -Path $FolderPath -Recurse -File -Include ('*.yml', '*.yaml')
-    Write-Host "Files found in $($FolderPath): $($files.Length)"
+    Write-Host "Searched path '$($FolderPath)' for YAML files. Found '$($files.Count)' file(s)."
 
     [boolean] $isValid = $true
     foreach ($file in $files) {
@@ -57,7 +57,7 @@ function Test-GitHubFile {
         [Object]
         $File
     )
-    Write-Host "Checking $($file.FullName)"
+    Write-Host "----- Checking '$($file.FullName)'"
 
     [string]$yaml = Get-Content -Path $file.FullName | Out-String
     # Remove characters which hinders our YAML convertion
@@ -146,21 +146,24 @@ function Add-CompositeActionFailures {
     )
 
     foreach ($key in $YamlObject.inputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Action Input definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Input” `
+            -Failures $Failures
     }
 
     foreach ($key in $YamlObject.outputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Action Output definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Output” `
+            -Failures $Failures
     }
 
     foreach ($key in $YamlObject.runs.steps.with.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Action Step With definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Step With” `
+            -Failures $Failures
     }
 }
 
@@ -189,27 +192,31 @@ function Add-WorkflowOnFailures {
     )
 
     foreach ($key in $yamlObject.on.workflow_call.inputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Workflow Input definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Input” `
+            -Failures $Failures
     }
 
     foreach ($key in $yamlObject.on.workflow_call.outputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Workflow Output definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Output" `
+            -Failures $Failures
     }
 
     foreach ($key in $yamlObject.on.workflow_call.secrets.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Workflow Secret definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Secret" `
+            -Failures $Failures
     }
 
     foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            [void]$Failures.Add(“Workflow Dispatch Input definition '$key' contains uppercase characters”)
-        }
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Dispatch Input” `
+            -Failures $Failures
     }
 }
 
@@ -239,38 +246,69 @@ function Add-WorkflowJobsFailures {
 
     foreach ($job in $YamlObject.jobs.Values) {
         foreach ($key in $job.with.Keys) {
-            if (!($key -ceq $key.ToLower())) {
-                [void]$Failures.Add(“Job With definition '$key' contains uppercase characters”)
-            }
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job With" `
+                -Failures $Failures
         }
 
         foreach ($key in $job.outputs.Keys) {
-            if (!($key -ceq $key.ToLower())) {
-                [void]$Failures.Add(“Job Output definition '$key' contains uppercase characters”)
-            }
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job Output" `
+                -Failures $Failures
         }
 
         if ($null -ne $job.secrets) {
             if ($job.secrets.GetType().Name -eq "Hashtable") {
                 foreach ($key in $job.secrets.Keys) {
-                    if (!($key -ceq $key.ToLower())) {
-                        [void]$Failures.Add(“Job Secret definition '$key' contains uppercase characters”)
-                    }
+                    Add-IfCasingFailure `
+                        -Value $key `
+                        -DefinitionKind “Job Secret" `
+                        -Failures $Failures
                 }
             }
             else {
                 $value = $job.secrets
-                if (!($value -ceq $value.ToLower())) {
-                    [void]$Failures.Add(“Job Secret definition '$value' contains uppercase characters”)
-                }
+                Add-IfCasingFailure `
+                    -Value $value `
+                    -DefinitionKind “Job Secret" `
+                    -Failures $Failures
             }
         }
 
         # Inline job
         foreach ($key in $job.steps.with.Keys) {
-            if (!($key -ceq $key.ToLower())) {
-                [void]$Failures.Add(“Job Step With definition '$key' contains uppercase characters”)
-            }
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job Step With" `
+                -Failures $Failures
         }
+    }
+}
+
+<#
+    .SYNOPSIS
+    Add failure message to list of failures, if value contains uppercase characters.
+#>
+function Add-IfCasingFailure {
+    param (
+        # Value we want to validate.
+        [Parameter(Mandatory)]
+        [string]
+        $Value,
+        # The the YAML definition kind of the value. Used to build any failure message added to the list of failures.
+        [Parameter(Mandatory)]
+        [string]
+        $DefinitionKind,
+        # List of failures, to which we should add a failure message if the value is invalid.
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    if (!($Value -ceq $Value.ToLower())) {
+        [void]$Failures.Add(“$DefinitionKind definition '$Value' contains uppercase characters.”)
     }
 }
