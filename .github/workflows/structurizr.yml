@@ -46,7 +46,7 @@ jobs:
   render_structurizr_diagrams:
     runs-on: ubuntu-latest
     env:
-      OUTPUT_FOLDER: docs/diagrams # folder where diagrams are rendered to.
+      DIAGRAM_FOLDER: ${{ github.workspace }}/docs/diagrams
     services:
       structurizr-lite:
         image: structurizr/lite:3000
@@ -69,11 +69,10 @@ jobs:
       - name: Setup repo
         shell: bash
         run: |
-          diagrams_folder=${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}
-          echo $diagrams_folder
-          rm -rf "${diagrams_folder}"
-          mkdir "${diagrams_folder}" -p
-          cd "${diagrams_folder}"
+          echo ${{ env.DIAGRAM_FOLDER }}
+          rm -rf "${{ env.DIAGRAM_FOLDER }}"
+          mkdir "${{ env.DIAGRAM_FOLDER }}" -p
+          cd "${{ env.DIAGRAM_FOLDER }}"
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
@@ -95,9 +94,8 @@ jobs:
         if: steps.diagrams-changed.outputs.any_changed == 'true'
         shell: bash
         run: |
-          diagrams_folder=${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}
           readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
-          cd "${diagrams_folder}"
+          cd "${{ env.DIAGRAM_FOLDER }}"
           set -e
           for dsl in "${dsl_files[@]}"
           do
@@ -114,4 +112,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
-          file_pattern: ${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}/**/*.png
+          file_pattern: ${{ env.DIAGRAM_FOLDER }}/**/*.png
