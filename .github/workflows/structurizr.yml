@@ -72,7 +72,7 @@ jobs:
           diagrams_folder=${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}
           echo $diagrams_folder
           rm -rf "${diagrams_folder}"
-          mkdir "${diagrams_folder}"
+          mkdir "${diagrams_folder}" -p
           cd "${diagrams_folder}"
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
