@@ -228,7 +228,6 @@ The workflow renders all views in a structurizr workspace. The diagrams are plac
 Inputs:
 
 - dsl: required - comma seperated list of dsl's to render.
-- output_folder: optional - folder where diagrams are placed (default: diagrams).
 
 Secrets:
 
