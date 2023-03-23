@@ -37,11 +37,6 @@ on:
         description: paths delimetered by ','
         required: true
         type: string
-      output_folder:
-        description: Temporary folder where diagrams are rendered to.
-        required: false
-        type: string
-        default: "diagrams"
     secrets:
       pat_token_repo_workflow:
         description: PAT token with `repo` and `workflow` scopes to re-trigger workflows if rendered diagrams are pushed
@@ -50,6 +45,8 @@ on:
 jobs:
   render_structurizr_diagrams:
     runs-on: ubuntu-latest
+    env:
+      OUTPUT_FOLDER: docs/diagrams # folder where diagrams are rendered to.
     services:
       structurizr-lite:
         image: structurizr/lite:3000
@@ -72,7 +69,7 @@ jobs:
       - name: Setup repo
         shell: bash
         run: |
-          diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
+          diagrams_folder=${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}
           echo $diagrams_folder
           rm -rf "${diagrams_folder}"
           mkdir "${diagrams_folder}"
@@ -98,7 +95,7 @@ jobs:
         if: steps.diagrams-changed.outputs.any_changed == 'true'
         shell: bash
         run: |
-          diagrams_folder=${{ github.workspace }}/${{ inputs.output_folder }}
+          diagrams_folder=${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}
           readarray -td, dsl_files <<<"${{ inputs.dsl }},"; unset 'dsl_files[-1]'; declare -p dsl_files;
           cd "${diagrams_folder}"
           set -e
@@ -117,4 +114,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
-          file_pattern: ${{ github.workspace }}/${{ inputs.output_folder }}/**/*.png
+          file_pattern: ${{ github.workspace }}/${{ env.OUTPUT_FOLDER }}/**/*.png
