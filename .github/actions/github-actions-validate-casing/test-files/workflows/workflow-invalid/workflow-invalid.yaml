@@ -36,7 +36,7 @@ jobs:
     name: Determine magic
     runs-on: ubuntu-latest
     outputs:
-      magic: ${{ steps.filter.outputs.magic }}
+      MAgic: ${{ steps.filter.outputs.magic }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -45,6 +45,22 @@ jobs:
         uses: dorny/paths-filter@v2
         id: filter
         with:
-          filters: |
+          FILTERS: |
             magic:
               - '.github/workflows/magic-*.yml'
+
+  ci_magic_build:
+    needs: changes
+    if: ${{ needs.changes.outputs.magic == 'true' }}
+    uses: ./.github/workflows/ci-magic-build.yml
+    with:
+      SOLUTION_file_path: my.sln
+    secrets: INHERIT
+
+  ci_magic_test:
+    needs: ci_magic_build
+    uses: Energinet-DataHub/.github/.github/workflows/ci-magic-test.yml@v10
+    with:
+      solution_FILE_path: my.sln
+    secrets:
+      secret_URL: my_secret_url

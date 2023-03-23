@@ -32,3 +32,10 @@ runs:
         echo ${{ inputs.second_input }}
         # Set outputs
         echo "my_output='output-data'" >>$GITHUB_OUTPUT
+
+    - name: Zip folder
+      uses: thedoctor0/zip-release
+      with:
+        type: zip
+        filename: my_file.zip
+        directory: my_folder

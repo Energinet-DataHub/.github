@@ -48,3 +48,19 @@ jobs:
           filters: |
             magic:
               - '.github/workflows/magic-*.yml'
+
+  ci_magic_build:
+    needs: changes
+    if: ${{ needs.changes.outputs.magic == 'true' }}
+    uses: ./.github/workflows/ci-magic-build.yml
+    with:
+      solution_file_path: my.sln
+    secrets: inherit
+
+  ci_magic_test:
+    needs: ci_magic_build
+    uses: Energinet-DataHub/.github/.github/workflows/ci-magic-test.yml@v10
+    with:
+      solution_file_path: my.sln
+    secrets:
+      secret_url: my_secret_url

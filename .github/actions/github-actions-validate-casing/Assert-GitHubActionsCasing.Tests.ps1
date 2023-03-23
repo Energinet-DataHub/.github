@@ -69,7 +69,7 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Input definition")
+                $Object -and $Object.StartsWith("Action Input definition")
             }
         }
 
@@ -82,11 +82,11 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Output definition")
+                $Object -and $Object.StartsWith("Action Output definition")
             }
         }
 
-        It "Should not find any secret definition" {
+        It "Should find 2 invalid step with definitions" {
             # Act
             try {
                 Assert-GitHubActionsCasing -FolderPath $script:folderPath
@@ -94,8 +94,8 @@ Describe "When dot-sourcing the script" {
             catch {
             }
 
-            Should -Not -Invoke Write-Host -ParameterFilter {
-                $Object -and $Object.StartsWith("Secret definition")
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Action Step With definition")
             }
         }
     }
@@ -132,7 +132,7 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Input definition")
+                $Object -and $Object.StartsWith("Workflow Input definition")
             }
         }
 
@@ -145,7 +145,7 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Output definition")
+                $Object -and $Object.StartsWith("Workflow Output definition")
             }
         }
 
@@ -158,7 +158,7 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Secret definition")
+                $Object -and $Object.StartsWith("Workflow Secret definition")
             }
         }
 
@@ -171,7 +171,59 @@ Describe "When dot-sourcing the script" {
             }
 
             Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
-                $Object -and $Object.StartsWith("Workflow dispatch input definition")
+                $Object -and $Object.StartsWith("Workflow Dispatch Input definition")
+            }
+        }
+
+        It "Should find 2 invalid job with definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job With definition")
+            }
+        }
+
+        It "Should find 1 invalid job output definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Output definition")
+            }
+        }
+
+        It "Should find 2 invalid job secret definitions" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 2 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Secret definition")
+            }
+        }
+
+        It "Should find 1 invalid job step with definition" {
+            # Act
+            try {
+                Assert-GitHubActionsCasing -FolderPath $script:folderPath
+            }
+            catch {
+            }
+
+            Should -Invoke Write-Host -Times 1 -Exactly -ParameterFilter {
+                $Object -and $Object.StartsWith("Job Step With definition")
             }
         }
     }

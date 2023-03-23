@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+using namespace System.Collections.Generic
+
 Import-Module PowerShell-Yaml -Force
 
 <#
@@ -29,10 +31,8 @@ function Assert-GitHubActionsCasing {
         [string]
         $FolderPath
     )
-    $isValid = $true
-
     [Object[]]$files = Get-ChildItem -Path $FolderPath -Recurse -File -Include ('*.yml', '*.yaml')
-    Write-Host "Files found in $($FolderPath): $($files.Length)"
+    Write-Host "Searched path '$($FolderPath)' for YAML files. Found '$($files.Count)' file(s)."
 
     [boolean] $isValid = $true
     foreach ($file in $files) {
@@ -57,48 +57,258 @@ function Test-GitHubFile {
         [Object]
         $File
     )
-    Write-Host "Checking $($file.FullName)"
+    Write-Host "----- Checking '$($file.FullName)'"
 
     [string]$yaml = Get-Content -Path $file.FullName | Out-String
-
     # Remove characters which hinders our YAML convertion
     $yaml = $yaml.Replace('{{', '').Replace('}}', '')
 
-    $jsonObj = (ConvertFrom-Yaml -Yaml $yaml)
+    [Object]$yamlObject = (ConvertFrom-Yaml -Yaml $yaml)
 
-    [boolean] $isValid = $true
-
-    # Definitions available in workflows and actions
-    $inputKeys = $jsonObj.on.workflow_call.inputs.Keys ?? $jsonObj.inputs.Keys
-    foreach ($key in $inputKeys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Input definition '$key' contains uppercase characters”
-            $isValid = $false
-        }
+    [List[string]]$failures = [List[string]]::new()
+    if (Test-CompositeActionYaml -YamlObject $yamlObject) {
+        Add-CompositeActionFailures -YamlObject $yamlObject -Failures $failures
+    }
+    elseif (Test-WorkflowYaml -YamlObject $yamlObject) {
+        Add-WorkflowOnFailures -YamlObject $yamlObject -Failures $failures
+        Add-WorkflowJobsFailures -YamlObject $yamlObject -Failures $failures
     }
 
-    $outputKeys = $jsonObj.on.workflow_call.outputs.Keys ?? $jsonObj.outputs.Keys
-    foreach ($key in $outputKeys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Output definition '$key' contains uppercase characters”
-            $isValid = $false
-        }
+    foreach ($failure in $failures) {
+        Write-Host $failure
     }
 
-    # Definitions only available in workflows
-    foreach ($key in $jsonObj.on.workflow_call.secrets.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Secret definition '$key' contains uppercase characters”
-            $isValid = $false
-        }
-    }
-
-    foreach ($key in $jsonObj.on.workflow_dispatch.inputs.Keys) {
-        if (!($key -ceq $key.ToLower())) {
-            Write-Host “Workflow dispatch input definition '$key' contains uppercase characters”
-            $isValid = $false
-        }
-    }
-
+    [boolean]$isValid = ($failures.Count -eq 0)
     return $isValid
+}
+
+<#
+    .SYNOPSIS
+    Return '$true' if YAML is a composite action; otherwise '$false'.
+#>
+function Test-CompositeActionYaml {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject
+    )
+
+    if ("composite" -eq $yamlObject.runs.using) {
+        return $true
+    }
+
+    return $false
+}
+
+<#
+    .SYNOPSIS
+    Return '$true' if YAML is a workflow; otherwise '$false'.
+#>
+function Test-WorkflowYaml {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject
+    )
+
+    if ($null -ne $yamlObject.jobs) {
+        return $true
+    }
+
+    return $false
+}
+
+<#
+    .SYNOPSIS
+    Validate composite action YAML and add any failures found to the current list of failures.
+
+    .DESCRIPTION
+    The following definitions are validated:
+     - inputs
+     - outputs
+
+    The following 'runs.steps' definitions are validated:
+     - with
+#>
+function Add-CompositeActionFailures {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject,
+        # List of failures, to which we should add any additionally failures found
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    foreach ($key in $YamlObject.inputs.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Input” `
+            -Failures $Failures
+    }
+
+    foreach ($key in $YamlObject.outputs.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Output” `
+            -Failures $Failures
+    }
+
+    foreach ($key in $YamlObject.runs.steps.with.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Action Step With” `
+            -Failures $Failures
+    }
+}
+
+<#
+    .SYNOPSIS
+    Validate workflow 'on.*' YAML and add any failures found to the current list of failures.
+
+    .DESCRIPTION
+    The following definitions are validated:
+     - workflow_dispatch.inputs
+     - workflow_call.inputs
+     - workflow_call.secrets
+     - workflow_call.outputs
+#>
+function Add-WorkflowOnFailures {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject,
+        # List of failures, to which we should add any additionally failures found
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    foreach ($key in $yamlObject.on.workflow_call.inputs.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Input” `
+            -Failures $Failures
+    }
+
+    foreach ($key in $yamlObject.on.workflow_call.outputs.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Output" `
+            -Failures $Failures
+    }
+
+    foreach ($key in $yamlObject.on.workflow_call.secrets.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Secret" `
+            -Failures $Failures
+    }
+
+    foreach ($key in $yamlObject.on.workflow_dispatch.inputs.Keys) {
+        Add-IfCasingFailure `
+            -Value $key `
+            -DefinitionKind “Workflow Dispatch Input” `
+            -Failures $Failures
+    }
+}
+
+<#
+    .SYNOPSIS
+    Validate workflow 'jobs.*' YAML and add any failures found to the current list of failures.
+
+    .DESCRIPTION
+    The following 'jobs' definitions are validated:
+     - with
+     - secrets (list of keys or 'inherit')
+     - outputs
+     - steps.with (inline jobs calling actions)
+#>
+function Add-WorkflowJobsFailures {
+    param (
+        # YAML as object (hashtables)
+        [Parameter(Mandatory)]
+        [Object]
+        $YamlObject,
+        # List of failures, to which we should add any additionally failures found
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    foreach ($job in $YamlObject.jobs.Values) {
+        foreach ($key in $job.with.Keys) {
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job With" `
+                -Failures $Failures
+        }
+
+        foreach ($key in $job.outputs.Keys) {
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job Output" `
+                -Failures $Failures
+        }
+
+        if ($null -ne $job.secrets) {
+            if ($job.secrets.GetType().Name -eq "Hashtable") {
+                foreach ($key in $job.secrets.Keys) {
+                    Add-IfCasingFailure `
+                        -Value $key `
+                        -DefinitionKind “Job Secret" `
+                        -Failures $Failures
+                }
+            }
+            else {
+                $value = $job.secrets
+                Add-IfCasingFailure `
+                    -Value $value `
+                    -DefinitionKind “Job Secret" `
+                    -Failures $Failures
+            }
+        }
+
+        # Inline job
+        foreach ($key in $job.steps.with.Keys) {
+            Add-IfCasingFailure `
+                -Value $key `
+                -DefinitionKind “Job Step With" `
+                -Failures $Failures
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+    Add failure message to list of failures, if value contains uppercase characters.
+#>
+function Add-IfCasingFailure {
+    param (
+        # Value we want to validate.
+        [Parameter(Mandatory)]
+        [string]
+        $Value,
+        # The the YAML definition kind of the value. Used to build any failure message added to the list of failures.
+        [Parameter(Mandatory)]
+        [string]
+        $DefinitionKind,
+        # List of failures, to which we should add a failure message if the value is invalid.
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [List[string]]
+        $Failures
+    )
+
+    if (!($Value -ceq $Value.ToLower())) {
+        [void]$Failures.Add(“$DefinitionKind definition '$Value' contains uppercase characters.”)
+    }
 }
