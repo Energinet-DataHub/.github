@@ -99,6 +99,7 @@ jobs:
           set -e
           for dsl in "${dsl_files[@]}"
           do
+            echo $dsl
             cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
             ! node export-diagrams.js http://localhost:8080/workspace/diagrams png | grep png
             rm *-key.png
