@@ -66,6 +66,15 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
 
+      - name: Setup repo
+        shell: bash
+        run: |
+          echo ${{ env.DIAGRAM_FOLDER }}
+          cd "${{ env.DIAGRAM_FOLDER }}"
+          rm -rf */
+          npm i puppeteer
+          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
+
       - name: Determine if any DSL files have changed since last pushed commit to the remote branch
         id: diagrams-changed
         uses: tj-actions/changed-files@v35
@@ -73,14 +82,6 @@ jobs:
           since_last_remote_commit: true
           files: |
             **/*.dsl
-
-      - name: Setup repo
-        shell: bash
-        run: |
-          echo ${{ env.DIAGRAM_FOLDER }}
-          cd "${{ env.DIAGRAM_FOLDER }}"
-          npm i puppeteer
-          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
       - name: Write out any changes to DSL files - based on `diagrams-changed`-step
         shell: bash
