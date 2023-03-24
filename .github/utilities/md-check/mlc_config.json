@@ -1,8 +1,8 @@
 {
-	"ignorePatterns": [
-		{
-			"pattern": "^https://github.com",
-			"pattern": "^https://nuget.org"
-		}
-	]
+    "ignorePatterns": [
+        {
+            "pattern": "^https://github.com",
+            "pattern": "^https://nuget.org"
+        }
+    ]
 }
