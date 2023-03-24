@@ -101,7 +101,6 @@ jobs:
           do
             cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
             ! node export-diagrams.js http://localhost:8080/workspace/diagrams png | grep png
-            rm *-key.png
             foldername=$(basename $dsl .dsl)
             mkdir "$foldername"
             mv -f *.png "$foldername/"
