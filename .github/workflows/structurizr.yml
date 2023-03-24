@@ -70,9 +70,8 @@ jobs:
         shell: bash
         run: |
           echo ${{ env.DIAGRAM_FOLDER }}
-          rm -rf "${{ env.DIAGRAM_FOLDER }}"
-          mkdir "${{ env.DIAGRAM_FOLDER }}" -p
           cd "${{ env.DIAGRAM_FOLDER }}"
+          rm -rf */
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
@@ -99,6 +98,7 @@ jobs:
           set -e
           for dsl in "${dsl_files[@]}"
           do
+            echo $dsl
             cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
             ! node export-diagrams.js http://localhost:8080/workspace/diagrams png | grep png
             rm *-key.png
