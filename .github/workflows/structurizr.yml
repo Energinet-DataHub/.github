@@ -78,8 +78,6 @@ jobs:
         shell: bash
         run: |
           echo ${{ env.DIAGRAM_FOLDER }}
-          rm -rf "${{ env.DIAGRAM_FOLDER }}"
-          mkdir "${{ env.DIAGRAM_FOLDER }}" -p
           cd "${{ env.DIAGRAM_FOLDER }}"
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
