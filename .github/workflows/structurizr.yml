@@ -82,7 +82,7 @@ jobs:
         with:
           since_last_remote_commit: true
           files: |
-            **.dsl
+            **/*.dsl
 
       - name: Write out any changes to DSL files - based on `diagrams-changed`-step
         shell: bash
