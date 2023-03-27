@@ -21,10 +21,10 @@ on:
         required: true
         type: string
       DOTNET_VERSION:
-        description: "Install specified .NET Core SDK version"
+        description: Install specified .NET Core SDK version
         required: false
-        default: "6.0.406"
-        type: "string"
+        default: 6.0.406
+        type: string
       SONAR_CLOUD_ORGANIZATION:
         required: true
         type: string
@@ -33,7 +33,7 @@ on:
         type: string
       OPERATING_SYSTEM:
         required: false
-        default: "windows-2022"
+        default: windows-2022
         type: string
     secrets:
       SONAR_CLOUD_TOKEN:
