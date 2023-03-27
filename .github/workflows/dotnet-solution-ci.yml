@@ -21,26 +21,26 @@ on:
         required: true
         type: string
       TESTS_FILTER_EXPRESSION:
-        description: "Filter expression to use with dotnet test"
+        description: Filter expression to use with dotnet test
         required: false
-        default: "empty"
+        default: empty
         type: string
       DOTNET_VERSION:
-        description: "Install specified .NET Core SDK version"
+        description: Install specified .NET Core SDK version
         required: false
-        default: "6.0.406"
-        type: "string"
+        default: 6.0.406
+        type: string
       OPERATING_SYSTEM:
-        description: "Must be a version of Windows, we do not support Linux for testing"
+        description: Must be a version of Windows, we do not support Linux for testing
         required: false
-        default: "windows-2022"
+        default: windows-2022
         type: string
       USE_COSMOS_DB_EMULATOR:
         required: false
         default: false
         type: boolean
       USE_AZURE_FUNCTIONS_TOOLS:
-        description: "Use Azurite and Azure Functions Core Tools to support testing"
+        description: Use Azurite and Azure Functions Core Tools to support testing
         required: false
         default: false
         type: boolean
@@ -49,7 +49,7 @@ on:
         default: false
         type: boolean
       PREPARE_OUTPUTS:
-        description: "Setting this to true will require an action dotnet-prepare-outputs in the calling repository"
+        description: Setting this to true will require an action dotnet-prepare-outputs in the calling repository
         required: false
         default: false
         type: boolean
@@ -58,16 +58,16 @@ on:
         default: ""
         type: string
       ENVIRONMENT:
-        description: "Can be used to set environment for OIDC which is AzureAuth"
+        description: Can be used to set environment for OIDC which is AzureAuth
         required: false
         default: ""
         type: string
     secrets:
       AZURE_KEYVAULT_URL:
-        description: "Required if we need to manage Azure resources from automated tests"
+        description: Required if we need to manage Azure resources from automated tests
         required: false
       AZURE_B2CSECRETS_KEYVAULT_URL:
-        description: "Required if we need to retrieve B2C access tokens from automated tests"
+        description: Required if we need to retrieve B2C access tokens from automated tests
         required: false
       # Secrets required if we need to login to Azure and use Azure resources from automated tests
       AZURE_TENANT_ID:
@@ -91,9 +91,9 @@ jobs:
       BUILD_CONFIGURATION: Release
       OUTPUT_PATH: ${{ github.workspace }}\output
       # Tool versions
-      NODE_VERSION: "16"
-      AZURITE_VERSION: "3.22.0"
-      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: "4.0.4670"
+      NODE_VERSION: 16
+      AZURITE_VERSION: 3.22.0
+      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
@@ -102,9 +102,9 @@ jobs:
       # Only relevant if USE_AZURE_FUNCTIONS_TOOLS is TRUE
       #
       # Set value used by 'AzuriteManager'
-      AzuriteBlobFolderPath: '${{ github.workspace }}\node_modules\.bin\'
+      AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
       # Overrides settings in 'functionhost.settings.json'
-      FunctionAppHostPath: '${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll'
+      FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
 
     steps:
       - name: Checkout repository
@@ -126,7 +126,7 @@ jobs:
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
-          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet' # yamllint disable-line rule:quoted-strings
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
@@ -207,7 +207,7 @@ jobs:
         id: cache-nuget
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} # hash of project files
           restore-keys: |
             ${{ runner.os }}-nuget-
 
