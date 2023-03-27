@@ -22,7 +22,7 @@ on:
       ARCHITECTURE:
         required: false
         type: string
-        default: "x64"
+        default: x64
       WHEEL_WORKING_DIRECTORY:
         required: true
         type: string
