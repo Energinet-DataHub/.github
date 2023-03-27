@@ -13,22 +13,21 @@
 # limitations under the License.
 
 name: Setup dotnet and tools
-description: "Setup .NET and other tools typically used when building and testing .NET code"
+description: Setup .NET and other tools typically used when building and testing .NET code
 
 inputs:
   DOTNET_VERSION:
-    description: "Install specified .NET Core SDK version"
+    description: Install specified .NET Core SDK version
     required: false
-    default: "6.0.406"
-    type: "string"
+    default: 6.0.406
   # Cosmos DB emulator
   USE_COSMOS_DB_EMULATOR:
-    description: "Install Cosmos DB emulator to support testing"
+    description: Install Cosmos DB emulator to support testing
     required: false
     default: "false"
   # Node and modules
   USE_AZURE_FUNCTIONS_TOOLS:
-    description: "Install Azurite and Azure Functions Core Tools to support testing"
+    description: Install Azurite and Azure Functions Core Tools to support testing
     required: false
     default: "false"
   NODE_VERSION:
@@ -36,13 +35,13 @@ inputs:
     default: "16"
   AZURITE_VERSION:
     required: false
-    default: "3.22.0"
+    default: 3.22.0
   AZURE_FUNCTIONS_CORE_TOOLS_VERSION:
     required: false
-    default: "4.0.4670"
+    default: 4.0.4670
   # SQL LocalDB 2019
   USE_SQLLOCALDB_2019:
-    description: "Install 2019 version of SQL LocalDB to support testing"
+    description: Install 2019 version of SQL LocalDB to support testing
     required: false
     default: "false"
 
