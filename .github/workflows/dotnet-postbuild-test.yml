@@ -151,7 +151,7 @@ jobs:
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
         env:
-          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet'
+          DOTNET_INSTALL_DIR: 'C:\Program Files\dotnet' # yamllint disable-line rule:quoted-strings
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
