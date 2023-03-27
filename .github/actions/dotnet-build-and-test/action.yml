@@ -20,19 +20,20 @@
 # https://github.com/actions/runner/pull/612
 # https://github.com/actions/runner/issues/646
 
-name: 'Common steps for dotnet projects'
-description: 'Builds and tests dotnet projects.'
+name: "Common steps for dotnet projects"
+description: "Builds and tests dotnet projects."
+
 inputs:
   csproj_file_path:
-    description: 'Path to the csproj file.'
+    description: "Path to the csproj file."
     required: true
   solution_file_path:
-    description: 'Path to the solution file.'
+    description: "Path to the solution file."
     required: true
   output_path:
-    description: 'Path to store the reports.'
+    description: "Path to store the reports."
     required: false
-    default: './output'
+    default: "./output"
 
 runs:
   using: composite

@@ -16,6 +16,7 @@ name: Package and release helm chart
 description: |
   Packages and creates a release with the chart,
   and commits chart into helm registry.
+
 inputs:
   chart_folder:
     description: Path to the folder containing the chart.
@@ -30,14 +31,14 @@ inputs:
   chart_repository_branch:
     description: The branch in which to add the chart.
     required: false
-    default: 'gh-pages'
+    default: "gh-pages"
   deploy_key:
     description: A deploy key that has access to the chart repository.
     required: true
   include_image_name:
     description: Add the name of the image to the name of a chart.
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   chart_name:

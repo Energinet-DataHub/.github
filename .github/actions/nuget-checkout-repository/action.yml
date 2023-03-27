@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: Checkout repository for preparing NuGet packages
-description: 'Checkout the repository in a way that allows us to use the action tj-actions/changed-files to detect file changes correctly'
+description: "Checkout the repository in a way that allows us to use the action tj-actions/changed-files to detect file changes correctly"
 
 runs:
   using: composite
