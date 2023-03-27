@@ -9,7 +9,7 @@
 yaml-files:
   - "*.yaml"
   - "*.yml"
-  - ".yamllint"
+  - .yamllint
 
 rules:
   braces:
