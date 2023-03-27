@@ -31,7 +31,7 @@ inputs:
   chart_repository_branch:
     description: The branch in which to add the chart.
     required: false
-    default: "gh-pages"
+    default: gh-pages
   deploy_key:
     description: A deploy key that has access to the chart repository.
     required: true
@@ -129,7 +129,7 @@ runs:
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
       with:
-        add: '["index.yaml", "${{ steps.generate_filename.outputs.filename }}"]'
+        add: '["index.yaml", "${{ steps.generate_filename.outputs.filename }}"]' # yamllint disable-line rule:quoted-strings
         message: Updated the helm registry with file ${{ steps.generate_filename.outputs.filename }}
         push: --force
         new_branch: ${{ inputs.chart_repository_branch }}
