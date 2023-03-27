@@ -28,5 +28,5 @@ outputs:
     description: The pull request number if the pull request was found
 
 runs:
-  using: "node16"
-  main: "dist/index.js"
+  using: node16
+  main: dist/index.js

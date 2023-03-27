@@ -11,40 +11,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: "Build and Push Docker Image"
-description: "Builds and push docker image"
+name: Build and Push Docker Image
+description: Builds and push docker image
 
 inputs:
   DOCKER_USERNAME:
-    description: "Docker username used for login"
+    description: Docker username used for login
     required: true
   DOCKER_PASSWORD:
-    description: "Docker password used for login"
+    description: Docker password used for login
     required: true
   DOCKER_IMAGE:
-    description: 'Docker image name eg. "projectorigin/auth"'
+    description: Docker image name eg. 'projectorigin/auth'
     required: true
   MAJOR:
-    description: "Major number used in docker tag"
+    description: Major number used in docker tag
     required: true
   MINOR:
-    description: "Minor number used in docker tag"
+    description: Minor number used in docker tag
     required: true
   PATCH:
-    description: "Patch number used in docker tag"
+    description: Patch number used in docker tag
     required: true
 outputs:
   RELEASE_VERSION:
-    description: "The generated release verision eg. v0.0.1"
+    description: The generated release verision eg. v0.0.1
     value: ${{ steps.define_version.outputs.VERSION_NUMBER }}
   IMAGE_TAGS:
-    description: 'Docker image tags eg. "v0.0.1, latest"'
+    description: Docker image tags eg. 'v0.0.1, latest'
     value: ${{ steps.meta.outputs.tags }}
   IMAGE_LABELS:
-    description: "Docker image labels"
+    description: Docker image labels
     value: ${{ steps.meta.outputs.labels }}
   DIGEST:
-    description: "Docker image digest"
+    description: Docker image digest
     value: ${{ steps.push.outputs.digest }}
 
 runs:
