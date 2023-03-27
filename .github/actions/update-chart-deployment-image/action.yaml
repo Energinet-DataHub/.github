@@ -46,6 +46,6 @@ runs:
     - name: Commit changes
       uses: EndBug/add-and-commit@v7
       with:
-        add: "chart/values.yaml"
-        message: "Updated version tag for ${{ inputs.deployment_name }} in the helm chart"
+        add: chart/values.yaml
+        message: Updated version tag for ${{ inputs.deployment_name }} in the helm chart
         push: true
