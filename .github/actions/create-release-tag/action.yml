@@ -11,26 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: "Create release tag"
-description: "Create new release tag in repository"
+name: Create release tag
+description: Create new release tag in repository
 
 inputs:
   MAJOR_VERSION:
-    description: "Major version"
+    description: Major version
     required: true
   MINOR_VERSION:
-    description: "Minor version"
+    description: Minor version
     required: true
   PATCH_VERSION:
-    description: "Patch version"
+    description: Patch version
     required: true
   REPOSITORY_PATH:
-    description: 'Path to repository, i.e. Energinet-DataHub\geh-terraform-modules'
+    description: Path to repository, i.e. Energinet-DataHub\geh-terraform-modules
     required: true
   TARGET_BRANCH:
     description: "Branch on which tags will be created. Default: main"
     required: false
-    default: "main"
+    default: main
 
 runs:
   using: composite
