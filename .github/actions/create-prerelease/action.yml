@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: "Common steps for dotnet projects"
-description: "Builds and tests dotnet projects."
+name: Common steps for dotnet projects
+description: Builds and tests dotnet projects.
 
 inputs:
   RELEASE_FOLDER_PATH:
@@ -28,13 +28,13 @@ runs:
     - name: Zip artifact
       uses: thedoctor0/zip-release@master
       with:
-        type: "zip"
+        type: zip
         filename: ${{ inputs.RELEASE_VERSION }}.zip
         directory: ${{ inputs.RELEASE_FOLDER_PATH }}
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - uses: marvinpinto/action-automatic-releases@latest
       with:
-        repo_token: "${{ inputs.PAT_TOKEN }}"
+        repo_token: ${{ inputs.PAT_TOKEN }}
         automatic_release_tag: ${{ inputs.RELEASE_VERSION }}
         prerelease: true
         title: ${{ inputs.RELEASE_VERSION }}
