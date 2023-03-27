@@ -33,19 +33,19 @@ on:
         required: true
         type: string
       DOTNET_VERSION:
-        description: 'Install specified .NET Core SDK version'
+        description: "Install specified .NET Core SDK version"
         required: false
-        default: '6.0.406'
-        type: 'string'
+        default: "6.0.406"
+        type: "string"
       OPERATING_SYSTEM:
         required: false
-        default: 'ubuntu-22.04'
+        default: "ubuntu-22.04"
         type: string
       RELEASE_NAME_PREFIX:
         required: false
         type: string
-        description: 'Use this variable if you want to prefix the release name'
-        default: 'dotnet'
+        description: "Use this variable if you want to prefix the release name"
+        default: "dotnet"
 
 jobs:
   create_prerelease:
@@ -130,7 +130,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: thedoctor0/zip-release@0.6.2
         with:
-          type: 'zip'
+          type: "zip"
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
