@@ -12,7 +12,7 @@ jobs:
   ci_base:
     uses: ./.github/workflows/ci-base.yml
     with:
-      skip_yaml_lint: true
+      skip_yaml_lint: false
       skip_actions_casing_validation: true
 
   #
