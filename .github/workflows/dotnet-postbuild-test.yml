@@ -34,75 +34,75 @@ name: .NET test
 on:
   workflow_call:
     inputs:
-      TESTS_DLL_FILE_PATH:
+      tests_dll_file_path:
         description: Relative path from artifacts folder to test assembly
         required: true
         type: string
-      TESTS_FILTER_EXPRESSION:
+      tests_filter_expression:
         description: Filter expression to use with dotnet test
         required: false
         default: empty
         type: string
-      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME:
+      aspnetcore_test_contentroot_variable_name:
         description: Name of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
         required: false
         default: empty # Cannot be '', it must contain a string that is also valid environment name
         type: string
-      ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE:
+      aspnetcore_test_contentroot_variable_value:
         description: Value of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
         required: false
         default: ""
         type: string
-      DOTNET_VERSION:
+      dotnet_version:
         description: Install specified .NET Core SDK version
         required: false
         default: 6.0.406
         type: string
-      OPERATING_SYSTEM:
+      operating_system:
         description: Must be a version of Windows, we do not support Linux for testing
         required: false
         default: windows-2022
         type: string
-      DOWNLOAD_ATTEMPT_LIMIT:
+      download_attempt_limit:
         description: Number of times we retry downloading dotnet-tests artifact (effectively waiting for the build job to complete)
         required: false
         default: 12
         type: number
-      USE_COSMOS_DB_EMULATOR:
+      use_cosmos_db_emulator:
         required: false
         default: false
         type: boolean
-      USE_AZURE_FUNCTIONS_TOOLS:
+      use_azure_functions_tools:
         description: Use Azurite and Azure Functions Core Tools to support testing
         required: false
         default: false
         type: boolean
-      USE_SQLLOCALDB_2019:
+      use_sqllocaldb_2019:
         required: false
         default: false
         type: boolean
-      CODE_COVERAGE_FLAGS:
+      code_coverage_flags:
         required: false
         default: ""
         type: string
-      ENVIRONMENT:
+      environment:
         description: Can be used to set environment for OIDC which is AzureAuth
         required: false
         default: ""
         type: string
     secrets:
-      AZURE_KEYVAULT_URL:
+      azure_keyvault_url:
         description: Required if we need to manage Azure resources from automated tests
         required: false
-      AZURE_B2CSECRETS_KEYVAULT_URL:
+      azure_b2csecrets_keyvault_url:
         description: Required if we need to retrieve B2C access tokens from automated tests
         required: false
       # Secrets required if we need to login to Azure and use Azure resources from automated tests
-      AZURE_TENANT_ID:
+      azure_tenant_id:
         required: false
-      AZURE_SUBSCRIPTION_ID:
+      azure_subscription_id:
         required: false
-      AZURE_SPN_ID:
+      azure_spn_id:
         required: false
 
 permissions:
@@ -111,9 +111,9 @@ permissions:
 
 jobs:
   dotnet_ci_test:
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    runs-on: ${{ inputs.operating_system }}
 
-    environment: ${{ inputs.ENVIRONMENT }}
+    environment: ${{ inputs.environment }}
 
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
@@ -123,11 +123,11 @@ jobs:
       AZURITE_VERSION: 3.22.0
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
-      AZURE_KEYVAULT_URL: ${{ secrets.AZURE_KEYVAULT_URL }}
+      AZURE_KEYVAULT_URL: ${{ secrets.azure_keyvault_url }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
       AZURE_B2CSECRETS_KEYVAULT_URL: ${{ secrets.AZURE_B2CSECRETS_KEYVAULT_URL }}
       #
-      # Only relevant if USE_AZURE_FUNCTIONS_TOOLS is TRUE
+      # Only relevant if use_azure_functions_tools is TRUE
       #
       # Set value used by 'AzuriteManager'
       AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
@@ -146,17 +146,17 @@ jobs:
             exit 1
           fi
 
-      - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
+      - name: Setup .NET ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+          dotnet-version: ${{ inputs.dotnet_version }}
         env:
           DOTNET_INSTALL_DIR: C:\Program Files\dotnet
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
       - name: Setup Azure Cosmos DB Emulator (with retry)
-        if: ${{ inputs.USE_COSMOS_DB_EMULATOR == true }}
+        if: ${{ inputs.use_cosmos_db_emulator == true }}
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
@@ -175,13 +175,13 @@ jobs:
             }
 
       - name: Use Node v${{ env.NODE_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+        if: ${{ inputs.use_azure_functions_tools == true }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Cache node modules
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true }}
+        if: ${{ inputs.use_azure_functions_tools == true }}
         id: cache-nodemodules
         uses: actions/cache@v3
         with:
@@ -189,16 +189,16 @@ jobs:
           path: ${{ github.workspace }}\node_modules
 
       - name: Install Azurite v${{ env.AZURITE_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         run: |
           npm install azurite@${{ env.AZURITE_VERSION }}
 
       - name: Install Azure Functions Core Tools v${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
-        if: ${{ inputs.USE_AZURE_FUNCTIONS_TOOLS == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         run: npm install azure-functions-core-tools@${{ env.AZURE_FUNCTIONS_CORE_TOOLS_VERSION }}
 
       - name: Install SQL LocalDB 2019
-        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+        if: ${{ inputs.use_sqllocaldb_2019 == true }}
         shell: pwsh
         run: |
           Write-Host "Downloading..."
@@ -210,7 +210,7 @@ jobs:
       # If a connection cannot be established within <timeout> seconds it fails.
       # We have added a retry action to see if this can mitigate builds failing on this account.
       - name: Verify SQL LocalDB 2019 (with retry)
-        if: ${{ inputs.USE_SQLLOCALDB_2019 == true }}
+        if: ${{ inputs.use_sqllocaldb_2019 == true }}
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 2
@@ -231,9 +231,9 @@ jobs:
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_SPN_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.azure_spn_id }}
+          tenant-id: ${{ secrets.azure_tenant_id }}
+          subscription-id: ${{ secrets.azure_subscription_id }}
 
       - name: Wait for dotnet-tests artifact to be ready for download
         uses: Wandalen/wretry.action@v1.0.27
@@ -242,7 +242,7 @@ jobs:
           with: |
             name: dotnet-tests
             path: ${{ env.ARTIFACTS_PATH }}
-          attempt_limit: ${{ inputs.DOWNLOAD_ATTEMPT_LIMIT }}
+          attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
 
       - name: Unzip dotnet-tests-outputs.zip
@@ -257,22 +257,22 @@ jobs:
         run: |
           dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
-          if ( '${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }}' -ne 'empty' )
+          if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
           {
-            $Env:${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME }} = '${{ github.workspace }}${{ inputs.ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE }}'
+            $Env:${{ inputs.aspnetcore_test_contentroot_variable_name }} = '${{ github.workspace }}${{ inputs.aspnetcore_test_contentroot_variable_value }}'
           }
           # Handle filter expression
-          if ( '${{ inputs.TESTS_FILTER_EXPRESSION }}' -eq 'empty' )
+          if ( '${{ inputs.tests_filter_expression }}' -eq 'empty' )
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
+              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
           else
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.TESTS_DLL_FILE_PATH }} `
-              --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
+              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
+              --filter '${{ inputs.tests_filter_expression }}' `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
 
@@ -282,7 +282,7 @@ jobs:
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
         with:
-          flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
+          flags: ${{ inputs.code_coverage_flags }}
           directory: ${{ env.TEST_RESULTS_PATH }}
           fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
           verbose: true
