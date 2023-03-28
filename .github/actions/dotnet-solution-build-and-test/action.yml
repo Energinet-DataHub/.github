@@ -68,7 +68,7 @@ runs:
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
-      if: (steps.runtests.conclusion == 'success' || steps.runtests.conclusion == 'failure')
+      if: inputs.publish_test_report == 'true' || (failure() && steps.runtests.conclusion == 'failure' && inputs.publish_test_report == 'true') #Reference_ https://docs.github.com/en/actions/learn-github-actions/expressions#failure-with-conditions
       with:
         files: |
           **/TestResults/*.xml
