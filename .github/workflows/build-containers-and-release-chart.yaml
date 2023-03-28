@@ -64,10 +64,10 @@ on:
         required: false
         default: false
       version_yaml_path_prefix:
-        description: "Prefix for version tag in values file."
+        description: Prefix for version tag in values file.
         type: string
         required: false
-        default: "eo-base-helm-chart.deployments."
+        default: eo-base-helm-chart.deployments.
 
     secrets:
       deploy_key:

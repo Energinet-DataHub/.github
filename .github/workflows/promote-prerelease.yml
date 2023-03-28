@@ -19,7 +19,7 @@ on:
       RELEASE_NAME_PREFIX:
         required: true
         type: string
-        description: 'Prefix to the release names. Eg: "infrastructure", "dotnet", "databricks" or similar'
+        description: "Prefix to the release names. Eg: 'infrastructure', 'dotnet', 'databricks' or similar"
 
 jobs:
   publish_release:

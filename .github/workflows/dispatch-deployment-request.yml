@@ -18,35 +18,35 @@ on:
     inputs:
       CALLER_REPOSITORY_NAME:
         required: true
-        description: 'Name of the local repository'
+        description: Name of the local repository
         type: string
       CALLER_REPOSITORY_PATH:
         required: true
-        description: 'Path to local repository, syntax: {owner}/{repo}'
+        description: "Path to local repository, syntax: {owner}/{repo}"
         type: string
       RELEASE_NAME_PREFIX:
         required: false
         type: string
-        description: 'Use this variable if you want to prefix the release name'
-        default: 'dotnet'
+        description: Use this variable if you want to prefix the release name
+        default: dotnet
       CUSTOM_EVENT_TYPE:
         required: false
         type: string
-        description: 'Use this variable if you want to override the current event naming convention'
+        description: Use this variable if you want to override the current event naming convention
     secrets:
       PAT_TOKEN:
         required: true
-        description: 'Personal access token'
+        description: Personal access token
       ENVIRONMENT_REPOSITORY_PATH:
         required: true
-        description: 'Path to the environment repository, syntax: {owner}/{repo}'
+        description: "Path to the environment repository, syntax: {owner}/{repo}"
 
 jobs:
   publish_release_and_dispatch_notification:
     runs-on: ubuntu-latest
     env:
-      REMOTE_REPO_FOLDER_PATH: '${{ github.workspace }}/remote_repo'
-      EVENT_TYPE: '${{ inputs.CUSTOM_EVENT_TYPE || inputs.CALLER_REPOSITORY_NAME }}-deployment-request'
+      REMOTE_REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
+      EVENT_TYPE: ${{ inputs.CUSTOM_EVENT_TYPE || inputs.CALLER_REPOSITORY_NAME }}-deployment-request
     steps:
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v10
@@ -61,6 +61,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          repository: '${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}'
+          repository: ${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}
           event-type: ${{ env.EVENT_TYPE }}
+          # yamllint disable-line rule:quoted-strings
           client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ inputs.CALLER_REPOSITORY_PATH }}", "repository_name": "${{ inputs.CALLER_REPOSITORY_NAME }}"}'

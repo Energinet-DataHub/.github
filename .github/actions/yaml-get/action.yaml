@@ -22,7 +22,7 @@ inputs:
   yaml_path:
     description: Where the target value is found
     required: true
-  
+
 outputs:
   result:
     description: The result of the yaml get query

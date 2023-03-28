@@ -29,7 +29,7 @@ runs:
     - name: install yamlpath
       uses: Energinet-DataHub/.github/.github/actions/yamlpath-install@main
 
-      # The extended bash script ignore errors where the path does not exists, otherwise it returns the 
+      # The extended bash script ignore errors where the path does not exists, otherwise it returns the
       # default exitcode and stderr
     - name: Delete yaml value
       shell: bash

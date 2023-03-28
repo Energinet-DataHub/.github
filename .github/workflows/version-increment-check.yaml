@@ -59,7 +59,7 @@ jobs:
       - name: Get next valid semvers
         id: semvers
         if: steps.is_prev_tag_valid.outcome == 'success'
-        uses: "WyriHaximus/github-action-next-semvers@v1"
+        uses: WyriHaximus/github-action-next-semvers@v1
         with:
           version: ${{ steps.previous_tag.outputs.result }}
 

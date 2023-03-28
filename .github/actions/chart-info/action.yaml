@@ -1,6 +1,7 @@
 name: Retrieve info from Chart file
 description: |
   Retrieves info from Chart file
+
 inputs:
   chart-folder:
     description: Path to the folder containing 'Chart.yaml'.
@@ -11,7 +12,7 @@ inputs:
   include-image-name:
     description: Add the name of the image to the name of a chart.
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   chart-name:
