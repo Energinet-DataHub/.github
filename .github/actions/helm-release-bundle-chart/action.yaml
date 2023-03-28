@@ -46,9 +46,9 @@ inputs:
       release the chart with a workflow dispatch to 'inputs.chart-repository'.
     required: true
   version_yaml_path_prefix:
-    description: "Prefix for version tag in values file."
+    description: Prefix for version tag in values file.
     required: false
-    default: "eo-base-helm-chart.deployments."
+    default: eo-base-helm-chart.deployments.
 
 outputs:
   chart-name:

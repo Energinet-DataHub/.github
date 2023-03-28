@@ -13,14 +13,14 @@
 # limitations under the License.
 
 name: Pack project as NuGet package
-description: 'Pack a .NET project as either a pre-release (alpha) or release NuGet package'
+description: Pack a .NET project as either a pre-release (alpha) or release NuGet package
 
 inputs:
   PROJECT_PATH:
     required: true
   BUILD_CONFIGURATION:
     required: false
-    default: 'Release'
+    default: Release
 
 runs:
   using: composite

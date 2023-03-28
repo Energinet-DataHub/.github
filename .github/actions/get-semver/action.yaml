@@ -20,16 +20,13 @@ inputs:
   yaml_file:
     description: Path to the version file.
     required: true
-    type: string
   yaml_path:
     description: Path inside the version file.
     required: true
-    type: string
   git_checkout_folder:
     description: Folder to checkout main-branch inputs.
     required: false
     default: git-main
-    type: string
 
 outputs:
   semver:
@@ -63,7 +60,7 @@ runs:
       run: |
         cd ${{ inputs.git_checkout_folder }}
         if ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        then    
+        then
           echo "::set-output name=version::${{ steps.get_chart_version.outputs.result }}"
         elif ${{ github.event_name == 'pull_request' }}
         then
