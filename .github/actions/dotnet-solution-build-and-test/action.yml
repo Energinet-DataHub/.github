@@ -34,6 +34,9 @@ inputs:
     required: false
   AZURE_SPN_ID:
     required: false
+  publish_test_report:
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -62,9 +65,9 @@ runs:
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
         dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
-    - name: Publish testresults
+    - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
-      if: always()
+      if: always() && ${{ inputs.publish_test_report }} == "true"
       with:
         files: |
           **/TestResults/*.xml
