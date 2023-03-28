@@ -127,7 +127,7 @@ jobs:
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
       AZURE_B2CSECRETS_KEYVAULT_URL: ${{ secrets.AZURE_B2CSECRETS_KEYVAULT_URL }}
       #
-      # Only relevant if use_azure_functions_tools is TRUE
+      # Only relevant if 'use_azure_functions_tools' is TRUE
       #
       # Set value used by 'AzuriteManager'
       AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
