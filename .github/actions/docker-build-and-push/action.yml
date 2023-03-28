@@ -15,35 +15,35 @@ name: Build and Push Docker Image
 description: Builds and push docker image
 
 inputs:
-  DOCKER_USERNAME:
+  docker_username:
     description: Docker username used for login
     required: true
-  DOCKER_PASSWORD:
+  docker_password:
     description: Docker password used for login
     required: true
-  DOCKER_IMAGE:
+  docker_image:
     description: Docker image name eg. 'projectorigin/auth'
     required: true
-  MAJOR:
+  major:
     description: Major number used in docker tag
     required: true
-  MINOR:
+  minor:
     description: Minor number used in docker tag
     required: true
-  PATCH:
+  patch:
     description: Patch number used in docker tag
     required: true
 outputs:
-  RELEASE_VERSION:
+  release_version:
     description: The generated release verision eg. v0.0.1
-    value: ${{ steps.define_version.outputs.VERSION_NUMBER }}
-  IMAGE_TAGS:
+    value: ${{ steps.define_version.outputs.version_number }}
+  image_tags:
     description: Docker image tags eg. 'v0.0.1, latest'
     value: ${{ steps.meta.outputs.tags }}
-  IMAGE_LABELS:
+  image_labels:
     description: Docker image labels
     value: ${{ steps.meta.outputs.labels }}
-  DIGEST:
+  digest:
     description: Docker image digest
     value: ${{ steps.push.outputs.digest }}
 
@@ -54,26 +54,26 @@ runs:
       id: define_version
       shell: bash
       run: |
-        export MAJOR=${{ inputs.MAJOR }}
-        export MINOR=${{ inputs.MINOR }}
-        export PATCH=${{ inputs.PATCH}}
-        export VERSION_NUMBER="v${MAJOR}.${MINOR}.${PATCH}"
-        echo $VERSION_NUMBER
-        echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
+        export major=${{ inputs.major }}
+        export minor=${{ inputs.minor }}
+        export patch=${{ inputs.patch}}
+        export version_number="v${major}.${minor}.${patch}"
+        echo $version_number
+        echo "::set-output name=version_number::$version_number"
 
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
-        username: ${{ inputs.DOCKER_USERNAME }}
-        password: ${{ inputs.DOCKER_PASSWORD }}
+        username: ${{ inputs.docker_username }}
+        password: ${{ inputs.docker_password }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
       with:
-        images: ${{ inputs.DOCKER_IMAGE }}
+        images: ${{ inputs.docker_image }}
         tags: |
-          type=semver,pattern=v{{version}},value=${{ steps.define_version.outputs.VERSION_NUMBER }}
+          type=semver,pattern=v{{version}},value=${{ steps.define_version.outputs.version_number }}
 
     - name: Build and push Docker image
       id: push
