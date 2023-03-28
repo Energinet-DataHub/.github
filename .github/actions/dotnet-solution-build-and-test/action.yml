@@ -67,7 +67,7 @@ runs:
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
-      if: always() && ${{ inputs.publish_test_report }} == "true"
+      if: always() && ${{ inputs.publish_test_report }} == true
       with:
         files: |
           **/TestResults/*.xml
