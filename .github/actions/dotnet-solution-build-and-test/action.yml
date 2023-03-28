@@ -13,20 +13,20 @@
 # limitations under the License.
 
 name: Build and test dotnet solution
-description: 'Build a .NET solution, run tests and upload code coverage'
+description: "Build a .NET solution, run tests and upload code coverage"
 
 inputs:
   SOLUTION_FILE_PATH:
     required: true
   USE_CODE_COVERAGE:
     required: false
-    default: 'true'
+    default: "true"
   CODE_COVERAGE_FLAGS:
     required: false
-    default: ''
+    default: ""
   BUILD_CONFIGURATION:
     required: false
-    default: 'Release'
+    default: "Release"
   # Secrets required if we need to login to Azure and use Azure resources from automated tests
   AZURE_TENANT_ID:
     required: false
@@ -60,7 +60,16 @@ runs:
       shell: pwsh
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+
+    - name: Publish testresults
+      uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      if: always()
+      with:
+        files: |
+          **/TestResults/*.xml
+          **/TestResults/*.trx
+          **/TestResults/*.json
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
