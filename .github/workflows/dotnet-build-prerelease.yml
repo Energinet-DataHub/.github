@@ -29,19 +29,19 @@ name: .NET build - prerelease
 on:
   workflow_call:
     inputs:
-      SOLUTION_FILE_PATH:
+      solution_file_path:
         required: true
         type: string
-      DOTNET_VERSION:
+      dotnet_version:
         description: Install specified .NET Core SDK version
         required: false
         default: 6.0.406
         type: string
-      OPERATING_SYSTEM:
+      operating_system:
         required: false
         default: ubuntu-22.04
         type: string
-      RELEASE_NAME_PREFIX:
+      release_name_prefix:
         required: false
         type: string
         description: Use this variable if you want to prefix the release name
@@ -49,15 +49,15 @@ on:
 
 jobs:
   create_prerelease:
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    runs-on: ${{ inputs.operating_system }}
 
     env:
       BUILD_CONFIGURATION: Release
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      RELEASE_VERSION: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: ${{ inputs.RELEASE_NAME_PREFIX }}_${{ github.event.pull_request.number }}.zip
+      RELEASE_VERSION: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout repository
@@ -76,10 +76,10 @@ jobs:
             exit 1
           fi
 
-      - name: Setup .NET ${{ inputs.DOTNET_VERSION }}
+      - name: Setup .NET ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+          dotnet-version: ${{ inputs.dotnet_version }}
         env:
           DOTNET_INSTALL_DIR: ${{ env.DOTNET_INSTALL_DIR }}
 
@@ -94,16 +94,16 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore NuGet packages
-        run: dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+        run: dotnet restore ${{ inputs.solution_file_path }}
 
       - name: Build solution
-        run: dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+        run: dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
         uses: ./.github/actions/dotnet-tests-prepare-outputs
         with:
-          OUTPUT_PATH: ${{ env.TESTS_OUTPUT_PATH }}
+          output_path: ${{ env.TESTS_OUTPUT_PATH }}
 
       - name: Zip dotnet tests outputs
         uses: thedoctor0/zip-release@0.6.2
@@ -124,7 +124,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
-          OUTPUT_PATH: ${{ env.RELEASE_FOLDER_PATH }}
+          output_path: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request'
@@ -138,7 +138,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ github.token }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
           prerelease: true
           title: ${{ env.RELEASE_VERSION }}
