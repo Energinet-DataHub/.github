@@ -22,16 +22,16 @@ name: License and linting validation
 on:
   workflow_call:
     inputs:
-      OPERATING_SYSTEM:
+      operating_system:
         required: false
         default: ubuntu-22.04
         type: string
-      SKIP_MARKDOWN_CHECK:
+      skip_markdown_check:
         required: false
         type: string
         description: Set to true to skip checking Markdown files.
         default: "false"
-      SKIP_LICENSE_CHECK:
+      skip_license_check:
         required: false
         type: string
         description: Set to true to skip checking License lines. All public repositories should run license check.
@@ -56,8 +56,8 @@ on:
 jobs:
   md_check:
     name: Markdown Check
-    if: ${{ inputs.SKIP_MARKDOWN_CHECK != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    if: ${{ inputs.skip_markdown_check != 'true' }}
+    runs-on: ${{ inputs.operating_system }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
@@ -126,8 +126,8 @@ jobs:
 
   check_license_lines:
     name: Check License Lines
-    if: ${{ inputs.SKIP_LICENSE_CHECK != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    if: ${{ inputs.skip_license_check != 'true' }}
+    runs-on: ${{ inputs.operating_system }}
     env:
       REMOTE_REPO_PATH: ${{ github.workspace }}/remote
     steps:
@@ -155,7 +155,7 @@ jobs:
   github_actions_yaml_linting:
     name: YAML linting for Github actions and workflows
     if: ${{ inputs.skip_yaml_lint != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    runs-on: ${{ inputs.operating_system }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -168,7 +168,7 @@ jobs:
   github_actions_validate_casing:
     name: Validate casing in Github actions and workflows
     if: ${{ inputs.skip_input_name_validation != 'true' || inputs.skip_actions_casing_validation != 'true' }}
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    runs-on: ${{ inputs.operating_system }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
