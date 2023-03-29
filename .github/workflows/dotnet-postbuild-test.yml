@@ -286,6 +286,9 @@ jobs:
         if: always()
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
+          check_name: Test results for ${{ inputs.TESTS_DLL_FILE_PATH }}
+          comment_title: Test results for ${{ inputs.TESTS_DLL_FILE_PATH }}
+          comment_mode: failures
           files: |
             **/TestResults/*.trx
 
