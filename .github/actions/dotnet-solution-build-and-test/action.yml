@@ -71,9 +71,7 @@ runs:
       if: inputs.publish_test_report == 'true' || (failure() && steps.runtests.conclusion == 'failure' && inputs.publish_test_report == 'true') # Reference_ https://docs.github.com/en/actions/learn-github-actions/expressions#failure-with-conditions
       with:
         files: |
-          **/TestResults/*.xml
           **/TestResults/*.trx
-          **/TestResults/*.json
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
