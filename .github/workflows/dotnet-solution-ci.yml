@@ -254,7 +254,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           files: |
-            **/TestResults/**/*.trx
+            **/TestResults/*.trx
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
