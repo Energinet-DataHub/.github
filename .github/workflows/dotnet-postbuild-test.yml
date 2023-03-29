@@ -108,6 +108,9 @@ on:
 permissions:
   id-token: write
   contents: read
+  issues: read # Needed by EnricoMi/publish-unit-test-result-action
+  checks: write # Needed by EnricoMi/publish-unit-test-result-action
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
 
 jobs:
   dotnet_ci_test:
