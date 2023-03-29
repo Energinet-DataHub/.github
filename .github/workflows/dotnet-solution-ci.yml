@@ -225,7 +225,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Run tests and publish report
+      - name: Run tests
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
@@ -235,6 +235,7 @@ jobs:
             dotnet test ${{ inputs.SOLUTION_FILE_PATH }} `
               --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
               --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --logger "trx;logfilename=testResults.trx" `
               --output ${{ github.workspace }}\output `
           }
           else
@@ -243,8 +244,16 @@ jobs:
               --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
               --filter '${{ inputs.TESTS_FILTER_EXPRESSION }}' `
               --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --logger "trx;logfilename=testResults.trx" `
               --output ${{ github.workspace }}\output `
           }
+
+      - name: Publish test report
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        with:
+          files: |
+            **/TestResults/*.trx
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3
