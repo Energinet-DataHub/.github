@@ -16,7 +16,7 @@ name: Python Wheel CI
 on:
   workflow_call:
     inputs:
-      pyhton_version:
+      python_version:
         required: true
         type: string
       architecture:
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ inputs.pyhton_version }}
+          python-version: ${{ inputs.python_version }}
           architecture: ${{ inputs.architecture }}
 
       - name: Create Python Wheel for Databricks Jobs
