@@ -70,8 +70,8 @@ runs:
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
       if: inputs.publish_test_report == 'true' || (failure() && steps.runtests.conclusion == 'failure' && inputs.publish_test_report == 'true') # Reference_ https://docs.github.com/en/actions/learn-github-actions/expressions#failure-with-conditions
       with:
-        check_name: Test results for ${{ inputs.SOLUTION_FILE_PATH }}
-        comment_title: Test results for ${{ inputs.SOLUTION_FILE_PATH }}
+        check_name: Test results for ${{ inputs.solution_file_path }}
+        comment_title: Test results for ${{ inputs.solution_file_path }}
         comment_mode: failures
         files: |
           **/TestResults/*.trx
