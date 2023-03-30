@@ -16,10 +16,10 @@ name: Terraform Validate
 on:
   workflow_call:
     inputs:
-      TERRAFORM_VERSION:
+      terraform_version:
         required: true
         type: string
-      TERRAFORM_WORKING_DIR_PATH:
+      terraform_working_dir_path:
         required: true
         type: string
 
@@ -34,14 +34,14 @@ jobs:
         uses: hashicorp/setup-terraform@v1.2.1
         with:
           terraform_wrapper: false
-          terraform_version: ${{ inputs.TERRAFORM_VERSION }}
+          terraform_version: ${{ inputs.terraform_version }}
 
       - name: Terraform init
         shell: bash
-        working-directory: ${{ inputs.TERRAFORM_WORKING_DIR_PATH }}
+        working-directory: ${{ inputs.terraform_working_dir_path }}
         run: terraform init -backend=false
 
       - name: Terraform validate
         shell: bash
-        working-directory: ${{ inputs.TERRAFORM_WORKING_DIR_PATH }}
+        working-directory: ${{ inputs.terraform_working_dir_path }}
         run: terraform validate

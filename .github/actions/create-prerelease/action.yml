@@ -15,11 +15,11 @@ name: Common steps for dotnet projects
 description: Builds and tests dotnet projects.
 
 inputs:
-  RELEASE_FOLDER_PATH:
+  release_folder_path:
     required: true
-  RELEASE_VERSION:
+  release_version:
     required: true
-  PAT_TOKEN:
+  pat_token:
     required: true
 
 runs:
@@ -29,14 +29,14 @@ runs:
       uses: thedoctor0/zip-release@master
       with:
         type: zip
-        filename: ${{ inputs.RELEASE_VERSION }}.zip
-        directory: ${{ inputs.RELEASE_FOLDER_PATH }}
+        filename: ${{ inputs.release_version }}.zip
+        directory: ${{ inputs.release_folder_path }}
 
     - uses: marvinpinto/action-automatic-releases@latest
       with:
-        repo_token: ${{ inputs.PAT_TOKEN }}
-        automatic_release_tag: ${{ inputs.RELEASE_VERSION }}
+        repo_token: ${{ inputs.pat_token }}
+        automatic_release_tag: ${{ inputs.release_version }}
         prerelease: true
-        title: ${{ inputs.RELEASE_VERSION }}
+        title: ${{ inputs.release_version }}
         files: |
-          ${{ inputs.RELEASE_FOLDER_PATH }}/${{ inputs.RELEASE_VERSION }}.zip
+          ${{ inputs.release_folder_path }}/${{ inputs.release_version }}.zip

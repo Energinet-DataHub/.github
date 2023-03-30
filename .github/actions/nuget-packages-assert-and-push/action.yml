@@ -16,23 +16,23 @@ name: Assert versions and push NuGet packages
 description: Assert versions of NuGet packages and push them to NuGet.org
 
 inputs:
-  PUSH_PACKAGES:
+  push_packages:
     required: true
-  CONTENT_CHANGED:
+  content_changed:
     required: true
-  NUGET_TOKEN:
+  nuget_token:
     required: true
-  NUPKG_RECURSE_PATH:
+  nupkg_recurse_path:
     required: true
 
 runs:
   using: composite
   steps:
     - name: Check each NuGet package version does not exists (not looking at prereleases)
-      if: ${{ inputs.PUSH_PACKAGES == 'true' || inputs.CONTENT_CHANGED == 'true'}}
+      if: ${{ inputs.push_packages == 'true' || inputs.content_changed == 'true'}}
       shell: pwsh
       run: |
-        $path = "${{ inputs.NUPKG_RECURSE_PATH }}"
+        $path = "${{ inputs.nupkg_recurse_path }}"
 
         # Loop on NuGet package files in path
         $hasError = $false
@@ -91,10 +91,10 @@ runs:
         }
 
     - name: Push to NuGet.org
-      if: ${{ inputs.PUSH_PACKAGES == 'true' }}
+      if: ${{ inputs.push_packages == 'true' }}
       shell: pwsh
       run: |
-        dotnet nuget push ${{ env.NUPKG_FILTER_PATTERN }} --api-key ${{ inputs.NUGET_TOKEN }} --source ${{ env.NUGET_FEED_PATH }}
+        dotnet nuget push ${{ env.NUPKG_FILTER_PATTERN }} --api-key ${{ inputs.nuget_token }} --source ${{ env.NUGET_FEED_PATH }}
       env:
-        NUPKG_FILTER_PATTERN: ${{ inputs.NUPKG_RECURSE_PATH }}/**/*.nupkg
+        NUPKG_FILTER_PATTERN: ${{ inputs.nupkg_recurse_path }}/**/*.nupkg
         NUGET_FEED_PATH: https://api.nuget.org/v3/index.json

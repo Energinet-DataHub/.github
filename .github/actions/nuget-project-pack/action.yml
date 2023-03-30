@@ -16,9 +16,9 @@ name: Pack project as NuGet package
 description: Pack a .NET project as either a pre-release (alpha) or release NuGet package
 
 inputs:
-  PROJECT_PATH:
+  project_path:
     required: true
-  BUILD_CONFIGURATION:
+  build_configuration:
     required: false
     default: Release
 
@@ -32,8 +32,8 @@ runs:
     - name: Pack project
       shell: pwsh
       run: |
-        dotnet pack ${{ inputs.PROJECT_PATH }} `
-          --configuration ${{ inputs.BUILD_CONFIGURATION }} `
+        dotnet pack ${{ inputs.project_path }} `
+          --configuration ${{ inputs.build_configuration }} `
           --include-symbols `
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `

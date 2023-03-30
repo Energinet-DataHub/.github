@@ -15,19 +15,19 @@ name: Create release tag
 description: Create new release tag in repository
 
 inputs:
-  MAJOR_VERSION:
+  major_version:
     description: Major version
     required: true
-  MINOR_VERSION:
+  minor_version:
     description: Minor version
     required: true
-  PATCH_VERSION:
+  patch_version:
     description: Patch version
     required: true
-  REPOSITORY_PATH:
+  repository_path:
     description: Path to repository, i.e. Energinet-DataHub\geh-terraform-modules
     required: true
-  TARGET_BRANCH:
+  target_branch:
     description: "Branch on which tags will be created. Default: main"
     required: false
     default: main
@@ -38,16 +38,15 @@ runs:
     - name: Create release tag
       shell: pwsh
       run: |
-        $major = ${{ inputs.MAJOR_VERSION }}
-        $minor = ${{ inputs.MINOR_VERSION }}
-        $patch = ${{ inputs.PATCH_VERSION }}
-        $repo = "${{ inputs.REPOSITORY_PATH }}"
-        $targetBranch = "${{ inputs.TARGET_BRANCH }}"
+        $major = ${{ inputs.major_version }}
+        $minor = ${{ inputs.minor_version }}
+        $patch = ${{ inputs.patch_version }}
+        $repo = "${{ inputs.repository_path }}"
+        $targetBranch = "${{ inputs.target_branch }}"
 
         Write-Host "Github event name is:" ${{ github.event_name }}
         $isPullRequest = ('${{ github.event_name }}' -eq 'pull_request')
         Write-Host "Is PR: $isPullRequest"
-
 
         if ($env:GH_TOKEN -eq '') {
           throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
