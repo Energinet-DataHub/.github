@@ -61,7 +61,7 @@ runs:
 
     - name: Run tests
       shell: pwsh
-      id: runtests
+      id: run_tests
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
         dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
