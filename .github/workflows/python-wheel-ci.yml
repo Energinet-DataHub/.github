@@ -16,20 +16,20 @@ name: Python Wheel CI
 on:
   workflow_call:
     inputs:
-      PYHTON_VERSION:
+      python_version:
         required: true
         type: string
-      ARCHITECTURE:
+      architecture:
         required: false
         type: string
         default: x64
-      WHEEL_WORKING_DIRECTORY:
+      wheel_working_directory:
         required: true
         type: string
-      ARTIFACT_NAME:
+      artifact_name:
         required: true
         type: string
-      ARTIFACT_PATH:
+      artifact_path:
         required: true
         type: string
 
@@ -44,11 +44,11 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ inputs.PYHTON_VERSION }}
-          architecture: ${{ inputs.ARCHITECTURE }}
+          python-version: ${{ inputs.python_version }}
+          architecture: ${{ inputs.architecture }}
 
       - name: Create Python Wheel for Databricks Jobs
-        working-directory: ${{ inputs.WHEEL_WORKING_DIRECTORY }}
+        working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
@@ -56,5 +56,5 @@ jobs:
       - name: Publish artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.ARTIFACT_NAME }}
-          path: ${{ inputs.ARTIFACT_PATH }}
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.artifact_path }}

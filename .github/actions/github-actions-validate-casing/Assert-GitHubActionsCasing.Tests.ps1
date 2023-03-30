@@ -21,9 +21,9 @@ Describe "When dot-sourcing the script" {
     }
 
     Context "Given Assert-GitHubActionsCasing is called with '<folderPath>'" -ForEach @(
-        @{ FolderPath = "$PSScriptRoot/test-files/actions/action-valid"; ExpectedCount = 1 }
-        @{ FolderPath = "$PSScriptRoot/test-files/actions"; ExpectedCount = 2 }
-        @{ FolderPath = "$PSScriptRoot/test-files"; ExpectedCount = 4 }
+        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions/action-valid"; ExpectedCount = 1 }
+        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions"; ExpectedCount = 2 }
+        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files"; ExpectedCount = 4 }
     ) {
         BeforeAll {
             Mock Test-GitHubFile {}
@@ -39,7 +39,7 @@ Describe "When dot-sourcing the script" {
 
     Context "Given Assert-GitHubActionsCasing is given valid action file" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/actions/action-valid"
+            $script:folderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions/action-valid"
         }
 
         It "Should not throw" {
@@ -50,7 +50,7 @@ Describe "When dot-sourcing the script" {
 
     Context "Given Assert-GitHubActionsCasing is given invalid action file" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/actions/action-invalid"
+            $script:folderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions/action-invalid"
         }
 
         It "Should throw" {
@@ -102,7 +102,7 @@ Describe "When dot-sourcing the script" {
 
     Context "Given Assert-GitHubActionsCasing is given valid workflow file" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/workflows/workflow-valid"
+            $script:folderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/workflows/workflow-valid"
         }
 
         It "Should not throw" {
@@ -113,7 +113,7 @@ Describe "When dot-sourcing the script" {
 
     Context "Given Assert-GitHubActionsCasing is given invalid workflow file" {
         BeforeAll {
-            $script:folderPath = "$PSScriptRoot/test-files/workflows/workflow-invalid"
+            $script:folderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/workflows/workflow-invalid"
         }
 
         It "Should throw" {

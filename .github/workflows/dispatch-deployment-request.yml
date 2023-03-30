@@ -16,28 +16,28 @@ name: Publish release and dispatch notification
 on:
   workflow_call:
     inputs:
-      CALLER_REPOSITORY_NAME:
+      caller_repository_name:
         required: true
         description: Name of the local repository
         type: string
-      CALLER_REPOSITORY_PATH:
+      caller_repository_path:
         required: true
         description: "Path to local repository, syntax: {owner}/{repo}"
         type: string
-      RELEASE_NAME_PREFIX:
+      release_name_prefix:
         required: false
         type: string
         description: Use this variable if you want to prefix the release name
         default: dotnet
-      CUSTOM_EVENT_TYPE:
+      custom_event_type:
         required: false
         type: string
         description: Use this variable if you want to override the current event naming convention
     secrets:
-      PAT_TOKEN:
+      pat_token:
         required: true
         description: Personal access token
-      ENVIRONMENT_REPOSITORY_PATH:
+      environment_repository_path:
         required: true
         description: "Path to the environment repository, syntax: {owner}/{repo}"
 
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REMOTE_REPO_FOLDER_PATH: ${{ github.workspace }}/remote_repo
-      EVENT_TYPE: ${{ inputs.CUSTOM_EVENT_TYPE || inputs.CALLER_REPOSITORY_NAME }}-deployment-request
+      EVENT_TYPE: ${{ inputs.custom_event_type || inputs.caller_repository_name }}-deployment-request
     steps:
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v10
@@ -55,13 +55,13 @@ jobs:
       - name: Set RELEASE_VERSION
         shell: bash
         run: |
-          echo "RELEASE_VERSION=${{ inputs.RELEASE_NAME_PREFIX }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_ENV
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          repository: ${{ secrets.ENVIRONMENT_REPOSITORY_PATH }}
+          token: ${{ secrets.pat_token }}
+          repository: ${{ secrets.environment_repository_path }}
           event-type: ${{ env.EVENT_TYPE }}
           # yamllint disable-line rule:quoted-strings
-          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ inputs.CALLER_REPOSITORY_PATH }}", "repository_name": "${{ inputs.CALLER_REPOSITORY_NAME }}"}'
+          client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ inputs.caller_repository_path }}", "repository_name": "${{ inputs.caller_repository_name }}"}'

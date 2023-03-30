@@ -17,26 +17,26 @@ name: Publish PyPI Package
 on:
   workflow_call:
     inputs:
-      PYTHON_VERSION:
+      python_version:
         description: The version of python to use
         type: string
         required: true
-      REPOSITORY_URL:
+      repository_url:
         description: The repository URL to use eg. https://test.pypi.org/legacy/ for testing
         type: string
         required: false
-      BUILD_NUMBER:
-        description: Parameter parsed to --build argument eg. --build=${BUILD_NUMBER}. If set, this will build a dev package for pypi using --build
+      build_number:
+        description: Parameter parsed to --build argument eg. --build=${build_number}. If set, this will build a dev package for pypi using --build
         required: false
         type: string
         default: ""
-      VERBOSE:
+      verbose:
         description: Set to true for verbose logging
         required: false
         default: false
         type: boolean
     secrets:
-      PYPI_API_TOKEN:
+      pypi_api_token:
         required: true
         description: API Token used to publish to PyPI
 
@@ -50,10 +50,10 @@ jobs:
       - name: Install Python and dependencies
         uses: Energinet-DataHub/.github/.github/actions/python-pipenv-install-dependencies@main
         with:
-          python_version: ${{ inputs.PYTHON_VERSION }}
+          python_version: ${{ inputs.python_version }}
 
       - name: Find current version
-        if: ${{ inputs.BUILD_NUMBER != '' }}
+        if: ${{ inputs.build_number != '' }}
         id: find_version
         uses: Energinet-DataHub/.github/.github/actions/yaml-get@main
         with:
@@ -61,12 +61,12 @@ jobs:
           yaml_path: package.version
 
       - name: Mark version as pre-release
-        if: ${{ inputs.BUILD_NUMBER != '' }}
+        if: ${{ inputs.build_number != '' }}
         uses: Energinet-DataHub/.github/.github/actions/yaml-set@main
         with:
           yaml_file: META.yaml
           yaml_path: package.version
-          value: ${{ steps.find_version.outputs.result }}.${{ inputs.BUILD_NUMBER }}
+          value: ${{ steps.find_version.outputs.result }}.${{ inputs.build_number }}
 
       - name: Build tarball
         run: pipenv run python setup.py sdist
@@ -75,6 +75,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.4.2
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          repository_url: ${{ inputs.REPOSITORY_URL }}
-          verbose: ${{ inputs.VERBOSE }}
+          password: ${{ secrets.pypi_api_token }}
+          repository_url: ${{ inputs.repository_url }}
+          verbose: ${{ inputs.verbose }}

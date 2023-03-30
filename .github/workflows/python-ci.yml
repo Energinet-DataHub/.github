@@ -17,23 +17,23 @@ name: Python CI Test and Coverage
 on:
   workflow_call:
     inputs:
-      PATH_STATIC_CHECKS:
+      path_static_checks:
         required: true
         type: string
-      IGNORE_ERRORS_AND_WARNING_FLAKE8:
+      ignore_errors_and_warning_flake8:
         required: true
         type: string
-      TEST_REPORT_PATH:
+      test_report_path:
         required: true
         type: string
-      OPERATING_SYSTEM:
+      operating_system:
         required: false
         default: ubuntu-22.04
         type: string
 
 jobs:
   python_ci:
-    runs-on: ${{ inputs.OPERATING_SYSTEM }}
+    runs-on: ${{ inputs.operating_system }}
     name: flake8 and unit test
     steps:
       - name: Checkout
@@ -42,8 +42,8 @@ jobs:
       - name: Static checks
         uses: TrueBrain/actions-flake8@v2
         with:
-          path: ${{ inputs.PATH_STATIC_CHECKS }}
-          ignore: ${{ inputs.IGNORE_ERRORS_AND_WARNING_FLAKE8 }}
+          path: ${{ inputs.path_static_checks }}
+          ignore: ${{ inputs.ignore_errors_and_warning_flake8 }}
 
       - name: Run unit tests
         uses: ./.github/actions/python-unit-test
@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: python-test-report
-          path: ${{ inputs.TEST_REPORT_PATH }}
+          path: ${{ inputs.test_report_path }}
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3

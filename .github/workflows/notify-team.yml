@@ -25,15 +25,15 @@ name: Notify team
 on:
   workflow_call:
     inputs:
-      TEAM_NAME:
+      team_name:
         description: The name of the team who should receive the email. Used to determine the email address.
         required: true
         type: string
-      SUBJECT:
+      subject:
         description: The email subject. Should contain environment information when possible.
         required: true
         type: string
-      BODY:
+      body:
         description: Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.
         required: false
         default: ""
@@ -47,32 +47,32 @@ jobs:
         id: get_email
         shell: bash
         run: |
-          if [ ${{ inputs.TEAM_NAME }} == 'Batman' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_BATMAN }}
-          elif [ ${{ inputs.TEAM_NAME }} == 'Mandalorian' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_MANDALORIAN }}
-          elif [ ${{ inputs.TEAM_NAME }} == 'Titans' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_TITANS }}
-          elif [ ${{ inputs.TEAM_NAME }} == 'TexasRangers' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_TEXASRANGERS }}
-          elif [ ${{ inputs.TEAM_NAME }} == 'TheOutlaws' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
-          elif [ ${{ inputs.TEAM_NAME }} == 'Volt' ]; then
-            TEAM_EMAIL=${{ secrets.EMAIL_VOLT }}
+          if [ ${{ inputs.team_name }} == 'Batman' ]; then
+            team_email=${{ secrets.email_batman }}
+          elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
+            team_email=${{ secrets.email_mandalorian }}
+          elif [ ${{ inputs.team_name }} == 'Titans' ]; then
+            team_email=${{ secrets.email_titans }}
+          elif [ ${{ inputs.team_name }} == 'TexasRangers' ]; then
+            team_email=${{ secrets.email_texasrangers }}
+          elif [ ${{ inputs.team_name }} == 'TheOutlaws' ]; then
+            team_email=${{ secrets.email_theoutlaws }}
+          elif [ ${{ inputs.team_name }} == 'Volt' ]; then
+            team_email=${{ secrets.email_volt }}
           else
             # Fallback
-            TEAM_EMAIL=${{ secrets.EMAIL_THEOUTLAWS }}
+            team_email=${{ secrets.email_theoutlaws }}
           fi
 
-          echo "::add-mask::$TEAM_EMAIL"
-          echo "TEAM_EMAIL=$TEAM_EMAIL" >>$GITHUB_OUTPUT
+          echo "::add-mask::$team_email"
+          echo "team_email=$team_email" >>$GITHUB_OUTPUT
 
       - name: Send email
         uses: Energinet-DataHub/.github/.github/actions/send-email@v10
         with:
-          sendgrid-api-key: ${{ secrets.SENDGRID_INSTANCE_SYSTEM_NOTIFICATIONS_API_KEY }}
-          team-name: ${{ inputs.TEAM_NAME }}
-          to: ${{ steps.get_email.outputs.TEAM_EMAIL }}
-          from: ${{ secrets.EMAIL_SENDER }}
-          subject: ${{ inputs.SUBJECT }}
-          content: ${{ inputs.BODY }}
+          sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
+          team-name: ${{ inputs.team_name }}
+          to: ${{ steps.get_email.outputs.team_email }}
+          from: ${{ secrets.email_sender }}
+          subject: ${{ inputs.subject }}
+          content: ${{ inputs.body }}

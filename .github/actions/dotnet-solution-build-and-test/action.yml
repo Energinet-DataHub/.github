@@ -16,23 +16,23 @@ name: Build and test dotnet solution
 description: Build a .NET solution, run tests and upload code coverage
 
 inputs:
-  SOLUTION_FILE_PATH:
+  solution_file_path:
     required: true
-  USE_CODE_COVERAGE:
+  use_code_coverage:
     required: false
     default: "true"
-  CODE_COVERAGE_FLAGS:
+  code_coverage_flags:
     required: false
     default: ""
-  BUILD_CONFIGURATION:
+  build_configuration:
     required: false
     default: Release
   # Secrets required if we need to login to Azure and use Azure resources from automated tests
-  AZURE_TENANT_ID:
+  azure_tenant_id:
     required: false
-  AZURE_SUBSCRIPTION_ID:
+  azure_subscription_id:
     required: false
-  AZURE_SPN_ID:
+  azure_spn_id:
     required: false
 
 runs:
@@ -41,31 +41,31 @@ runs:
     - name: Restore NuGet packages
       shell: pwsh
       run: |
-        dotnet restore ${{ inputs.SOLUTION_FILE_PATH }}
+        dotnet restore ${{ inputs.solution_file_path }}
 
     - name: Build solution
       shell: pwsh
       run: |
-        dotnet build ${{ inputs.SOLUTION_FILE_PATH }} --no-restore --configuration ${{ inputs.BUILD_CONFIGURATION }}
+        dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ inputs.build_configuration }}
 
     - name: Login to use Azure resources from automated tests
-      if: ${{ inputs.AZURE_TENANT_ID != '' }}
+      if: ${{ inputs.azure_tenant_id != '' }}
       uses: azure/login@v1
       with:
-        client-id: ${{ inputs.AZURE_SPN_ID }}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
-        subscription-id: ${{ inputs.AZURE_SUBSCRIPTION_ID }}
+        client-id: ${{ inputs.azure_spn_id }}
+        tenant-id: ${{ inputs.azure_tenant_id }}
+        subscription-id: ${{ inputs.azure_subscription_id }}
 
     - name: Run tests and publish report
       shell: pwsh
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ inputs.SOLUTION_FILE_PATH }} --no-build --configuration ${{ inputs.BUILD_CONFIGURATION }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Upload coverage to CodeCov
-      if: ${{ inputs.USE_CODE_COVERAGE == 'true' }}
+      if: ${{ inputs.use_code_coverage == 'true' }}
       uses: codecov/codecov-action@v3
       with:
-        flags: ${{ inputs.CODE_COVERAGE_FLAGS }}
+        flags: ${{ inputs.code_coverage_flags }}
         fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
         verbose: true
