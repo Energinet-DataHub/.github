@@ -80,6 +80,9 @@ on:
 permissions:
   id-token: write
   contents: read
+  issues: read # Needed by EnricoMi/publish-unit-test-result-action
+  checks: write # Needed by EnricoMi/publish-unit-test-result-action
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
 
 jobs:
   function_ci:
@@ -225,7 +228,7 @@ jobs:
           tenant-id: ${{ secrets.azure_tenant_id }}
           subscription-id: ${{ secrets.azure_subscription_id }}
 
-      - name: Run tests and publish report
+      - name: Run tests
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
@@ -234,7 +237,7 @@ jobs:
           {
             dotnet test ${{ inputs.solution_file_path }} `
               --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
-              --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
               --output ${{ github.workspace }}\output `
           }
           else
@@ -242,9 +245,16 @@ jobs:
             dotnet test ${{ inputs.solution_file_path }} `
               --no-build --configuration ${{ env.BUILD_CONFIGURATION }} `
               --filter '${{ inputs.tests_filter_expression }}' `
-              --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
+              --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover `
               --output ${{ github.workspace }}\output `
           }
+
+      - name: Publish test report
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        with:
+          files: |
+            **/TestResults/*.trx
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3

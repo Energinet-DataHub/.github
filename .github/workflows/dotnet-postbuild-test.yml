@@ -108,6 +108,9 @@ on:
 permissions:
   id-token: write
   contents: read
+  issues: read # Needed by EnricoMi/publish-unit-test-result-action
+  checks: write # Needed by EnricoMi/publish-unit-test-result-action
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
 
 jobs:
   dotnet_ci_test:
@@ -252,7 +255,7 @@ jobs:
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
-      - name: Run tests and publish report
+      - name: Run tests
         shell: pwsh
         run: |
           dotnet tool install --global dotnet-coverage --version 17.5.0
@@ -278,6 +281,16 @@ jobs:
 
           $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
           $testFailures
+
+      - name: Publish test report
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        with:
+          check_name: Test results for ${{ inputs.tests_dll_file_path }}
+          comment_title: Test results for ${{ inputs.tests_dll_file_path }}
+          comment_mode: failures
+          files: |
+            **/TestResults/*.trx
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3

@@ -34,6 +34,9 @@ inputs:
     required: false
   azure_spn_id:
     required: false
+  publish_test_report:
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -56,11 +59,22 @@ runs:
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
 
-    - name: Run tests and publish report
+    - name: Run tests
       shell: pwsh
+      id: run_tests
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+
+    - name: Publish test report
+      uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      if: inputs.publish_test_report == 'true' || (failure() && steps.run_tests.conclusion == 'failure' && inputs.publish_test_report == 'true') # Reference_ https://docs.github.com/en/actions/learn-github-actions/expressions#failure-with-conditions
+      with:
+        check_name: Test results for ${{ inputs.solution_file_path }}
+        comment_title: Test results for ${{ inputs.solution_file_path }}
+        comment_mode: failures
+        files: |
+          **/TestResults/*.trx
 
     - name: Upload coverage to CodeCov
       if: ${{ inputs.use_code_coverage == 'true' }}
