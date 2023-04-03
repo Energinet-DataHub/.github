@@ -61,7 +61,7 @@ jobs:
       - name: Upload test coverage report
         uses: actions/upload-artifact@v3
         with:
-          name: python-test-report
+          name: python-coverage-test-report
           path: ${{ inputs.test_report_path }}/htmlcov/
 
       - name: Upload coverage to CodeCov
