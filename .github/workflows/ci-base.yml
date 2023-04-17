@@ -26,6 +26,11 @@ on:
         required: false
         default: ubuntu-22.04
         type: string
+      skip_markdown_links_check:
+        required: false
+        type: string
+        description: Set to true to skip checking Markdown links.
+        default: "false"
       skip_markdown_check:
         required: false
         type: string
@@ -80,6 +85,7 @@ jobs:
 
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
+        if: ${{ inputs.skip_markdown_links_check != 'true' }}
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: "yes"
