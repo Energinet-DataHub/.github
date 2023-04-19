@@ -43,6 +43,10 @@ on:
         required: false
         default: ubuntu-20.04 # Tools for python is not available in arch x64 on 22.04
         type: string
+      wheel_major_minor_version:
+        required: false
+        default: "0.0"
+        type: string
 
 jobs:
   create_prerelease:
@@ -63,10 +67,6 @@ jobs:
           python-version: ${{ inputs.python_version }}
           architecture: ${{ inputs.architecture }}
 
-      - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v10
-        id: find_pull_request
-
       # This creates the wheel in a subfolder "dist"
       - name: Create Python Wheel for Databricks Jobs
         shell: bash
@@ -77,8 +77,8 @@ jobs:
           mkdir "./artifacts"
           mv "./dist" "./artifacts"
         env:
-          RELEASE_NUMBER : ${{ steps.find_pull_request.outputs.pull_request_number }}
-          WHEEL_MAJOR_MINOR_VERSION: ${{ env.WHEEL_MAJOR_MINOR_VERSION}}
+          WHEEL_MAJOR_MINOR_VERSION: ${{ inputs.wheel_major_minor_version}}
+          RELEASE_NUMBER : ${{ github.event.pull_request.number }}
 
       - name: Include Databricks assets in release
         if: ${{ inputs.should_include_assets }}
