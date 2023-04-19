@@ -78,7 +78,7 @@ jobs:
           mv "./dist" "./artifacts"
         env:
           WHEEL_MAJOR_MINOR_VERSION: ${{ inputs.wheel_major_minor_version}}
-          RELEASE_NUMBER : ${{ github.event.pull_request.number }}
+          RELEASE_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Include Databricks assets in release
         if: ${{ inputs.should_include_assets }}
