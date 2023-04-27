@@ -72,6 +72,8 @@ jobs:
           python setup.py sdist bdist_wheel
           mkdir "./artifacts"
           mv "./dist" "./artifacts"
+        env:
+          RELEASE_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Include Databricks assets in release
         if: ${{ inputs.should_include_assets }}
