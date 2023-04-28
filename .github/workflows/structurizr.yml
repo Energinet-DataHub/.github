@@ -103,9 +103,9 @@ jobs:
           do
             echo "DSL filepath: $dsl"
             cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
-            echo "Rendering diagram ..."
+            echo "Rendering diagram(s) ..."
             ! node export-diagrams.js ${{ env.DIAGRAM_PAGE_URL }} png | grep png
-            echo "Rendered diagram"
+            echo "Rendered diagram(s)"
             rm *-key.png
             foldername=$(basename $dsl .dsl)
             mkdir "$foldername"
