@@ -47,8 +47,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DIAGRAM_FOLDER: ${{ github.workspace }}/docs/diagrams
-      # Url for unauthenticated access to diagrams on the cloud service, as given in example here: https://github.com/structurizr/puppeteer#examples
-      DIAGRAM_PAGE_URL: https://structurizr.com/share/36141/diagrams
+      # Url for local Structurizr Lite
+      DIAGRAM_PAGE_URL: http://localhost:8080/workspace/diagrams
+    services:
+      # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
+      structurizr-lite:
+        image: structurizr/lite:3052
+        ports:
+          - 8080:8080
+        volumes:
+          - ${{ github.workspace }}:/usr/local/structurizr
     steps:
       - name: Checkout
         uses: actions/checkout@v3
