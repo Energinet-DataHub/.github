@@ -35,7 +35,7 @@ When we implement a breaking change we must create a new major version.
 
 You **MUST** ensure that we do not reference releases of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories !
 
-> :information: This schedule runs every night out of `dh3-automation`.
+This schedule runs every night out of `dh3-automation`.
 
 ---
 
