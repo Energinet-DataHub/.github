@@ -167,7 +167,7 @@ jobs:
 
   github_actions_validate_casing:
     name: Validate casing in Github actions and workflows
-    if: ${{ inputs.skip_input_name_validation != 'true' || inputs.skip_actions_casing_validation != 'true' }}
+    if: ${{ inputs.skip_actions_casing_validation != 'true' }}
     runs-on: ${{ inputs.operating_system }}
     steps:
       - name: Checkout repository
