@@ -45,18 +45,12 @@ on:
         required: false
         type: string
         description: Set to true to skip YAML linting for Github actions and workflows in repository.
-        default: "true"
-      # TODO: Remove when new parameter 'skip_actions_casing_validation' is in use all over
-      skip_input_name_validation:
-        required: false
-        type: string
-        description: Set to true to skip input name validation for Github actions and workflows in repository.
-        default: "true"
+        default: "false"
       skip_actions_casing_validation:
         required: false
         type: string
         description: Set to true to skip casing validation for Github actions and workflows in repository.
-        default: "true"
+        default: "false"
 
 jobs:
   md_check:
