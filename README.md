@@ -226,6 +226,8 @@ File: [structurizr.yml](.github/workflows/structurizr.yml)
 
 The workflow renders all views in a structurizr workspace. The diagrams are placed in a user-defined folder and auto-committed to the current branch.
 
+Implemented using information available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer).
+
 Inputs:
 
 - dsl: required - comma seperated list of dsl's to render.
