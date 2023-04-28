@@ -46,7 +46,7 @@ When creating a new major version we must handle the following:
     - Delete the previous major version release and tag in GitHub
     - Create a root branch based on the last commit for that version and name it as the previous major version
     - Create a branch policy for this new branch to ensure we use PR's for any changes
-1. Delete older major version branches (e.g. `v8`)
+1. Delete the now unsupported major version branch, or lock it using its branch policy (e.g. `v8`)
 
 From then on any important maintenance changes to the previous version must be implemented using a PR to the version branch.
 
