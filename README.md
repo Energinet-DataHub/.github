@@ -224,9 +224,9 @@ The secrets are created as organizational secrets in the Energinet organization,
 
 File: [structurizr.yml](.github/workflows/structurizr.yml)
 
-The workflow renders all views in a structurizr workspace. The diagrams are placed in a user-defined folder and auto-committed to the current branch.
+The workflow renders all views in a Structurizr workspace. The diagrams are placed in a user-defined folder and auto-committed to the current branch.
 
-Implemented using information available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer).
+The implementation uses a Structurizr lite docker image and a script available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer). In case the redering of diagrams fails, see if a newer image is available at [Docker Hub](https://hub.docker.com/r/structurizr/lite/tags).
 
 Inputs:
 
