@@ -47,9 +47,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DIAGRAM_FOLDER: ${{ github.workspace }}/docs/diagrams
+      # Url for local Structurizr Lite
+      DIAGRAM_PAGE_URL: http://localhost:8080/workspace/diagrams
     services:
+      # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
       structurizr-lite:
-        image: structurizr/lite:3000
+        image: structurizr/lite:3052
         ports:
           - 8080:8080
         volumes:
@@ -98,9 +101,11 @@ jobs:
           set -e
           for dsl in "${dsl_files[@]}"
           do
-            echo $dsl
+            echo "DSL filepath: $dsl"
             cp -f "${{ github.workspace }}/${dsl}" "${{ github.workspace }}/workspace.dsl"
-            ! node export-diagrams.js http://localhost:8080/workspace/diagrams png | grep png
+            echo "Rendering diagram(s) ..."
+            ! node export-diagrams.js ${{ env.DIAGRAM_PAGE_URL }} png | grep png
+            echo "Rendered diagram(s)"
             rm *-key.png
             foldername=$(basename $dsl .dsl)
             mkdir "$foldername"
