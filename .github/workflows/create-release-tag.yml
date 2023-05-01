@@ -16,7 +16,7 @@ jobs:
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 11
           minor_version: 0
-          patch_version: 2
+          patch_version: 3
           repository_path: Energinet-DataHub/.github
         env:
           GH_TOKEN: ${{ github.token }}
