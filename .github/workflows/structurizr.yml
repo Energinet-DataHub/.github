@@ -15,7 +15,7 @@
 name: Render C4 diagrams using Structurizr
 
 # DESCRIPTION:
-# This workflow is used to render C4 diagrams (*.dsl-files) to PNG images using Structurizr.
+# This workflow is used to render C4 diagrams (*.dsl-files) to PNG images using Structurizr Lite.
 #
 # The workflow must be called using 'secrets: inherit' to get access PAT token with `repo`
 # and `workflow` scopes. The accessible secret must be named pat_token_repo_workflow
@@ -46,7 +46,7 @@ jobs:
   render_structurizr_diagrams:
     runs-on: ubuntu-latest
     env:
-      DIAGRAM_FOLDER: ${{ github.workspace }}/docs/diagrams
+      DIAGRAM_FOLDER: ${{ github.workspace }}/docs/diagrams/c4-model
       # Url for local Structurizr Lite
       DIAGRAM_PAGE_URL: http://localhost:8080/workspace/diagrams
     services:
