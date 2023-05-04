@@ -224,9 +224,11 @@ The secrets are created as organizational secrets in the Energinet organization,
 
 File: [structurizr.yml](.github/workflows/structurizr.yml)
 
-The workflow renders all views in a Structurizr workspace. The diagrams are placed in a user-defined folder and auto-committed to the current branch.
+The workflow renders all views in a Structurizr workspace as `*.png` files (diagrams). The diagrams are placed in a folder defined by `DIAGRAM_FOLDER` combined with the name of the DSL file, and auto-committed to the current branch. E.g. the images generated from a file named `views.dsl` will be placed in `DIAGRAM_FOLDER\views\`.
 
-The implementation uses a Structurizr lite docker image and a script available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer). In case the redering of diagrams fails, see if a newer image is available at [Docker Hub](https://hub.docker.com/r/structurizr/lite/tags).
+The implementation uses a Structurizr Lite docker image available at [Docker Hub](https://hub.docker.com/r/structurizr/lite/tags) and a script available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer).
+
+**Notice:** In case the redering of diagrams fails, see if a newer docker image.
 
 Inputs:
 
@@ -246,8 +248,8 @@ on:
 
 jobs:
   render_c4:
-    uses: Energinet-DataHub/.github/.github/workflows/structurizr.yml@v10
+    uses: Energinet-DataHub/.github/.github/workflows/structurizr.yml@v11
     with:
-      dsl: "source/datahub3-model/model.dsl"
+      dsl: "docs/diagrams/c4-model/views.dsl"
     secrets: inherit
 ```
