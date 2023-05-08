@@ -86,20 +86,19 @@ jobs:
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
-      # TODO: Fails over and over, disable for now
-      # - name: Determine if the DSL file has changed since last pushed commit to the remote branch
-      #   id: diagrams-changed
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     since_last_remote_commit: true
-      #     files: |
-      #       ${{ env.DIAGRAMS_FOLDER }}/${{ env.DSL_FILENAME }}
+      - name: Determine if the DSL file has changed since last pushed commit to the remote branch
+        id: diagrams-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          since_last_remote_commit: true
+          files: |
+            ${{ env.DIAGRAMS_FOLDER }}/${{ env.DSL_FILENAME }}
 
-      # - name: Write out any changes to the DSL file - based on `diagrams-changed`-step
-      #   shell: bash
-      #   run: |
-      #     echo "DSL file has changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
-      #     echo "List all the files that have changed (hopefully just one): ${{ steps.diagrams-changed.outputs.all_changed_files }}"
+      - name: Write out any changes to the DSL file - based on `diagrams-changed`-step
+        shell: bash
+        run: |
+          echo "DSL file has changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
+          echo "List all the files that have changed (hopefully just one): ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
       - name: Render diagrams as PNG images
         #if: steps.diagrams-changed.outputs.any_changed == 'true'
