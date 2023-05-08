@@ -101,7 +101,7 @@ jobs:
           echo "List all the files that have changed (hopefully just one): ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
       - name: Render diagrams as PNG images
-        #if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         shell: bash
         run: |
           cd "${{ env.DIAGRAMS_FOLDER }}"
@@ -115,7 +115,7 @@ jobs:
           mv -f *.png "$foldername/"
 
       - name: Commit PNG images
-        #if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
