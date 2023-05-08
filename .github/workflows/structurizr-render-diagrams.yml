@@ -58,7 +58,7 @@ jobs:
     services:
       # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
       structurizr-lite:
-        image: structurizr/lite:latest
+        image: structurizr/lite:3052
         ports:
           - 8080:8080
         volumes:
