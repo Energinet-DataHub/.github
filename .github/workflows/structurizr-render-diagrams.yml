@@ -90,6 +90,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
 
+      # Script is available from https://github.com/structurizr/puppeteer
       - name: Prepare export-diagrams script
         shell: bash
         run: |

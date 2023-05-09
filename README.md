@@ -10,7 +10,7 @@ This repository contains shared github items such as actions, workflows and much
     - [License and linting validation](#license-and-linting-validation)
     - [.NET build and test](#net-build-and-test)
     - [Notify Team](#notify-team)
-    - [Structurizr](#structurizr-diagrams)
+    - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
 ## Prepare release
 
@@ -220,36 +220,14 @@ When called with a known `TEAM_NAME` it looks up a corresponding GitHub secret t
 
 The secrets are created as organizational secrets in the Energinet organization, and can be managed by The Outlaws.
 
-### Structurizr diagrams
+### Structurizr Lite: Render diagrams
 
-File: [structurizr.yml](.github/workflows/structurizr.yml)
+File: [structurizr-render-diagrams.yml](.github/workflows/structurizr-render-diagrams.yml)
 
-The workflow renders all views in a Structurizr workspace as `*.png` files (diagrams). The diagrams are placed in a folder defined by `DIAGRAM_FOLDER` combined with the name of the DSL file, and auto-committed to the current branch. E.g. the images generated from a file named `views.dsl` will be placed in `DIAGRAM_FOLDER\views\`.
+Read the documentation in the workflow file, including information about `inputs` and `secrets`.
+
+The workflow renders all views in a Structurizr Lite workspace as `*.png` files (diagrams). The diagrams are placed in a folder defined by `DIAGRAM_FOLDER` combined with the name of the DSL file, and auto-committed to the current branch. E.g. the images generated from a file named `views.dsl` will be placed in `DIAGRAM_FOLDER\views\`.
 
 The implementation uses a Structurizr Lite docker image available at [Docker Hub](https://hub.docker.com/r/structurizr/lite/tags) and a script available at [Structurizr / Puppeteer](https://github.com/structurizr/puppeteer).
 
-**Notice:** In case the redering of diagrams fails, see if a newer docker image.
-
-Inputs:
-
-- dsl: required - comma seperated list of dsl's to render.
-
-Secrets:
-
-- pat_token_repo_workflow: PAT token with `repo` and `workflow` scopes used for the repository checkout.
-
-Example:
-
-``` yml
-name: Render C4 models with Structurizr
-
-on:
-  workflow_call: {}
-
-jobs:
-  render_c4:
-    uses: Energinet-DataHub/.github/.github/workflows/structurizr.yml@v11
-    with:
-      dsl: "docs/diagrams/c4-model/views.dsl"
-    secrets: inherit
-```
+**Notice:** In case the redering of diagrams fails, see if a newer docker image, or newer script, is available.
