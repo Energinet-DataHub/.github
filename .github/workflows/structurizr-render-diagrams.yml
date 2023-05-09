@@ -100,7 +100,7 @@ jobs:
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
-        id: diagrams-changed
+        id: diagrams_changed
         uses: tj-actions/changed-files@v35
         with:
           since_last_remote_commit: true
@@ -109,14 +109,14 @@ jobs:
             **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
             **/docs/diagrams/c4-model/${{ inputs.included_model_filename }}.dsl
 
-      - name: Write out any changes to Structurizr files - based on `diagrams-changed`-step
+      - name: Write out any changes to Structurizr files - based on `diagrams_changed`-step
         shell: bash
         run: |
-          echo "Structurizr files has changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
-          echo "List changed files: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
+          echo "Structurizr files has changed: ${{ steps.diagrams_changed.outputs.any_changed }}"
+          echo "List changed files: ${{ steps.diagrams_changed.outputs.all_changed_files }}"
 
       - name: Render diagrams as PNG images
-        if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
         shell: bash
         run: |
           cd "${{ env.DIAGRAMS_FOLDER }}"
@@ -130,7 +130,7 @@ jobs:
           mv -f *.png "$foldername/"
 
       - name: Commit PNG images
-        if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
