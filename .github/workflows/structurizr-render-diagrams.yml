@@ -43,6 +43,13 @@ on:
         description: Structurizr workspace filename, see https://structurizr.com/share/76352/documentation#workspace-filename.
         required: true
         type: string
+      included_model_filename:
+        description: |
+          Only used if the primary DSL file includes another DSL file.
+          Specify the filename (without extension) of the included C4 model DSL file.
+        required: false
+        type: string
+        default: "not-in-use" # Having a default value makes the workflow simpler to develop
     secrets:
       pat_token_repo_workflow:
         description: PAT token with `repo` and `workflow` scopes to re-trigger workflows if rendered diagrams are pushed
@@ -95,6 +102,7 @@ jobs:
           files: |
             **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.dsl
             **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
+            **/docs/diagrams/c4-model/${{ inputs.included_model_filename }}.dsl
 
       - name: Write out any changes to Structurizr files - based on `diagrams-changed`-step
         shell: bash
