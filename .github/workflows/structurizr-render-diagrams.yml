@@ -54,9 +54,7 @@ jobs:
     env:
       # Location of Structurizr workspace files (*.dsl, *.json)
       DIAGRAMS_FOLDER: ${{ github.workspace }}/docs/diagrams/c4-model
-      # The DSL filename with extension
-      DSL_FILENAME: ${{ inputs.structurizr_workspace_filename }}.dsl
-      # Url for Structurizr Lite running in docker
+      # Url for diagrams page in Structurizr Lite, when running in docker
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
     services:
       # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
@@ -89,23 +87,22 @@ jobs:
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
-      # TODO: Fails over and over, disable for now
-      # - name: Determine if the DSL file has changed since last pushed commit to the remote branch
-      #   id: diagrams-changed
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     since_last_remote_commit: true
-      #     files: |
-      #       ${{ env.DIAGRAMS_FOLDER }}/${{ env.DSL_FILENAME }}
+      - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
+        id: diagrams-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          since_last_remote_commit: true
+          files: |
+            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.{dsl,json}
 
-      # - name: Write out any changes to the DSL file - based on `diagrams-changed`-step
-      #   shell: bash
-      #   run: |
-      #     echo "DSL file has changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
-      #     echo "List all the files that have changed (hopefully just one): ${{ steps.diagrams-changed.outputs.all_changed_files }}"
+      - name: Write out any changes to Structurizr files - based on `diagrams-changed`-step
+        shell: bash
+        run: |
+          echo "Structurizr files has changed: ${{ steps.diagrams-changed.outputs.any_changed }}"
+          echo "List changed files: ${{ steps.diagrams-changed.outputs.all_changed_files }}"
 
       - name: Render diagrams as PNG images
-        #if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         shell: bash
         run: |
           cd "${{ env.DIAGRAMS_FOLDER }}"
@@ -119,7 +116,7 @@ jobs:
           mv -f *.png "$foldername/"
 
       - name: Commit PNG images
-        #if: steps.diagrams-changed.outputs.any_changed == 'true'
+        if: steps.diagrams-changed.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto generated diagrams
