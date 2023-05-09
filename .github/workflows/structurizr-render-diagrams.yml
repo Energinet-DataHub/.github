@@ -93,8 +93,7 @@ jobs:
         with:
           since_last_remote_commit: true
           files: |
-            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.dsl
-            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
+            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.{dsl,json}
 
       - name: Write out any changes to Structurizr files - based on `diagrams-changed`-step
         shell: bash
