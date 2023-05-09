@@ -53,7 +53,7 @@ on:
           Specify the filename (without extension) of the included C4 model DSL file.
         required: false
         type: string
-        default: "not-in-use" # Having a default value makes the workflow simpler to develop
+        default: not-in-use # Having a default value makes the workflow simpler to develop
     secrets:
       pat_token_repo_workflow:
         description: PAT token with `repo` and `workflow` scopes to re-trigger workflows if rendered diagrams are pushed
