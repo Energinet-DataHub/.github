@@ -15,13 +15,17 @@
 name: Render C4 diagrams using Structurizr Lite
 
 # DESCRIPTION:
-# This workflow is used to render C4 model views in a SINGLE Structurizr DSL file using
+# This workflow is used to render C4 model views in a primary Structurizr DSL file using
 # Structurizr Lite (https://structurizr.com/help/lite). Views are rendered as PNG images.
 #
 # Structurizr Lite loads the DSL information and matching layout information from a pair
 # of files named according to the "Structurizr workspace filename":
 #  - '<structurizr_workspace_filename>.dsl'
 #  - '<structurizr_workspace_filename>.json'
+#
+# The workflow support if the primary DSL file includes another C4 model DSL file. In this
+# case the input parameter 'included_model_filename' should be used to specify the filename
+# of this DSL file.
 #
 # The workflow must be called using 'secrets: inherit' to get access PAT token with `repo`
 # and `workflow` scopes. The accessible secret must be named pat_token_repo_workflow
