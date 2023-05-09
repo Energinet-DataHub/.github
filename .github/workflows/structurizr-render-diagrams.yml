@@ -91,7 +91,7 @@ jobs:
         id: diagrams-changed
         uses: tj-actions/changed-files@v35
         with:
-          since_last_remote_commit: true
+          #since_last_remote_commit: true
           files: |
             **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.dsl
             **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
