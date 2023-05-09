@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Render C4 diagrams using Structurizr
+name: Render C4 diagrams using Structurizr Lite
 
 # DESCRIPTION:
-# This workflow is used to render C4 model views in a SINGLE Structurizr DSL file given by the
-# Structurizr workspace filename (see https://structurizr.com/share/76352/documentation#workspace-filename).
+# This workflow is used to render C4 model views in a SINGLE Structurizr DSL file using
+# Structurizr Lite (https://structurizr.com/help/lite). Views are rendered as PNG images.
 #
-# Views are rendered to PNG images using Structurizr Lite.
+# Structurizr Lite loads the DSL information and matching layout information from a pair
+# of files named according to the "Structurizr workspace filename":
+#  - '<structurizr_workspace_filename>.dsl'
+#  - '<structurizr_workspace_filename>.json'
 #
 # The workflow must be called using 'secrets: inherit' to get access PAT token with `repo`
 # and `workflow` scopes. The accessible secret must be named pat_token_repo_workflow
@@ -37,7 +40,7 @@ on:
   workflow_call:
     inputs:
       structurizr_workspace_filename:
-        description: Structurizr workspace filename (no file extension), see https://structurizr.com/share/76352/documentation#workspace-filename.
+        description: Structurizr workspace filename, see https://structurizr.com/share/76352/documentation#workspace-filename.
         required: true
         type: string
     secrets:
