@@ -27,11 +27,7 @@ name: Render C4 diagrams using Structurizr Lite
 # case the input parameter 'included_model_filename' should be used to specify the filename
 # of this DSL file.
 #
-# The workflow must be called using 'secrets: inherit' to get access PAT token with `repo`
-# and `workflow` scopes. The accessible secret must be named pat_token_repo_workflow
-# See: https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
-#
-# The rendered diagrams are committed to the feature branch using the `git-auto-commit-action`-action.
+# The rendered diagrams are committed to the feature branch using the `stefanzweifel/git-auto-commit-action`-action.
 # To avoid an infinite loop of rendered diagrams being committed to the feature branch, the
 # `tj-actions/changed-files`-action is used to determine if the DSL file is changed by the recent
 # push to the remote feature branch.
@@ -55,8 +51,10 @@ on:
         type: string
         default: not-in-use # Having a default value makes the workflow simpler to develop
     secrets:
-      pat_token_repo_workflow:
-        description: PAT token with `repo` and `workflow` scopes to re-trigger workflows if rendered diagrams are pushed
+      pat_token_retrigger_workflow:
+        description: |
+          Used to be able to re-trigger workflows if rendered diagrams are pushed.
+          It must be a PAT token with `repo` and `workflow` scopes.
         required: true
 
 jobs:
@@ -85,7 +83,7 @@ jobs:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
-          token: ${{ secrets.pat_token_repo_workflow }}
+          token: ${{ secrets.pat_token_retrigger_workflow }}
 
       - name: Setup node
         uses: actions/setup-node@v3
