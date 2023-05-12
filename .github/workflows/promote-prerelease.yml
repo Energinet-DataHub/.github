@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "release_name=${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >>$GITHUB_OUTPUT
 
-      - name: Publish release
+      - name: Publish ${{ steps.set_release_name.outputs.release_name }}" as latest release
         shell: pwsh
         run: |
           gh release create ${{ steps.set_release_name.outputs.release_name }} --title ${{ steps.set_release_name.outputs.release_name }} --notes "RELEASE_NAME=${{ steps.set_release_name.outputs.release_name }}" --draft false --prerelease false
