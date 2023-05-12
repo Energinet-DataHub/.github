@@ -50,4 +50,4 @@ jobs:
           gh release delete ${{ inputs.release_name_prefix }}_latest --yes
 
           Write-Host 'Creating new ${{ inputs.release_name_prefix }}_latest'
-          gh release create ${{ inputs.release_name_prefix }}_latest --title ${{ steps.set_release_name.outputs.release_name }} --notes "RELEASE_NAME=${{ steps.set_release_name.outputs.release_name }}" --latest
+          gh release create ${{ inputs.release_name_prefix }}_latest --title ${{ inputs.release_name_prefix }}_latest --notes "RELEASE_NAME=${{ steps.set_release_name.outputs.release_name }}" --latest
