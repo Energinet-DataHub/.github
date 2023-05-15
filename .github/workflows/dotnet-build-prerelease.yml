@@ -134,7 +134,7 @@ jobs:
           filename: ${{ env.RELEASE_ZIP_FILENAME }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
-      - name: Create prelease
+      - name: Create pre-release
         if: github.event_name == 'pull_request'
         uses: marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303
         with:

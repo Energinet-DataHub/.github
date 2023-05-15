@@ -25,6 +25,9 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v10
         id: find_pull_request
@@ -35,17 +38,16 @@ jobs:
         run: |
           echo "release_name=${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >>$GITHUB_OUTPUT
 
-      - name: Publish release
-        shell: bash
+      - name: Promote ${{ steps.set_release_name.outputs.release_name }} and update ${{ inputs.release_name_prefix }}_latest
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          release_tag_response=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.set_release_name.outputs.release_name }})
-          release_id=$(echo $release_tag_response | jq '.id')
-          publish_url="https://api.github.com/repos/${{ github.repository }}/releases/${release_id}"
-          publish_response=$(curl -X PATCH -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $publish_url -d '{"prerelease":"false","draft":"false","tag_name":"'${{ steps.set_release_name.outputs.release_name }}'"}')
+          Write-Host 'Promoting ${{ steps.set_release_name.outputs.release_name }} from pre-release to release'
+          gh release edit ${{ steps.set_release_name.outputs.release_name }} --prerelease=false
 
-      - name: Create _latest release
-        uses: Energinet-DataHub/.github/.github/actions/create-latest-release@v10
-        with:
-          repo_token: ${{ github.token }}
-          release_name: ${{ steps.set_release_name.outputs.release_name }}
-          release_name_prefix: ${{ inputs.release_name_prefix }}
+          Write-Host 'Deleting ${{ inputs.release_name_prefix }}_latest if exists'
+          gh release delete ${{ inputs.release_name_prefix }}_latest --yes
+
+          Write-Host 'Creating new ${{ inputs.release_name_prefix }}_latest'
+          gh release create ${{ inputs.release_name_prefix }}_latest --title ${{ inputs.release_name_prefix }}_latest --notes "RELEASE_NAME=${{ steps.set_release_name.outputs.release_name }}" --latest

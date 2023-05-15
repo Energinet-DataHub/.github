@@ -59,7 +59,7 @@ runs:
         export PATCH=${{ inputs.patch}}
         export VERSION_NUMBER="v${MAJOR}.${MINOR}.${PATCH}"
         echo $VERSION_NUMBER
-        echo "::set-output name=version_number::$VERSION_NUMBER"
+        echo "name=version_number" >> $GITHUB_OUTPUT
 
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
