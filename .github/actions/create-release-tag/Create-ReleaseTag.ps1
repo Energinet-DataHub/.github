@@ -14,7 +14,7 @@
 
 <#
     .SYNOPSIS
-    Validte and Updates Release Tags
+    Validate and Updates Release Tags
 
     .DESCRIPTION
     The function validates that the checked in version isn't a predecenting or identical version of targetted branch (eg. main)
@@ -208,5 +208,3 @@ function Update-MajorVersion {
     Write-Host "Creating $Version"
     gh release create $Version --generate-notes --latest --title $Version --target $GithubBranch -R $GitHubRepository
 }
-
-#Export-ModuleMember Get-GithubReleases, Compare-Versions, Find-ConflictingVersions, Update-MajorVersion, Create-ReleaseTag

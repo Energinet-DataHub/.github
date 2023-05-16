@@ -14,7 +14,7 @@
 
 Describe "CreateReleaseTag" {
     BeforeAll {
-        . $PSScriptRoot/CreateReleaseTag.ps1
+        . $PSScriptRoot/Create-ReleaseTag.ps1
 
         $env:GH_TOKEN = "mock"
 
