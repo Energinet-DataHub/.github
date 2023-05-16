@@ -45,7 +45,7 @@ runs:
         $targetBranch = "${{ inputs.target_branch }}"
         $eventName = "${{ github.event_name }}"
 
-        . CreateReleaseTag.psm1
+        . CreateReleaseTag.ps1
 
         Create-ReleaseTag -MajorVersion $major `
         -MinorVersion $minor `
