@@ -43,7 +43,7 @@ runs:
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
-        $eventName = ${{ github.event_name }}
+        $eventName = "${{ github.event_name }}"
 
         Import-Module CreateReleaseTag.psm1 -Force
 
