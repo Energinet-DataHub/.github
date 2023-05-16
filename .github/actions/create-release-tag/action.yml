@@ -45,7 +45,7 @@ runs:
         $targetBranch = "${{ inputs.target_branch }}"
         $eventName = "${{ github.event_name }}"
 
-        Import-Module CreateReleaseTag.psm1 -Force
+        . CreateReleaseTag.psm1
 
         Create-ReleaseTag -MajorVersion $major `
         -MinorVersion $minor `
