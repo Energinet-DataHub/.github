@@ -79,7 +79,7 @@ Describe "CreateReleaseTag" {
     }
 
     Context "When merging a new version" {
-        It "Throws an exception when later verison exists" {
+        It "Throws an exception when later version exists" {
 
             { Create-ReleaseTag -MajorVersion "11" `
                     -MinorVersion "1" `
