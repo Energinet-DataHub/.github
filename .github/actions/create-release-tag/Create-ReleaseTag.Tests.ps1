@@ -45,14 +45,14 @@ Describe "CreateReleaseTag" {
             Compare-Versions "1" "1" | Should -Be 0
             Compare-Versions "10" "10" | Should -Be 0
             Compare-Versions "10.0" "10" | Should -Be 0
-            Compare-Versions "10" "10.0.0.0" | Should -Be 0
+            Compare-Versions "10" "10.0.0" | Should -Be 0
             Compare-Versions "3.4.5" "3.4.5" | Should -Be 0
         }
 
         It "Returns -1 when version is smaller" {
             Compare-Versions "1" "2" | Should -Be -1
             Compare-Versions "1.2.3" "1.2.4" | Should -Be -1
-            Compare-Versions "1.2.3" "1.2.3.1" | Should -Be -1
+            Compare-Versions "1" "1.2.3" | Should -Be -1
             Compare-Versions "1.2" "1.2.4" | Should -Be -1
         }
 
