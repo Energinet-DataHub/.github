@@ -25,7 +25,7 @@ inputs:
     description: Patch version
     required: true
   repository_path:
-    description: Path to repository, i.e. Energinet-DataHub\geh-terraform-modules
+    description: Path to repository, i.e. Energinet-DataHub/geh-terraform-modules
     required: true
   target_branch:
     description: "Branch on which tags will be created. Default: main"
@@ -43,42 +43,13 @@ runs:
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
+        $eventName = ${{ github.event_name }}
 
-        Write-Host "Github event name is:" ${{ github.event_name }}
-        $isPullRequest = ('${{ github.event_name }}' -eq 'pull_request')
-        Write-Host "Is PR: $isPullRequest"
+        Import-Module CreateReleaseTag.psm1 -Force
 
-        if ($env:GH_TOKEN -eq '') {
-          throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
-        }
-
-        $semver = "$major.$minor.$patch"
-        Write-Host "New version tag: $semver"
-        Write-Host "Major version tag is: v$major"
-
-        $currentReleases = gh release list -L 10000 -R $repo | ConvertFrom-Csv -Delimiter "`t" -Header @('title','type','tagname','published')
-
-        foreach($release in $currentReleases)
-        {
-            if ($release.title -eq $semver) {
-                throw "Error: Cannot create release $semver in $repo as it already exists !"
-            }
-        }
-
-        Write-Host 'Tag does not exist, all clear'
-
-        if (!$isPullRequest) {
-
-            Write-Host "Deleting major version tag v$major"
-            gh release delete "v$major" -y --cleanup-tag  -R $repo
-
-            Write-Host "Creating new major version tag v$major"
-            gh release create "v$major" --title "v$major" --notes "Latest release"  --target $targetBranch -R $repo
-
-            Write-Host "Creating $semver"
-            gh release create $semver --generate-notes --latest --title $semver --target $targetBranch -R $repo
-        } else {
-          Write-Host 'This was a dry-run, no changes have been made'
-        }
-
-        Write-Host "All done"
+        Create-ReleaseTag -MajorVersion $major `
+        -MinorVersion $minor `
+        -PatchVersion $patch `
+        -GithubRepository $repo `
+        -GithubBranch $targetBranch `
+        -GithubEvent $eventName
