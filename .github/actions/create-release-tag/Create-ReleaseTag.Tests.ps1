@@ -17,7 +17,7 @@ Describe "CreateReleaseTag" {
         . $PSScriptRoot/Create-ReleaseTag.ps1
 
         $env:GH_TOKEN = "mock"
-
+        Mock gh { }
         Mock Get-GithubReleases {
             return @"
                 "title","type","tagname","published"
@@ -36,8 +36,6 @@ Describe "CreateReleaseTag" {
                 "10.0.0","","10.0.0","2023-01-18T07:38:37Z"
 "@ | ConvertFrom-Csv
         }
-
-        Mock Update-MajorVersion { return "" }
     }
 
     Context "When two version numbers are compared with Compare-Versions" {
@@ -77,6 +75,26 @@ Describe "CreateReleaseTag" {
             (Find-ConflictingVersions "11" $releases).Count | Should -Be 6
         }
     }
+    Context "When updating major version" {
+        It "Calls gh with correct version and Completes successfully" {
+            Update-MajorVersion -Version "1" -GitHubRepository "mock" -GitHubBranch "mock" | `
+                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v1' -or $args[2] -eq '1') }
+
+            Update-MajorVersion -Version "2.0.0" -GitHubRepository "mock" -GitHubBranch "mock" | `
+                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v2' -or $args[2] -eq '2.0.0') }
+
+            Update-MajorVersion -Version "3.2.1" -GitHubRepository "mock" -GitHubBranch "mock" | `
+                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v3' -or $args[2] -eq '3.2.1') }
+
+        }
+
+        It "Throws an exception if no version or invalid version is provided" {
+            $EmptyVersion = ""
+            { Update-MajorVersion -Version $EmptyVersion -GitHubRepository "mock" -GitHubBranch "mock" } | Should -Throw
+            $InvalidVersion = "abc"
+            { Update-MajorVersion -Version $InvalidVersion -GitHubRepository "mock" -GitHubBranch "mock" } | Should -Throw
+        }
+    }
 
     Context "When merging a new version" {
         It "Throws an exception when later version exists" {
@@ -87,6 +105,21 @@ Describe "CreateReleaseTag" {
                     -GitHubRepository "mock" `
                     -GitHubBranch "mock" `
                     -GitHubEvent "mock" } | Should -Throw
+        }
+        It "Completes successfully when version is higher" {
+            Create-ReleaseTag -MajorVersion "11" `
+                -MinorVersion "2" `
+                -PatchVersion "1" `
+                -GitHubRepository "mock" `
+                -GitHubBranch "mock" `
+                -GitHubEvent "mock"
+
+            Create-ReleaseTag -MajorVersion "12" `
+                -MinorVersion "0" `
+                -PatchVersion "0" `
+                -GitHubRepository "mock" `
+                -GitHubBranch "mock" `
+                -GitHubEvent "mock"
         }
     }
 }
