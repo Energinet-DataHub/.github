@@ -31,7 +31,7 @@ function Find-RelatedPRNumber {
 
         [Parameter(Mandatory = $true)]
         [string]
-        $Repository,
+        $Repository
     )
 
     # Set Headers
