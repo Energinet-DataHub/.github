@@ -3,6 +3,7 @@ name: Create release tag
 on:
   workflow_call: {}
 
+# FORCE BUILD
 jobs:
   create_release:
     runs-on: ubuntu-latest
