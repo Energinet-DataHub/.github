@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Describe "CreateReleaseTag" {
+Describe "Create-ReleaseTag" {
     BeforeAll {
         . $PSScriptRoot/Create-ReleaseTag.ps1
 
@@ -76,7 +76,7 @@ Describe "CreateReleaseTag" {
         }
     }
     Context "When updating major version" {
-        It "Calls gh with correct version and Completes successfully" {
+        It "Calls gh with correct version and completes successfully" {
             Update-MajorVersion -Version "1" -GitHubRepository "mock" -GitHubBranch "mock" | `
                 Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v1' -or $args[2] -eq '1') }
 
