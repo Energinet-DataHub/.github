@@ -26,7 +26,7 @@ inputs:
 outputs:
   pull_request_number:
     description: The pull request number if the pull request was found
-    value: "${{ steps.find_pull_request_number.outputs.pull_request_number }}"
+    value: ${{ steps.find_pull_request_number.outputs.pull_request_number }}
 
 runs:
   using: composite
@@ -43,4 +43,4 @@ runs:
 
         Write-Host "lol: $prNumber"
 
-        echo "pull_request_number=$prNumber" >> $GITHUB_OUTPUT
+        echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
