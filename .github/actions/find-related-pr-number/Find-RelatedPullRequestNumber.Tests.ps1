@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Describe "Find-RelatedPullRequestNumber" {
+Describe "FindRelatedPullRequestNumber" {
     BeforeAll {
         . $PSScriptRoot/Find-RelatedPullRequestNumber.ps1
 
@@ -28,7 +28,7 @@ Describe "Find-RelatedPullRequestNumber" {
                 },
                 [PSCustomObject]@{
                     number = 456
-                },
+                }
             )
         } -ModuleName 'Microsoft.PowerShell.Utility'
     }
