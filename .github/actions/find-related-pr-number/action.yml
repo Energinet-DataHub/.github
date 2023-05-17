@@ -23,15 +23,22 @@ inputs:
     required: false
     description: SHA used to get the related pull request for. Defaults to current pull request SHA or the commit SHA.
     default: ${{ github.event.pull_request.head.sha || github.sha }}
+outputs:
+  pull_request_number:
+    description: The pull request number if the pull request was found
+    value: ${{ steps.find_pr_number.outputs.pr_number }}
 
 runs:
   using: composite
   steps:
     - name: Find related PR number
+      id: find_pr_number
       shell: pwsh
       run: |
         . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
-        Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
+        $prNumber = Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
         -GithubRepository "${{ github.repository }}" `
         -GithubToken "${{ inputs.github_token }}" `
+
+        echo "pr_number=$prNumber" >> $GITHUB_OUTPUT
