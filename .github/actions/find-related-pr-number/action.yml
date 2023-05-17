@@ -41,7 +41,4 @@ runs:
         -GithubRepository "${{ github.repository }}" `
         -GithubToken "${{ inputs.github_token }}"
 
-        Write-Host "lol: $prNumber"
-
         echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
-        echo "test"
