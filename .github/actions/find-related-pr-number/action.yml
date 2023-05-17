@@ -44,3 +44,4 @@ runs:
         Write-Host "lol: $prNumber"
 
         echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
+        echo "test"
