@@ -23,10 +23,15 @@ inputs:
     required: false
     description: SHA used to get the related pull request for. Defaults to current pull request SHA or the commit SHA.
     default: ${{ github.event.pull_request.head.sha || github.sha }}
-outputs:
-  pull_request_number:
-    description: The pull request number if the pull request was found
 
 runs:
-  using: node16
-  main: dist/index.js
+  using: composite
+  steps:
+    - name: Find related PR number
+      shell: pwsh
+      run: |
+        . ${{ github.action_path }}/Find-Related-PR-Number.ps1
+
+        Find-Related-PR-Number -Sha "${{ inputs.sha }}" `
+        -GithubRepository "${{ github.repository }}" `
+        -GithubToken "${{ inputs.github_token }}" `
