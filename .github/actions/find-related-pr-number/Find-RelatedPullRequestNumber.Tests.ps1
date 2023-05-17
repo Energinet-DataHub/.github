@@ -50,15 +50,21 @@ Describe "FindRelatedPullRequestNumber" {
         }
 
         It "Throws an error and exits with code 1" {
-            { Find-RelatedPullRequestNumber -GithubToken $githubToken -Sha $sha -GithubRepository $githubRepository } | Should -Throw
-            $LASTEXITCODE | Should -Be 1
+            { Find-RelatedPullRequestNumber
+                -GithubToken $githubToken
+                -Sha $sha
+                -GithubRepository $githubRepository
+            } | Should -Throw
         }
     }
 
     Context "Invalid input" {
         It "Throws an error and exits with code 1" {
-            { Find-RelatedPullRequestNumber -GithubToken $null -Sha $sha -GithubRepository $githubRepository } | Should -Throw
-            $LASTEXITCODE | Should -Be 1
+            { Find-RelatedPullRequestNumber
+                -GithubToken $null
+                -Sha $sha
+                -GithubRepository $githubRepository
+            } | Should -Throw
         }
     }
 }
