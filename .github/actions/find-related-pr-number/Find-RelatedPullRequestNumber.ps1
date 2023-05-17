@@ -44,6 +44,7 @@ function Find-RelatedPullRequestNumber {
     try {
         # Get Pull Requests
         $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
+        Write-Host "URL: $prUrl"
         $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
 
         Write-Host "Output: $prData"
