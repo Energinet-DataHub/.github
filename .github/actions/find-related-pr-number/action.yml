@@ -39,6 +39,8 @@ runs:
 
         $prNumber = Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
         -GithubRepository "${{ github.repository }}" `
-        -GithubToken "${{ inputs.github_token }}" `
+        -GithubToken "${{ inputs.github_token }}"
+
+        Write-Host "lol: $prNumber"
 
         echo "pr_number=$prNumber" >> $GITHUB_OUTPUT
