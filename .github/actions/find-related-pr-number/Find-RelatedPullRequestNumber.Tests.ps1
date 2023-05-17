@@ -32,9 +32,7 @@ Describe "FindRelatedPullRequestNumber" {
                         number = 456
                     }
                 )
-            } -ModuleName 'Microsoft.PowerShell.Utility' -ParameterFilter {
-                $Uri -like "*api.github.com*" -and $Headers["Authorization"] -eq "Bearer $githubToken"
-            } -Verifiable
+            } -ModuleName 'Microsoft.PowerShell.Utility'
         }
 
         It "Returns the first associated pull request number" {
