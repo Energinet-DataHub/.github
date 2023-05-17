@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Describe "FindRelatedPullRequestNumber" {
+Describe "Find-RelatedPullRequestNumber" {
     BeforeAll {
         . $PSScriptRoot/Find-RelatedPullRequestNumber.ps1
 
@@ -21,7 +21,6 @@ Describe "FindRelatedPullRequestNumber" {
         $sha = "COMMIT_SHA"
         $githubRepository = "OWNER/REPO_NAME"
 
-        # Mock the Invoke-RestMethod cmdlet
         Mock Invoke-RestMethod {
             return @(
                 [PSCustomObject]@{
@@ -43,7 +42,7 @@ Describe "FindRelatedPullRequestNumber" {
 
     Context "No pull requests found" {
         BeforeAll {
-            # Mock the Invoke-RestMethod cmdlet to return an empty response
+            # Return an empty response
             Mock Invoke-RestMethod {
                 return @()
             } -ModuleName 'Microsoft.PowerShell.Utility'
