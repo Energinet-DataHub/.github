@@ -49,8 +49,7 @@ function Find-RelatedPullRequestNumber {
         # Extract Pull Request Numbers
         $prNumbers = $prData.number
 
-        # Output Pull Request Numbers
-        Write-Host "Output: $prNumbers"
+        return $prNumbers;
     }
     catch {
         Write-Error $_.Exception.Message
