@@ -16,24 +16,25 @@ Describe "FindRelatedPullRequestNumber" {
     BeforeAll {
         . $PSScriptRoot/Find-RelatedPullRequestNumber.ps1
 
-        # Define test inputs
         $githubToken = "GITHUB_TOKEN"
         $sha = "COMMIT_SHA"
         $githubRepository = "OWNER/REPO_NAME"
-
-        Mock Invoke-RestMethod {
-            return @(
-                [PSCustomObject]@{
-                    number = 123
-                },
-                [PSCustomObject]@{
-                    number = 456
-                }
-            )
-        } -ModuleName 'Microsoft.PowerShell.Utility'
     }
 
     Context "Valid input" {
+        BeforeAll {
+            Mock Invoke-RestMethod {
+                return @(
+                    [PSCustomObject]@{
+                        number = 123
+                    },
+                    [PSCustomObject]@{
+                        number = 456
+                    }
+                )
+            } -ModuleName 'Microsoft.PowerShell.Utility'
+        }
+
         It "Returns the first associated pull request number" {
             $result = Find-RelatedPullRequestNumber -GithubToken $githubToken -Sha $sha -GithubRepository $githubRepository
             $result | Should -Be 123
