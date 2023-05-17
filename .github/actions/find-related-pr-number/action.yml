@@ -30,7 +30,7 @@ runs:
     - name: Find related PR number
       shell: pwsh
       run: |
-        . ${{ github.action_path }}/Find-Related-PR-Number.ps1
+        . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
         Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
         -GithubRepository "${{ github.repository }}" `
