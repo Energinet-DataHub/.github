@@ -1,0 +1,19 @@
+name: CD Release
+
+on:
+  push:
+    branches:
+      - find-related-pr-number-to-pwsh
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout local repo
+        uses: actions/checkout@v3
+
+      - name: Run pwsh
+        uses: ./.github/actions/find-related-pr-number
+        with:
+          github_token: ${{ github.token }}
+          sha: ${{ github.sha }}
