@@ -185,6 +185,7 @@ function Update-MajorVersion {
     param(
         # Version number
         [Parameter(Mandatory = $true)]
+        [ValidatePattern("^(0|[1-9]\d*)((\.(0|[1-9]\d*)\.(0|[1-9]\d*))?)?$")]
         [string]
         $Version,
 
@@ -198,7 +199,8 @@ function Update-MajorVersion {
         [string]
         $GitHubBranch
     )
-    $MajorVersion = $Version -Split "." | Select-Object -First
+    $MajorVersion = $Version -Split "\." | Select-Object -First 1
+
     Write-Host "Deleting major version tag v$MajorVersion"
     gh release delete "v$MajorVersion" -y --cleanup-tag -R $GitHubRepository
 
