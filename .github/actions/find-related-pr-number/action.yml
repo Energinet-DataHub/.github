@@ -32,6 +32,6 @@ runs:
       run: |
         . ${{ github.action_path }}/Find-Related-PR-Number.ps1
 
-        Find-Related-PR-Number -Sha "${{ inputs.sha }}" `
+        Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
         -GithubRepository "${{ github.repository }}" `
         -GithubToken "${{ inputs.github_token }}" `

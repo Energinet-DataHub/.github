@@ -19,7 +19,7 @@
     .DESCRIPTION
     This function uses the GitHub API to find the open pull request numbers for a given base branch.
 #>
-function Find-RelatedPRNumber {
+function Find-RelatedPullRequestNumber {
     param (
         [Parameter(Mandatory = $true)]
         [string]
