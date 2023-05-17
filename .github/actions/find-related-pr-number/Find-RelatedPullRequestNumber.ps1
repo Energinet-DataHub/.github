@@ -49,6 +49,12 @@ function Find-RelatedPullRequestNumber {
         # Extract Pull Request Numbers
         $prNumbers = $prData.number
 
+        if ($prNumbers) {
+            return $prNumbers[0]
+        } else {
+            throw "No pull requests found."
+        }
+
         return $prNumbers;
     }
     catch {
