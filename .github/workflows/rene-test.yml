@@ -19,6 +19,6 @@ jobs:
           github_token: ${{ github.token }}
           sha: ${{ github.sha }}
 
-      - name: Run pwsh
+      - name: Echo pwsh
         run: |
           echo ${{ steps.test.outputs.pull_request_number }}
