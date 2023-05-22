@@ -21,15 +21,15 @@
 #>
 function Find-RelatedPullRequestNumber {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GithubToken,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $Sha,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GithubRepository
     )
@@ -41,24 +41,19 @@ function Find-RelatedPullRequestNumber {
         "User-Agent"    = "powershell/find-related-pr-number"
     }
 
-    try {
-        # Get Pull Requests
-        $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
-        $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
+    # Get Pull Requests
+    $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
+    $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body | ConvertTo-Json
 
-        # Extract Pull Request Numbers
-        $prNumbers = $prData.number
+    # Extract Pull Request Numbers
+    $prNumbers = $prData.number
 
-        if ($prNumbers) {
-            return $prNumbers[0]
-        } else {
-            throw "No pull requests found."
-        }
-
-        return $prNumbers;
+    if ($prNumbers) {
+        return $prNumbers[0]
     }
-    catch {
-        Write-Error $_.Exception.Message
-        exit 1
+    else {
+        throw "No pull requests found for sha: $Sha."
     }
+
+    return $prNumbers
 }
