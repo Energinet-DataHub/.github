@@ -53,3 +53,4 @@ runs:
         -GithubRepository $repo `
         -GithubBranch $targetBranch `
         -GithubEvent $eventName
+        -ReferencePatterns @("\s*uses:\s*mockOrg/mockRepo(.*)@v(?<version>.*)")

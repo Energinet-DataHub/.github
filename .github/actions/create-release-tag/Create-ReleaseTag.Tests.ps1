@@ -36,6 +36,20 @@ Describe "Create-ReleaseTag" {
                 "10.0.0","","10.0.0","2023-01-18T07:38:37Z"
 "@ | ConvertFrom-Csv
         }
+
+        Mock Search-GithubForRepositoryReferences {
+            $mockData = @{
+                total_count = "4"
+                Items       = @(
+                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "uses: mockOrg/mockRepo/some/path/some-action.yml@v10" } },
+                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "uses: mockOrg/mockRepo/some/path/some-action.yml@v11" } },
+                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v11" } },
+                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v10" } }
+                )
+            }
+
+            return $mockData | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+        }
     }
 
     Context "When two version numbers are compared with Compare-Versions" {
@@ -120,6 +134,19 @@ Describe "Create-ReleaseTag" {
                 -GitHubRepository "mock" `
                 -GitHubBranch "mock" `
                 -GitHubEvent "mock"
+        }
+    }
+
+    Context "Creating a new Major Release" {
+
+        It "Completes successfully if no deprecated versions are found" {
+            Assert-MajorVersionDeprecations -MajorVersion "11" -Repository "mockOrg/mockRepo" -Patterns @("\s*uses:\s*mockOrg/mockRepo(.*)@v(?<version>.*)")
+            Assert-MajorVersionDeprecations -MajorVersion "11" -Repository "AnotherMockOrg/AnotherMockRepo" -Patterns @("AnotherMockOrg/AnotherMockRepo//(.*?)ref=v(?<version>.*)")
+        }
+
+        It "Throws an error if references to deprecated versions are found" {
+            { Assert-MajorVersionDeprecations -MajorVersion "12" -Repository "mockOrg/mockRepo" -Patterns @("\s*uses:\s*mockOrg/mockRepo(.*)yml@v(?<version>.*)") } | Should -Throw
+            { Assert-MajorVersionDeprecations -MajorVersion "12" -Repository "AnotherMockOrg/AnotherMockRepo" -Patterns @("(.*)/AnotherMockOrg/AnotherMockRepo//(.*)ref=v(?<version>.*)") } | Should -Throw
         }
     }
 }

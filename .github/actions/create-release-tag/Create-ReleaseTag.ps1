@@ -49,7 +49,12 @@ function Create-ReleaseTag {
         # The value of the GitHub event
         [Parameter(Mandatory = $true)]
         [string]
-        $GitHubEvent
+        $GitHubEvent,
+
+        # Regex Patterns used to identify references in other projects
+        [Parameter(Mandatory = $false)]
+        [string[]]
+        $ReferencePatterns = @()
     )
 
     Write-Host "Github event name is: $GitHubEvent"
@@ -63,13 +68,17 @@ function Create-ReleaseTag {
     }
 
     # Validate Version
+    if ($ReferencePatterns) {
+        # Check that other projects arent referencing older versions
+        Assert-MajorVersionDeprecations -MajorVersion $MajorVersion -Repository $GitHubRepository -Patterns $ReferencePatterns
+    }
     $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
     $existingVersions = $existingReleases.title.Trim("v")
     $conflicts = Find-ConflictingVersions $version $existingVersions
 
     if ($conflicts.Count) {
         $latest = $conflicts | Select-Object -First 1
-        throw "Error: Cannot create release $version in $GithubRepository because a later version exist. Latest release is: $latest"
+        throw "Error: Cannot create release $version in $GithubRepository because a later or identical version number exist. Latest release is: $latest"
     }
 
     Write-Host 'Validated version tag: $version'
@@ -210,3 +219,76 @@ function Update-MajorVersion {
     Write-Host "Creating $Version"
     gh release create $Version --generate-notes --latest --title $Version --target $GithubBranch -R $GitHubRepository
 }
+
+<#
+    .SYNOPSIS
+    Helper function to search for occurences github references
+
+    .DESCRIPTION
+    Compares two version numbers in dot-notation (eg. 1.0.3) and return (-1,1,0) if the first number is smaller, bigger og equivelant version
+#>
+function Search-GithubForRepositoryReferences {
+    param(
+        #The Sub-path in the repository for relevant files. By default only files in .github/ are relevant
+        [Parameter(Mandatory)]
+        [string]$Repository,
+
+        #Limit search to a specific github organization. By default this is always Energinet-DataHub
+        [Parameter(Mandatory)]
+        [string]$Organization
+    )
+    $result = gh api -H "Accept: application/vnd.github.text-match+json" `
+        -H "X-GitHub-Api-Version: 2022-11-28" `
+        "/search/code?q=org:$Organization $Organization/$Repository"
+
+    return $result | ConvertFrom-Json
+}
+
+function Assert-MajorVersionDeprecations {
+    param(
+        #Major Version
+        [Parameter(Mandatory = $true)]
+        [string]$MajorVersion,
+
+        #The Repository being referenced
+        [Parameter(Mandatory = $true)]
+        [string]$Repository,
+
+        #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
+        [Parameter(Mandatory = $true)]
+        [string[]]$Patterns
+    )
+
+    $Organization = $Repository -split "/" | Select-Object -First 1
+    $searchResults = Search-GithubForRepositoryReferences -Organization $Organization -Repository $Repository
+
+    if ($searchResults.total_count -eq 0) { return $true }
+
+
+    $SupportedVersion = $MajorVersion - 1
+
+    # Filter all search results and find lines referencing deprecated version tags
+    $deprecatedItems = @()
+    foreach ($item in $searchResults.Items) {
+        foreach ($pattern in $Patterns) {
+            foreach ($textMatch in $item.text_matches) {
+
+                $re_result = [regex]::Match($textMatch.fragment, $pattern)
+
+                if ($re_result.Success -and $re_result.Groups["version"].Value -lt $SupportedVersion) {
+                    $deprecatedItems += $item
+                }
+            }
+        }
+    }
+
+    if ($deprecatedItems.Count -gt 0) {
+        foreach ($deprecatedItem in $deprecatedItems) {
+            Write-Host "Major Version Deprecation in: " $deprecatedItem.repository.html_url
+            Write-Host "File: "$deprecatedItem.name
+            Write-Host "Matched text:" $deprecatedItem.text_matches.fragment
+        }
+        throw "Cannot Update Major Version to $MajorVersion. Found deprecated references. Need to update depending projects first."
+    }
+}
+
