@@ -63,9 +63,9 @@ function Create-ReleaseTag {
 
     $version = "$MajorVersion.$MinorVersion.$PatchVersion"
 
-    if ($null -eq $env:GH_TOKEN) {
-        throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
-    }
+    # if ($null -eq $env:GH_TOKEN) {
+    #     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
+    # }
 
     # Validate Version
     if ($ReferencePatterns) {
@@ -243,6 +243,31 @@ function Search-GithubForRepositoryReferences {
 
     return $result | ConvertFrom-Json
 }
+
+<#
+    .SYNOPSIS
+    Prints Github search items
+
+    .DESCRIPTION
+    Helper function to write items to output in readable format
+#>
+function Show-DeprecatedItems {
+    param(
+        #Collection of github search items to display
+        [Parameter(Mandatory)]
+        [object[]]$Items
+    )
+
+    Write-Host "--- Deprecated version references ---"
+    foreach ($item in $Items) {
+        Write-Host "---"
+        Write-Host "Link:" $item.html_url
+        Write-Host "Repository:" $item.repository.full_name
+        Write-Host "File:" $item.path
+        Write-Host "Context: `t"
+        Write-Host $item.text_matches.fragment
+    }
+}
 <#
     .SYNOPSIS
     Identifies and prevents further execution if deprecated major version are found
@@ -265,17 +290,20 @@ function Assert-MajorVersionDeprecations {
         [string[]]$Patterns,
 
         #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
+        # Note: This value needs to be kept in sync with the automated cleanup script in dh3-automation
+        # https://github.com/Energinet-DataHub/dh3-automation/blob/main/source/github-repository/Remove-DeprecatedReleases.ps1
         [Parameter(Mandatory = $false)]
-        [int]$NumberOfSupportedVersions = 2
+        [int]$MajorVersionsToKeep = 2
     )
 
     $Organization = $Repository -split "/" | Select-Object -First 1
     $searchResults = Search-GithubForRepositoryReferences -Organization $Organization -Repository $Repository
 
-    if ($searchResults.total_count -eq 0) { return $true }
+    if ($searchResults.total_count -eq 0) {
+        return $true
+    }
 
-
-    $UnsupportedVersion = $MajorVersion - $NumberOfSupportedVersions
+    $UnsupportedVersion = $MajorVersion - $MajorVersionsSupported
 
     # Filter all search results and find lines referencing deprecated version tags
     $deprecatedItems = @()
@@ -293,11 +321,7 @@ function Assert-MajorVersionDeprecations {
     }
 
     if ($deprecatedItems.Count -gt 0) {
-        foreach ($deprecatedItem in $deprecatedItems) {
-            Write-Host "Major Version Deprecation in: " $deprecatedItem.repository.html_url
-            Write-Host "File: "$deprecatedItem.name
-            Write-Host "Matched text:" $deprecatedItem.text_matches.fragment
-        }
+        Show-DeprecatedItems -Items $deprecatedItems
         throw "Cannot Update Major Version to $MajorVersion. Found deprecated references. Need to update depending projects first."
     }
 }
