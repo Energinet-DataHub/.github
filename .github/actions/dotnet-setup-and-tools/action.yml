@@ -19,7 +19,7 @@ inputs:
   dotnet_version:
     description: Install specified .NET Core SDK version
     required: false
-    default: 6.0.408
+    default: 7.0.203
   # Cosmos DB emulator
   use_cosmos_db_emulator:
     description: Install Cosmos DB emulator to support testing
@@ -31,12 +31,15 @@ inputs:
     required: false
     default: "false"
   node_version:
+    description: Install specified Node.js version
     required: false
     default: "16"
   azurite_version:
+    description: Install specified Azurite version
     required: false
     default: 3.22.0
   azure_functions_core_tools_version:
+    description: Install specified Azure Functions Core Tools version
     required: false
     default: 4.0.4670
   # SQL LocalDB 2019
