@@ -225,7 +225,7 @@ function Update-MajorVersion {
     Helper function to search for occurences github references
 
     .DESCRIPTION
-    Compares two version numbers in dot-notation (eg. 1.0.3) and return (-1,1,0) if the first number is smaller, bigger og equivelant version
+    Searches github code api for references to a specific repository.
 #>
 function Search-GithubForRepositoryReferences {
     param(
@@ -239,11 +239,17 @@ function Search-GithubForRepositoryReferences {
     )
     $result = gh api -H "Accept: application/vnd.github.text-match+json" `
         -H "X-GitHub-Api-Version: 2022-11-28" `
-        "/search/code?q=org:$Organization $Organization/$Repository"
+        "/search/code?q=org:$Organization%20$Repository"
 
     return $result | ConvertFrom-Json
 }
+<#
+    .SYNOPSIS
+    Identifies and prevents further execution if deprecated major version are found
 
+    .DESCRIPTION
+    Runs through a github code api search with specific patterns and throws an exception in case specific references to deprecated versions are found
+#>
 function Assert-MajorVersionDeprecations {
     param(
         #Major Version
