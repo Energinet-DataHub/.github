@@ -26,7 +26,19 @@ inputs:
 outputs:
   pull_request_number:
     description: The pull request number if the pull request was found
+    value: ${{ steps.find_pull_request_number.outputs.pull_request_number }}
 
 runs:
-  using: node16
-  main: dist/index.js
+  using: composite
+  steps:
+    - name: Find related PR number
+      id: find_pull_request_number
+      shell: pwsh
+      run: |
+        . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
+
+        $prNumber = Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
+        -GithubRepository "${{ github.repository }}" `
+        -GithubToken "${{ inputs.github_token }}"
+
+        echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
