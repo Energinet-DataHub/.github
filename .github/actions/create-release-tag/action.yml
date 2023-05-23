@@ -52,5 +52,5 @@ runs:
         -PatchVersion $patch `
         -GithubRepository $repo `
         -GithubBranch $targetBranch `
-        -GithubEvent $eventName
+        -GithubEvent $eventName `
         -ReferencePatterns @("\s*uses:\s*mockOrg/mockRepo(.*)@v(?<version>.*)")
