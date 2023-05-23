@@ -256,7 +256,11 @@ function Assert-MajorVersionDeprecations {
 
         #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
         [Parameter(Mandatory = $true)]
-        [string[]]$Patterns
+        [string[]]$Patterns,
+
+        #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
+        [Parameter(Mandatory = $false)]
+        [int]$NumberOfSupportedVersions = 2
     )
 
     $Organization = $Repository -split "/" | Select-Object -First 1
@@ -265,7 +269,7 @@ function Assert-MajorVersionDeprecations {
     if ($searchResults.total_count -eq 0) { return $true }
 
 
-    $SupportedVersion = $MajorVersion - 1
+    $UnsupportedVersion = $MajorVersion - $NumberOfSupportedVersions
 
     # Filter all search results and find lines referencing deprecated version tags
     $deprecatedItems = @()
@@ -275,7 +279,7 @@ function Assert-MajorVersionDeprecations {
 
                 $re_result = [regex]::Match($textMatch.fragment, $pattern)
 
-                if ($re_result.Success -and $re_result.Groups["version"].Value -lt $SupportedVersion) {
+                if ($re_result.Success -and [int]$re_result.Groups["version"].Value -le $UnsupportedVersion) {
                     $deprecatedItems += $item
                 }
             }

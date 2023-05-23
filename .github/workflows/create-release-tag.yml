@@ -14,7 +14,7 @@ jobs:
         with:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
-          major_version: 11
+          major_version: 12
           minor_version: 3
           patch_version: 2
           repository_path: Energinet-DataHub/.github
