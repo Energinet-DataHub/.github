@@ -264,7 +264,7 @@ function Show-DeprecatedItems {
         Write-Host "Link:" $item.html_url
         Write-Host "Repository:" $item.repository.full_name
         Write-Host "File:" $item.path
-        Write-Host "Context: `t"
+        Write-Host "Context:"
         Write-Host $item.text_matches.fragment
     }
 }
@@ -303,7 +303,7 @@ function Assert-MajorVersionDeprecations {
         return $true
     }
 
-    $UnsupportedVersion = $MajorVersion - $MajorVersionsSupported
+    $UnsupportedVersion = $MajorVersion - $MajorVersionsToKeep
 
     # Filter all search results and find lines referencing deprecated version tags
     $deprecatedItems = @()
