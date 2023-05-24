@@ -32,7 +32,7 @@ inputs:
     required: false
     default: main
   usage_patterns:
-    description: "Regex used to locate usage"
+    description: Regex used to locate usage
     required: false
 
 runs:
