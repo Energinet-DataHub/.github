@@ -81,7 +81,7 @@ function Create-ReleaseTag {
         throw "Error: Cannot create release $version in $GithubRepository because a later or identical version number exist. Latest release is: $latest"
     }
 
-    Write-Host 'Validated version tag: $version'
+    Write-Host "Validated version tag: $version"
 
     # Updating major version tag
     if (!$isPullRequest) {
