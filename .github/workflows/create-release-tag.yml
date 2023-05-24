@@ -18,5 +18,6 @@ jobs:
           minor_version: 5
           patch_version: 0
           repository_path: Energinet-DataHub/.github
+          usage_patterns: \s*uses:\s*Energinet-DataHub(.*)@v(?<version>.*)
         env:
           GH_TOKEN: ${{ github.token }}

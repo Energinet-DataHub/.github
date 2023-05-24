@@ -54,7 +54,7 @@ function Create-ReleaseTag {
         # Regex Patterns used to identify references in other projects
         [Parameter(Mandatory = $false)]
         [string[]]
-        $ReferencePatterns = @()
+        $UsagePatterns = @()
     )
 
     Write-Host "Github event name is: $GitHubEvent"
@@ -68,9 +68,9 @@ function Create-ReleaseTag {
     # }
 
     # Validate Version
-    if ($ReferencePatterns) {
+    if ($UsagePatterns) {
         # Check that other projects arent referencing older versions
-        Assert-MajorVersionDeprecations -MajorVersion $MajorVersion -Repository $GitHubRepository -Patterns $ReferencePatterns
+        Assert-MajorVersionDeprecations -MajorVersion $MajorVersion -Repository $GitHubRepository -Patterns $UsagePatterns
     }
     $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
     $existingVersions = $existingReleases.title.Trim("v")
