@@ -22,22 +22,22 @@
 function Create-ReleaseTag {
     param (
         # Major Version number
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $MajorVersion,
 
         # Major Version number
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $MinorVersion,
 
         # Patch Version number
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $PatchVersion,
 
         # The value of the GitHub repository variable.
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GitHubRepository,
 
@@ -47,7 +47,7 @@ function Create-ReleaseTag {
         $GitHubBranch,
 
         # The value of the GitHub event
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GitHubEvent,
 
@@ -63,9 +63,9 @@ function Create-ReleaseTag {
 
     $version = "$MajorVersion.$MinorVersion.$PatchVersion"
 
-    # if ($null -eq $env:GH_TOKEN) {
-    #     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
-    # }
+    if ($null -eq $env:GH_TOKEN) {
+        throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
+    }
 
     # Validate Version
     if ($UsagePatterns) {
@@ -104,12 +104,12 @@ function Create-ReleaseTag {
 function Compare-Versions {
     param(
         # Previous Version
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $Version,
 
         # New Version
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $Comparison
     )
@@ -153,7 +153,7 @@ function Compare-Versions {
 function Get-GithubReleases {
     param (
         # The value of the GitHub repository variable.
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GitHubRepository
     )
@@ -170,11 +170,11 @@ function Get-GithubReleases {
 function Find-ConflictingVersions {
     param(
         # Previous Version
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $Version,
         # Previous Version
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [Object[]]
         $ReleaseList
     )
@@ -193,13 +193,13 @@ function Find-ConflictingVersions {
 function Update-MajorVersion {
     param(
         # Version number
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [ValidatePattern("^(0|[1-9]\d*)((\.(0|[1-9]\d*)\.(0|[1-9]\d*))?)?$")]
         [string]
         $Version,
 
         # The value of the GitHub repository variable.
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]
         $GitHubRepository,
 
@@ -222,51 +222,47 @@ function Update-MajorVersion {
 
 <#
     .SYNOPSIS
-    Helper function to search for occurences github references
+    Helper function to perform a Github code search
 
     .DESCRIPTION
-    Searches github code api for references to a specific repository.
+    Searches github code api for references to a specific repository. Returns GithubCodeSearchResult
 #>
-function Search-GithubForRepositoryReferences {
+class GithubCodeSearchResult {
+    [string]$Url
+    [string]$Repository
+    [string]$Path
+    [string[]]$TextMatches
+
+    [string]ToString() {
+        return ("Link: {0}`nRepository: {1}`nPath: {2}`nContext:`n{3}" -f $this.Url, $this.Repository, $this.Path, ($this.TextMatches -join "`n-`n"))
+    }
+}
+function Invoke-GithubCodeSearch {
     param(
         #The Sub-path in the repository for relevant files. By default only files in .github/ are relevant
         [Parameter(Mandatory)]
-        [string]$Repository,
+        [string]$Search,
 
         #Limit search to a specific github organization. By default this is always Energinet-DataHub
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $false)]
         [string]$Organization
     )
-    $result = gh api -H "Accept: application/vnd.github.text-match+json" `
+    [string]$json = gh api -H "Accept: application/vnd.github.text-match+json" `
         -H "X-GitHub-Api-Version: 2022-11-28" `
-        "/search/code?q=org:$Organization%20$Repository"
+        "/search/code?q=org:$Organization%20$Search"
 
-    return $result | ConvertFrom-Json
-}
+    [GithubCodeSearchResult[]]$searchResults = @()
 
-<#
-    .SYNOPSIS
-    Prints Github search items
-
-    .DESCRIPTION
-    Helper function to write items to output in readable format
-#>
-function Show-DeprecatedItems {
-    param(
-        #Collection of github search items to display
-        [Parameter(Mandatory)]
-        [object[]]$Items
-    )
-
-    Write-Host "--- Deprecated version references ---"
-    foreach ($item in $Items) {
-        Write-Host "---"
-        Write-Host "Link:" $item.html_url
-        Write-Host "Repository:" $item.repository.full_name
-        Write-Host "File:" $item.path
-        Write-Host "Context:"
-        Write-Host $item.text_matches.fragment
+    foreach ($item in ($json | ConvertFrom-Json).Items) {
+        $result = [GithubCodeSearchResult]::new()
+        $result.Path = $item.path
+        $result.Repository = $item.repository.full_name
+        $result.Url = $item.html_url
+        $result.TextMatches = $item.text_matches.fragment
+        $searchResults += $result
     }
+
+    return $searchResults
 }
 <#
     .SYNOPSIS
@@ -278,15 +274,15 @@ function Show-DeprecatedItems {
 function Assert-MajorVersionDeprecations {
     param(
         #Major Version
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]$MajorVersion,
 
         #The Repository being referenced
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string]$Repository,
 
         #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [string[]]$Patterns,
 
         #Patterns to identify version references. Must contain a named (?<version>) group to identify version number.
@@ -296,32 +292,29 @@ function Assert-MajorVersionDeprecations {
         [int]$MajorVersionsToKeep = 2
     )
 
-    $Organization = $Repository -split "/" | Select-Object -First 1
-    $searchResults = Search-GithubForRepositoryReferences -Organization $Organization -Repository $Repository
+    [string]$Organization = $Repository -split "/" | Select-Object -First 1
+    [GithubCodeSearchResult[]] $searchResults = Invoke-GithubCodeSearch -Organization $Organization -Search $Repository
 
-    if ($searchResults.total_count -eq 0) {
+    if ($searchResults.Count -eq 0) {
         return $true
     }
 
-    $UnsupportedVersion = $MajorVersion - $MajorVersionsToKeep
+    [int]$UnsupportedVersion = $MajorVersion - $MajorVersionsToKeep
 
     # Filter all search results and find lines referencing deprecated version tags
-    $deprecatedItems = @()
-    foreach ($item in $searchResults.Items) {
-        foreach ($pattern in $Patterns) {
-            foreach ($textMatch in $item.text_matches) {
-
-                $re_result = [regex]::Match($textMatch.fragment, $pattern)
-
-                if ($re_result.Success -and [int]$re_result.Groups["version"].Value -le $UnsupportedVersion) {
-                    $deprecatedItems += $item
-                }
-            }
+    [GithubCodeSearchResult[]]$filteredResults = $searchResults | Where-Object {
+        $searchResult = $_
+        $matchFound = $false
+        $Patterns | ForEach-Object {
+            $match = [regex]::Match($searchResult.TextMatches, $_)
+            $matchFound = $matchFound -or ($match.Success -and [int]$match.Groups["version"].Value -le $UnsupportedVersion)
         }
+        return $matchFound
     }
 
-    if ($deprecatedItems.Count -gt 0) {
-        Show-DeprecatedItems -Items $deprecatedItems
+    if ($filteredResults.Count -gt 0) {
+        $filteredResults | % { Write-Host "--- Version deprecation:`n$($_.ToString())" }
+
         throw "Cannot Update Major Version to $MajorVersion. Found deprecated references. Need to update depending projects first."
     }
 }
