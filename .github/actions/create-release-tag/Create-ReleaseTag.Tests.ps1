@@ -37,18 +37,39 @@ Describe "Create-ReleaseTag" {
 "@ | ConvertFrom-Csv
         }
 
-        Mock Search-GithubForRepositoryReferences {
-            $mockData = @{
-                total_count = "4"
-                Items       = @(
-                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "uses: mockOrg/mockRepo/some/path/some-action.yml@v10" } },
-                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "uses: mockOrg/mockRepo/some/path/some-action.yml@v11" } },
-                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v11" } },
-                    @{name = "mockName.yml"; path = "path/to/file"; repository = @{html_url = "https://github.com/mockOrg/mockRepo" }; text_matches = @{fragment = "source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v10" } }
-                )
-            }
+        Mock Invoke-GithubCodeSearch {
 
-            return $mockData | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+            [GithubCodeSearchResult[]]$mocks = @()
+            $mock1 = [GithubCodeSearchResult]::new()
+            $mock1.Url = "https://github.com/mockOrg/mockRepo"
+            $mock1.Path = "path/to/file"
+            $mock1.Repository = "mockOrg/mockRepo"
+            $mock1.TextMatches = @("uses: mockOrg/mockRepo/some/path/some-action.yml@v10")
+
+            $mock2 = [GithubCodeSearchResult]::new()
+            $mock2.Url = "https://github.com/mockOrg/mockRepo"
+            $mock2.Path = "path/to/file"
+            $mock2.Repository = "mockOrg/mockRepo"
+            $mock2.TextMatches = @("uses: mockOrg/mockRepo/some/path/some-action.yml@v10")
+
+            $mock3 = [GithubCodeSearchResult]::new()
+            $mock3.Url = "https://github.com/mockOrg/mockRepo"
+            $mock3.Path = "path/to/file"
+            $mock3.Repository = "mockOrg/mockRepo"
+            $mock3.TextMatches = @("source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v10")
+
+            $mock4 = [GithubCodeSearchResult]::new()
+            $mock4.Url = "https://github.com/mockOrg/mockRepo"
+            $mock4.Path = "path/to/file"
+            $mock4.Repository = "mockOrg/mockRepo"
+            $mock4.TextMatches = @("source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v11")
+
+            $mocks += $mock1
+            $mocks += $mock2
+            $mocks += $mock3
+            $mocks += $mock4
+
+            return $mocks
         }
     }
 
