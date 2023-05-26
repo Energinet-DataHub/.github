@@ -31,6 +31,9 @@ inputs:
     description: "Branch on which tags will be created. Default: main"
     required: false
     default: main
+  usage_patterns:
+    description: Regex used to locate usage
+    required: false
 
 runs:
   using: composite
@@ -38,11 +41,13 @@ runs:
     - name: Create release tag
       shell: pwsh
       run: |
+        Write-Host "${{ inputs.usage_patterns }}"
         $major = ${{ inputs.major_version }}
         $minor = ${{ inputs.minor_version }}
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
+        $usage_patterns = "${{ inputs.usage_patterns }}"
         $eventName = "${{ github.event_name }}"
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
@@ -52,4 +57,5 @@ runs:
         -PatchVersion $patch `
         -GithubRepository $repo `
         -GithubBranch $targetBranch `
-        -GithubEvent $eventName
+        -GithubEvent $eventName `
+        -UsagePatterns $usage_patterns
