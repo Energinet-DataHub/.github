@@ -220,13 +220,6 @@ function Update-MajorVersion {
     gh release create $Version --generate-notes --latest --title $Version --target $GithubBranch -R $GitHubRepository
 }
 
-<#
-    .SYNOPSIS
-    Helper function to perform a Github code search
-
-    .DESCRIPTION
-    Searches github code api for references to a specific repository. Returns GithubCodeSearchResult
-#>
 class GithubCodeSearchResult {
     [string]$Url
     [string]$Repository
@@ -237,6 +230,14 @@ class GithubCodeSearchResult {
         return ("Link: {0}`nRepository: {1}`nPath: {2}`nContext:`n{3}" -f $this.Url, $this.Repository, $this.Path, ($this.TextMatches -join "`n-`n"))
     }
 }
+
+<#
+    .SYNOPSIS
+    Helper function to perform a Github code search
+
+    .DESCRIPTION
+    Searches github code api for references to a specific repository. Returns GithubCodeSearchResult
+#>
 function Invoke-GithubCodeSearch {
     param(
         #The Sub-path in the repository for relevant files. By default only files in .github/ are relevant
