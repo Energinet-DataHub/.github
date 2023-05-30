@@ -49,7 +49,7 @@ jobs:
       EVENT_TYPE: ${{ inputs.custom_event_type || inputs.caller_repository_name }}-deployment-request
     steps:
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v10
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v11
         id: find_pull_request
 
       - name: Set RELEASE_VERSION

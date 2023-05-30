@@ -166,7 +166,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run yamllint on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v10
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v11
         with:
           yaml_file_or_folder: .github
 
@@ -179,7 +179,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run casing validation on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v10
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v11
         with:
           folder: .github
 
