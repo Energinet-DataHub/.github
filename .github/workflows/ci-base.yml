@@ -55,7 +55,7 @@ on:
         required: false
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
-        default: "true"
+        default: "false"
 
 jobs:
   md_check:
