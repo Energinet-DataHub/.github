@@ -41,14 +41,16 @@ runs:
     - name: Create release tag
       shell: pwsh
       run: |
-        Write-Host inputs.usage_patterns
+        Write-Host ${{ inputs.usage_patterns }}
         $major = ${{ inputs.major_version }}
         $minor = ${{ inputs.minor_version }}
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
-        $usage_patterns = [string[]] "${{ inputs.usage_patterns }}" -split " "
+        $usage_patterns = "${{ inputs.usage_patterns }}" -split " "
         $eventName = "${{ github.event_name }}"
+
+        Write-Host $usage_patterns
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
 
