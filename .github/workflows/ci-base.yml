@@ -194,9 +194,9 @@ jobs:
       - name: Run Pester tests
         shell: pwsh
         run: |
-          $pesterTestFiles = ".github/actions/**/*.Tests.ps1"
-          if (Test-Path -Path $pesterTestFiles -PathType leaf) {
-            Invoke-Pester -Output 'Detailed' -CI $pesterTestFiles
+          $pesterTestFilesPattern = ".github/actions/**/*.Tests.ps1"
+          if (Test-Path -Path $pesterTestFilesPattern -PathType leaf) {
+            Invoke-Pester -Output 'Detailed' -CI $pesterTestFilesPattern
           }
           else {
             Write-Host "No Pester test files detected. Skipping Pester execution."
