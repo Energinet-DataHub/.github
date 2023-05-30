@@ -51,6 +51,11 @@ on:
         type: string
         description: Set to true to skip casing validation for Github actions and workflows in repository.
         default: "false"
+      skip_actions_powershell_verification:
+        required: false
+        type: string
+        description: Set to true to skip executing Pester tests for Github actions in repository.
+        default: "false"
 
 jobs:
   md_check:
@@ -177,3 +182,17 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v10
         with:
           folder: .github
+
+  github_actions_powershell_verification:
+    name: Run Pester tests in actions-folder
+    if: ${{ inputs.skip_actions_powershell_verification != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run Pester tests
+        shell: pwsh
+        working-directory: .github/actions
+        run: |
+          Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
