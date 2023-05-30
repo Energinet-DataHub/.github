@@ -177,3 +177,16 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v10
         with:
           folder: .github
+
+  powershell_verification:
+    name: Run Pester tests in actions-folder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run Pester tests
+        shell: pwsh
+        working-directory: .github/actions
+        run: |
+          Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
