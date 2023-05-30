@@ -51,7 +51,7 @@ runs:
         Write-Host "${{ inputs.usage_patterns }}"
         Write-Host $usage_patterns
 
-        $match = [regex]::Match("git::http://test.git//azure/test?v=10", $usage_patterns[0])
+        $match = [regex]::Match("git::http://test.git//azure/test?ref=v10", $usage_patterns[0])
         $match
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
