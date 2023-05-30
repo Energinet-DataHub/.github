@@ -55,7 +55,7 @@ on:
         required: false
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
-        default: "true"
+        default: "false"
 
 jobs:
   md_check:
@@ -193,6 +193,11 @@ jobs:
 
       - name: Run Pester tests
         shell: pwsh
-        working-directory: .github/actions
         run: |
-          Invoke-Pester -Output 'Detailed' -CI *.Tests.ps1
+          $pesterTestFilesPattern = ".github/actions/**/*.Tests.ps1"
+          if (Test-Path -Path $pesterTestFilesPattern -PathType leaf) {
+            Invoke-Pester -Output 'Detailed' -CI $pesterTestFilesPattern
+          }
+          else {
+            Write-Host "No Pester test files detected. Skipping Pester execution."
+          }
