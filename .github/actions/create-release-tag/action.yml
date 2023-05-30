@@ -41,7 +41,7 @@ runs:
     - name: Create release tag
       shell: pwsh
       run: |
-        Write-Host ${{ inputs.usage_patterns }}
+        Write-Host inputs.usage_patterns
         $major = ${{ inputs.major_version }}
         $minor = ${{ inputs.minor_version }}
         $patch = ${{ inputs.patch_version }}
