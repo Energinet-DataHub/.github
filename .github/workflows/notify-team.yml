@@ -68,7 +68,7 @@ jobs:
           echo "team_email=$team_email" >>$GITHUB_OUTPUT
 
       - name: Send email
-        uses: Energinet-DataHub/.github/.github/actions/send-email@v10
+        uses: Energinet-DataHub/.github/.github/actions/send-email@v11
         with:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
