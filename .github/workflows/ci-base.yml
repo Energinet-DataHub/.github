@@ -194,7 +194,7 @@ jobs:
       - name: Run Pester tests
         shell: pwsh
         run: |
-          $pesterTestFiles = ".github/actions/*.Tests.ps1"
+          $pesterTestFiles = ".github/actions/**/*.Tests.ps1"
           if (Test-Path -Path $pesterTestFiles -PathType leaf) {
             Invoke-Pester -Output 'Detailed' -CI $pesterTestFiles
           }
