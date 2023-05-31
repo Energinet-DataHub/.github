@@ -6,8 +6,8 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Release procedure](#release-procedure)
 - [Workflows](#workflows)
+    - [CI Base](#ci-base)
     - [Dispatch Deployment Request](#dispatch-deployment-request)
-    - [License and linting validation](#license-and-linting-validation)
     - [.NET build and test](#net-build-and-test)
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
@@ -88,16 +88,7 @@ Then we can create the new major version tag for a specific commit:
 
 ## Workflows
 
-### Dispatch deployment request
-
-File: [dispath-deployment-request.yml](.github/workflows/dispatch-deployment-request.yml)
-
-This workflow will find the associated pull request to a commit:
-
-- If no pull request is found it will abort.
-- If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
-
-### License and linting validation
+### CI Base
 
 File: [ci-base.yml](.github/workflows/ci-base.yml)
 
@@ -107,12 +98,23 @@ A given repository might be able to skip certain features but at least some of t
 
 Features:
 
-- Check files for license lines (header).
+- Check relevant files for a license header.
 - Perform markdown linting.
+- Validate links in markdown files.
 - Perform YAML linting of GitHub actions/workflows.
 - Perform casing validation of GitHub actions/workflows.
+- Execute Pester tests for any GitHub actions.
 
 Teams should ensure developers configure their local development environment to follow the same rules as what will be forced by the workflow. All rules can be configured using VS Code and extensions. Internal contributors can get more information on the subject by looking in the guidelines documented by The Outlaws.
+
+### Dispatch deployment request
+
+File: [dispath-deployment-request.yml](.github/workflows/dispatch-deployment-request.yml)
+
+This workflow will find the associated pull request to a commit:
+
+- If no pull request is found it will abort.
+- If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
 
 ### .NET build and test
 
