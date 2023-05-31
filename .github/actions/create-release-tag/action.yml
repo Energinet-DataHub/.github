@@ -47,7 +47,7 @@ runs:
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
-        $usage_patterns = "${{ inputs.usage_patterns }}"
+        $usage_patterns = "${{ inputs.usage_patterns }}" -split " "
         $eventName = "${{ github.event_name }}"
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
