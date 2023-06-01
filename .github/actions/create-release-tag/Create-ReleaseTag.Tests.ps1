@@ -170,4 +170,47 @@ Describe "Create-ReleaseTag" {
             { Assert-MajorVersionDeprecations -MajorVersion "12" -Repository "AnotherMockOrg/AnotherMockRepo" -Patterns @("(.*)/AnotherMockOrg/AnotherMockRepo//(.*)ref=v(?<version>.*)") } | Should -Throw
         }
     }
+
+    Context "Regular expressions" {
+
+        It "Correctly finds version for .github" {
+
+            # This needs to reflect the value used in .github/.github/workflows/create-release-tag.yml
+            $pattern = "\s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)"
+
+            $tests = @(
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v10"; "expected" = "10" },
+                @{"input" = "   uses:Energinet-DataHub/.github/cde/f-g/h@v11"; "expected" = "11" },
+                @{"input" = "uses:Energinet-DataHub/.github/c-d-e.yml@v09   "; "expected" = "09" },
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@1.2.3"; "expected" = "1" },
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@3.2.1"; "expected" = "3" }
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@0003.112.122"; "expected" = "0003" }
+            )
+            $tests | ForEach-Object {
+                $match = [regex]::Match($_.input, $pattern)
+                $match.Success | Should -Be $true
+                $match.Groups["version"] | Should -Be $_.expected
+            }
+        }
+
+        It "Correctly finds version for geh-terraform-modules" {
+            $pattern = "Energinet-DataHub/geh-terraform-modules\.git//(.*?)\?ref=v?(?<version>\d+)"
+
+            $tests = @(
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v1`""; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v2`""; "expected" = "2" },
+                @{"input" = "  source   =   `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v1`"  "; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v20`""; "expected" = "20" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=1.2.3`""; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=3.2.1`""; "expected" = "3" }
+            )
+            $tests | ForEach-Object {
+                $match = [regex]::Match($_.input, $pattern)
+                $match.Success | Should -Be $true
+                $match.Groups["version"] | Should -Be $_.expected
+            }
+        }
+    }
 }
