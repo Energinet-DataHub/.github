@@ -32,7 +32,7 @@ inputs:
     required: false
     default: main
   usage_patterns:
-    description: "A list of regular expressions (seperated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
+    description: "A list of regular expressions (separated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
     required: false
 
 runs:
@@ -41,7 +41,6 @@ runs:
     - name: Create release tag
       shell: pwsh
       run: |
-        Write-Host "${{ inputs.usage_patterns }}"
         $major = ${{ inputs.major_version }}
         $minor = ${{ inputs.minor_version }}
         $patch = ${{ inputs.patch_version }}

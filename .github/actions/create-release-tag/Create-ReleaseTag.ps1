@@ -63,7 +63,7 @@ function Create-ReleaseTag {
 
     $version = "$MajorVersion.$MinorVersion.$PatchVersion"
 
-    if ($null -eq $env:GH_TOKEN) {
+    if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
         throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
     }
 
@@ -157,7 +157,7 @@ function Get-GithubReleases {
         [string]
         $GitHubRepository
     )
-    gh release list -L 10000 -R $repo | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+    gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 }
 
 <#
@@ -248,11 +248,16 @@ function Invoke-GithubCodeSearch {
         [Parameter(Mandatory = $false)]
         [string]$Organization
     )
+
+    [GithubCodeSearchResult[]]$searchResults = @()
+
     [string]$json = gh api -H "Accept: application/vnd.github.text-match+json" `
         -H "X-GitHub-Api-Version: 2022-11-28" `
         "/search/code?q=org:$Organization%20$Search"
 
-    [GithubCodeSearchResult[]]$searchResults = @()
+    if ($null -eq $json) {
+        throw "Unable to search github code api for version deprecations"
+    }
 
     foreach ($item in ($json | ConvertFrom-Json).Items) {
         $result = [GithubCodeSearchResult]::new()
