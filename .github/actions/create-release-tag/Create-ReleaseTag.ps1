@@ -254,8 +254,9 @@ function Invoke-GithubCodeSearch {
     [string]$json = gh api -H "Accept: application/vnd.github.text-match+json" `
         -H "X-GitHub-Api-Version: 2022-11-28" `
         "/search/code?q=org:$Organization%20$Search"
-    Write-Host "Json: "
-    $json
+
+    Write-Host $json
+
     if ($null -eq $json) {
         throw "Unable to search github code api for version deprecations"
     }
