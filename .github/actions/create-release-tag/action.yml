@@ -32,7 +32,7 @@ inputs:
     required: false
     default: main
   usage_patterns:
-    description: Regex used to locate usage
+    description: "A list of regular expressions (seperated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
     required: false
 
 runs:
@@ -47,7 +47,7 @@ runs:
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
-        $usage_patterns = "${{ inputs.usage_patterns }}"
+        $usage_patterns = "${{ inputs.usage_patterns }}" -split " "
         $eventName = "${{ github.event_name }}"
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1

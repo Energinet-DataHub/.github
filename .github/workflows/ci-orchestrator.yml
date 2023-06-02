@@ -17,6 +17,7 @@ jobs:
   #
   create_release:
     uses: ./.github/workflows/create-release-tag.yml
+    secrets: inherit # Needed for organization scope GH_TOKEN
 
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest
