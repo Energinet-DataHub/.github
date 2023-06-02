@@ -32,7 +32,7 @@ inputs:
     required: false
     default: main
   usage_patterns:
-    description: "A list of regular expressions (seperated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
+    description: "A list of regular expressions (separated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
     required: false
 
 runs:
