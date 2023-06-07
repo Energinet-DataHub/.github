@@ -113,13 +113,13 @@ Describe "Create-ReleaseTag" {
     Context "When updating major version" {
         It "Calls gh with correct version and completes successfully" {
             Update-MajorVersion -Version "1" -GitHubRepository "mock" -GitHubBranch "mock" | `
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v1' -or $args[2] -eq '1') }
+                    Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v1' -or $args[2] -eq '1') }
 
             Update-MajorVersion -Version "2.0.0" -GitHubRepository "mock" -GitHubBranch "mock" | `
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v2' -or $args[2] -eq '2.0.0') }
+                    Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v2' -or $args[2] -eq '2.0.0') }
 
             Update-MajorVersion -Version "3.2.1" -GitHubRepository "mock" -GitHubBranch "mock" | `
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v3' -or $args[2] -eq '3.2.1') }
+                    Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v3' -or $args[2] -eq '3.2.1') }
 
         }
 
