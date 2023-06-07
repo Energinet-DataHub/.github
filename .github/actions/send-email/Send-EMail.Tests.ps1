@@ -33,9 +33,9 @@ Describe "When dot-sourcing the script" {
             ]
 "@
             # Minify JSON (must use '-AsArray' when we have only one item)
-            $expected = $expected
-            | ConvertFrom-Json
-            | ConvertTo-Json -Depth 5 -Compress -AsArray
+            $expected = $expected |
+                ConvertFrom-Json |
+                ConvertTo-Json -Depth 5 -Compress -AsArray
 
             # Act
             $actual = Build-ToEMail -TeamName $teamName -To $to
@@ -66,9 +66,9 @@ Describe "When dot-sourcing the script" {
             ]
 "@
             # Minify JSON
-            $expected = $expected
-            | ConvertFrom-Json
-            | ConvertTo-Json -Depth 5 -Compress
+            $expected = $expected |
+                ConvertFrom-Json |
+                ConvertTo-Json -Depth 5 -Compress
 
             # Act
             $actual = Build-ToEMail -TeamName $teamName -To $to
