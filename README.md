@@ -14,11 +14,11 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Prepare release
 
-All releases are tagged by the CI workflow. To increment the semver-version tag, the variables in [create-release-tag.yml](.github/workflows/create-release-tag.yml) must be adjusted accordingly to the change.
+All releases are automatically tagged by the CI workflow. To increment the semver-version tag, the variables in [create-release-tag.yml](.github/workflows/create-release-tag.yml) must be adjusted accordingly to the change.
 
-## Release procedure
+### Preparing a new major version
 
-After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below to create a new release.
+If a Pull-request implements any breaking changes we must create a new major version i.e. (v46 -> v47)
 
 **Versioning:**
 
@@ -26,35 +26,23 @@ After we have merged a Pull Request, and created or updated any artifact within 
 1. The latest major version must contain all changes (new functionality, improvements, maintenance).
 1. The previous major version should only contain **important maintenance** changes.
 
-### Preparing a new major version
-
-When we implement a breaking change we must create a new major version.
-
 ---
-> :warning: **If you create a new major version, i.e. v47, all releases and major release tags from v45 and downwards in that repository WILL BE DELETED !!**
+> :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
 
-You **MUST** ensure that we do not reference releases of  `.github` and `geh-terraform-modules` about to be deleted before creating a new major version in either of these repositories !
+This is handled by a scheduled workflow out of `dh3-automation` every night.
 
-This schedule runs every night out of `dh3-automation`.
+We **MUST** ensure that no references exists to releases of  `.github` and `geh-terraform-modules` about to be deleted.
 
 ---
 
-When creating a new major version we must handle the following:
+## Release procedure
 
-1. Create the new major version release and tag following [Create major version tag](#create-major-version-tag) (e.g. `v10`)
-1. Shift the previous major version into maintenance mode (e.g. `v9`)
-    - Delete the previous major version release and tag in GitHub
-    - Create a root branch based on the last commit for that version and name it as the previous major version
-    - Create a branch policy for this new branch to ensure we use PR's for any changes
-1. Delete the now unsupported major version branch, or lock it using its branch policy (e.g. `v8`)
+After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below:
 
-From then on any important maintenance changes to the previous version must be implemented using a PR to the version branch.
+---
+> :information_source: **This process is automated by the ci-workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml)**
 
-### Create major version tag
-
-Secondly we must create or update a major version tag (e.g. `v7`). This allows developers to opt in on automatically using the latest minor or patch version within the choosen major version channel.
-
-If a major version tag exists for the channel in which we just released a minor or patch version then we must delete it first:
+---
 
 1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
