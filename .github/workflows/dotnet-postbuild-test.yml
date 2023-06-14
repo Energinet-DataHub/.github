@@ -235,7 +235,7 @@ jobs:
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.azure_spn_id }}
-          tenant-id: ${{ secrets.azure_tenant_id }}
+          tenant-id: ${{ vars.azure_tenant_id }}
           subscription-id: ${{ vars.azure_subscription_id }}
 
       - name: Wait for dotnet-tests artifact to be ready for download
