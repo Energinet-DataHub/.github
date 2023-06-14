@@ -26,7 +26,7 @@ function Get-GithubReleases {
         [string]
         $Repository
     )
-    gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+    gh release list -L 10000 -R $Repository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 }
 
 <#
