@@ -14,6 +14,41 @@
 
 <#
     .SYNOPSIS
+    Uses github CLI (gh) to retrieves a list of releases
+
+    .DESCRIPTION
+    Simple function wrapping a call with gh to retrieve the latest releases from github.
+#>
+function Get-GithubReleases {
+    param (
+        # The value of the GitHub repository variable.
+        [Parameter(Mandatory)]
+        [string]
+        $Repository
+    )
+    gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+}
+
+<#
+    .SYNOPSIS
+    Uses github CLI (gh) to retrieve latest major version
+
+    .DESCRIPTION
+    Simple filtering applied to Get-GithubReleases to return the latest major version
+#>
+function Get-LatestMajorVersion {
+    param (
+        # The value of the GitHub repository variable.
+        [Parameter(Mandatory)]
+        [string]
+        $Repository
+    )
+    [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
+    return $latestMajor
+}
+
+<#
+    .SYNOPSIS
     A collection of patterns used to identify github references and their associated version.
 
     .DESCRIPTION
@@ -70,39 +105,4 @@ function Assert-GithubVersionReferences {
     if ($deprecatedReferenceFound) {
         throw "Files contains references to deprecated versions"
     }
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
-
-    .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
-#>
-function Get-GithubReleases {
-    param (
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $Repository
-    )
-    gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieve latest major version
-
-    .DESCRIPTION
-    Simple filtering applied to Get-GithubReleases to return the latest major version
-#>
-function Get-LatestMajorVersion {
-    param (
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $Repository
-    )
-    [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
-    return $latestMajor
 }
