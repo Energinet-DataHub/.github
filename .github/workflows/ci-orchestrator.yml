@@ -11,7 +11,7 @@ jobs:
   #
   ci_base:
     uses: ./.github/workflows/ci-base.yml
-
+    secrets: inherit
   #
   # Automatic Release (verify if release tag exists)
   #

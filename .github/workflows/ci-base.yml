@@ -56,6 +56,11 @@ on:
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
         default: "false"
+      skip_validate_version_references:
+        required: false
+        type: string
+        description: Set to true to skip validation of references to deprecated versions.
+        default: "false"
 
 jobs:
   md_check:
@@ -201,3 +206,16 @@ jobs:
           else {
             Write-Host "No Pester test files detected. Skipping Pester execution."
           }
+
+  github_validate_version_references:
+    name: Validate references
+    if: ${{ inputs.skip_validate_version_references != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run casing validation on .github folder
+        uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@rf-halfspace/validate-references-gate
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for gh api search
