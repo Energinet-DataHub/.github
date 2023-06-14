@@ -126,7 +126,7 @@ jobs:
       AZURITE_VERSION: 3.22.0
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
-      AZURE_KEYVAULT_URL: ${{ secrets.azure_keyvault_url }}
+      AZURE_KEYVAULT_URL: ${{ vars.azure_keyvault_url }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
       AZURE_B2CSECRETS_KEYVAULT_URL: ${{ vars.azure_b2csecrets_keyvault_url }}
       #
