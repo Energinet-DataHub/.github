@@ -27,6 +27,4 @@ runs:
       shell: pwsh
       run: |
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
-
         Assert-GithubVersionReferences -Path ${{ github.workspace }}
-
