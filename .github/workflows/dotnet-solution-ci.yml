@@ -226,7 +226,7 @@ jobs:
         with:
           client-id: ${{ secrets.azure_spn_id }}
           tenant-id: ${{ secrets.azure_tenant_id }}
-          subscription-id: ${{ secrets.azure_subscription_id }}
+          subscription-id: ${{ vars.azure_subscription_id }}
 
       - name: Run tests
         shell: pwsh
