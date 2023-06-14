@@ -81,6 +81,10 @@ function Assert-GithubVersionReferences {
         [int]$MajorVersionsToKeep = 2
     )
 
+    if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
+        throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
+    }
+
     $files = Get-ChildItem -Path $Path -File -Recurse
 
     $deprecatedReferenceFound = $false
