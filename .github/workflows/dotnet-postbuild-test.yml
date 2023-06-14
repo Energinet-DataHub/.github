@@ -234,7 +234,7 @@ jobs:
         if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.azure_spn_id }}
+          client-id: ${{ vars.azure_spn_id }}
           tenant-id: ${{ vars.azure_tenant_id }}
           subscription-id: ${{ vars.azure_subscription_id }}
 
