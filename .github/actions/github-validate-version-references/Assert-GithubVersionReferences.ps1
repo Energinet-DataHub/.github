@@ -43,6 +43,7 @@ function Get-LatestMajorVersion {
         [string]
         $Repository
     )
+    Write-Host "Repository:"$Repository
     [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
     return $latestMajor
 }
