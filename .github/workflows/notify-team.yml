@@ -48,20 +48,18 @@ jobs:
         shell: bash
         run: |
           if [ ${{ inputs.team_name }} == 'Batman' ]; then
-            team_email=${{ secrets.email_batman }}
+            team_email=${{ vars.email_phoenix }}
           elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
-            team_email=${{ secrets.email_mandalorian }}
+            team_email=${{ vars.email_mandalorian }}
           elif [ ${{ inputs.team_name }} == 'Titans' ]; then
-            team_email=${{ secrets.email_titans }}
-          elif [ ${{ inputs.team_name }} == 'TexasRangers' ]; then
-            team_email=${{ secrets.email_texasrangers }}
+            team_email=${{ vars.email_titans }}
           elif [ ${{ inputs.team_name }} == 'TheOutlaws' ]; then
-            team_email=${{ secrets.email_theoutlaws }}
+            team_email=${{ vars.email_theoutlaws }}
           elif [ ${{ inputs.team_name }} == 'Volt' ]; then
-            team_email=${{ secrets.email_volt }}
+            team_email=${{ vars.email_volt }}
           else
             # Fallback
-            team_email=${{ secrets.email_theoutlaws }}
+            team_email=${{ vars.email_theoutlaws }}
           fi
 
           echo "::add-mask::$team_email"
@@ -73,6 +71,6 @@ jobs:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
           to: ${{ steps.get_email.outputs.team_email }}
-          from: ${{ secrets.email_sender }}
+          from: ${{ vars.email_sender }}
           subject: ${{ inputs.subject }}
           content: ${{ inputs.body }}
