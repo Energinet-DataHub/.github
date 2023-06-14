@@ -86,7 +86,8 @@ function Assert-GithubVersionReferences {
     $deprecatedReferenceFound = $false
 
     foreach ($test in $TestCases) {
-
+        Write-Host $test.repository
+        Write-Host $test.pattern
         [int]$latestVersion = Get-LatestMajorVersion -Repository $test.repository
         [int]$UnsupportedVersion = $latestVersion - $MajorVersionsToKeep
 
