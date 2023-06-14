@@ -88,10 +88,11 @@ function Assert-GithubVersionReferences {
     $files = Get-ChildItem -Path $Path -File -Recurse
 
     $deprecatedReferenceFound = $false
+    Write-Host "TestCases"$TestCases
 
     foreach ($test in $TestCases) {
-        Write-Host $test.repository
-        Write-Host $test.pattern
+        Write-Host "Repo: "$test.repository
+        Write-Host "Pattern"$test.pattern
         [int]$latestVersion = Get-LatestMajorVersion -Repository $test.repository
         [int]$UnsupportedVersion = $latestVersion - $MajorVersionsToKeep
 
