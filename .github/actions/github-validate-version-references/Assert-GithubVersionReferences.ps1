@@ -87,6 +87,8 @@ function Assert-GithubVersionReferences {
 
     $files = Get-ChildItem -Path $Path -File -Recurse
 
+    $files.FullName
+
     $deprecatedReferenceFound = $false
     Write-Host "TestCases"$TestCases
 
