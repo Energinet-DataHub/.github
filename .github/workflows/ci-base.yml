@@ -217,5 +217,7 @@ jobs:
 
       - name: Run reference validation on local folder
         uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@rf-halfspace/validate-references-gate
+        with:
+          folder: ${{ github.workspace }}
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for gh api search

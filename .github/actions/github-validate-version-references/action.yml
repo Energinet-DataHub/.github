@@ -16,7 +16,7 @@ name: Validates references to release versions
 description: Scans commit for references to deprecated versions
 
 inputs:
-  repository_path:
+  folder:
     description: Path to repository to scan
     required: true
 
@@ -26,5 +26,7 @@ runs:
     - name: Assert Github Version References
       shell: pwsh
       run: |
+        Write-Host "${{ inputs.folder }}"
+
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
-        Assert-GithubVersionReferences -Path ${{ github.workspace }}
+        Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
