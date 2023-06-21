@@ -29,7 +29,7 @@ If a Pull-request implements any breaking changes we must create a new major ver
 
 ### Preparing a new major version
 
-If we have breaking changes and wish to push a new major version - A number of steps is needed that shifts the existing version into maintenance mode prior to merging.
+If we have breaking changes and wish to push a new major version - a number of steps is needed that shifts the existing version into maintenance mode prior to merging.
 
 ***Example moving from 9.1.3 to 10.0.0:***
 
