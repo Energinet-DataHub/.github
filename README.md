@@ -40,7 +40,7 @@ If we have breaking changes and wish to push a new major version - A number of s
 ---
 > :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
 
-This is handled by a scheduled workflow [rat-scheduled-update](https://github.com/Energinet-DataHub/dh3-automation/blob/57067eb114b9230c98acd48997cbf46d92995b33/.github/workflows/rat-update-scheduled.yml#L41) out of `dh3-automation` every night.
+This is handled by a scheduled workflow [rat-scheduled-update.yml](https://github.com/Energinet-DataHub/dh3-automation/blob/main/.github/workflows/rat-update-scheduled.yml) out of `dh3-automation` every night.
 
 We **MUST** ensure that no references exists to releases of  `.github` and `geh-terraform-modules` about to be deleted.
 
@@ -57,7 +57,7 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
 
-2. Find the major version release and click on its name (e.g. `v7`).
+  2. Find the major version release and click on its name (e.g. `v7`).
 
    - This will open the release.
    - Click the `Delete (icon)` and choose to delete the release.
