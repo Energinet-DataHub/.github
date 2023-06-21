@@ -23,7 +23,7 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Release Procedure
 
-Every pull-request merged to main updates the workflow file [create-release-tag.yml](.github/workflows/create-release-tag.yml). The associated action ensures all merges are tagged with as a release, and updates the latest major version tag (i.eq v46).
+Every pull-request merged to main updates the workflow file [create-release-tag.yml](.github/workflows/create-release-tag.yml). The associated action ensures all merges are released and updates the latest major version tag (i.eq v46).
 
 If a Pull-request implements any breaking changes we must create a new major version (i.e. v46 -> v47). Otherwise we keep updates as minor or patches.
 ### Preparing a new major version
@@ -33,7 +33,7 @@ If we have breaking changes and wish to push a new major version - A number of s
 ***Example moving from 9.1.3 to 10.0.0:***
 
 1. Delete the previous major version release and tag (v9) in GitHub
-1. Create a root branch and name it identically as the previous deleted major tag (v9)
+1. Create a root branch based on the last commit for the latest version (i.ex 9.1.2) and name the branch identically to the old release tag v9
 1. Create a branch policy for this new branch to ensure we use PR's for any changes on branch named (v9)
 
 ---
@@ -50,7 +50,7 @@ We **MUST** ensure that no references exists to releases of  `.github` and `geh-
 After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below:
 
 ---
-> :information_source: **This process is automated by the ci-workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml)**
+> :information_source: **These are the steps handled by the ci-workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml)**
 
 ---
 
