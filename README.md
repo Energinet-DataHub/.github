@@ -40,7 +40,7 @@ If we have breaking changes and wish to push a new major version - A number of s
 ---
 > :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
 
-This is handled by a scheduled workflow [rat-scheduled-update.yml](/Energinet-DataHub/dh3-automation/blob/main/.github/workflows/rat-update-scheduled.yml) out of `dh3-automation` every night.
+This is handled by a scheduled workflow **(/Energinet-DataHub/dh3-automation/blob/main/.github/workflows/rat-update-scheduled.yml)** out of `dh3-automation` every night.
 
 We **MUST** ensure that no references exists to releases of  `.github` and `geh-terraform-modules` about to be deleted.
 
