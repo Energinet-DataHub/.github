@@ -85,7 +85,7 @@ function Assert-GithubVersionReferences {
         throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
     }
 
-    $files = Get-ChildItem -Path $Path -File -Recurse
+    $files = Get-ChildItem -Path $Path -File -Recurse -Force -Depth 10
 
     $files.FullName
 
