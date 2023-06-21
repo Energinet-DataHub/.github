@@ -23,7 +23,7 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Release Procedure
 
-Every pull-request merged to main updates the workflow file [create-release-tag.yml](.github/workflows/create-release-tag.yml). The associated action ensures all merges are released and updates the latest major version tag (i.eq v46).
+Every pull-request merged to main updates the workflow file [create-release-tag.yml](.github/workflows/create-release-tag.yml). The associated action ensures all merges are released and updates the latest major version tag (i.e. v46).
 
 If a Pull-request implements any breaking changes we must create a new major version (i.e. v46 -> v47). Otherwise we keep updates as minor or patches.
 
