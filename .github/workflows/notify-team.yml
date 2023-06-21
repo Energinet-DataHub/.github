@@ -47,7 +47,7 @@ jobs:
         id: get_email
         shell: bash
         run: |
-          if [ ${{ inputs.team_name }} == 'Batman' ]; then
+          if [ ${{ inputs.team_name }} == 'Phoenix' ]; then
             team_email=${{ vars.email_phoenix }}
           elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
             team_email=${{ vars.email_mandalorian }}
