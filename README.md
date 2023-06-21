@@ -4,7 +4,10 @@ This repository contains shared github items such as actions, workflows and much
 
 ## Overview
 
+- [Versioning](#versioning)
 - [Release procedure](#release-procedure)
+    - [Preparing a new major version](#preparing-a-new-major-version)
+    - [Release process](#release-process)
 - [Workflows](#workflows)
     - [CI Base](#ci-base)
     - [Dispatch Deployment Request](#dispatch-deployment-request)
@@ -12,30 +15,38 @@ This repository contains shared github items such as actions, workflows and much
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
-## Prepare release
-
-All releases are automatically tagged by the CI workflow. To increment the semver-version tag, the variables in [create-release-tag.yml](.github/workflows/create-release-tag.yml) must be adjusted accordingly to the change.
-
-### Preparing a new major version
-
-If a Pull-request implements any breaking changes we must create a new major version i.e. (v46 -> v47)
-
-**Versioning:**
+## Versioning
 
 1. We support up to two major versions at any given time.
 1. The latest major version must contain all changes (new functionality, improvements, maintenance).
 1. The previous major version should only contain **important maintenance** changes.
 
+## Release Procedure
+
+Every Pull-request merged to main is automatically (by default) tagged as a new release by the workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml) in GitHub and the major version tag (eg. v9) is updated.
+
+If a Pull-request implements any breaking changes we must create a new major version (i.e. v46 -> v47)
+
+### Preparing a new major version
+
+If we have breaking changes and wish to push a new major version - A number of steps is needed that shifts the existing version into maintenance mode prior to merging.
+
+***Example moving from 9.1.3 to 10.0.0:***
+
+1. Delete the previous major version release and tag (v9) in GitHub
+1. Create a root branch and name it identically as the previous deleted major tag (v9)
+1. Create a branch policy for this new branch to ensure we use PR's for any changes on branch named (v9)
+
 ---
 > :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
 
-This is handled by a scheduled workflow out of `dh3-automation` every night.
+This is handled by a scheduled workflow [rat-scheduled-update](https://github.com/Energinet-DataHub/dh3-automation/blob/57067eb114b9230c98acd48997cbf46d92995b33/.github/workflows/rat-update-scheduled.yml#L41) out of `dh3-automation` every night.
 
 We **MUST** ensure that no references exists to releases of  `.github` and `geh-terraform-modules` about to be deleted.
 
 ---
 
-## Release procedure
+## Release process
 
 After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below:
 
