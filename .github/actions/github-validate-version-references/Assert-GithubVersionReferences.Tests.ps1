@@ -53,12 +53,9 @@ Describe "Assert-GithubVersionReferences" {
                 return @{"FullName" = "mock" }
             }
             Mock Get-Content {
-                # Note: In order not to have this test-file introduce false positives string formatting is used to avoid the regex pattern.
-                # Invalid line: uses: Energinet-DataHub/.github/subpath/action@v1
-                # Invalid line: source = `"https://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/subpath/module.git?ref=v1`"
                 return @"
                 mock
-                    uses: Energinet-DataHub/.github/subpath/action@{0}
+                    uses: Energinet-DataHub/.github/.github/actions/action@{0}
                 Mock
 "@ -f "v49"
             }
@@ -80,7 +77,7 @@ Describe "Assert-GithubVersionReferences" {
                 # Note: In order not to have this test-file introduce false possitives string formatting is used to avoid the regex pattern.
                 return @"
                 mock
-                    source = `"https://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/subpath/module.git?ref={0}`"
+                    source = `"https://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/subpath/module?ref={0}`"
                 mock
 "@ -f "v49"
             }

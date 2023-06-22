@@ -43,7 +43,7 @@ function Get-LatestMajorVersion {
         [string]
         $Repository
     )
-    Write-Host "Repository:"$Repository
+
     [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
     return $latestMajor
 }
@@ -58,11 +58,11 @@ function Get-LatestMajorVersion {
 $TestCases = @(
     @{
         "repository" = "Energinet-DataHub/.github"
-        "pattern"    = "\s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)"
+        "pattern"    = "(.*?)uses:\s*Energinet-DataHub/\.github/\.github/actions/(.*?)@v?(?<version>\d+)(.*?)"
     },
     @{
         "repository" = "Energinet-DataHub/geh-terraform-modules"
-        "pattern"    = "Energinet-DataHub/geh-terraform-modules\.git//(.*?)\?ref=v?(?<version>\d+)"
+        "pattern"    = "(.*?)Energinet-DataHub/geh-terraform-modules\.git//(.*?)ref=v?(?<version>\d+)(.*?)"
     }
 )
 
@@ -85,28 +85,25 @@ function Assert-GithubVersionReferences {
         throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
     }
 
-    $files = Get-ChildItem -Path $Path -File -Recurse -Force -Depth 10
-
-    $files.FullName
+    $files = Get-ChildItem -Path $Path -File -Recurse -Force -Depth 15
 
     $deprecatedReferenceFound = $false
-    Write-Host "TestCases"$TestCases
 
     foreach ($test in $TestCases) {
-        Write-Host "Repo: "$test.repository
-        Write-Host "Pattern"$test.pattern
         [int]$latestVersion = Get-LatestMajorVersion -Repository $test.repository
         [int]$UnsupportedVersion = $latestVersion - $MajorVersionsToKeep
 
         foreach ($file in $files) {
             $content = Get-Content $file
-            $match = [regex]::Match($Content, $test.pattern)
+            foreach ($line in $content) {
+                $match = [regex]::Match($line, $test.pattern)
 
-            if ($match.Success -and [int]$match.Groups["version"].Value -le $UnsupportedVersion) {
-                Write-Host "File found with reference to deprecated version $UnsupportedVersion or lower. Please change to a supported version. (Current latest: v$latestVersion)"
-                Write-Host "File:"$file.FullName
-                Write-Host "Context: "$match.Groups[0].Value.Trim()
-                $deprecatedReferenceFound = $true
+                if ($match.Success -and [int]$match.Groups["version"].Value -le $UnsupportedVersion) {
+                    Write-Host "File found with reference to deprecated version $($match.Groups["version"]). Please change to a supported version. (Current latest: v$latestVersion)"
+                    Write-Host "File:"$file.FullName
+                    Write-Host "Context: "$match.Groups[0].Value.Trim()
+                    $deprecatedReferenceFound = $true
+                }
             }
         }
     }

@@ -199,15 +199,16 @@ Describe "Create-ReleaseTag" {
             $pattern = "Energinet-DataHub/geh-terraform-modules\.git//(.*?)\?ref=v?(?<version>\d+)"
 
             $tests = @(
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v1`""; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v2`""; "expected" = "2" },
-                @{"input" = "  source   =   `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v1`"  "; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v20`""; "expected" = "20" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=1.2.3`""; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=3.2.1`""; "expected" = "3" }
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "2" },
+                @{"input" = "  source   =   `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`"  "; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "20" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref={0}.2.3`""; "expected" = "1" },
+                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref={0}.2.1`""; "expected" = "3" }
             )
             $tests | ForEach-Object {
-                $match = [regex]::Match($_.input, $pattern)
+                $testString = $_.input -f $_.expected
+                $match = [regex]::Match($testString, $pattern)
                 $match.Success | Should -Be $true
                 $match.Groups["version"] | Should -Be $_.expected
             }
