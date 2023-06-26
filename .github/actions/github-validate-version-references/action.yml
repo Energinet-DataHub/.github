@@ -32,13 +32,13 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: Energinet-DataHub/.github
-        path: ${{ inputs.folder }}/remote
+        path: ${{ inputs.folder }}/remote/github
 
     - name: Checkout
       uses: actions/checkout@v3
       with:
         repository: Energinet-DataHub/geh-terraform-modules
-        path: ${{ inputs.folder}}/remote
+        path: ${{ inputs.folder}}/remote/modules
 
     - name: Assert Github Version References
       shell: pwsh
