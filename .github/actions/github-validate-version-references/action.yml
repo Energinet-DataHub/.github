@@ -38,7 +38,7 @@ runs:
     - name: Assert Github Version References
       shell: pwsh
       run: |
-        Write-Host "${{ inputs.folder }}"
+        Write-Host "DETTE ER FOLDEREN DEN TJEKKER: ${{ inputs.folder }}"
 
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
 
