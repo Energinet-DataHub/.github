@@ -10,8 +10,7 @@ jobs:
   # License and Markdown Check
   #
   ci_base:
-    uses: ./.github/workflows/ci-base.yml
-    secrets: inherit
+    uses: ./.github/workflows/ci-base.yml@rf-halfspace/validate-references-gate-new
 
   #
   # Automatic Release (verify if release tag exists)
