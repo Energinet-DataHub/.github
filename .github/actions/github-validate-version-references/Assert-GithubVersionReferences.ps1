@@ -14,27 +14,10 @@
 
 <#
     .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
+    Gets the latest major version from a repository folder
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
-#>
-function Get-GithubReleases {
-    param (
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $Repository
-    )
-    gh release list -L 10000 -R $Repository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieve latest major version
-
-    .DESCRIPTION
-    Simple filtering applied to Get-GithubReleases to return the latest major version
+    Looks up the create-release-tag file in a repository (i.e. .github or geh-terraform-modules) and extracts the verison number defined.
 #>
 function Get-LatestMajorVersion {
     param (
@@ -43,9 +26,14 @@ function Get-LatestMajorVersion {
         [string]
         $Repository
     )
+    [int] $major = Get-Content -Path (Join-Path $Repository ".github/workflows/create-release-tag.yml") `
+    | Select-String -Pattern "major_version: (?<version>\d+)" `
+    | Select-Object -First 1 -ExpandProperty Matches `
+    | Select-Object -ExpandProperty Groups `
+    | Where-Object { $_.Name -eq "version" }  `
+    | Select-Object -ExpandProperty Value
 
-    [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
-    return $latestMajor
+    return $major
 }
 
 <#
@@ -81,10 +69,6 @@ function Assert-GithubVersionReferences {
         [int]$MajorVersionsToKeep = 2
     )
 
-    if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
-        throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
-    }
-
     $files = Get-ChildItem -Path $Path -File -Recurse -Force -Depth 15
 
     $deprecatedReferenceFound = $false
@@ -111,4 +95,50 @@ function Assert-GithubVersionReferences {
     if ($deprecatedReferenceFound) {
         throw "Files contains references to deprecated versions"
     }
+}
+
+function Find-DeprecatedRepositoryReferences {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+        [Parameter(Mandatory)]
+        [int]$UnsupportedVersion,
+        [Parameter(Mandatory)]
+        [string]$Pattern
+    )
+    $files = Get-ChildItem -Path $Path -File -Recurse -Force -Depth 15
+    foreach ($file in $files) {
+        $content = Get-Content $file
+        foreach ($line in $content) {
+            $match = [regex]::Match($line, $Pattern)
+
+            if ($match.Success -and [int]$match.Groups["version"].Value -le $UnsupportedVersion) {
+                Write-Host "File found with reference to deprecated version $($match.Groups["version"]). Please change to a supported version. (Current latest: v$latestVersion)"
+                Write-Host "File:"$file.FullName
+                Write-Host "Context: "$match.Groups[0].Value.Trim()
+                $deprecatedReferenceFound = $true
+            }
+        }
+    }
+    if ($deprecatedReferenceFound) {
+        throw "Files contains references to deprecated versions"
+    }
+
+}
+function Assert-DotGithubVersionReferences {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+        [Parameter(Mandatory)]
+        [string]$RepositoryPath,
+        [Parameter(Mandatory = $false)]
+        [int]$MajorVersionsToKeep = 2
+    )
+
+    [int]$UnsupportedVersion = (Get-LatestMajorVersion $RepositoryPath) - $MajorVersionsToKeep
+    Find-DeprecatedRepositoryReferences `
+        -Path $Path `
+        -UnsupportedVersion $UnsupportedVersion `
+        -Pattern "(.*?)uses:\s*Energinet-DataHub/\.github/\.github/actions/(.*?)@v?(?<version>\d+)(.*?)"
+
 }
