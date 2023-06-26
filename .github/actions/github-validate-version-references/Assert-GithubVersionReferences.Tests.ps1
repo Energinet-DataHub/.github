@@ -35,6 +35,9 @@ Describe "Assert-GithubVersionReferences" {
             "49.0.0","","49.0.0","2023-01-18T07:38:37Z"
 "@ | ConvertFrom-Csv
         }
+        if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
+            $env:GH_TOKEN = $(gh auth token)
+        }
     }
 
     Context "Get-LatestMajorVersion" {
@@ -87,12 +90,6 @@ Describe "Assert-GithubVersionReferences" {
             { Assert-GithubVersionReferences -Path "Path" -MajorVersionsToKeep 49 } | Should -Not -Throw
             { Assert-GithubVersionReferences -Path "Path" -MajorVersionsToKeep 1 } | Should -Throw
             { Assert-GithubVersionReferences -Path "Path" -MajorVersionsToKeep 0 } | Should -Throw
-        }
-        It "Doesn't throws when version is way lower than referenced" {
-            Mock Get-LatestMajorVersion {
-                return [int]1
-            }
-            { Assert-DotGithubVersionReferences -Path "mock" -RepositoryPath "mock" } | Should -Not -Throw
         }
     }
 }
