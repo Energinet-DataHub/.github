@@ -60,5 +60,11 @@ Describe "Assert-GithubVersionReferences" {
             }
             { Assert-DotGithubVersionReferences -Path "mock" -RepositoryPath "mock" } | Should -Not -Throw
         }
+        It "Doesn't throws when version is way lower than referenced" {
+            Mock Get-LatestMajorVersion {
+                return [int]1
+            }
+            { Assert-DotGithubVersionReferences -Path "mock" -RepositoryPath "mock" } | Should -Not -Throw
+        }
     }
 }
