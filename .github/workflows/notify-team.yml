@@ -57,6 +57,8 @@ jobs:
             team_email=${{ vars.email_theoutlaws }}
           elif [ ${{ inputs.team_name }} == 'Volt' ]; then
             team_email=${{ vars.email_volt }}
+          elif [ ${{ inputs.team_name}} == 'TeamFrontend' ]; then
+            team_email=${{ vars.email_teamfrontend }}
           else
             # Fallback
             team_email=${{ vars.email_theoutlaws }}
