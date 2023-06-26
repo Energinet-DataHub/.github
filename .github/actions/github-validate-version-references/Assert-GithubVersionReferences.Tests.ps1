@@ -17,7 +17,7 @@ Describe "Assert-GithubVersionReferences" {
     BeforeAll {
         . $PSScriptRoot/Assert-GithubVersionReferences.ps1
 
-        Mock Get-GithubReleases {
+        Mock Invoke-GetGithubReleases {
             return @"
             "title","type","tagname","published"
             "50.2.0","Latest","50.2.0","2023-05-10T12:57:40Z"

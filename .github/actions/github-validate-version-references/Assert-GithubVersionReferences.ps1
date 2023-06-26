@@ -12,50 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
+###############################################################################
+# SCRIPT CONSTANTS
+# Functions within the module can use these variables as constants.
+###############################################################################
 
-    .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
-#>
-function Get-GithubReleases {
-    param (
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $Repository
-    )
-    gh release list -L 10000 -R $Repository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieve latest major version
-
-    .DESCRIPTION
-    Simple filtering applied to Get-GithubReleases to return the latest major version
-#>
-function Get-LatestMajorVersion {
-    param (
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $Repository
-    )
-
-    [int]$latestMajor = (Get-GithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
-    return $latestMajor
-}
-
-<#
-    .SYNOPSIS
-    A collection of patterns used to identify github references and their associated version.
-
-    .DESCRIPTION
-    Each pattern must include a (?<version>\d+) group used to identify the major version.
-#>
-$TestCases = @(
+$RepositoryTestPatterns = @(
     @{
         "repository" = "Energinet-DataHub/.github"
         "pattern"    = "(.*?)uses:\s*Energinet-DataHub/\.github/\.github/actions/(.*?)@v?(?<version>\d+)(.*?)"
@@ -65,6 +27,54 @@ $TestCases = @(
         "pattern"    = "(.*?)Energinet-DataHub/geh-terraform-modules\.git//(.*?)ref=v?(?<version>\d+)(.*?)"
     }
 )
+
+###############################################################################
+# FUNCTIONS
+###############################################################################
+
+#######################################
+# Assert-GitHubCliPrerequisites
+#######################################
+
+<#
+    .SYNOPSIS
+    Uses github CLI (gh) to retrieve latest major version
+
+    .DESCRIPTION
+    Simple filtering applied to Invoke-GetGithubReleases to return the latest major version
+#>
+function Get-LatestMajorVersion {
+    param (
+        # The value of the GitHub repository variable.
+        [Parameter(Mandatory)]
+        [string]
+        $Repository
+    )
+
+    [int]$latestMajor = (Invoke-GetGithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
+    return $latestMajor
+}
+
+<#
+    .SYNOPSIS
+    Uses github CLI (gh) to retrieves a list of releases
+
+    .DESCRIPTION
+    Simple function wrapping a call with gh to retrieve the latest releases from github.
+#>
+function Invoke-GetGithubReleases {
+    param (
+        # The value of the GitHub repository variable.
+        [Parameter(Mandatory)]
+        [string]
+        $Repository
+    )
+    gh release list -L 10000 -R $Repository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+}
+
+#######################################
+# Assert-GithubVersionReferences
+#######################################
 
 <#
     .SYNOPSIS
@@ -89,16 +99,16 @@ function Assert-GithubVersionReferences {
 
     $deprecatedReferenceFound = $false
 
-    foreach ($test in $TestCases) {
-        [int]$latestVersion = Get-LatestMajorVersion -Repository $test.repository
-        [int]$UnsupportedVersion = $latestVersion - $MajorVersionsToKeep
+    foreach ($testPattern in $RepositoryTestPatterns) {
+        [int]$latestVersion = Get-LatestMajorVersion -Repository $testPattern.repository
+        [int]$unsupportedVersion = $latestVersion - $MajorVersionsToKeep
 
         foreach ($file in $files) {
             $content = Get-Content $file
             foreach ($line in $content) {
-                $match = [regex]::Match($line, $test.pattern)
+                $match = [regex]::Match($line, $testPattern.pattern)
 
-                if ($match.Success -and [int]$match.Groups["version"].Value -le $UnsupportedVersion) {
+                if ($match.Success -and [int]$match.Groups["version"].Value -le $unsupportedVersion) {
                     Write-Host "File found with reference to deprecated version $($match.Groups["version"]). Please change to a supported version. (Current latest: v$latestVersion)"
                     Write-Host "File:"$file.FullName
                     Write-Host "Context: "$match.Groups[0].Value.Trim()

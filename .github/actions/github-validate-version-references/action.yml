@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: Validates references to release versions
-description: Scans commit for references to deprecated versions
+description: Scans commit for references to deprecated versions of GitHub reusable actions/workflows and Terraform modules
 
 inputs:
   folder:
