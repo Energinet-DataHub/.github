@@ -51,7 +51,10 @@ function Get-LatestMajorVersion {
         $Repository
     )
 
-    [int]$latestMajor = (Invoke-GetGithubReleases -Repository $Repository | Where-Object { $_.title -like "v*" } | Select-Object -First 1 -ExpandProperty title).Trim("v")
+    [int]$latestMajor = (Invoke-GetGithubReleases -Repository $Repository `
+        | Where-Object { $_.title -like "v*" } `
+        | Select-Object -First 1 -ExpandProperty title).Trim("v")
+
     return $latestMajor
 }
 
@@ -69,7 +72,8 @@ function Invoke-GetGithubReleases {
         [string]
         $Repository
     )
-    gh release list -L 10000 -R $Repository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+    gh release list -L 10000 -R $Repository `
+    | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 }
 
 #######################################
