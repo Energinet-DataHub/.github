@@ -23,6 +23,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Pre-run
+      shell: pwsh
+      run: |
+        Write-Host "Just a debug message"
+
     - name: Checkout
       uses: actions/checkout@v3
       with:
@@ -38,7 +43,7 @@ runs:
     - name: Assert Github Version References
       shell: pwsh
       run: |
-        Write-Host "DETTE ER FOLDEREN DEN TJEKKER: ${{ inputs.folder }}"
+        Write-Host "${{ inputs.folder }}"
 
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
 
