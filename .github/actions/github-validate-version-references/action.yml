@@ -23,32 +23,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Pre-run
-      shell: pwsh
-      run: |
-        Write-Host "Just a debug message"
-
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        repository: Energinet-DataHub/.github
-        path: ${{ inputs.folder }}/remote/github
-
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        repository: Energinet-DataHub/geh-terraform-modules
-        ref: main
-        path: ${{ inputs.folder}}/remote/modules
-
     - name: Assert Github Version References
       shell: pwsh
       run: |
         Write-Host "${{ inputs.folder }}"
 
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
-
-        Assert-DotGithubVersionReferences -Path "${{ inputs.folder }}" -RepositoryPath "${{ inputs.folder}}/../remote/.github"
-        #Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
-        #. ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
-        #Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
+        Assert-GithubVersionReferences -Path "${{ inputs.folder }}"

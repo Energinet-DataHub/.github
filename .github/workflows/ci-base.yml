@@ -211,6 +211,8 @@ jobs:
     name: Validate references
     if: ${{ inputs.skip_validate_version_references != 'true' }}
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for gh api search
     steps:
       - name: Checkout
         uses: actions/checkout@v3
