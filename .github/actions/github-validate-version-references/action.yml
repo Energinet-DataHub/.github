@@ -46,4 +46,3 @@ runs:
         #Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
         #. ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
         #Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
-
