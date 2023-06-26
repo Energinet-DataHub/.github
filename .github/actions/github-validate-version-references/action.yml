@@ -38,6 +38,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: Energinet-DataHub/geh-terraform-modules
+        ref: main
         path: ${{ inputs.folder}}/remote/modules
 
     - name: Assert Github Version References
