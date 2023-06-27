@@ -105,7 +105,10 @@ jobs:
       # Only relevant if 'use_azure_functions_tools' is TRUE
       #
       # Set value used by 'AzuriteManager'
+      #  Use 'AzuriteBlobFolderPath' for TestCommon version 4.2.0 and lower
       AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
+      #  Use 'AzuriteFolderPath' for TestCommon version 4.3.0 and higher
+      AzuriteFolderPath: ${{ github.workspace }}\node_modules\.bin\
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
 
