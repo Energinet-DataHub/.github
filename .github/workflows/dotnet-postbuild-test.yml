@@ -90,20 +90,36 @@ on:
         required: false
         default: ""
         type: string
-    secrets:
+      run_integration_tests:
+        description: Set to 'true' to log into Azure for executing integration tests
+        required: false
+        default: false
+        type: boolean
+      azure_integrationtest_spn_id:
+        description: Azure Service Principal for executing integration tests
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_tenant_id:
+        description: Azure Tenant ID for executing integration tests
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_subscription_id:
+        description: Azure subscription ID for executing integration tests
+        required: false
+        default: ""
+        type: string
       azure_keyvault_url:
-        description: Required if we need to manage Azure resources from automated tests
+        description: Azure Keyvault URL with secrets used in integration tests
         required: false
+        default: ""
+        type: string
       azure_b2csecrets_keyvault_url:
-        description: Required if we need to retrieve B2C access tokens from automated tests
+        description: Azure Keyvault URL with B2C secrets used in integration tests
         required: false
-      # Secrets required if we need to login to Azure and use Azure resources from automated tests
-      azure_tenant_id:
-        required: false
-      azure_subscription_id:
-        required: false
-      azure_spn_id:
-        required: false
+        default: ""
+        type: string
 
 permissions:
   id-token: write
@@ -126,9 +142,9 @@ jobs:
       AZURITE_VERSION: 3.23.0
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
-      AZURE_KEYVAULT_URL: ${{ secrets.azure_keyvault_url }}
+      AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
-      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ secrets.AZURE_B2CSECRETS_KEYVAULT_URL }}
+      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ inputs.azure_b2csecrets_keyvault_url }}
       #
       # Only relevant if 'use_azure_functions_tools' is TRUE
       #
@@ -139,7 +155,6 @@ jobs:
       AzuriteFolderPath: ${{ github.workspace }}\node_modules\.bin\
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
-
     steps:
       - name: Guard for Windows OS
         shell: bash
@@ -234,12 +249,12 @@ jobs:
             }
 
       - name: Login to use Azure resources from automated tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
+        if: ${{ inputs.run_integration_tests == true }}
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.azure_spn_id }}
-          tenant-id: ${{ secrets.azure_tenant_id }}
-          subscription-id: ${{ secrets.azure_subscription_id }}
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Wait for dotnet-tests artifact to be ready for download
         uses: Wandalen/wretry.action@v1.0.36
