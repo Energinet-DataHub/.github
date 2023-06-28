@@ -240,7 +240,7 @@ jobs:
         run: dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Login to use Azure resources from automated tests
-        if: ${{ env.RUN_INTEGRATION_TESTS == 'true' }}
+        if: ${{ inputs.run_integration_tests == true }}
         uses: azure/login@v1
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
