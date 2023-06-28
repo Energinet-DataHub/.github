@@ -61,6 +61,11 @@ on:
         type: string
         description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
         default: "false"
+    secrets:
+      pat_token:
+        required: true
+        type: string
+        description: Organization PAT for access both public and private repositories
 
 jobs:
   md_check:
@@ -211,8 +216,6 @@ jobs:
     name: Validate references to shared action/modules
     if: ${{ inputs.skip_validate_version_references != 'true' }}
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for gh api search
     steps:
       - name: Checkout
         uses: actions/checkout@v3

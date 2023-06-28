@@ -11,7 +11,8 @@ jobs:
   #
   ci_base:
     uses: ./.github/workflows/ci-base.yml
-    secrets: inherit # Needed for organization scope GH_TOKEN
+    secrets:
+      pat_token: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }}
 
   #
   # Automatic Release (verify if release tag exists)
