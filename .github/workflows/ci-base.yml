@@ -64,7 +64,6 @@ on:
     secrets:
       pat_token:
         required: true
-        type: string
         description: Organization PAT for access both public and private repositories
 
 jobs:
@@ -223,6 +222,6 @@ jobs:
       - name: Run reference validation on local folder
         uses: ./.github/actions/github-validate-version-references
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for checkout of private repos
+          GH_TOKEN: ${{ secrets.pat_token }} # Organization level token needed for checkout of private repos
         with:
           folder: ${{ github.workspace }}
