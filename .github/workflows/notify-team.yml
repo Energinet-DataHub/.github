@@ -18,9 +18,8 @@ name: Notify team
 # This workflow is used to notify teams about failing deployments
 # by sending an email to their MS Team Channel or possibly direct mails.
 #
-# The workflow must be called using 'secrets: inherit' to get access
-# to necessary secrets.
-# See: https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
+# Note: Variables prefixed "EMAIL_" are organization variables allowing this reusable workflow to access them
+# regardless of where the workflow is used
 
 on:
   workflow_call:
