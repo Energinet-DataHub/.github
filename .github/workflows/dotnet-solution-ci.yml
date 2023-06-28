@@ -63,7 +63,32 @@ on:
         default: ""
         type: string
       run_integration_tests:
-        description: Must be 'true' to log into Azure for executing integration tests
+        description: Set to 'true' to log into Azure for executing integration tests
+        required: false
+        default: false
+        type: boolean
+      azure_integrationtest_spn_id:
+        description: Azure Service Principal for executing integration tests
+        required: false
+        default: "false"
+        type: string
+      azure_integrationtest_tenant_id:
+        description: Azure Tenant ID for executing integration tests
+        required: false
+        default: "false"
+        type: string
+      azure_integrationtest_subscription_id:
+        description: Azure subscription ID for executing integration tests
+        required: false
+        default: "false"
+        type: string
+      azure_keyvault_url:
+        description: Azure Keyvault URL with secrets used in integration tests
+        required: false
+        default: "false"
+        type: string
+      azure_b2csecrets_keyvault_url:
+        description: Azure Keyvault URL with B2C secrets used in integration tests
         required: false
         default: "false"
         type: string
@@ -89,9 +114,9 @@ jobs:
       AZURITE_VERSION: 3.23.0
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
-      AZURE_KEYVAULT_URL: ${{ vars.azure_keyvault_url }}
+      AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
-      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ vars.azure_b2csecrets_keyvault_url }}
+      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ inputs.azure_b2csecrets_keyvault_url }}
       #
       # Only relevant if 'use_azure_functions_tools' is TRUE
       #
@@ -219,9 +244,9 @@ jobs:
         if: ${{ env.RUN_INTEGRATION_TESTS == 'true' }}
         uses: azure/login@v1
         with:
-          client-id: ${{ vars.azure_spn_id }}
-          tenant-id: ${{ vars.azure_tenant_id }}
-          subscription-id: ${{ vars.azure_subscription_id }}
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run tests
         shell: pwsh
