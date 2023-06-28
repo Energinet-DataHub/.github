@@ -62,20 +62,11 @@ on:
         required: false
         default: ""
         type: string
-    secrets:
-      azure_keyvault_url:
-        description: Required if we need to manage Azure resources from automated tests
+      run_integration_tests:
+        description: Must be 'true' to log into Azure for executing integration tests
         required: false
-      azure_b2csecrets_keyvault_url:
-        description: Required if we need to retrieve B2C access tokens from automated tests
-        required: false
-      # Secrets required if we need to login to Azure and use Azure resources from automated tests
-      azure_tenant_id:
-        required: false
-      azure_subscription_id:
-        required: false
-      azure_spn_id:
-        required: false
+        default: "false"
+        type: string
 
 permissions:
   id-token: write
@@ -112,6 +103,7 @@ jobs:
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
 
+      RUN_INTEGRATION_TESTS: ${{ inputs.run_integration_tests }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -224,7 +216,7 @@ jobs:
         run: dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Login to use Azure resources from automated tests
-        if: ${{ env.AZURE_KEYVAULT_URL != '' || env.AZURE_B2CSECRETS_KEYVAULT_URL != '' }}
+        if: ${{ env.RUN_INTEGRATION_TESTS == 'true' }}
         uses: azure/login@v1
         with:
           client-id: ${{ vars.azure_spn_id }}
