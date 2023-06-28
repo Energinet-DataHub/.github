@@ -98,27 +98,27 @@ on:
       azure_integrationtest_spn_id:
         description: Azure Service Principal for executing integration tests
         required: false
-        default: "false"
+        default: ""
         type: string
       azure_integrationtest_tenant_id:
         description: Azure Tenant ID for executing integration tests
         required: false
-        default: "false"
+        default: ""
         type: string
       azure_integrationtest_subscription_id:
         description: Azure subscription ID for executing integration tests
         required: false
-        default: "false"
+        default: ""
         type: string
       azure_keyvault_url:
         description: Azure Keyvault URL with secrets used in integration tests
         required: false
-        default: "false"
+        default: ""
         type: string
       azure_b2csecrets_keyvault_url:
         description: Azure Keyvault URL with B2C secrets used in integration tests
         required: false
-        default: "false"
+        default: ""
         type: string
 
 permissions:
