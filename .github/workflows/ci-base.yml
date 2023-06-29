@@ -64,7 +64,7 @@ on:
     secrets:
       pat_token:
         required: true
-        description: Organization PAT for access both public and private repositories
+        description: Organization PAT to access both public and private repositories
 
 jobs:
   md_check:

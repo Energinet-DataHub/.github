@@ -51,11 +51,13 @@ function Get-LatestMajorVersion {
         $Repository
     )
 
-    [int]$latestMajor = (Invoke-GetGithubReleases -Repository $Repository `
+    [int[]]$majorVersions = (Invoke-GetGithubReleases -Repository $Repository `
         | Where-Object { $_.title -like "v*" } `
-        | Select-Object -First 1 -ExpandProperty title).Trim("v")
+        | Select-Object -ExpandProperty title).Trim("v")
 
-    return $latestMajor
+    return $majorVersions `
+    | Sort-Object -Descending `
+    | Select-Object -First 1
 }
 
 <#
@@ -76,6 +78,54 @@ function Invoke-GetGithubReleases {
     | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 }
 
+<#
+    .SYNOPSIS
+    Compares two version numbers
+
+    .DESCRIPTION
+    Compares two version numbers in dot-notation (eg. 1.0.3) and return (-1,1,0) if the first number is smaller, bigger og equivelant version
+#>
+function Compare-Versions {
+    param(
+        # Previous Version
+        [Parameter(Mandatory)]
+        [string]
+        $Version,
+
+        # New Version
+        [Parameter(Mandatory)]
+        [string]
+        $Comparison
+    )
+    # Split the version numbers into segments
+    $v1 = $Version -Split "\."
+    $v2 = $Comparison -Split "\."
+
+    # Pad the shorter version number with zeros
+    $diff = $v1.Count - $v2.Count
+    if ($diff -gt 0) {
+        $v2 += , @(0) * $diff
+    }
+    elseif ($diff -lt 0) {
+        $v1 += , @(0) * (-$diff)
+    }
+
+    # Compare each segment of the version number
+    foreach ($i in 0..($v1.Count - 1)) {
+        $v1val = [int]::Parse($v1[$i])
+        $v2val = [int]::Parse($v2[$i])
+
+        if ($v1val -gt $v2val) {
+            return 1
+        }
+        elseif ($v1val -lt $v2val) {
+            return -1
+        }
+    }
+
+    # The version numbers are equal
+    return 0
+}
 #######################################
 # Assert-GithubVersionReferences
 #######################################

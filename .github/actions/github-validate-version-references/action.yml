@@ -26,7 +26,5 @@ runs:
     - name: Assert Github Version References
       shell: pwsh
       run: |
-        Write-Host "${{ inputs.folder }}"
-
         . ${{ github.action_path }}/Assert-GithubVersionReferences.ps1
         Assert-GithubVersionReferences -Path "${{ inputs.folder }}"
