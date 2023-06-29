@@ -56,6 +56,15 @@ on:
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
         default: "false"
+      skip_validate_version_references:
+        required: false
+        type: string
+        description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
+        default: "false"
+    secrets:
+      pat_token:
+        required: true
+        description: Organization PAT to access both public and private repositories
 
 jobs:
   md_check:
@@ -201,3 +210,18 @@ jobs:
           else {
             Write-Host "No Pester test files detected. Skipping Pester execution."
           }
+
+  github_validate_version_references:
+    name: Validate references to shared action/modules
+    if: ${{ inputs.skip_validate_version_references != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run reference validation on local folder
+        uses: ./.github/actions/github-validate-version-references
+        env:
+          GH_TOKEN: ${{ secrets.pat_token }} # Organization level token needed for checkout of private repos
+        with:
+          folder: ${{ github.workspace }}
