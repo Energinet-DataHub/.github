@@ -61,7 +61,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.pat_token }}
-          repository: ${{ secrets.environment_repository_path }}
+          repository: ${{ vars.environment_repository_path }}
           event-type: ${{ env.EVENT_TYPE }}
           # yamllint disable-line rule:quoted-strings
           client-payload: '{"tag_name": "${{ env.RELEASE_VERSION }}", "repository_path": "${{ inputs.caller_repository_path }}", "repository_name": "${{ inputs.caller_repository_name }}"}'
