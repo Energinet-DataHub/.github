@@ -105,15 +105,6 @@ Features:
 
 Teams should ensure developers configure their local development environment to follow the same rules as what will be forced by the workflow. All rules can be configured using VS Code and extensions. Internal contributors can get more information on the subject by looking in the guidelines documented by The Outlaws.
 
-### Dispatch deployment request
-
-File: [dispath-deployment-request.yml](.github/workflows/dispatch-deployment-request.yml)
-
-This workflow will find the associated pull request to a commit:
-
-- If no pull request is found it will abort.
-- If a pull request is found, it will use this to find an associated release. Using that release as a referer, it will dispatch an event to the environment repository.
-
 ### .NET build and test
 
 Files:
@@ -123,7 +114,7 @@ Files:
 
 These workflows are intended to run in parallel. While we build the .NET solution on one runner we can utilize this build time to setup other runners for the test execution.
 
-#### _Build_
+#### *Build*
 
 As it is more time effecient to build on Linux, we default to use Ubuntu for building the
 .NET solution.
@@ -133,7 +124,7 @@ The caveat of this is:
 - Developers must be observant of the casing of folders and files in the repository as Linux is case-sensitive and Windows is not. This difference can lead to successful builds locally (on Windows) while it could fail on the build runner.
 - An exception stacktrace from a .NET assembly builded on Linux uses the Linux path (if a path is given in the trace).
 
-#### _Test_
+#### *Test*
 
 We default to use Windows when testing as we currently also use Windows as the hosting system in Azure.
 
@@ -212,7 +203,7 @@ The purpose of this workflow is to notify a team through emails, if a workflow f
 
 We would prefer to notify teams by emailing to their Microsoft Team Channel, but as these kind of emails are often blocked, we have implemented the workflow so it also supports emailing a list of recipients. This means teams can give us their team members emails and we can configure it to email them directly.
 
-#### _Details_
+#### *Details*
 
 The workflow uses SendGrid to send emails.
 
