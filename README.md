@@ -201,7 +201,7 @@ File: [notify-team.yml](.github/workflows/notify-team.yml)
 
 The purpose of this workflow is to notify a team through emails, if a workflow fails.
 
-We would prefer to notify teams by emailing to their Microsoft Team Channel, but as these kind of emails are often blocked, we have implemented the workflow so it also supports emailing a list of recipients. This means teams can give us their team members emails and we can configure it to email them directly.
+You may add a comma-delimited list of recipients. This means teams can configure the notification workflow to email them directly to their Office 365 account, as well as to their MS Teams channel using the channel's email-address.
 
 #### *Details*
 
