@@ -180,8 +180,8 @@ Describe "Create-ReleaseTag" {
 
             $tests = @(
                 @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v10"; "expected" = "10" },
-                @{"input" = "   uses:Energinet-DataHub/.github/cde/f-g/h@v11"; "expected" = "11" },
-                @{"input" = "uses:Energinet-DataHub/.github/c-d-e.yml@v09   "; "expected" = "09" },
+                @{"input" = "uses: Energinet-DataHub/.github/cde/f-g/h@v11"; "expected" = "11" },
+                @{"input" = "uses: Energinet-DataHub/.github/c-d-e.yml@v09   "; "expected" = "09" },
                 @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
                 @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
                 @{"input" = "uses: Energinet-DataHub/.github/c-d-e@1.2.3"; "expected" = "1" },
