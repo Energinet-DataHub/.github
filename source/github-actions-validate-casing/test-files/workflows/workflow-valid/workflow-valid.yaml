@@ -59,7 +59,7 @@ jobs:
 
   ci_magic_test:
     needs: ci_magic_build
-    uses: Energinet-DataHub/.github/.github/workflows/ci-magic-test.yml@v11
+    uses: Energinet-DataHub/.github/.github/workflows/ci-magic-test.yml@v12
     with:
       solution_file_path: my.sln
     secrets:
