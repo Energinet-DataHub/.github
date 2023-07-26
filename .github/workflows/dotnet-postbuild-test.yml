@@ -139,7 +139,7 @@ jobs:
       TEST_RESULTS_PATH: ${{ github.workspace }}\TestResults
       # Tool versions
       NODE_VERSION: 16
-      AZURITE_VERSION: 3.23.0
+      AZURITE_VERSION: 3.24.0
       AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
