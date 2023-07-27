@@ -41,7 +41,7 @@ inputs:
   azure_functions_core_tools_version:
     description: Install specified Azure Functions Core Tools version
     required: false
-    default: 4.0.4670
+    default: 4.0.5198
   # SQL LocalDB 2019
   use_sqllocaldb_2019:
     description: Install 2019 version of SQL LocalDB to support testing
