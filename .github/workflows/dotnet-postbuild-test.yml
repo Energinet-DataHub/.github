@@ -140,7 +140,7 @@ jobs:
       # Tool versions
       NODE_VERSION: 16
       AZURITE_VERSION: 3.24.0
-      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.4670
+      AZURE_FUNCTIONS_CORE_TOOLS_VERSION: 4.0.5198
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
