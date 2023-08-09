@@ -155,7 +155,7 @@ jobs:
           path: ${{ env.REMOTE_REPO_PATH }}
 
       - name: Copy configuration files
-        run: cp -n ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
+        run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
 
       - name: Cleanup remote
         run: rm -rf ${{ env.REMOTE_REPO_PATH }}
