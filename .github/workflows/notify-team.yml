@@ -72,6 +72,6 @@ jobs:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
           to: ${{ steps.get_email.outputs.team_email }}
-          from: ${{ vars.email_sender }}
+          from: ${{ vars.email_internal_sender }}
           subject: ${{ inputs.subject }}
           content: ${{ inputs.body }}
