@@ -84,6 +84,7 @@ jobs:
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
           token: ${{ secrets.pat_token_retrigger_workflow }}
+          clean: false
 
       # - name: Setup node
       #   uses: actions/setup-node@v3
