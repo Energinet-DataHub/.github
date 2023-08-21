@@ -85,51 +85,51 @@ jobs:
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
           token: ${{ secrets.pat_token_retrigger_workflow }}
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      # - name: Setup node
+      #   uses: actions/setup-node@v3
 
-      # Script is available from https://github.com/structurizr/puppeteer
-      - name: Prepare export-diagrams script
-        shell: bash
-        run: |
-          cd "${{ env.DIAGRAMS_FOLDER }}"
-          rm -rf */
-          npm i puppeteer
-          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
+      # # Script is available from https://github.com/structurizr/puppeteer
+      # - name: Prepare export-diagrams script
+      #   shell: bash
+      #   run: |
+      #     cd "${{ env.DIAGRAMS_FOLDER }}"
+      #     rm -rf */
+      #     npm i puppeteer
+      #     curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
-      - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
-        id: diagrams_changed
-        uses: tj-actions/changed-files@v35
-        with:
-          since_last_remote_commit: true
-          files: |
-            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.dsl
-            **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
-            **/docs/diagrams/c4-model/${{ inputs.included_model_filename }}.dsl
+      # - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
+      #   id: diagrams_changed
+      #   uses: tj-actions/changed-files@v35
+      #   with:
+      #     since_last_remote_commit: true
+      #     files: |
+      #       **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.dsl
+      #       **/docs/diagrams/c4-model/${{ inputs.structurizr_workspace_filename }}.json
+      #       **/docs/diagrams/c4-model/${{ inputs.included_model_filename }}.dsl
 
-      - name: Write out any changes to Structurizr files - based on `diagrams_changed`-step
-        shell: bash
-        run: |
-          echo "Structurizr files has changed: ${{ steps.diagrams_changed.outputs.any_changed }}"
-          echo "List changed files: ${{ steps.diagrams_changed.outputs.all_changed_files }}"
+      # - name: Write out any changes to Structurizr files - based on `diagrams_changed`-step
+      #   shell: bash
+      #   run: |
+      #     echo "Structurizr files has changed: ${{ steps.diagrams_changed.outputs.any_changed }}"
+      #     echo "List changed files: ${{ steps.diagrams_changed.outputs.all_changed_files }}"
 
-      - name: Render diagrams as PNG images
-        if: steps.diagrams_changed.outputs.any_changed == 'true'
-        shell: bash
-        run: |
-          cd "${{ env.DIAGRAMS_FOLDER }}"
-          set -e
-          echo "Rendering diagram(s) ..."
-          ! node export-diagrams.js ${{ env.DIAGRAMS_PAGE_URL }} png | grep png
-          echo "Rendered diagram(s)"
-          rm *-key.png
-          foldername=${{ inputs.structurizr_workspace_filename }}
-          mkdir "$foldername"
-          mv -f *.png "$foldername/"
+      # - name: Render diagrams as PNG images
+      #   if: steps.diagrams_changed.outputs.any_changed == 'true'
+      #   shell: bash
+      #   run: |
+      #     cd "${{ env.DIAGRAMS_FOLDER }}"
+      #     set -e
+      #     echo "Rendering diagram(s) ..."
+      #     ! node export-diagrams.js ${{ env.DIAGRAMS_PAGE_URL }} png | grep png
+      #     echo "Rendered diagram(s)"
+      #     rm *-key.png
+      #     foldername=${{ inputs.structurizr_workspace_filename }}
+      #     mkdir "$foldername"
+      #     mv -f *.png "$foldername/"
 
-      - name: Commit PNG images
-        if: steps.diagrams_changed.outputs.any_changed == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Auto generated diagrams
-          file_pattern: ${{ env.DIAGRAMS_FOLDER }}/**/*.png
+      # - name: Commit PNG images
+      #   if: steps.diagrams_changed.outputs.any_changed == 'true'
+      #   uses: stefanzweifel/git-auto-commit-action@v4
+      #   with:
+      #     commit_message: Auto generated diagrams
+      #     file_pattern: ${{ env.DIAGRAMS_FOLDER }}/**/*.png
