@@ -74,7 +74,7 @@ jobs:
         volumes:
           - ${{ github.workspace }}:/usr/local/structurizr
         env:
-          STRUCTURIZR_WORKSPACE_PATH: /Xdocs/diagrams/c4-model
+          STRUCTURIZR_WORKSPACE_PATH: /docs/diagrams/c4-model
           STRUCTURIZR_WORKSPACE_FILENAME: ${{ inputs.structurizr_workspace_filename }}
     steps:
       - name: Checkout
