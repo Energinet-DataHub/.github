@@ -72,9 +72,9 @@ jobs:
         ports:
           - 8080:8080
         volumes:
-          - ${{ github.workspace }}/docs/diagrams:/usr/local/structurizr
+          - ${{ github.workspace }}:/usr/local/structurizr
         env:
-          STRUCTURIZR_WORKSPACE_PATH: /c4-model
+          STRUCTURIZR_WORKSPACE_PATH: /docs/diagrams/c4-model
           STRUCTURIZR_WORKSPACE_FILENAME: ${{ inputs.structurizr_workspace_filename }}
     steps:
       - name: Checkout
