@@ -65,17 +65,6 @@ jobs:
       DIAGRAMS_FOLDER: ${{ github.workspace }}/docs/diagrams/c4-model
       # Url for diagrams page in Structurizr Lite, when running in docker
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
-    services:
-      # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
-      structurizr-lite:
-        image: structurizr/lite:latest
-        ports:
-          - 8080:8080
-        volumes:
-          - ${{ github.workspace }}:/usr/local/structurizr
-        env:
-          STRUCTURIZR_WORKSPACE_PATH: /docs/diagrams/c4-model
-          STRUCTURIZR_WORKSPACE_FILENAME: ${{ inputs.structurizr_workspace_filename }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -84,18 +73,6 @@ jobs:
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
           token: ${{ secrets.pat_token_retrigger_workflow }}
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-
-      # Script is available from https://github.com/structurizr/puppeteer
-      - name: Prepare export-diagrams script
-        shell: bash
-        run: |
-          cd "${{ env.DIAGRAMS_FOLDER }}"
-          rm -rf */
-          npm i puppeteer
-          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
         id: diagrams_changed
@@ -112,6 +89,39 @@ jobs:
         run: |
           echo "Structurizr files has changed: ${{ steps.diagrams_changed.outputs.any_changed }}"
           echo "List changed files: ${{ steps.diagrams_changed.outputs.all_changed_files }}"
+
+      # We experienced issues with using GitHub 'services' to run Structurizr Lite in docker;
+      # it caused an checkout error in the 'greenforce-frontend' repository.
+      # So instead we use an action to run the docker container; that way we can checkout the
+      # repository BEFORE we run Structurizr Lite.
+      - name: Prepare Structurizr Lite (docker)
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
+        shell: bash
+        run: |
+          # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
+          docker pull structurizr/lite
+          docker run \
+            -d \
+            -t \
+            -p 8080:8080 \
+            -v ${{ github.workspace }}:/usr/local/structurizr \
+            -e STRUCTURIZR_WORKSPACE_PATH=/docs/diagrams/c4-model \
+            -e STRUCTURIZR_WORKSPACE_FILENAME=${{ inputs.structurizr_workspace_filename }} \
+            structurizr/lite
+
+      - name: Setup node
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
+        uses: actions/setup-node@v3
+
+      # Script is available from https://github.com/structurizr/puppeteer
+      - name: Prepare export-diagrams script
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
+        shell: bash
+        run: |
+          cd "${{ env.DIAGRAMS_FOLDER }}"
+          rm -rf */
+          npm i puppeteer
+          curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
       - name: Render diagrams as PNG images
         if: steps.diagrams_changed.outputs.any_changed == 'true'
