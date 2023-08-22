@@ -90,6 +90,10 @@ jobs:
           echo "Structurizr files has changed: ${{ steps.diagrams_changed.outputs.any_changed }}"
           echo "List changed files: ${{ steps.diagrams_changed.outputs.all_changed_files }}"
 
+      # We experienced issues with using GitHub 'services' to run Structurizr Lite in docker;
+      # it caused an checkout error in the 'greenforce-frontend' repository.
+      # So instead we use an action to run the docker container; that way we can checkout the
+      # repository BEFORE we run Structurizr Lite.
       - name: Prepare Structurizr Lite (docker)
         if: steps.diagrams_changed.outputs.any_changed == 'true'
         shell: bash
