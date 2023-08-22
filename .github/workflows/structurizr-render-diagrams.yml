@@ -90,8 +90,6 @@ jobs:
         run: |
           docker pull structurizr/lite
           docker run \
-            -it \
-            --rm \
             -p 8080:8080 \
             -v ${{ github.workspace }}:/usr/local/structurizr \
             -e STRUCTURIZR_WORKSPACE_PATH=/docs/diagrams/c4-model \
