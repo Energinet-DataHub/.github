@@ -35,6 +35,11 @@ name: Render C4 diagrams using Structurizr Lite
 # That means if multiple commits are pushed to the remote branch at the same time, all commits will be
 # checked for changes to the DSL file. If `since_last_remote_commit` is false (default value),
 # only the latest commit being pushed is checked - thereby not checking any intermediate commits.
+#
+# If we have multiple Structurizr DSL files in the same repository, we can support rendering them by:
+#  1. Adding a job per file
+#  2. Ensure these jobs are executed in serial (by using 'needs')
+# If the jobs are executed in parallel and more than one needs to make an auto commit, the second commit will fail.
 
 on:
   workflow_call:
