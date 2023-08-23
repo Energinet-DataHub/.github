@@ -39,6 +39,7 @@ name: Render C4 diagrams using Structurizr Lite
 # If we have multiple Structurizr DSL files in the same repository, we can support rendering them by:
 #  1. Adding a job per file
 #  2. Ensure these jobs are executed in serial (by using 'needs')
+#  3. Ensure that later jobs are executed even if some are skipped (by using 'if' and 'always()')
 # If the jobs are executed in parallel and more than one needs to make an auto commit, the second commit will fail.
 
 on:
