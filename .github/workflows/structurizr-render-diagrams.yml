@@ -119,7 +119,7 @@ jobs:
         shell: bash
         run: |
           cd "${{ env.DIAGRAMS_FOLDER }}"
-          rm -rf */
+          rm -rf */${{ inputs.structurizr_workspace_filename }}
           npm i puppeteer
           curl https://raw.githubusercontent.com/structurizr/puppeteer/cf6f70da15fb18c038e052c9335970eecd77025a/export-diagrams.js --output export-diagrams.js
 
