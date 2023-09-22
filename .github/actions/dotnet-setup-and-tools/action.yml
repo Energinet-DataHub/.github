@@ -19,7 +19,7 @@ inputs:
   dotnet_version:
     description: Install specified .NET Core SDK version
     required: false
-    default: 7.0.400
+    default: 7.0.401
   # Cosmos DB emulator
   use_cosmos_db_emulator:
     description: Install Cosmos DB emulator to support testing

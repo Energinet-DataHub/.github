@@ -56,7 +56,7 @@ on:
       dotnet_version:
         description: Install specified .NET Core SDK version
         required: false
-        default: 7.0.400
+        default: 7.0.401
         type: string
       operating_system:
         description: Must be a version of Windows, we do not support Linux for testing
