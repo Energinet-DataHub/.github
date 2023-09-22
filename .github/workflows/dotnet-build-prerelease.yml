@@ -101,7 +101,7 @@ jobs:
           dotnet build ${{ inputs.solution_file_path }} `
             --no-restore `
             --configuration ${{ env.BUILD_CONFIGURATION }} `
-            -p:SourceRevisionId=${{ github.sha }}
+            -p:SourceRevisionId="${{ github.sha }}"
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
