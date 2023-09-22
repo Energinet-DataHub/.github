@@ -98,12 +98,10 @@ jobs:
 
       - name: Build solution
         run: |
-          # Release/tag SHA
-          #dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=${{ github.sha }}
+          # Last merge commit on PR
+          dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=${{ github.sha }}
           # <Repository>-PR-<PR Number>
           #dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=${{ github.repository }}-PR-${{ github.event.number }}
-          # Workflow SHA
-          dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=${{ github.workflow_sha }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
