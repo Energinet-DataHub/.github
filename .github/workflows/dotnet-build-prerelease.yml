@@ -19,7 +19,8 @@ name: .NET build - prerelease
 #  - dotnet-prepare-outputs
 #  - dotnet-tests-prepare-outputs
 #
-# The workflow will build the dotnet code. If it is running as part
+# The workflow will build the dotnet code and add the GitHub PR and SHA
+# information as .NET assembly meta data. If it is running as part
 # of a PR it will also create a prerelease package containing the
 # output. The prerelease name will be in the format 'dotnet_<PR-number>'.
 #
@@ -98,7 +99,7 @@ jobs:
 
       - name: Build solution
         run: |
-          # We build the GitHub PR and SHA (last merge commit on PR) into the assembly meta data
+          # We build the GitHub PR and SHA (last merge commit on PR) into the .NET assembly meta data:
           #   The full 'InformationalVersion' format is '<version>+PR_<pr number>+SHA_<sha>'.
           #
           #   The value of 'SourceRevisionId' is appended to the assembly attribute 'InformationalVersion', separated by a '+' sign.
