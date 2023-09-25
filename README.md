@@ -116,8 +116,9 @@ These workflows are intended to run in parallel. While we build the .NET solutio
 
 #### *Build*
 
-As it is more time effecient to build on Linux, we default to use Ubuntu for building the
-.NET solution.
+This workflow build the GitHub PR and SHA (last merge commit on PR) into the .NET assembly meta data property `InformationalVersion`. The final format of the valus is `<version>+PR_<pr number>+SHA_<sha>`.
+
+As it is more time effecient to build on Linux, we default to use Ubuntu for building the .NET solution.
 
 The caveat of this is:
 
