@@ -37,11 +37,11 @@ inputs:
   azurite_version:
     description: Install specified Azurite version
     required: false
-    default: 3.24.0
+    default: 3.26.0
   azure_functions_core_tools_version:
     description: Install specified Azure Functions Core Tools version
     required: false
-    default: 4.0.5198
+    default: 4.0.5413
   # SQL LocalDB 2019
   use_sqllocaldb_2019:
     description: Install 2019 version of SQL LocalDB to support testing
