@@ -42,12 +42,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Detect file changes
-        uses: dorny/paths-filter@v2
+        uses: ./.github/paths-filter@v2
         id: filter
         with:
           filters: |
             magic:
-              - '.github/workflows/magic-*.yml'
+              - './.github/workflows/magic-*.yml'
 
   ci_magic_build:
     needs: changes

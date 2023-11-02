@@ -22,8 +22,8 @@ Describe "When dot-sourcing the script" {
 
     Context "Given Assert-GitHubActionsCasing is called with '<folderPath>'" -ForEach @(
         @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions/action-valid"; ExpectedCount = 1 }
-        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions"; ExpectedCount = 2 }
-        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files"; ExpectedCount = 4 }
+        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions"; ExpectedCount = 3 }
+        @{ FolderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files"; ExpectedCount = 5 }
     ) {
         BeforeAll {
             Mock Test-GitHubFile {}
@@ -34,6 +34,17 @@ Describe "When dot-sourcing the script" {
             Assert-GitHubActionsCasing -FolderPath $folderPath
 
             Should -Invoke Test-GitHubFile -Times $expectedCount -Exactly
+        }
+    }
+
+    Context "Given Assert-GitHubActionsCasing is given valid action file with invalid 3rd party action" {
+        BeforeAll {
+            $script:folderPath = "$PSScriptRoot/../../../source/github-actions-validate-casing/test-files/actions/action-valid-with-invalid-3rd-party"
+        }
+
+        It "Should not throw" {
+            # Act
+            Assert-GitHubActionsCasing -FolderPath $script:folderPath
         }
     }
 
