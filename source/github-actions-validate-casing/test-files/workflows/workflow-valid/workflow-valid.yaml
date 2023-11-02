@@ -47,7 +47,7 @@ jobs:
         with:
           filters: |
             magic:
-              - './.github/workflows/magic-*.yml'
+              - '.github/workflows/magic-*.yml'
 
   ci_magic_build:
     needs: changes
