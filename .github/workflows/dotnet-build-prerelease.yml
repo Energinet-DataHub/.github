@@ -47,6 +47,10 @@ on:
         type: string
         description: Use this variable if you want to prefix the release name
         default: dotnet
+      project_name:
+        required: false
+        default: ''
+        type: string
 
 jobs:
   create_prerelease:
@@ -133,6 +137,7 @@ jobs:
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
+          project_name: ${{ inputs.project_name }}
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request'
