@@ -1,0 +1,33 @@
+name: Unittest for 3rd party action
+
+on:
+
+jobs:
+  job1:
+    steps:
+      - name: 3rd party invalid action
+        uses: someprovider/anaction@v1
+        with:
+          releaseRepositoryPath: foo
+
+      - name: Energinet valid action
+        uses: Energinet-DataHub/.github/actions/action@v2
+        with:
+          load_test_config_file: bar
+
+      - name: Energinet valid action
+        uses: ./.github/actions/action@v2
+        with:
+          load_test_config_file: baz
+
+  job2:
+    - name: 3rd party invalid action
+      uses: someprovider/anotheraction@v2
+      with:
+        loadTestConfigFile: bar
+
+  job3:
+    - name: Energinet valid action
+      uses: ./.github/actions/action@v2
+      with:
+        load_test_config_file: baz

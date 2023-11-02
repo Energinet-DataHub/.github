@@ -249,6 +249,7 @@ function Add-WorkflowJobsFailures {
             Add-IfCasingFailure `
                 -Value $key `
                 -DefinitionKind “Job With" `
+                -DefinitionContext $job.uses `
                 -Failures $Failures
         }
 
@@ -278,11 +279,16 @@ function Add-WorkflowJobsFailures {
         }
 
         # Inline job
-        foreach ($key in $job.steps.with.Keys) {
-            Add-IfCasingFailure `
-                -Value $key `
-                -DefinitionKind “Job Step With" `
-                -Failures $Failures
+        foreach ($steps in $job.steps) {
+            foreach ($step in $steps) {
+                foreach ($key in $step.with.Keys) {
+                    Add-IfCasingFailure `
+                        -Value $key `
+                        -DefinitionKind “Job Step With" `
+                        -DefinitionContext $step.uses `
+                        -Failures $Failures
+                }
+            }
         }
     }
 }
@@ -297,10 +303,13 @@ function Add-IfCasingFailure {
         [Parameter(Mandatory)]
         [string]
         $Value,
-        # The the YAML definition kind of the value. Used to build any failure message added to the list of failures.
+        # The YAML definition kind of the value. Used to build any failure message added to the list of failures.
         [Parameter(Mandatory)]
         [string]
         $DefinitionKind,
+        # The context to understand the origin of the DefinitionKind parameter. Used to build any failure message added to the list of failures.
+        [string]
+        $DefinitionContext = '',
         # List of failures, to which we should add a failure message if the value is invalid.
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
@@ -308,7 +317,15 @@ function Add-IfCasingFailure {
         $Failures
     )
 
+    $isMaintainedLocally = ($('./.github', 'energinet-datahub/.github/') | Where-Object {
+            $DefinitionContext.ToLower().StartsWith($_) }
+    ).Count -gt 0
+
     if (!($Value -ceq $Value.ToLower())) {
-        [void]$Failures.Add(“$DefinitionKind definition '$Value' contains uppercase characters.”)
+        #If Definitioncontext is not set, it's a secret, an output or similar - throw an error
+        #If Definitioncontext is set, we need to verify that we are in control of the code (i.e. can provide a bugfix) before we throw an error
+        if ($DefinitionContext -eq '' -or (($DefinitionContext -ne '') -and ($isMaintainedLocally))) {
+            [void]$Failures.Add(“$DefinitionKind definition '$Value' contains uppercase characters.”)
+        }
     }
 }

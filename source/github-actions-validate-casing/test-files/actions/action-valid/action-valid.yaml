@@ -34,7 +34,7 @@ runs:
         echo "my_output='output-data'" >>$GITHUB_OUTPUT
 
     - name: Zip folder
-      uses: thedoctor0/zip-release
+      uses: ./.github/zip-release
       with:
         type: zip
         filename: my_file.zip
