@@ -15,9 +15,9 @@ jobs:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 12
-          minor_version: 9
-          patch_version: 3
+          minor_version: 10
+          patch_version: 0
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN_REPO_WORKFLOW }} # Organization level token needed for github code search to target all repositories
+          GH_TOKEN: ${{ secrets.internal_github_pat }} # Organization level token needed for github code search to target all repositories
