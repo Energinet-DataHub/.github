@@ -47,6 +47,14 @@ on:
         type: string
         description: Use this variable if you want to prefix the release name
         default: dotnet
+      project_name:
+        required: false
+        default: ""
+        type: string
+      prepare_dotnet_tests:
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   create_prerelease:
@@ -109,11 +117,13 @@ jobs:
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
+        if: ${{ inputs.prepare_dotnet_tests == true }}
         uses: ./.github/actions/dotnet-tests-prepare-outputs
         with:
           output_path: ${{ env.TESTS_OUTPUT_PATH }}
 
       - name: Zip dotnet tests outputs
+        if: ${{ inputs.prepare_dotnet_tests == true }}
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
@@ -121,6 +131,7 @@ jobs:
           directory: ${{ env.TESTS_OUTPUT_PATH }}
 
       - name: Upload dotnet-tests artifact
+        if: ${{ inputs.prepare_dotnet_tests == true }}
         uses: actions/upload-artifact@v3
         with:
           name: dotnet-tests
@@ -133,6 +144,7 @@ jobs:
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
+          project_name: ${{ inputs.project_name }}
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request'
