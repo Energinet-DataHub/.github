@@ -113,6 +113,7 @@ jobs:
           #   The value of 'SourceRevisionId' is appended to the assembly attribute 'InformationalVersion', separated by a '+' sign.
           #   See: https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#generateassemblyinfo
           #
+          dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ github.event.number }}+SHA_${{ github.sha }}
 
       # Call action in source (caller) repository
