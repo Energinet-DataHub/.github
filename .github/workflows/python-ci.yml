@@ -30,11 +30,37 @@ on:
         required: false
         default: ubuntu-22.04
         type: string
+      use_integrationtest_environment:
+        description: Set to 'true' to log into Azure for using the integration test environment
+        required: false
+        default: false
+        type: boolean
+      azure_integrationtest_spn_id:
+        description: Azure Service Principal for accessing the integration test environment
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_tenant_id:
+        description: Azure Tenant ID for accessing the integration test environment
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_subscription_id:
+        description: Azure subscription ID for accessing the integration test environment
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  id-token: write # Required for use of OIDC in GitHub
+  contents: read # Required for use of OIDC in GitHub
 
 jobs:
   python_ci:
-    runs-on: ${{ inputs.operating_system }}
     name: flake8 and unit test
+    runs-on: ${{ inputs.operating_system }}
+    # Environment is used when using OIDC to login and access the integration test environment
+    environment: AzureAuth
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,6 +70,14 @@ jobs:
         with:
           path: ${{ inputs.path_static_checks }}
           ignore: ${{ inputs.ignore_errors_and_warning_flake8 }}
+
+      - name: Login to access Azure resources (integration test environment)
+        if: ${{ inputs.use_integrationtest_environment == true }}
+        uses: azure/login@v1
+        with:
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests
         uses: ./.github/actions/python-unit-test
