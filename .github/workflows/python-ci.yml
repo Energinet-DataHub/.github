@@ -51,6 +51,10 @@ on:
         default: ""
         type: string
 
+permissions:
+  id-token: write # Required for use of OIDC in GitHub
+  contents: read # Required for use of OIDC in GitHub
+
 jobs:
   python_ci:
     name: flake8 and unit test
