@@ -30,23 +30,23 @@ on:
         required: false
         default: ubuntu-22.04
         type: string
-      use_integration_test_environment:
-        description: Set to 'true' to log into Azure for using the integration tests environment
+      use_integrationtest_environment:
+        description: Set to 'true' to log into Azure for using the integration test environment
         required: false
         default: false
         type: boolean
       azure_integrationtest_spn_id:
-        description: Azure Service Principal for accessing the integration tests environment
+        description: Azure Service Principal for accessing the integration test environment
         required: false
         default: ""
         type: string
       azure_integrationtest_tenant_id:
-        description: Azure Tenant ID for accessing the integration tests environment
+        description: Azure Tenant ID for accessing the integration test environment
         required: false
         default: ""
         type: string
       azure_integrationtest_subscription_id:
-        description: Azure subscription ID for accessing the integration tests environment
+        description: Azure subscription ID for accessing the integration test environment
         required: false
         default: ""
         type: string
@@ -75,7 +75,7 @@ jobs:
           ignore: ${{ inputs.ignore_errors_and_warning_flake8 }}
 
       - name: Login to access Azure resources (integration test environment)
-        if: ${{ inputs.use_integration_test_environment == true }}
+        if: ${{ inputs.use_integrationtest_environment == true }}
         uses: azure/login@v1
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
