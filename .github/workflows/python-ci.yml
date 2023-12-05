@@ -64,6 +64,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        # TODO: Remove branch checkout
+        with:
+          ref: dstenroejl/ci-set-test-input
 
       - name: Static checks
         uses: TrueBrain/actions-flake8@v2
