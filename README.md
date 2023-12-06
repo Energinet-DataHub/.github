@@ -11,6 +11,7 @@ This repository contains shared github items such as actions, workflows and much
 - [Workflows](#workflows)
     - [CI Base](#ci-base)
     - [.NET build and test](#net-build-and-test)
+    - [Python CI Test and Coverage](#python-ci-test-and-coverage)
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
@@ -192,6 +193,22 @@ As a good practice also add a comment to the class inheriting from `WebApplicati
     /// </summary>
     public class WebApiFactory : WebApplicationFactory<Startup>
 ```
+
+### Python CI Test and Coverage
+
+File: [python-ci.yml](.github/workflows/python-ci.yml)
+
+This workflow can be used to validate python code and execute python tests.
+
+Features:
+
+- Perform static code analysis of python code (using flake8).
+- Login to Azure using OIDC for accessing the integration test environment from python tests.
+- Execute a custom action to run python tests.
+- Upload test results to workflow summary.
+- Upload test coverage report as workflow artifact and to CodeCov.
+
+The calling repository must have a custom action `python-unit-test` from which the actual execution of `coverage` and `pytest` is performed.
 
 ### Notify Team
 
