@@ -10,7 +10,6 @@ This repository contains shared github items such as actions, workflows and much
     - [Release process](#release-process)
 - [Workflows](#workflows)
     - [CI Base](#ci-base)
-    - [Dispatch Deployment Request](#dispatch-deployment-request)
     - [.NET build and test](#net-build-and-test)
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
