@@ -51,13 +51,13 @@ on:
         default: ""
         type: string
 
-# TODO: Revert when done playing around
-# permissions:
-#   id-token: write # Required for use of OIDC in GitHub
-#   contents: read # Required for use of OIDC in GitHub
-#   issues: read # Needed by EnricoMi/publish-unit-test-result-action
-#   checks: write # Needed by EnricoMi/publish-unit-test-result-action
-#   pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
+permissions:
+  id-token: write # Required for use of OIDC in GitHub
+  contents: read # Required for use of OIDC in GitHub
+  issues: read # Needed by EnricoMi/publish-unit-test-result-action
+  checks: write # Needed by EnricoMi/publish-unit-test-result-action
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
+  repository-projects: write
 
 jobs:
   python_ci:
