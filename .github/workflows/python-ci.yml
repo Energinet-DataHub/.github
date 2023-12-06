@@ -57,7 +57,9 @@ permissions:
   issues: read # Needed by EnricoMi/publish-unit-test-result-action
   checks: write # Needed by EnricoMi/publish-unit-test-result-action
   pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
-  repository-projects: write
+  #repository-projects: write
+  packages: write # Needed by codecov/codecov-action
+
 
 jobs:
   python_ci:
