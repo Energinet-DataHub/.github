@@ -50,6 +50,11 @@ on:
         required: false
         default: ""
         type: string
+      azure_keyvault_url:
+        description: URL to the Azure Keyvault in the integration test environment. The key vault contains secrets for using resources in the environment.
+        required: false
+        default: ""
+        type: string
 
 permissions:
   id-token: write # Required for use of OIDC in GitHub
@@ -65,6 +70,9 @@ jobs:
     runs-on: ${{ inputs.operating_system }}
     # Environment is used when using OIDC to login and access the integration test environment
     environment: AzureAuth
+    env:
+      # Necessary to manage Azure resources from automated tests
+      AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
