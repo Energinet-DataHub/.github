@@ -30,6 +30,11 @@ on:
         required: false
         default: ubuntu-22.04
         type: string
+      tests_filter_expression:
+        description: Filter expression to use with pytest
+        required: false
+        default: empty
+        type: string
       use_integrationtest_environment:
         description: Set to 'true' to log into Azure for using the integration test environment
         required: false
@@ -92,7 +97,14 @@ jobs:
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests
+        if: ${{ inputs.tests_filter_expression == 'empty' }}
         uses: ./.github/actions/python-unit-test
+
+      - name: Run unit tests with filter
+        if: ${{ inputs.tests_filter_expression != 'empty' }}
+        uses: ./.github/actions/python-unit-test
+        with:
+          tests_filter_expression: ${{ inputs.tests_filter_expression }}
 
       - name: Publish test report
         if: always()

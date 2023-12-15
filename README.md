@@ -204,7 +204,7 @@ Features:
 
 - Perform static code analysis of python code (using flake8).
 - Login to Azure using OIDC for accessing the integration test environment from python tests.
-- Execute a custom action to run python tests.
+- Execute a custom action to run python tests. The action can be called with a filter to split the execution of python tests on multiple GitHub runners.
 - Upload test results to workflow summary.
 - Upload test coverage report as workflow artifact and to CodeCov.
 
