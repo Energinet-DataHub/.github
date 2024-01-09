@@ -222,6 +222,6 @@ jobs:
       - name: Run reference validation on local folder
         uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@v12
         env:
-          GH_TOKEN: ${{ secrets.pat_token }} # Organization level token needed for checkout of private repos
+          GH_TOKEN: ${{ secrets.internal_github_pat }} # Organization level token needed for checkout of private repos
         with:
           folder: ${{ github.workspace }}
