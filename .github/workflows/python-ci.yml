@@ -115,4 +115,3 @@ jobs:
           comment_mode: failures
           files: |
             ${{ inputs.test_report_path }}/pytest*.xml
-
