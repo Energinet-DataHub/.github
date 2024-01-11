@@ -18,12 +18,6 @@ description: Build a .NET solution, run tests and upload code coverage
 inputs:
   solution_file_path:
     required: true
-  use_code_coverage:
-    required: false
-    default: "true"
-  code_coverage_flags:
-    required: false
-    default: ""
   build_configuration:
     required: false
     default: Release
@@ -75,11 +69,3 @@ runs:
         comment_mode: failures
         files: |
           **/TestResults/*.trx
-
-    - name: Upload coverage to CodeCov
-      if: ${{ inputs.use_code_coverage == 'true' }}
-      uses: codecov/codecov-action@v3
-      with:
-        flags: ${{ inputs.code_coverage_flags }}
-        fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
-        verbose: true

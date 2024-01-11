@@ -206,7 +206,7 @@ Features:
 - Login to Azure using OIDC for accessing the integration test environment from python tests.
 - Execute a custom action to run python tests.
 - Upload test results to workflow summary.
-- Upload test coverage report as workflow artifact and to CodeCov.
+- Upload test coverage report as workflow artifact
 
 The calling repository must have a custom action `python-unit-test` from which the actual execution of `coverage` and `pytest` is performed. If the action accepts the input `tests_filter_expression` then it can be called with a filter to split the execution of python tests on multiple GitHub runners.
 

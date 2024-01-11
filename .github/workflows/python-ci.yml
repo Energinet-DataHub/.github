@@ -115,15 +115,3 @@ jobs:
           comment_mode: failures
           files: |
             ${{ inputs.test_report_path }}/pytest*.xml
-
-      - name: Upload test coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: python-coverage-test-report
-          path: ${{ inputs.test_report_path }}/htmlcov/
-
-      - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
-          verbose: true

@@ -53,10 +53,6 @@ on:
         required: false
         default: false
         type: boolean
-      code_coverage_flags:
-        required: false
-        default: ""
-        type: string
       environment:
         description: Can be used to set environment for OIDC which is AzureAuth
         required: false
@@ -274,13 +270,6 @@ jobs:
         with:
           files: |
             **/TestResults/*.trx
-
-      - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: ${{ inputs.code_coverage_flags }}
-          fail_ci_if_error: false # Do not fail step when Codecov runs into errors during upload
-          verbose: true
 
       # Call action in source (caller) repository
       - name: Prepare outputs
