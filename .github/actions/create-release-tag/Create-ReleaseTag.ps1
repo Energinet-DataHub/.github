@@ -73,22 +73,24 @@ function Create-ReleaseTag {
         Assert-MajorVersionDeprecations -MajorVersion $MajorVersion -Repository $GitHubRepository -Patterns $UsagePatterns
     }
     $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
-    $existingVersions = $existingReleases.title.Trim("v")
-    $conflicts = Find-ConflictingVersions $version $existingVersions
+    if ($existingReleases.Count -gt 0) {
+        $existingVersions = $existingReleases.title.Trim("v")
+        $conflicts = Find-ConflictingVersions $version $existingVersions
 
-    if ($conflicts.Count) {
-        $latest = $conflicts | Select-Object -First 1
-        throw "Error: Cannot create release $version in $GithubRepository because a later or identical version number exist. Latest release is: $latest"
-    }
+        if ($conflicts.Count) {
+            $latest = $conflicts | Select-Object -First 1
+            throw "Error: Cannot create release $version in $GithubRepository because a later or identical version number exist. Latest release is: $latest"
+        }
 
-    Write-Host "Validated version tag: $version"
+        Write-Host "Validated version tag: $version"
 
-    # Updating major version tag
-    if (!$isPullRequest) {
-        Update-MajorVersion -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
-    }
-    else {
-        Write-Host 'This was a dry-run, no changes have been made'
+        # Updating major version tag
+        if (!$isPullRequest) {
+            Update-MajorVersion -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
+        }
+        else {
+            Write-Host 'This was a dry-run, no changes have been made'
+        }
     }
 
     Write-Host "All done"
