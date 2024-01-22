@@ -73,7 +73,13 @@ function Create-ReleaseTag {
         Assert-MajorVersionDeprecations -MajorVersion $MajorVersion -Repository $GitHubRepository -Patterns $UsagePatterns
     }
     $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
-    $existingVersions = $existingReleases.title.Trim("v")
+    if ($null -eq $existingReleases) {
+        $existingVersions = '0.0.0'
+    }
+    else {
+        $existingVersions = $existingReleases.title.Trim("v")
+    }
+
     $conflicts = Find-ConflictingVersions $version $existingVersions
 
     if ($conflicts.Count) {
@@ -85,11 +91,12 @@ function Create-ReleaseTag {
 
     # Updating major version tag
     if (!$isPullRequest) {
-        Update-MajorVersion -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
+        Update-VersionTags -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
     }
     else {
         Write-Host 'This was a dry-run, no changes have been made'
     }
+
 
     Write-Host "All done"
 }
@@ -190,7 +197,7 @@ function Find-ConflictingVersions {
     .DESCRIPTION
     When merging new release number, update the major release tag eg. v11 with the latest version number
 #>
-function Update-MajorVersion {
+function Update-VersionTags {
     param(
         # Version number
         [Parameter(Mandatory)]
