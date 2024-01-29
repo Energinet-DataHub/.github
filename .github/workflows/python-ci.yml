@@ -60,6 +60,11 @@ on:
         required: false
         default: ""
         type: string
+      image_tag:
+        description: Tag of the docker image to use for running the tests
+        required: false
+        default: latest
+        type: string
 
 permissions:
   id-token: write # Required for use of OIDC in GitHub
@@ -99,11 +104,14 @@ jobs:
       - name: Run unit tests
         if: ${{ inputs.tests_filter_expression == 'empty' }}
         uses: ./.github/actions/python-unit-test
+        with:
+          image_tag: ${{ inputs.image_tag }}
 
       - name: Run unit tests with filter
         if: ${{ inputs.tests_filter_expression != 'empty' }}
         uses: ./.github/actions/python-unit-test
         with:
+          image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
 
       - name: Publish test report
