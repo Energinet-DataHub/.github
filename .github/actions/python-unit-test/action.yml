@@ -27,4 +27,7 @@ runs:
       shell: bash
       run: |
         chmod +x ./.docker/entrypoint.sh
-        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w ${{ github.workspace }} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
+        echo "Workspace ${{ github.workspace }}"
+        echo "Repository ${{ github.repository }}"
+
+        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/opengeh-python-packages python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
