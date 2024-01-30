@@ -210,6 +210,8 @@ Features:
 
 The calling repository must have a custom action `python-unit-test` from which the actual execution of `coverage` and `pytest` is performed. If the action accepts the input `tests_filter_expression` then it can be called with a filter to split the execution of python tests on multiple GitHub runners.
 
+Optional `image_tag` can be set which the custom action `python-unit-test` is being called with. Default value is `latest`. If `python-unit-test` does not know the input `image_tag` it will throw a warning.
+
 ### Notify Team
 
 File: [notify-team.yml](.github/workflows/notify-team.yml)
