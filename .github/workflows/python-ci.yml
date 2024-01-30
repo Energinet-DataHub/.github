@@ -65,6 +65,11 @@ on:
         required: false
         default: latest
         type: string
+      private_repo:
+        description: Set to 'true' if the repository is private
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   id-token: write # Required for use of OIDC in GitHub
@@ -106,6 +111,7 @@ jobs:
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
+          private_repo: ${{ inputs.private_repo }}
 
       - name: Publish test report
         if: always()

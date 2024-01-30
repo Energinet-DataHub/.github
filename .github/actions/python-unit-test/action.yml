@@ -9,12 +9,8 @@ inputs:
     description: Filter expression to use with pytest. Read description in 'entrypoint.sh'.
     required: true
   private_repo:
-    description: Whether the repository is private or not
+    description: Whether the repository is private or not. If it is private, the action will log in to the container registry.
     required: true
-  repository_name:
-    description: The name of the repository
-    required: true
-
 
 runs:
   using: composite
@@ -31,4 +27,4 @@ runs:
       shell: bash
       run: |
         chmod +x ./.docker/entrypoint.sh
-        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${{ inputs.repository_name }} migration ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
+        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w ${{ github.workspace }} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
