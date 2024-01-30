@@ -210,6 +210,21 @@ Features:
 
 The calling repository must have a custom action `python-unit-test` from which the actual execution of `coverage` and `pytest` is performed. If the action accepts the input `tests_filter_expression` then it can be called with a filter to split the execution of python tests on multiple GitHub runners.
 
+### Python Build and Push Docker Image
+
+File: [python-build-and-push-docker-image.yml](.github/workflows/python-build-and-push-docker-image.yml)
+
+This workflow can be used to build and push docker image used for Python.
+
+The workflow should be giving two input parameters:
+
+- `docker_changed`: When Docker files changed in Pull Request. It determines what image tag to build and push the docker.
+- `docker_changed_in_commit`: When Docker files changed in the commit that triggered the CI. If there was no changes in the Docker files it will skip the Docker build.
+
+The workflow gives one output variable:
+
+- `image_tag`: Gives the image tag that should be used when running the `python-ci.yml` workflow.
+
 ### Notify Team
 
 File: [notify-team.yml](.github/workflows/notify-team.yml)
