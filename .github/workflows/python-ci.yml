@@ -65,11 +65,6 @@ on:
         required: false
         default: latest
         type: string
-      private_repo:
-        description: Set to 'true' if the repository is private
-        required: false
-        default: false
-        type: boolean
       repository_name:
         description: The name of the repository.
         required: true
