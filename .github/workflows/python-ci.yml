@@ -70,6 +70,10 @@ on:
         required: false
         default: false
         type: boolean
+      repository_name:
+        description: The name of the repository.
+        required: true
+        type: string
 
 permissions:
   id-token: write # Required for use of OIDC in GitHub
@@ -112,6 +116,7 @@ jobs:
           image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
           private_repo: ${{ inputs.private_repo }}
+          repository_name: ${{ inputs.repository_name }}
 
       - name: Publish test report
         if: always()
