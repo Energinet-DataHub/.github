@@ -33,7 +33,7 @@ on:
       tests_filter_expression:
         description: Filter expression to use with pytest
         required: false
-        default: empty
+        default: ""
         type: string
       use_integrationtest_environment:
         description: Set to 'true' to log into Azure for using the integration test environment
@@ -101,15 +101,8 @@ jobs:
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
-      - name: Run unit tests
-        if: ${{ inputs.tests_filter_expression == 'empty' }}
-        uses: ./.github/actions/python-unit-test
-        with:
-          image_tag: ${{ inputs.image_tag }}
-
       - name: Run unit tests with filter
-        if: ${{ inputs.tests_filter_expression != 'empty' }}
-        uses: ./.github/actions/python-unit-test
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v12
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}

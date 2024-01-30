@@ -1,0 +1,34 @@
+name: PySpark execution
+description: This action allows you to execute code, written for Spark, Databricks or other similar engines.
+
+inputs:
+  image_tag:
+    description: The tag of the docker image to use
+    required: true
+  tests_filter_expression:
+    description: Filter expression to use with pytest. Read description in 'entrypoint.sh'.
+    required: true
+  private_repo:
+    description: Whether the repository is private or not
+    required: true
+  repository_name:
+    description: The name of the repository
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to the Container registry
+      if: ${{ inputs.private_repo == 'true' }}
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    - name: Execute python tests
+      shell: bash
+      run: |
+        chmod +x ./.docker/entrypoint.sh
+        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${{ inputs.repository_name }} migration ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
