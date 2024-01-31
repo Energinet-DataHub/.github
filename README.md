@@ -12,6 +12,7 @@ This repository contains shared github items such as actions, workflows and much
     - [CI Base](#ci-base)
     - [.NET build and test](#net-build-and-test)
     - [Python CI Test and Coverage](#python-ci-test-and-coverage)
+    - [Python build and push docker image](#python-build-and-push-docker-image)
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
@@ -227,7 +228,7 @@ echo "Filter (keyword expression): $1"
 coverage run --branch -m pytest -k "$1" --junitxml=pytest-results.xml .
 ```
 
-Optional `image_tag` can be set which the custom action `python-unit-test` is being called with. Default value is `latest`. If `python-unit-test` does not know the input `image_tag` it will throw a warning. It is possible to get the `image_tag` from [the python docker build](#python-build-and-push-docker-image)
+Optional `image_tag` can be set which the custom action `python-unit-test` is being called with. Default value is `latest`. If `python-unit-test` does not know the input `image_tag` it will throw a warning. It is possible to get the `image_tag` from [the python docker build](#python-build-and-push-docker-image).
 
 ### Python Build and Push Docker Image
 
