@@ -22,8 +22,10 @@ runs:
     - name: Execute python tests
       shell: bash
       run: |
-        REPO_NAME=${{ github.repository }}
-        OWNER=${{ github.repository_owner }}
-        repository_name=${REPO_NAME/$OWNER\//}
+        # Small hack to get the repository name
+        repository=${{ github.repository }}
+        repository_owner=${{ github.repository_owner }}
+        repository_name=${repository/$repository_owner\//}
+
         chmod +x ./.docker/entrypoint.sh
         IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
