@@ -44,7 +44,7 @@ jobs:
       image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
 
     steps:
-      - name: Set tag environmental variable
+      - name: Set image tag environmental variable
         id: set_image_tag
         run: |
           if [[ ${{ env.IS_PULL_REQUEST_TRIGGERED }} == true && ${{ inputs.docker_changed }} == true ]]; then

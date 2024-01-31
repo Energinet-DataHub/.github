@@ -33,7 +33,7 @@ on:
       tests_filter_expression:
         description: Filter expression to use with pytest
         required: false
-        default: empty
+        default: ""
         type: string
       use_integrationtest_environment:
         description: Set to 'true' to log into Azure for using the integration test environment
@@ -59,6 +59,11 @@ on:
         description: URL to the Azure Keyvault in the integration test environment. The key vault contains secrets for using resources in the environment.
         required: false
         default: ""
+        type: string
+      image_tag:
+        description: Tag of the docker image to use for running the tests
+        required: false
+        default: latest
         type: string
 
 permissions:
@@ -96,14 +101,10 @@ jobs:
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
-      - name: Run unit tests
-        if: ${{ inputs.tests_filter_expression == 'empty' }}
-        uses: ./.github/actions/python-unit-test
-
       - name: Run unit tests with filter
-        if: ${{ inputs.tests_filter_expression != 'empty' }}
-        uses: ./.github/actions/python-unit-test
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v12
         with:
+          image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
 
       - name: Publish test report

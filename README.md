@@ -12,6 +12,7 @@ This repository contains shared github items such as actions, workflows and much
     - [CI Base](#ci-base)
     - [.NET build and test](#net-build-and-test)
     - [Python CI Test and Coverage](#python-ci-test-and-coverage)
+    - [Python build and push docker image](#python-build-and-push-docker-image)
     - [Notify Team](#notify-team)
     - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
@@ -200,7 +201,14 @@ File: [python-ci.yml](.github/workflows/python-ci.yml)
 
 This workflow can be used to validate python code and execute python tests.
 
-Features:
+**Requirements:**
+
+A `docker-compose.yml` file should be placed here `.devcontainer/docker-compose.yml`.
+The name of the service inside the `docker-compose.yml` file should be `python-unit-test`.
+
+A `entrypoints.sh` file should be placed here `.docker/entrypoint.sh`.
+
+**Features:**
 
 - Perform static code analysis of python code (using flake8).
 - Login to Azure using OIDC for accessing the integration test environment from python tests.
@@ -208,7 +216,19 @@ Features:
 - Upload test results to workflow summary.
 - Upload test coverage report as workflow artifact
 
-The calling repository must have a custom action `python-unit-test` from which the actual execution of `coverage` and `pytest` is performed. If the action accepts the input `tests_filter_expression` then it can be called with a filter to split the execution of python tests on multiple GitHub runners.
+Optional `tests_filter_expression` can be set to add a filter to split the execution of python tests on multiple GitHub runners.
+
+The filter expression should be used in the `entrypoint.sh` like this:
+
+``` sh
+# $1: (Optional) Can be set to specify a filter for running python tests by using 'keyword expressions'.
+# See use of '-k' and 'keyword expressions' here: https://docs.pytest.org/en/7.4.x/how-to/usage.html#specifying-which-tests-to-run
+echo "Filter (keyword expression): $1"
+
+coverage run --branch -m pytest -k "$1" --junitxml=pytest-results.xml .
+```
+
+Optional `image_tag` can be set which the custom action `python-unit-test` is being called with. Default value is `latest`. If `python-unit-test` does not know the input `image_tag` it will throw a warning. It is possible to get the `image_tag` from [the python docker build](#python-build-and-push-docker-image).
 
 ### Python Build and Push Docker Image
 
