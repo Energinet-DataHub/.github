@@ -24,6 +24,6 @@ runs:
       run: |
         REPO_NAME=${{ github.repository }}
         OWNER=${{ github.repository_owner }}
-        REPO_NAME=${REPO_NAME/$OWNER\//}
+        repository_name=${REPO_NAME/$OWNER\//}
         chmod +x ./.docker/entrypoint.sh
-        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${ REPO_NAME } python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
+        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
