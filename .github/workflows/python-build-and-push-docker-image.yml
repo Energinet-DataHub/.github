@@ -1,0 +1,90 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Python build and push Docker image
+
+on:
+  workflow_call:
+    inputs:
+      docker_changed:
+        description: Is docker changed in the pull request.
+        required: true
+        type: boolean
+      docker_changed_in_commit:
+        description: Is docker changed in the commit.
+        required: true
+        type: boolean
+    outputs:
+      image_tag:
+        description: The tag of the docker image to use
+        value: ${{ jobs.determine_build.outputs.image_tag }}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/python-unit-test
+  IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
+  CONTEXT_PATH: ./.docker/
+  CONTAINER_REGISTRY_USER: dh-system-account
+
+jobs:
+  determine_build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
+
+    steps:
+      - name: Set tag environmental variable
+        id: set_image_tag
+        run: |
+          if [[ ${{ env.IS_PULL_REQUEST_TRIGGERED }} == true && ${{ inputs.docker_changed }} == true ]]; then
+            echo "image_tag=pre-release-pr${{ github.event.pull_request.number }}" >>$GITHUB_OUTPUT
+          else
+            echo "image_tag=latest" >>$GITHUB_OUTPUT
+          fi
+
+  build_and_push_image:
+    needs: determine_build
+    if: ${{ inputs.docker_changed_in_commit == 'true' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.CONTAINER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Declare Docker image name
+        id: image-name
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          push: true
+          tags: ${{ steps.image-name.outputs.lowercase }}${{ needs.determine_build.outputs.image_tag }}
