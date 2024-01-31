@@ -55,7 +55,7 @@ jobs:
 
   build_and_push_image:
     needs: determine_build
-    if: ${{ inputs.docker_changed_in_commit == 'true' }}
+    if: ${{ inputs.docker_changed_in_commit }}
     runs-on: ubuntu-latest
 
     permissions:
