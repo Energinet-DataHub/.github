@@ -32,7 +32,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/python-unit-test
+  IMAGE_NAME: '${{ github.repository }}/python-unit-test:'
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
   CONTEXT_PATH: ./.docker/
   CONTAINER_REGISTRY_USER: dh-system-account
@@ -80,7 +80,7 @@ jobs:
         id: image-name
         uses: ASzc/change-string-case-action@v5
         with:
-          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:
+          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
