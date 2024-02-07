@@ -48,9 +48,9 @@ jobs:
         id: set_image_tag
         run: |
           if [[ ${{ env.IS_PULL_REQUEST_TRIGGERED }} == true && ${{ inputs.docker_changed }} == true ]]; then
-            echo "image_tag=pre-release-pr${{ github.event.pull_request.number }}" >>$GITHUB_OUTPUT
+            echo "image_tag=:pre-release-pr${{ github.event.pull_request.number }}" >>$GITHUB_OUTPUT
           else
-            echo "image_tag=latest" >>$GITHUB_OUTPUT
+            echo "image_tag=:latest" >>$GITHUB_OUTPUT
           fi
 
   build_and_push_image:
