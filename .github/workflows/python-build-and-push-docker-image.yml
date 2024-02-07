@@ -87,4 +87,4 @@ jobs:
         with:
           context: ${{ env.CONTEXT_PATH }}
           push: true
-          tags: "${{ steps.image-name.outputs.lowercase }}:${{ needs.determine_build.outputs.image_tag }}"
+          tags: '${{ steps.image-name.outputs.lowercase }}:${{ needs.determine_build.outputs.image_tag }}'
