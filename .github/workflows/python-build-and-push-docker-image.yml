@@ -80,11 +80,11 @@ jobs:
         id: image-name
         uses: ASzc/change-string-case-action@v5
         with:
-          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: ${{ env.CONTEXT_PATH }}
           push: true
-          tags: '${{ steps.image-name.outputs.lowercase }}:${{ needs.determine_build.outputs.image_tag }}'
+          tags: ${{ steps.image-name.outputs.lowercase }}${{ needs.determine_build.outputs.image_tag }}
