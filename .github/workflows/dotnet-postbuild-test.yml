@@ -269,7 +269,7 @@ jobs:
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Wait for dotnet-tests artifact to be ready for download
-        uses: Wandalen/wretry.action@v1.0.36
+        uses: Wandalen/wretry.action@v1
         with:
           action: actions/download-artifact@v3
           with: |
