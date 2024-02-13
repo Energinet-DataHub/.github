@@ -213,7 +213,7 @@ jobs:
       - name: Cache node modules
         if: ${{ inputs.use_azure_functions_tools == true }}
         id: cache-nodemodules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
           path: ${{ github.workspace }}\node_modules

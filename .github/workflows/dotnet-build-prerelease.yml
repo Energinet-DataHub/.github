@@ -94,7 +94,7 @@ jobs:
 
       - name: Cache NuGet packages
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nuget
         with:
           path: ~/.nuget/packages
