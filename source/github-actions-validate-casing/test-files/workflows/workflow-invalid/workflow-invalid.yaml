@@ -39,7 +39,7 @@ jobs:
       MAgic: ${{ steps.filter.outputs.magic }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Detect file changes
         uses: ./.github/paths-filter@v2
