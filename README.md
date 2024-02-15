@@ -62,7 +62,7 @@ After we have merged a Pull Request, and created or updated any artifact within 
    - This will open the release.
    - Click the `Delete (icon)` and choose to delete the release.
 
-3. Navigate to [Tags](https://github.com/Energinet-DataHub/.github/tags)
+3. Navigate to [Tags](https://github.com/Energinet-DataHub/.githubBADURL/tags)
 
 4. Find the major version tag and click on its name (e.g. `v7`).
 
