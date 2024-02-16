@@ -3,10 +3,10 @@ description: Create Github app installation token to authenticate requests
 
 inputs:
   app_id:
-    description: "Github app ID"
+    description: Github app ID
     required: true
   private_key:
-    description: "Github app private key"
+    description: Github app private key
     required: true
 
 outputs:
