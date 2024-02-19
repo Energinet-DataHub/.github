@@ -61,6 +61,10 @@ on:
         type: string
         description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
         default: "false"
+    secrets:
+      dh3serviceaccount_privatekey:
+        required: true
+        description: Private key used to issue short-lived tokens for authenticating Github API requests
 
 jobs:
   md_check:
