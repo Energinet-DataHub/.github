@@ -9,15 +9,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v12
+        name: Generate Github token
+        id: generate_token
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
       - name: Create release
         uses: ./.github/actions/create-release-tag
         with:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
-          major_version: 12
-          minor_version: 20
+          major_version: 13
+          minor_version: 0
           patch_version: 0
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
-          GH_TOKEN: ${{ secrets.internal_github_pat }} # Organization level token needed for github code search to target all repositories
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}

@@ -12,14 +12,14 @@ jobs:
   ci_base:
     uses: ./.github/workflows/ci-base.yml
     secrets:
-      pat_token: ${{ secrets.internal_github_pat }}
+      dh3serviceaccount_privatekey: ${{ secrets.dh3serviceaccount_privatekey}}
 
   #
   # Automatic Release (verify if release tag exists)
   #
   create_release:
     uses: ./.github/workflows/create-release-tag.yml
-    secrets: inherit # Needed for organization scope GH_TOKEN
+    secrets: inherit
 
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest

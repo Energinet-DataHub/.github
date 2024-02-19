@@ -62,9 +62,9 @@ on:
         description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
         default: "false"
     secrets:
-      pat_token:
+      dh3serviceaccount_privatekey:
         required: true
-        description: Organization PAT to access both public and private repositories
+        description: Private key used to issue short-lived tokens for authenticating Github API requests
 
 jobs:
   md_check:
@@ -195,7 +195,7 @@ jobs:
   github_actions_powershell_verification:
     name: Run Pester tests in actions-folder
     if: ${{ inputs.skip_actions_powershell_verification != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.operating_system }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -214,14 +214,21 @@ jobs:
   github_validate_version_references:
     name: Validate references to shared action/modules
     if: ${{ inputs.skip_validate_version_references != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.operating_system }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v12
+        name: Generate Github token
+        id: generate_token
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
       - name: Run reference validation on local folder
         uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@v12
         env:
-          GH_TOKEN: ${{ secrets.pat_token }} # Organization level token must be provider by consumer of this workflow
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         with:
           folder: ${{ github.workspace }}
