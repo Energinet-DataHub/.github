@@ -215,9 +215,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v12
+        name: Generate Github token
+        id: generate_token
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
       - name: Run reference validation on local folder
         uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@v12
         env:
-          GH_TOKEN: ${{ secrets.pat_token }} # Organization level token must be provider by consumer of this workflow
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         with:
           folder: ${{ github.workspace }}
