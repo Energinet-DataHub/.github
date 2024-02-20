@@ -26,7 +26,7 @@ function Create-ReleaseTag {
         [string]
         $MajorVersion,
 
-        # Major Version number
+        # Minor Version number
         [Parameter(Mandatory)]
         [string]
         $MinorVersion,
