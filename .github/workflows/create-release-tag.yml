@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v12
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
         name: Generate Github token
         id: generate_token
         with:
@@ -23,7 +23,7 @@ jobs:
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 13
           minor_version: 0
-          patch_version: 0
+          patch_version: 1
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
