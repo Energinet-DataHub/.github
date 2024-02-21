@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v12
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
         name: Generate Github token
         id: generate_token
         with:
