@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload dotnet-tests artifact
         if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
