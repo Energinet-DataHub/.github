@@ -105,7 +105,7 @@ jobs:
         id: md-link-check
 
       - name: Register markdownlint problem matcher
-        uses: xt0rted/markdownlint-problem-matcher@v3
+        uses: xt0rted/markdownlint-problem-matcher@v2
         id: md-lint-check-matcher
 
       # https://github.com/marketplace/actions/markdownlint-mdl-action
