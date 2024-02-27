@@ -94,6 +94,7 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ env.RELEASE_VERSION }}
           prerelease: true
+          target_commitish: ${{ github.sha }}
           name: ${{ env.RELEASE_VERSION }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
