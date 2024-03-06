@@ -35,7 +35,7 @@ env:
   IMAGE_NAME: "${{ github.repository }}/python-unit-test:"
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
   CONTEXT_PATH: ./.docker/
-  CONTAINER_REGISTRY_USER: dh-system-account
+  CONTAINER_REGISTRY_USER: PerTHenriksen  # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
 
 jobs:
   determine_build:
