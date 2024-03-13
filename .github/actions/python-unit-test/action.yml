@@ -28,4 +28,4 @@ runs:
         repository_name=${repository/$repository_owner\//}
 
         chmod +x ./.docker/entrypoint.sh
-        IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
+        IMAGE_TAG=${{ inputs.image_tag }} docker-compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
