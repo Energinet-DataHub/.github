@@ -36,7 +36,7 @@ on:
       dotnet_version:
         description: Install specified .NET Core SDK version
         required: false
-        default: 8.0.200
+        default: 8.0.202
         type: string
       operating_system:
         required: false
