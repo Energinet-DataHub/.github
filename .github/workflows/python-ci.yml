@@ -19,7 +19,7 @@ on:
     inputs:
       job_name:
         required: false
-        default: Python tests
+        default: flake8 and unit test
         type: string
       path_static_checks:
         required: true
