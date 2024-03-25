@@ -17,6 +17,10 @@ name: Python CI Test and Coverage
 on:
   workflow_call:
     inputs:
+      job_name:
+        required: false
+        default: Python tests
+        type: string
       path_static_checks:
         required: true
         type: string
@@ -76,7 +80,7 @@ permissions:
 
 jobs:
   python_ci:
-    name: flake8 and unit test
+    name: ${{ inputs.job_name }}
     runs-on: ${{ inputs.operating_system }}
     # Environment is used when using OIDC to login and access the integration test environment
     environment: AzureAuth
