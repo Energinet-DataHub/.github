@@ -99,11 +99,9 @@ jobs:
 
       - name: Login to access Azure resources (integration test environment)
         if: ${{ inputs.use_integrationtest_environment == true }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ inputs.azure_integrationtest_spn_id }}
-          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
-          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
+        run: |
+          az login --service-principal -u ${{ inputs.azure_integrationtest_spn_id }} --tenant ${{ inputs.azure_integrationtest_tenant_id }}
+          az account set -s ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests with filter
         uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v13
