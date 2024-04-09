@@ -84,7 +84,7 @@ jobs:
         id: generate_token
         with:
           app_id: ${{ vars.dh3serviceaccount_appid }}
-          private_key: ${{ secrets.dh3serviceaccount_privatekey }
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
       - name: Checkout
         if: ${{ secrets.dh3serviceaccount_privatekey != '' }}
