@@ -63,6 +63,10 @@ on:
         description: |
           Used to re-trigger workflows if rendered diagrams are pushed.
         required: false
+      github_token:
+        description: |
+          Used to re-trigger workflows if rendered diagrams are pushed.
+        required: false
 
 jobs:
   render_structurizr_diagrams:
@@ -79,7 +83,7 @@ jobs:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
-          token: ${{ GITHUB_TOKEN }}
+          token: ${{ secrets.github_token }}
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
         id: diagrams_changed
