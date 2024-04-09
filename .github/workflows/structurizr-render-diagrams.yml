@@ -64,7 +64,7 @@ on:
           Used to re-trigger workflows if rendered diagrams are pushed.
         required: false
       token:
-        description: |
+        description: Token used to checkout the repository
           Used to re-trigger workflows if rendered diagrams are pushed.
         required: false
 
