@@ -77,7 +77,30 @@ jobs:
       # Url for diagrams page in Structurizr Lite, when running in docker
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
     steps:
+      # START TODO
+      # TODO: REMOVE IN NEXT MAJOR
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
+        if: ${{ secrets.dh3serviceaccount_privatekey != '' }}
+        name: Generate Github token
+        id: generate_token
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }
+
       - name: Checkout
+        if: ${{ secrets.dh3serviceaccount_privatekey != '' }}
+        uses: actions/checkout@v4
+        with:
+          # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
+          # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
+          # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
+          token: ${{ secrets.token }}
+
+      # END TODO
+      # TODO: REMOVE IN NEXT MAJOR
+
+      - name: Checkout
+        if: ${{ secrets.token != '' }}
         uses: actions/checkout@v4
         with:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
