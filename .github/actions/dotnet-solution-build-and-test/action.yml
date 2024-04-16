@@ -61,6 +61,18 @@ runs:
       shell: pwsh
       run: |
         az --version
+    - uses: azure/cli@v2
+      with:
+        azcliversion: 2.58.0
+        inlineScript: |
+          # Storage:
+          az account get-access-token --scope https://storage.azure.com/.default --output none
+          # Key Vault:
+          az account get-access-token --scope https://vault.azure.net/.default --output none
+          # Microsoft Graph:
+          az account get-access-token --scope https://graph.microsoft.com/.default --output none
+          # Kusto:
+          az account get-access-token --scope https://kusto.kusto.windows.net/.default --output none
 
     - name: Restore NuGet packages
       shell: pwsh
