@@ -58,6 +58,15 @@ runs:
       env:
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
 
+    # To circumvent a bug i version 2.59.0; see https://github.com/Azure/login/issues/372#issuecomment-2056289617
+    # Can be removed when 2.60.0 is released
+    - name: Setup specific Azure CLI version
+      uses: azure/cli@v2
+      with:
+        azcliversion: 2.58.0
+        inlineScript: |
+          az --version
+
     # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
     # We have added a retry action to see if this can mitigate builds failing on this account.
     - name: Setup Azure Cosmos DB Emulator (with retry)
