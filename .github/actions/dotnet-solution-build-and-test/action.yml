@@ -47,7 +47,7 @@ runs:
 
     - name: Login to use Azure resources from automated tests
       if: ${{ inputs.azure_tenant_id != '' }}
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure_spn_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
