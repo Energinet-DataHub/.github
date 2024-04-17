@@ -99,7 +99,7 @@ jobs:
 
       - name: Login to access Azure resources (integration test environment)
         if: ${{ inputs.use_integrationtest_environment == true }}
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
