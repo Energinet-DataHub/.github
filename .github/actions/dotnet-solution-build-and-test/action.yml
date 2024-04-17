@@ -35,6 +35,33 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Guard for Windows OS
+      shell: bash
+      run: |
+        echo "Runner OS is $RUNNER_OS"
+        if [ $RUNNER_OS == 'Windows' ]; then
+          echo "$RUNNER_OS is supported"
+        else
+          echo "$RUNNER_OS is not supported"
+          exit 1
+        fi
+
+    # Downgrade Azure CLI to v2.58.0 to workaround bug in v2.59.0
+    # When v2.60.0 is released we can remove this again.
+    # See https://github.com/Azure/login/issues/372#issuecomment-2056289617
+    - name: uninstall azure-cli
+      shell: pwsh
+      run: |
+        Start-Process msiexec.exe -Wait -ArgumentList '/x {DEFB65A7-FD02-4710-B01E-6C9387982CA9} /quiet'
+    - name: install azure-cli 2.58.0
+      shell: pwsh
+      run: |
+        $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://azcliprod.blob.core.windows.net/msi/azure-cli-2.58.0-x64.msi -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; Remove-Item .\AzureCLI.msi
+    - name: check azure-cli version
+      shell: pwsh
+      run: |
+        az --version
+
     - name: Restore NuGet packages
       shell: pwsh
       run: |
@@ -47,7 +74,7 @@ runs:
 
     - name: Login to use Azure resources from automated tests
       if: ${{ inputs.azure_tenant_id != '' }}
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure_spn_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
