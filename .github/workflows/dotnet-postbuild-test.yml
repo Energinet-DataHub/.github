@@ -34,6 +34,11 @@ name: .NET test
 on:
   workflow_call:
     inputs:
+      job_name:
+        description: Set job name so it is easier to identify job in workflow summary
+        required: false
+        default: .NET CI Test
+        type: string
       tests_dll_file_path:
         description: Relative path from artifacts folder to test assembly
         required: true
@@ -144,6 +149,7 @@ permissions:
 
 jobs:
   dotnet_ci_test:
+    name: ${{ inputs.job_name }}
     runs-on: ${{ inputs.operating_system }}
 
     environment: ${{ inputs.environment }}
