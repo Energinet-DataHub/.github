@@ -277,7 +277,7 @@ jobs:
       - name: Wait for dotnet-tests artifact to be ready for download
         uses: Wandalen/wretry.action@v1
         with:
-          action: actions/download-artifact@v3
+          action: actions/download-artifact@v4
           with: |
             name: dotnet-tests
             path: ${{ env.ARTIFACTS_PATH }}
