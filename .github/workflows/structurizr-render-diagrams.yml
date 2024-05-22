@@ -59,13 +59,9 @@ on:
         type: string
         default: not-in-use # Having a default value makes the workflow simpler to develop
     secrets:
-      dh3serviceaccount_privatekey:
-        description: |
-          Used to re-trigger workflows if rendered diagrams are pushed.
-        required: false
       token:
         description: Token used to checkout the repository
-        required: false
+        required: true
 
 jobs:
   render_structurizr_diagrams:
