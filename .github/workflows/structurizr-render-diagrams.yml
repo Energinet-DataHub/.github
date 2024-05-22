@@ -76,42 +76,7 @@ jobs:
       # Url for diagrams page in Structurizr Lite, when running in docker
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
     steps:
-      #
-      # START TODO: REMOVE IN NEXT MAJOR, AND JUST USE NEW CHECKOUT METHOD WITHOUT IF
-      #
-      - id: auth_method
-        name: Determine Authentication Method
-        run: |
-          if [ -n "${{ secrets.dh3serviceaccount_privatekey }}" ]; then
-            echo "::set-output name=use_old_auth::true"
-          fi
-          if [ -n "${{ secrets.token }}" ]; then
-            echo "::set-output name=use_new_auth::true"
-          fi
-
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
-        if: steps.auth_method.outputs.use_old_auth == 'true'
-        name: Generate Github token
-        id: generate_token
-        with:
-          app_id: ${{ vars.dh3serviceaccount_appid }}
-          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
-
       - name: Checkout
-        if: steps.auth_method.outputs.use_old_auth == 'true'
-        uses: actions/checkout@v4
-        with:
-          # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
-          # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
-          # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
-          token: ${{ steps.generate_token.outputs.token }}
-
-      #
-      # END TODO
-      #
-
-      - name: Checkout
-        if: steps.auth_method.outputs.use_new_auth == 'true'
         uses: actions/checkout@v4
         with:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
