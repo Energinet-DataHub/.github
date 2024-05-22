@@ -134,11 +134,6 @@ on:
         required: false
         default: ""
         type: string
-      azure_b2csecrets_keyvault_url:
-        description: Azure Keyvault URL with B2C secrets used in integration tests
-        required: false
-        default: ""
-        type: string
 
 permissions:
   id-token: write
@@ -158,8 +153,6 @@ jobs:
       ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
-      # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
-      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ inputs.azure_b2csecrets_keyvault_url }}
       #
       # Only relevant if 'use_azure_functions_tools' is TRUE
       #
