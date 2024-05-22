@@ -34,9 +34,15 @@ If we have breaking changes and wish to push a new major version - a number of s
 
 ***Example moving from 9.1.3 to 10.0.0:***
 
-1. Delete the previous major version release and tag (v9) in GitHub
+1. Delete the previous major version release and tag (v9) in GitHub - remember to delete the tag in your local git as well
 1. Create a root branch based on the last commit for the latest version (i.e. 9.1.2) and name the branch identically to the old release tag v9
 1. Create a branch policy for this new branch to ensure we use PR's for any changes on branch named (v9)
+
+Git commands:
+git tag d- <v-tag-to-delete>
+git checkout <commit-sha>
+git checkout -b <branch-name>
+git push
 
 ---
 > :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
