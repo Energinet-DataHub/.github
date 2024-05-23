@@ -59,10 +59,8 @@ on:
         type: string
         default: not-in-use # Having a default value makes the workflow simpler to develop
     secrets:
-      pat_token_retrigger_workflow:
-        description: |
-          Used to be able to re-trigger workflows if rendered diagrams are pushed.
-          It must be a PAT token with `repo` and `workflow` scopes.
+      token:
+        description: Token used to checkout the repository
         required: true
 
 jobs:
@@ -80,7 +78,7 @@ jobs:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
-          token: ${{ secrets.pat_token_retrigger_workflow }}
+          token: ${{ secrets.token }}
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
         id: diagrams_changed

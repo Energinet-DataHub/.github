@@ -102,11 +102,6 @@ on:
         required: false
         default: ""
         type: string
-      azure_b2csecrets_keyvault_url:
-        description: Azure Keyvault URL with B2C secrets used in integration tests
-        required: false
-        default: ""
-        type: string
 
 permissions:
   id-token: write
@@ -126,8 +121,6 @@ jobs:
       OUTPUT_PATH: ${{ github.workspace }}\output
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
-      # Necessary to provide B2C information that allows us to retrieve an access token from automated tests
-      AZURE_B2CSECRETS_KEYVAULT_URL: ${{ inputs.azure_b2csecrets_keyvault_url }}
       #
       # Only relevant if 'use_azure_functions_tools' is TRUE
       #
@@ -255,7 +248,7 @@ jobs:
 
       - name: Login to use Azure resources from automated tests
         if: ${{ inputs.run_integration_tests == true }}
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
@@ -306,7 +299,7 @@ jobs:
 
       - name: Upload dotnet artifact
         if: ${{ inputs.prepare_outputs == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dotnet
           path: ${{ env.OUTPUT_PATH }}/dotnet-outputs.zip

@@ -17,6 +17,10 @@ name: Python CI Test and Coverage
 on:
   workflow_call:
     inputs:
+      job_name:
+        required: false
+        default: flake8 and unit test
+        type: string
       path_static_checks:
         required: true
         type: string
@@ -76,7 +80,7 @@ permissions:
 
 jobs:
   python_ci:
-    name: flake8 and unit test
+    name: ${{ inputs.job_name }}
     runs-on: ${{ inputs.operating_system }}
     # Environment is used when using OIDC to login and access the integration test environment
     environment: AzureAuth
@@ -95,14 +99,14 @@ jobs:
 
       - name: Login to access Azure resources (integration test environment)
         if: ${{ inputs.use_integrationtest_environment == true }}
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v12
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v13
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}

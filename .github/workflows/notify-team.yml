@@ -28,6 +28,10 @@ on:
         description: The name of the team who should receive the email. Used to determine the email address.
         required: true
         type: string
+      email:
+        description: Specify to override the email determined by team_name
+        required: false
+        type: string
       subject:
         description: The email subject. Should contain environment information when possible.
         required: true
@@ -46,7 +50,9 @@ jobs:
         id: get_email
         shell: bash
         run: |
-          if [ ${{ inputs.team_name }} == 'Mosaic' ]; then
+          if [ ${{ inputs.email }} != '' ]; then
+            team_email=${{ inputs.email }}
+          elif [ ${{ inputs.team_name }} == 'Mosaic' ]; then
             team_email=${{ vars.email_mosaic }}
           elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
             team_email=${{ vars.email_mandalorian }}
@@ -69,7 +75,7 @@ jobs:
           echo "team_email=$team_email" >>$GITHUB_OUTPUT
 
       - name: Send email
-        uses: Energinet-DataHub/.github/.github/actions/send-email@v12
+        uses: Energinet-DataHub/.github/.github/actions/send-email@v13
         with:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
