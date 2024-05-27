@@ -35,6 +35,8 @@ runs:
     - name: Create automatic release
       shell: pwsh
       run: |
+        Get-ChildItem  ${{ github.action_path }} -Recurse
+
         $context = @"
         ${{ toJSON(github) }}
         "@
