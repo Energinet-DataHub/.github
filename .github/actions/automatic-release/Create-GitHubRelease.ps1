@@ -6,15 +6,10 @@
     The functionality is executed as an action on a github runner and creates automated releases for pull requests.
 #>
 
-param(
-    [Parameter(Mandatory)]
-    [string]$GithubContext
-)
-
 if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
-$GithubRepository = $GithubContext | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
+#$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
 
 <#
     .SYNOPSIS
@@ -39,7 +34,7 @@ class GithubRelease {
     .DESCRIPTION
     Simple function wrapping a call with gh to retrieve the latest releases from github.
 #>
-function Publish-GitHubRelease {
+function Create-GitHubRelease {
     param (
         [Parameter(Mandatory)]
         [string]$TagName,
@@ -48,7 +43,8 @@ function Publish-GitHubRelease {
         [Parameter(Mandatory)]
         [string[]]$Files,
         [string]$PreRelease = $false,
-        [string]$Draft = $false
+        [string]$Draft = $false,
+        [string]$GithubRepository
     )
 
     # Get Previous Release

@@ -24,6 +24,9 @@ inputs:
   files:
     description: Assets to upload to the release
     required: false
+  repository:
+    description: Repository Name
+    default: ${{ github.repository.full_name }}
 outputs:
   automatic_releases_tag:
     description: The release tag this action just processed
@@ -37,8 +40,8 @@ runs:
       run: |
         Get-ChildItem  ${{ github.action_path }} -Recurse
 
-        $context = @"
+        $env:GHcontext = @"
         ${{ toJSON(github) }}
         "@
-        Write-Host $context
-        . ${{ github.action_path }}/Create-GithubRelease.ps1 -GithubContext $context
+
+        . ${{ github.action_path }}/Create-GitHubRelease.ps1
