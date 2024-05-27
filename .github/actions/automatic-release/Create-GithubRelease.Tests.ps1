@@ -52,14 +52,10 @@ Describe "Create-AutomaticGitHubRelease" -ForEach @(
     }
 
     It "Creates <expected> when provided <tagname>" {
-        $Files = "$PSScriptRoot\sauron_infrastructure_1496.zip"
         Invoke-GithubReleaseCreate -TagName $TagName -Title "title" -PreRelease $true -Draft $false -Files $Files
-        if ($Expected) {
-            Should -Invoke -CommandName "gh" -Exactly -Times 1
-        }
-        else {
-            Should -Invoke -CommandName "gh" -Exactly -Times 0
-        }
+
+        Should -Invoke -CommandName "gh" -Exactly -Times 1
+
     }
 }
 

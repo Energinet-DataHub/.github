@@ -109,6 +109,7 @@ function Invoke-GithubReleaseDelete {
 #>
 function Invoke-GithubReleaseCreate {
     param(
+        [Parameter(Mandatory)]
         [string]$TagName,
         [string]$Title,
         [string[]]$Files,
@@ -122,15 +123,18 @@ function Invoke-GithubReleaseCreate {
         "-R $GithubRepository"
         "--generate-notes"
     )
+
     if ($PreRelease) {
         $cmdbuilder += "--prerelease"
     }
+
     if ($Draft) {
         $cmdbuilder += "--draft"
     }
+
     $cmdbuilder += $Files
 
     $cmd = $cmdbuilder -join " "
 
-    Write-Host $cmd
+    Invoke-Expression $cmd
 }
