@@ -33,6 +33,7 @@ runs:
   using: composite
   steps:
     - name: "Create automatic release"
-      shell: bash
+      shell: pwsh
       run: |
-        . Create-GithubRelease.ps1
+      $context = '${{ toJSON(github) }}'
+      . ${{ github.action_path }}/Create-GithubRelease.ps1 -GithubContext $context
