@@ -35,5 +35,5 @@ runs:
     - name: "Create automatic release"
       shell: pwsh
       run: |
-      $context = '${{ toJSON(github) }}'
-      . ${{ github.action_path }}/Create-GithubRelease.ps1 -GithubContext $context
+        $context = '${{ toJSON(github) }}'
+        . ${{ github.action_path }}/Create-GithubRelease.ps1 -GithubContext $context
