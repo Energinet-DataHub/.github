@@ -38,10 +38,12 @@ runs:
     - name: Create automatic release
       shell: pwsh
       run: |
-        Get-ChildItem  ${{ github.action_path }} -Recurse
+        Get-ChildItem  ${{ github.action_path }} -Recurse | Get-Content
 
-        $env:GHcontext = @"
-        ${{ toJSON(github) }}
-        "@
+        Write-Host "output the file specific"
+        Get-Content ${{ github.action_path }}/Create-GitHubRelease.ps1
+        # $env:GHcontext = @"
+        # ${{ toJSON(github) }}
+        # "@
 
         . ${{ github.action_path }}/Create-GitHubRelease.ps1
