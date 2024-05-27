@@ -36,4 +36,5 @@ runs:
       shell: pwsh
       run: |
         $context = '${{ toJSON(github) }}'
+        Write-Host $context
         . ${{ github.action_path }}/Create-GithubRelease.ps1 -GithubContext $context
