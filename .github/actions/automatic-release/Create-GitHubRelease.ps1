@@ -54,7 +54,7 @@ function Create-GitHubRelease {
     $release | Invoke-GithubReleaseDelete
 
     # Create release
-    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -PreRelease $PreRelease -Draft $Draft -Files $Files
+    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -Repository $Repository -PreRelease $PreRelease -Draft $Draft -Files $Files
 }
 
 <#
@@ -110,7 +110,8 @@ function Invoke-GithubReleaseCreate {
         [string]$Title,
         [string[]]$Files,
         [string]$PreRelease = $false,
-        [string]$Draft = $false
+        [string]$Draft = $false,
+        [string]$Repository
     )
 
     $cmdbuilder = @(
