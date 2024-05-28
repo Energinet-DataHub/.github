@@ -15,8 +15,7 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-$Github
-$GithubRepository
+$CommitSha = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty sha
 
 <#
     .SYNOPSIS
@@ -99,7 +98,7 @@ function Invoke-GithubReleaseDelete {
     }
 
     Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y --cleanup-tag -R $GithubRepository
+    gh release delete $release.Name -y -R $GithubRepository
 }
 
 <#
@@ -115,8 +114,8 @@ function Invoke-GithubReleaseCreate {
         [string]$TagName,
         [string]$Title,
         [string[]]$Files,
-        [string]$PreRelease = $false,
-        [string]$Draft = $false
+        [bool]$PreRelease = $false,
+        [bool]$Draft = $false
     )
 
     $cmdbuilder = @(
@@ -125,6 +124,7 @@ function Invoke-GithubReleaseCreate {
         "--title $Title"
         "-R $GithubRepository"
         "--generate-notes"
+        "--target $CommitSha"
     )
 
     # gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
