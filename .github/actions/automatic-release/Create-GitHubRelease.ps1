@@ -44,7 +44,7 @@ function Create-GitHubRelease {
         [string[]]$Files,
         [string]$PreRelease = $false,
         [string]$Draft = $false,
-        [string]$GithubRepository
+        [string]$Repository
     )
 
     # Get Previous Release
@@ -68,7 +68,7 @@ function Invoke-GithubReleaseList {
     param (
         [string]$TagName
     )
-    gh release list -L 10000 -R $GithubRepository --json name, tagName, publishedAt, isPrerelease, isLatest, isDraft `
+    gh release list -L 10000 -R $Repository --json name, tagName, publishedAt, isPrerelease, isLatest, isDraft `
     | ConvertFrom-Json
     | Where-Object { $_.name -eq $TagName }
 }
@@ -93,7 +93,7 @@ function Invoke-GithubReleaseDelete {
     }
 
     Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y --cleanup-tag -R $GitHubRepository
+    gh release delete $release.Name -y --cleanup-tag -R $Repository
 }
 
 <#
@@ -116,7 +116,7 @@ function Invoke-GithubReleaseCreate {
     $cmdbuilder = @(
         "gh release create"
         $TagName,
-        "-R $GithubRepository"
+        "-R $Repository"
         "--generate-notes"
     )
 
