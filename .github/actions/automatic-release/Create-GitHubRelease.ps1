@@ -13,7 +13,7 @@ if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
 
-$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
+$GithubRepository = $GithubContext | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
 
 <#
     .SYNOPSIS
