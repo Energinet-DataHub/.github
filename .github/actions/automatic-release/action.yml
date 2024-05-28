@@ -37,9 +37,10 @@ runs:
   steps:
     - name: Create automatic release
       shell: pwsh
+      env:
+        GH_TOKEN: ${{ inputs.repo_token }}
+        GH_CONTEXT: ${{ toJSON(github) }}
       run: |
-        $env:GH_TOKEN = "${{ inputs.repo_token }}"
-
         $context = @"
         ${{ toJSON(github) }}
         "@

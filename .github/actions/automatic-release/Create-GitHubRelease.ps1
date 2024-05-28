@@ -1,6 +1,3 @@
-param(
-    [string]$GithubContext
-)
 <#
     .SYNOPSIS
     Github Action script creating automated releases
@@ -13,7 +10,13 @@ if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
 
-$GithubRepository = $GithubContext | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
+if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
+    throw "Error: GH_CONTEXT environment variable is not set. Functionality is depending on github actions context variables."
+}
+
+$env:GH_CONTEXT
+
+$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
 $GithubContext | Select-Object -ExpandProperty repository
 
 <#
