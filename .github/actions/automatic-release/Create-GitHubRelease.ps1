@@ -74,7 +74,7 @@ function Invoke-GithubReleaseList {
     param (
         [string]$TagName
     )
-    gh release list -L 10000 -R $GithubRepository --json name, tagName, publishedAt, isPrerelease, isLatest, isDraft `
+    gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest,isDraft" `
     | ConvertFrom-Json
     | Where-Object { $_.name -eq $TagName }
 }
