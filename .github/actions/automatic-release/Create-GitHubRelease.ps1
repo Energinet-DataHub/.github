@@ -15,7 +15,7 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-
+$Github
 $GithubRepository
 
 <#
@@ -123,7 +123,6 @@ function Invoke-GithubReleaseCreate {
         "gh release create"
         $TagName,
         "--title $Title"
-        "--target $GithubBranch"
         "-R $GithubRepository"
         "--generate-notes"
     )
