@@ -24,9 +24,6 @@ inputs:
   files:
     description: Assets to upload to the release
     required: false
-  repository:
-    description: Repository Name
-    default: ${{ github.repository.full_name }}
 outputs:
   automatic_releases_tag:
     description: The release tag this action just processed
@@ -44,7 +41,7 @@ runs:
         . ${{ github.action_path }}/Create-GitHubRelease.ps1
 
         Create-GitHubRelease `
-          -TagName ${{ inputs.automatic_release_tag }} `
+          -TagName "${{ inputs.automatic_release_tag }}" `
           -Draft ([boolean] "${{ inputs.draft }}") `
           -PreRelease ([boolean] "${{ inputs.prerelease }}") `
           -title "${{ inputs.title }}" `
