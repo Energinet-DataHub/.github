@@ -122,10 +122,13 @@ function Invoke-GithubReleaseCreate {
     $cmdbuilder = @(
         "gh release create"
         $TagName,
+        "--title $Title"
+        "--target $GithubBranch"
         "-R $GithubRepository"
         "--generate-notes"
     )
 
+    # gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
     if ($PreRelease) {
         $cmdbuilder += "--prerelease"
     }
@@ -138,5 +141,6 @@ function Invoke-GithubReleaseCreate {
 
     $cmd = $cmdbuilder -join " "
 
+    Write-Host $cmd
     Invoke-Expression $cmd
 }
