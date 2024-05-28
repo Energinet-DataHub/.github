@@ -130,10 +130,6 @@ function Invoke-GithubReleaseCreate {
         $cmdbuilder += "--prerelease"
     }
 
-    if ($Draft) {
-        $cmdbuilder += "--draft"
-    }
-
     $cmdbuilder += $Files
 
     $cmd = $cmdbuilder -join " "
