@@ -48,10 +48,9 @@ function Create-GitHubRelease {
         [string]$Title,
         [Parameter(Mandatory)]
         [string[]]$Files,
-        [string]$PreRelease = $false,
-        [string]$Draft = $false
+        [bool]$PreRelease = $false,
+        [bool]$Draft = $false
     )
-
     # Get Previous Release
     [GithubRelease]$release = Invoke-GithubReleaseList -TagName $TagName
 
