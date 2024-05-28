@@ -41,11 +41,7 @@ runs:
         GH_TOKEN: ${{ inputs.repo_token }}
         GH_CONTEXT: ${{ toJSON(github) }}
       run: |
-        $context = @"
-        ${{ toJSON(github) }}
-        "@
-
-        . ${{ github.action_path }}/Create-GitHubRelease.ps1 -GithubContext $context
+        . ${{ github.action_path }}/Create-GitHubRelease.ps1
 
         Create-GitHubRelease `
           -TagName ${{ inputs.automatic_release_tag }} `
