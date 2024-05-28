@@ -41,3 +41,11 @@ runs:
         $env:GH_TOKEN = "${{ inputs.repo_token }}"
 
         . ${{ github.action_path }}/Create-GitHubRelease.ps1
+
+        Create-GitHubRelease `
+          -TagName ${{ inputs.automatic_release_tag }} `
+          -Draft ([boolean] ${{ inputs.draft }}) `
+          -PreRelease ([boolean] ${{ inputs.prerelease }}) `
+          -title "${{ inputs.}}"
+          -repository "${{ inputs.repository }}" `
+          -files ${{ inputs.files }}
