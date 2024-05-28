@@ -60,7 +60,7 @@ function Create-GitHubRelease {
     $release | Invoke-GithubReleaseDelete
 
     # Create release
-    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -Repository $GithubRepository -PreRelease $PreRelease -Draft $Draft -Files $Files
+    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -PreRelease $PreRelease -Draft $Draft -Files $Files
 }
 
 <#
