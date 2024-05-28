@@ -14,9 +14,9 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
     throw "Error: GH_CONTEXT environment variable is not set. Functionality is depending on github actions context variables."
 }
 
-$env:GH_CONTEXT
-
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
+
+$GithubRepository
 
 <#
     .SYNOPSIS
