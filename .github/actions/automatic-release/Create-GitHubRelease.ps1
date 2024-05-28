@@ -14,6 +14,7 @@ if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
 }
 
 $GithubRepository = $GithubContext | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
+$GithubContext | Select-Object -ExpandProperty repository
 
 <#
     .SYNOPSIS
