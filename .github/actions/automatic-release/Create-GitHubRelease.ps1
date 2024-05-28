@@ -1,3 +1,6 @@
+param(
+    [string]$GithubContext
+)
 <#
     .SYNOPSIS
     Github Action script creating automated releases
@@ -9,7 +12,8 @@
 if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
-#$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
+
+$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository | Select-Object -ExpandProperty full_name
 
 <#
     .SYNOPSIS
@@ -43,8 +47,7 @@ function Create-GitHubRelease {
         [Parameter(Mandatory)]
         [string[]]$Files,
         [string]$PreRelease = $false,
-        [string]$Draft = $false,
-        [string]$Repository
+        [string]$Draft = $false
     )
 
     # Get Previous Release
@@ -54,7 +57,7 @@ function Create-GitHubRelease {
     $release | Invoke-GithubReleaseDelete
 
     # Create release
-    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -Repository $Repository -PreRelease $PreRelease -Draft $Draft -Files $Files
+    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -Repository $GithubRepository -PreRelease $PreRelease -Draft $Draft -Files $Files
 }
 
 <#
@@ -68,7 +71,7 @@ function Invoke-GithubReleaseList {
     param (
         [string]$TagName
     )
-    gh release list -L 10000 -R $Repository --json name, tagName, publishedAt, isPrerelease, isLatest, isDraft `
+    gh release list -L 10000 -R $GithubRepository --json name, tagName, publishedAt, isPrerelease, isLatest, isDraft `
     | ConvertFrom-Json
     | Where-Object { $_.name -eq $TagName }
 }
@@ -93,7 +96,7 @@ function Invoke-GithubReleaseDelete {
     }
 
     Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y --cleanup-tag -R $Repository
+    gh release delete $release.Name -y --cleanup-tag -R $GithubRepository
 }
 
 <#
@@ -110,14 +113,13 @@ function Invoke-GithubReleaseCreate {
         [string]$Title,
         [string[]]$Files,
         [string]$PreRelease = $false,
-        [string]$Draft = $false,
-        [string]$Repository
+        [string]$Draft = $false
     )
 
     $cmdbuilder = @(
         "gh release create"
         $TagName,
-        "-R $Repository"
+        "-R $GithubRepository"
         "--generate-notes"
     )
 
