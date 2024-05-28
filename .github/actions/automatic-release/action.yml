@@ -38,6 +38,6 @@ runs:
     - name: Create automatic release
       shell: pwsh
       run: |
-        $env:GH_TOKEN = ${{ inputs.repo_token }}
+        $env:GH_TOKEN = "${{ inputs.repo_token }}"
 
         . ${{ github.action_path }}/Create-GitHubRelease.ps1
