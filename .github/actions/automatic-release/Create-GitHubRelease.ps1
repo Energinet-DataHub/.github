@@ -123,7 +123,6 @@ function Invoke-GithubReleaseCreate {
         "--title $Title"
         "-R $GithubRepository"
         "--generate-notes"
-        "--target $CommitSha"
     )
 
     # gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
