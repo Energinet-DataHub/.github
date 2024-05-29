@@ -29,24 +29,11 @@ runs:
     - name: Download release
       shell: bash
       run: |
-        # If GITHUB_OAUTH_TOKEN is set, the release resides in a private repo --> we use https://github.com/gruntwork-io/fetch to add Github authentication headers.
-        # Otherwise, we can use wget and avoid the overhead of installing fetch on Github hosted runners prior to downloading artifact
+        repo="${{ inputs.release_repository_path }}"
 
-        if [[ -n "${GITHUB_OAUTH_TOKEN}" ]]; then
-          echo "** Downloading using fetch **"
-
-          # fetch is installed on self-hosted runners, but not on Github hosted dittos
-          if [[ $(command -v fetch) == "" ]]; then
-            echo "Installing fetch"
-            /home/linuxbrew/.linuxbrew/bin/brew install fetch  #Homebrew isn't in PATH on Ubuntu images, ref: https://github.com/actions/runner-images/issues/6283
-          fi
-
-          /home/linuxbrew/.linuxbrew/opt/fetch/bin/fetch --repo="https://github.com/${{ inputs.release_repository_path }}" --tag="${{ inputs.release_name }}" --release-asset="${{ inputs.release_name }}.zip" /tmp
-
-          unzip /tmp/${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
+        if echo $repo | grep -iqF "energinet-datahub"; then
+          gh release download -R "${{ inputs.release_repository_path }}" ${{ inputs.release_name }} -p "${{ inputs.release_name }}.zip"
         else
-          echo "** Downloading using wget **"
           wget https://github.com/${{ inputs.release_repository_path }}/releases/download/${{ inputs.release_name }}/${{ inputs.release_name }}.zip
-
-          unzip ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
         fi
+        unzip ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
