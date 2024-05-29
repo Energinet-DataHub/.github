@@ -15,7 +15,8 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-$PrNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty number
+$GH_CONTEXT
+$PrNumber = (($env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty ref) -replace "[^0-9]", "").Trim()
 
 <#
     .SYNOPSIS
