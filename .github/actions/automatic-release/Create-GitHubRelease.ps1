@@ -117,30 +117,13 @@ function Invoke-GithubReleaseCreate {
         [bool]$Draft = $false
     )
 
-    $notecmd = "--generate-notes"
-    $notes = Get-ChangeNotes
-    if ($notes) {
-        $notecmd = "-n `"$notes`""
-    }
+    $ChangeNotes = Get-ChangeNotes
 
-    $cmdbuilder = @(
-        "gh release create"
-        $TagName,
-        "--title $Title"
-        "-R $GithubRepository"
-        $notecmd
-    )
+    $ArgNotes = if ($ChangeNotes) { "-n `"$ChangeNotes`"" } else { "--generate-notes" }
+    $ArgPreRelease = if ($PreRelease) { "--prerelease" } else { "" }
+    $ArgDraft = if ($Draft) { "--draft" } else { "" }
 
-    if ($PreRelease) {
-        $cmdbuilder += "--prerelease"
-    }
-
-    $cmdbuilder += $Files
-
-    $cmd = $cmdbuilder -join " "
-
-    Write-Host $cmd
-    Invoke-Expression $cmd
+    gh release create $TagName --Title $Title -R $GithubRepository $ArgPreRelease $ArgDraft $ArgNotes
 }
 
 <#
