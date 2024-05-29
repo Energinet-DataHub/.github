@@ -30,10 +30,9 @@ runs:
       shell: bash
       run: |
         repo="${{ inputs.release_repository_path }}"
-        
-        if [[ $repo =~ "Energinet-Datahub" ]]; then 
+
+        if [[ $repo =~ "Energinet-Datahub" ]]; then
           gh release download -R "${{ inputs.release_repository_path }}" ${{ inputs.release_name }} -p "${{ inputs.release_name }}.zip"
         else
           wget https://github.com/${{ inputs.release_repository_path }}/releases/download/${{ inputs.release_name }}/${{ inputs.release_name }}.zip
-        fi
-        
+        fi      
