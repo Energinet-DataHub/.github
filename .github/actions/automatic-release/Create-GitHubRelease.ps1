@@ -97,7 +97,7 @@ function Invoke-GithubReleaseDelete {
     }
 
     Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y -R $GithubRepository
+    gh release delete $release.Name -y --cleanup-tag -R $GithubRepository
 }
 
 <#
