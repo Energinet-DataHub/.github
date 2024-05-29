@@ -15,8 +15,7 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-$GH_CONTEXT
-$PrNumber = (($env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty ref) -replace "[^0-9]", "").Trim()
+$PullRequstNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty event | Select-Object -ExpandProperty number
 
 <#
     .SYNOPSIS
@@ -144,6 +143,13 @@ function Invoke-GithubReleaseCreate {
     Invoke-Expression $cmd
 }
 
+<#
+    .SYNOPSIS
+    Construct a change note
+
+    .DESCRIPTION
+    Creates changes notes for github release
+#>
 function Get-ChangeNotes {
     $commits = Invoke-GithubPrCommitHistory
     $notes = @("## Commits")
@@ -151,6 +157,14 @@ function Get-ChangeNotes {
 
     return $notes -join "`n"
 }
+
+<#
+    .SYNOPSIS
+    Uses github CLI (gh api) to retrieve commit history
+
+    .DESCRIPTION
+    Wrapping a "gh api /repos/{repo}/pulls/{pr_number}/commits" call
+#>
 function Invoke-GithubPrCommitHistory {
-    gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$GithubRepository/pulls/$PrNumber/commits" | ConvertFrom-Json
+    gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$GithubRepository/pulls/$PullRequstNumber/commits" | ConvertFrom-Json
 }
