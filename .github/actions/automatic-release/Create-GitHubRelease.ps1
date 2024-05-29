@@ -15,14 +15,14 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-$CommitSha = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty sha
+$PrNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty number
 
 <#
     .SYNOPSIS
-    Class representing a Github Release output using  github CLI (gh)
+    Class representing a Github Release using  github CLI (gh)
 
     .DESCRIPTION
-    Simple class modelling the output from a gh release list command into typed.
+    Simple class mapping the output from a gh release list json response to a typed object
 #>
 class GithubRelease {
     [string]$name
@@ -35,10 +35,10 @@ class GithubRelease {
 
 <#
     .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
+    Creates a github release
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
+    Creates a github release. Makes sure to delete any prior releases with similar tag.
 #>
 function Create-GitHubRelease {
     param (
@@ -57,6 +57,8 @@ function Create-GitHubRelease {
     # Delete Previous Release
     $release | Invoke-GithubReleaseDelete
 
+    $notes = Get-ChangeNotes
+
     # Create release
     Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -PreRelease $PreRelease -Draft $Draft -Files $Files
 }
@@ -66,7 +68,7 @@ function Create-GitHubRelease {
     Uses github CLI (gh) to retrieves a list of releases
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
+    Wrapping a "gh release list" call
 #>
 function Invoke-GithubReleaseList {
     param (
@@ -82,7 +84,7 @@ function Invoke-GithubReleaseList {
     Uses github CLI (gh) to delete a release
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to delete a release from github.
+    Wrapping a "gh release delete" call
 #>
 function Invoke-GithubReleaseDelete {
     [CmdletBinding()]
@@ -102,10 +104,10 @@ function Invoke-GithubReleaseDelete {
 
 <#
     .SYNOPSIS
-    Uses github CLI (gh) to delete a release
+    Uses github CLI (gh) to create a release
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to delete a release from github.
+    Wrapping a "gh release create" call
 #>
 function Invoke-GithubReleaseCreate {
     param(
@@ -117,15 +119,20 @@ function Invoke-GithubReleaseCreate {
         [bool]$Draft = $false
     )
 
+    $notecmd = "--generate-notes"
+    $notes = Get-ChangeNotes
+    if ($notes) {
+        $notecmd = "-n `"$notes`""
+    }
+
     $cmdbuilder = @(
         "gh release create"
         $TagName,
         "--title $Title"
         "-R $GithubRepository"
-        "--generate-notes"
+        $notecmd
     )
 
-    # gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
     if ($PreRelease) {
         $cmdbuilder += "--prerelease"
     }
@@ -136,4 +143,15 @@ function Invoke-GithubReleaseCreate {
 
     Write-Host $cmd
     Invoke-Expression $cmd
+}
+
+function Get-ChangeNotes {
+    $commits = Invoke-GithubPrCommitHistory
+    $notes = @("## commits")
+    $commits | ForEach-Object { notes += "- $($_.sha.Substring(0,8)): $($_.commit.message) $($_.committer.login)" }
+
+    return $notes -join "`n"
+}
+function Invoke-GithubPrCommitHistory {
+    gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$GithubRepository/pulls/$PrNumber/commits" | ConvertFrom-Json
 }
