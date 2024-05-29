@@ -58,8 +58,6 @@ function Create-GitHubRelease {
     # Delete Previous Release
     $release | Invoke-GithubReleaseDelete
 
-    $notes = Get-ChangeNotes
-
     # Create release
     Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -PreRelease $PreRelease -Draft $Draft -Files $Files
 }
