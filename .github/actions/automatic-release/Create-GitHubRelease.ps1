@@ -147,7 +147,7 @@ function Invoke-GithubReleaseCreate {
 function Get-ChangeNotes {
     $commits = Invoke-GithubPrCommitHistory
     $notes = @("## commits")
-    $commits | ForEach-Object { notes += "- $($_.sha.Substring(0,8)): $($_.commit.message) $($_.committer.login)" }
+    $commits | ForEach-Object { $notes += "- $($_.sha.Substring(0,8)): $($_.commit.message) $($_.committer.login)" }
 
     return $notes -join "`n"
 }
