@@ -31,6 +31,8 @@ class GithubRelease {
     [string]$isPrerelease
     [string]$isLatest
     [string]$isDraft
+    [string]$notes
+    [string[]]$files
 }
 
 <#
@@ -57,8 +59,17 @@ function Create-GitHubRelease {
     # Delete Previous Release
     $release | Invoke-GithubReleaseDelete
 
+    # Setup
+    $newrelease = [GithubRelease]@{
+        name         = $Title
+        tagName      = $TagName
+        isPrerelease = $PreRelease
+        isDraft      = $Draft
+        notes        = Get-ChangeNotes
+        files        = $Files
+    }
     # Create release
-    Invoke-GithubReleaseCreate -TagName $TagName -Title $Title -PreRelease $PreRelease -Draft $Draft -Files $Files
+    $newrelease | Invoke-GithubReleaseCreate
 }
 
 <#
@@ -108,22 +119,23 @@ function Invoke-GithubReleaseDelete {
     Wrapping a "gh release create" call
 #>
 function Invoke-GithubReleaseCreate {
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory)]
-        [string]$TagName,
-        [string]$Title,
-        [string[]]$Files,
-        [bool]$PreRelease = $false,
-        [bool]$Draft = $false
+        [Parameter(ValueFromPipeline)]
+        [GithubRelease]$release
     )
 
-    $ChangeNotes = Get-ChangeNotes
+    if ($null -eq $release) {
+        Write-Warning "No release to delete."
+        return $release
+    }
 
-    $ArgNotes = if ($ChangeNotes) { "-n `"$ChangeNotes`"" } else { "--generate-notes" }
-    $ArgPreRelease = if ($PreRelease) { "--prerelease" } else { "" }
-    $ArgDraft = if ($Draft) { "--draft" } else { "" }
+    $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
+    $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
+    $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
 
-    gh release create $TagName --Title $Title -R $GithubRepository $ArgPreRelease $ArgDraft $ArgNotes
+    $cmd = "gh release create $($release.tagName) -t $($release.name) -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} ${release.Files}"
+    Invoke-Expression $cmd
 }
 
 <#

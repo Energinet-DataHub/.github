@@ -64,35 +64,22 @@ Describe "Create-GithubRelease" {
     }
 
     Context "Invoke-GithubReleaseCreate" {
-
+        It "Should have <expected> as argument to create" -ForEach @(
+            @{ Release = @{ name = "xyz" }; Expected = "xyz" }
+            @{ Release = @{ name = "xyz" }; Expected = "-t" }
+            @{ Release = @{ tagName = "tagxyz" }; Expected = "tagxyz" }
+            @{ Release = @{ notes = "" }; Expected = "--generate-notes" }
+            @{ Release = @{ isPrerelease = $true }; Expected = "--prerelease" }
+            @{ Release = @{ isDraft = $true }; Expected = "--draft" }
+            @{ Release = @{ notes = "notes" }; Expected = "-n" }
+            @{ Release = @{ notes = "notes" }; Expected = "notes" }
+        ) {
+            Mock gh {}
+            $rel = [GithubRelease]$Release
+            $rel | Invoke-GithubReleaseCreate | Should -Invoke -CommandName gh -Exactly 1 -ParameterFilter {
+                $args -contains $Expected
+            }
+        }
     }
 }
-# Describe "Create-AutomaticGitHubRelease" {
-
-#     BeforeEach {
-
-#     }
-#     It "Returns <expected> when searching for <TagName>" {
-#         $previousRelease = Invoke-GithubReleaseList -TagName $TagName
-#         $previousRelease.Name | Should -Be $expected
-#     }
-
-#     It "Deletes <expected> when provided <TagName>" {
-#         $previousRelease = Invoke-GithubReleaseList -TagName $TagName
-#         $previousRelease | Invoke-GithubReleaseDelete
-#         if ($Expected) {
-#             Should -Invoke -CommandName "gh" -Exactly -Times 2
-#         }
-#         else {
-#             Should -Invoke -CommandName "gh" -Exactly -Times 1
-#         }
-#     }
-
-#     It "Creates <expected> when provided <tagname>" {
-#         Invoke-GithubReleaseCreate -TagName $TagName -Title "title" -PreRelease $true -Draft $false -Files $Files
-
-#         Should -Invoke -CommandName "gh" -Exactly -Times 1
-
-#     }
-# }
 
