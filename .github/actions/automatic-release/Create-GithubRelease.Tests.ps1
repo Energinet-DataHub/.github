@@ -56,7 +56,8 @@ Describe "Create-GithubRelease" {
         ) {
             Mock gh {}
             $rel = [GithubRelease]$Release
-            $rel | Invoke-GithubReleaseCreate | Should -Invoke -CommandName gh -Exactly 1 -ParameterFilter {
+            $rel | Invoke-GithubReleaseCreate
+            Should -Invoke -CommandName gh -Exactly 1 -ParameterFilter {
                 $args -contains $Expected
             }
         }
