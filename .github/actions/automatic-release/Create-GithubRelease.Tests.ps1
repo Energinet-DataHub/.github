@@ -64,7 +64,7 @@ Describe "Create-GithubRelease" {
     }
 
     Context "Invoke-GithubReleaseCreate" {
-        It "Should have <expected> as argument to create" -ForEach @(
+        It "Should have <expected> as parameter" -ForEach @(
             @{ Release = @{ name = "xyz" }; Expected = "xyz" }
             @{ Release = @{ name = "xyz" }; Expected = "-t" }
             @{ Release = @{ tagName = "tagxyz" }; Expected = "tagxyz" }
