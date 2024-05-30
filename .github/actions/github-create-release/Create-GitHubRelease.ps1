@@ -19,6 +19,8 @@ $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandPr
 $CommitSha = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty sha
 $PullRequstNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty event | Select-Object -ExpandProperty number
 
+Write-Host "Sha: $CommitSha"
+
 <#
     .SYNOPSIS
     Class representing a Github Release using  github CLI (gh)
@@ -142,8 +144,8 @@ function Invoke-GithubReleaseCreate {
     $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
-
     $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${CommitSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
+    Write-Host $cmd
     Invoke-Expression $cmd
 }
 
