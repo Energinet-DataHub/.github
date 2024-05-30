@@ -131,9 +131,16 @@ function Invoke-GithubReleaseCreate {
         return $release
     }
 
+    # Debug
+    $release | ConvertTo-Json
+
     $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
+
+    $ArgNotes
+    $ArgPreRelease
+    $ArgDraft
 
     $cmd = "gh release create $($release.tagName) -t $($release.name) -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} ${release.Files}"
     Write-Host $cmd
