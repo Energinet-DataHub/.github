@@ -146,7 +146,7 @@ function Invoke-GithubReleaseCreate {
     $ArgPreRelease
     $ArgDraft
 
-    $cmd = "gh release create $($release.tagName) -t $($release.name) -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} ${release.Files}"
+    $cmd = "gh release create $($release.tagName) -t $($release.name) -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
     Write-Host $cmd
     Invoke-Expression $cmd
 }
