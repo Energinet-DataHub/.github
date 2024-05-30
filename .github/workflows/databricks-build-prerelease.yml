@@ -89,7 +89,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        uses: Energinet-Datahub/.github/.github/actions/automatic-release@rf-halfspace/automatic-release
+        uses: Energinet-Datahub/.github/.github/actions/automatic-release@v14
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
