@@ -28,9 +28,9 @@ class GithubRelease {
     [string]$name
     [string]$tagName
     [string]$publishedAt
-    [string]$isPrerelease
-    [string]$isLatest
-    [string]$isDraft
+    [bool]$isPrerelease
+    [bool]$isLatest
+    [bool]$isDraft
     [string]$notes
     [string[]]$files
 }
