@@ -14,10 +14,11 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
     throw "Error: GH_CONTEXT environment variable is not set. Functionality is depending on github actions context variables."
 }
 
-$env:GH_CONTEXT
-$GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
-$CommitSha = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty sha
-$PullRequstNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty event | Select-Object -ExpandProperty number
+$context = $env:GH_CONTEXT | ConvertFrom-Json
+$context
+$GithubRepository = $context.repository
+$TargetSha = $context.event.after
+$PullRequstNumber = $context.event.number
 
 Write-Host "Sha: $CommitSha"
 
@@ -144,7 +145,7 @@ function Invoke-GithubReleaseCreate {
     $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
-    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${CommitSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
+    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
     Write-Host $cmd
     Invoke-Expression $cmd
 }
