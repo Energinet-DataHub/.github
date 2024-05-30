@@ -50,26 +50,30 @@ function Create-GitHubRelease {
         [string]$Title,
         [Parameter(Mandatory)]
         [string[]]$Files,
-        [bool]$PreRelease = $false,
-        [bool]$Draft = $false
+        [string]$PreRelease = "false",
+        [string]$Draft = "false"
     )
-    # Get Previous Release
+
+    # Input parsing
+    $isDraft = if ($Draft -eq "true") { $true } else { $false }
+    $isPrerelease = if ($PreRelease -eq "true") { $true } else { $false }
+
+    # Step 1: Get Previous Release
     [GithubRelease]$release = Invoke-GithubReleaseList -TagName $TagName
 
-    # Delete Previous Release
+    # Step 2: Delete Previous Release
     $release | Invoke-GithubReleaseDelete
 
-    # Setup
+    # Step 3: Create new release
     $newrelease = [GithubRelease]@{
         name         = $Title
         tagName      = $TagName
-        isPrerelease = $PreRelease
-        isDraft      = $Draft
+        isPrerelease = $isPrerelease
+        isDraft      = $isDraft
         notes        = Get-ChangeNotes
         files        = $Files
     }
 
-    # Create release
     $newrelease | Invoke-GithubReleaseCreate
 }
 
