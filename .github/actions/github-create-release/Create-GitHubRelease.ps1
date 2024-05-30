@@ -14,7 +14,9 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
     throw "Error: GH_CONTEXT environment variable is not set. Functionality is depending on github actions context variables."
 }
 
+$env:GH_CONTEXT
 $GithubRepository = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty repository
+$CommitSha = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty sha
 $PullRequstNumber = $env:GH_CONTEXT | ConvertFrom-Json | Select-Object -ExpandProperty event | Select-Object -ExpandProperty number
 
 <#
@@ -141,7 +143,7 @@ function Invoke-GithubReleaseCreate {
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
 
-    $cmd = "gh release create $($release.tagName) -t $($release.name) -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
+    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${CommitSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
     Invoke-Expression $cmd
 }
 
