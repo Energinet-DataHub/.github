@@ -157,7 +157,7 @@ jobs:
 
       - name: Create pre-release
         if: github.event_name == 'pull_request'
-        uses: Energinet-Datahub/.github/.github/actions/automatic-release@rf-halfspace/automatic-release
+        uses: Energinet-Datahub/.github/.github/actions/github-create-releasee@v14
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
