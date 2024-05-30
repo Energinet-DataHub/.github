@@ -9,7 +9,7 @@ BeforeAll {
             }
         }
 "@
-    . $PSScriptRoot/Create-GithubRelease.ps1
+    . $PSScriptRoot/Create-GitHubRelease.ps1
 }
 
 Describe "Create-GithubRelease" {
