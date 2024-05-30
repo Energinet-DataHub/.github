@@ -55,8 +55,8 @@ function Create-GitHubRelease {
     )
 
     # Input parsing
-    $isDraft = if ($Draft -eq "true") { $true } else { $false }
-    $isPrerelease = if ($PreRelease -eq "true") { $true } else { $false }
+    $isDraft = [bool]::Parse($PreRelease)
+    $isPrerelease = [bool]::Parse($Draft)
 
     # Step 1: Get Previous Release
     [GithubRelease]$release = Invoke-GithubReleaseList -TagName $TagName
