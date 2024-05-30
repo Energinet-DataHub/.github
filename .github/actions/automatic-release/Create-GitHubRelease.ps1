@@ -68,6 +68,7 @@ function Create-GitHubRelease {
         notes        = Get-ChangeNotes
         files        = $Files
     }
+
     # Create release
     $newrelease | Invoke-GithubReleaseCreate
 }

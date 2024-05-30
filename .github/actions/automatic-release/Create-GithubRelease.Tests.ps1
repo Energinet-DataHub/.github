@@ -1,28 +1,6 @@
-# BeforeAll {
-
-
-#     ## Mock gh release delete
-#     Mock -CommandName gh `
-#         -ParameterFilter { $args[0] -eq 'release' -and $args[1] -eq "delete" } `
-#         -MockWith {
-#         Write-Warning "Mocked gh release delete ..."
-#         $true
-#     }
-
-#     ## Mock gh release create
-#     Mock -CommandName gh `
-#         -ParameterFilter { $args[0] -eq 'release' -and $args[1] -eq "create" } `
-#         -MockWith {
-#         Write-Warning "Mocked gh release create ..."
-#         $true
-#     }
-# }
-
-Describe "Create-GithubRelease" {
-
-    BeforeEach {
-        $env:GH_TOKEN = "test"
-        $env:GH_CONTEXT = @"
+BeforeAll {
+    $env:GH_TOKEN = "test"
+    $env:GH_CONTEXT = @"
         {
             "sha": "7fc6c8ad63a35313621bade00ddd2e91f756e093",
             "repository": "owner/reponame",
@@ -31,8 +9,10 @@ Describe "Create-GithubRelease" {
             }
         }
 "@
-        . $PSScriptRoot/Create-GithubRelease.ps1
-    }
+    . $PSScriptRoot/Create-GithubRelease.ps1
+}
+
+Describe "Create-GithubRelease" {
 
     Context "Invoke-GithubReleaseList" {
         It "Returns a release when release exist" -ForEach @(
