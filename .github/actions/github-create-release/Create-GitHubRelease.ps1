@@ -141,7 +141,13 @@ function Invoke-GithubReleaseCreate {
 
     Write-Verbose "Creating release: $($release.tagName)"
 
-    $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
+    $ArgNotes = if ($release.notes) {
+        $release.Notes  | Out-File "notes.md"
+        "-n `"$($release.notes)`""
+    }
+    else {
+        "--generate-notes"
+    }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
     $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
