@@ -16,7 +16,7 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 
 $context = $env:GH_CONTEXT | ConvertFrom-Json
 $GithubRepository = $context.repository
-$TargetSha = $context.event.after
+$TargetSha = if ($context.event.after) { $context.event.after } else { $context.sha }
 $PullRequstNumber = $context.event.number
 
 Write-Host "Sha: $TargetSha"
