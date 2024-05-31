@@ -16,10 +16,10 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 
 $context = $env:GH_CONTEXT | ConvertFrom-Json
 $GithubRepository = $context.repository
-$TargetSha = $context.event.after
+$TargetSha = if ($context.event.after) { $context.event.after } else { $context.sha }
 $PullRequstNumber = $context.event.number
 
-Write-Host "Sha: $CommitSha"
+Write-Host "Sha: $TargetSha"
 
 <#
     .SYNOPSIS
@@ -141,7 +141,13 @@ function Invoke-GithubReleaseCreate {
 
     Write-Verbose "Creating release: $($release.tagName)"
 
-    $ArgNotes = if ($release.notes) { "-n `"$($release.notes)`"" } else { "--generate-notes" }
+    $ArgNotes = if ($release.notes) {
+        $release.Notes  | Out-File "notes.md"
+        "--notes-file notes.md"
+    }
+    else {
+        "--generate-notes"
+    }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
     $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
     $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
