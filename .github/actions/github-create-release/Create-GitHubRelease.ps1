@@ -143,7 +143,7 @@ function Invoke-GithubReleaseCreate {
 
     $ArgNotes = if ($release.notes) {
         $release.Notes  | Out-File "notes.md"
-        "-n `"$($release.notes)`""
+        "--notes-file notes.md"
     }
     else {
         "--generate-notes"

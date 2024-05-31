@@ -51,8 +51,7 @@ Describe "Create-GithubRelease" {
             @{ Release = @{ notes = "" }; Expected = "--generate-notes" }
             @{ Release = @{ isPrerelease = $true }; Expected = "--prerelease" }
             @{ Release = @{ isDraft = $true }; Expected = "--draft" }
-            @{ Release = @{ notes = "notes" }; Expected = "-n" }
-            @{ Release = @{ notes = "notes" }; Expected = "notes" }
+            @{ Release = @{ notes = "notes" }; Expected = "--notes-file" }
         ) {
             Mock gh {}
             $rel = [GithubRelease]$Release
