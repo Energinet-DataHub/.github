@@ -19,7 +19,7 @@ $GithubRepository = $context.repository
 $TargetSha = $context.event.after
 $PullRequstNumber = $context.event.number
 
-Write-Host "Sha: $CommitSha"
+Write-Host "Sha: $TargetSha"
 
 <#
     .SYNOPSIS
