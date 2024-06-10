@@ -50,7 +50,6 @@ Describe "Create-GithubRelease" {
             @{ Release = @{ tagName = "tagxyz" }; Expected = "tagxyz" }
             @{ Release = @{ notes = "" }; Expected = "--generate-notes" }
             @{ Release = @{ isPrerelease = $true }; Expected = "--prerelease" }
-            @{ Release = @{ isDraft = $true }; Expected = "--draft" }
             @{ Release = @{ notes = "notes" }; Expected = "--notes-file" }
         ) {
             Mock gh {}

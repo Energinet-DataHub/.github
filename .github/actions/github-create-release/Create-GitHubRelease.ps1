@@ -53,7 +53,7 @@ function Create-GitHubRelease {
         [string]$Title,
         [Parameter(Mandatory)]
         [string[]]$Files,
-        [string]$PreRelease = "false",
+        [string]$PreRelease = "false"
     )
 
     # Input parsing
