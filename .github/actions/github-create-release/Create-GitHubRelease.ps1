@@ -34,7 +34,6 @@ class GithubRelease {
     [string]$publishedAt
     [bool]$isPrerelease
     [bool]$isLatest
-    [bool]$isDraft
     [string]$notes
     [string[]]$files
 }
@@ -54,12 +53,10 @@ function Create-GitHubRelease {
         [string]$Title,
         [Parameter(Mandatory)]
         [string[]]$Files,
-        [string]$PreRelease = "false",
-        [string]$Draft = "false"
+        [string]$PreRelease = "false"
     )
 
     # Input parsing
-    $isDraft = [bool]::Parse($Draft)
     $isPrerelease = [bool]::Parse($PreRelease)
 
     # Step 1: Get Previous Release
@@ -73,7 +70,6 @@ function Create-GitHubRelease {
         name         = $Title
         tagName      = $TagName
         isPrerelease = $isPrerelease
-        isDraft      = $isDraft
         notes        = Get-ChangeNotes
         files        = $Files
     }
@@ -92,7 +88,7 @@ function Invoke-GithubReleaseList {
     param (
         [string]$TagName
     )
-    gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest,isDraft" `
+    gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest" `
     | ConvertFrom-Json
     | Where-Object { $_.name -eq $TagName }
 }
@@ -149,8 +145,7 @@ function Invoke-GithubReleaseCreate {
         "--generate-notes"
     }
     $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
-    $ArgDraft = if ($release.isDraft) { "--draft" } else { "" }
-    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgDraft} ${ArgNotes} $($release.Files)"
+    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgNotes} $($release.Files)"
     Write-Host $cmd
     Invoke-Expression $cmd
 }
