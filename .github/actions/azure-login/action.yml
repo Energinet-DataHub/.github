@@ -15,7 +15,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Create release tag
+    - name: Log in to Azure using OIDC
       shell: pwsh
       env:
         AZURE_CLIENT_ID: ${{ inputs.azure_client_id }}
