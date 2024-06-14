@@ -3,9 +3,9 @@
 Prepares the Az Module for use with an OIDC credential much more quickly than azure/login action
 #>
 param (
-    $applicationId = $env:AZURE_CLIENT_ID,
-    $tenantId = $env:AZURE_TENANT_ID,
-    $subscription = $env:AZURE_SUBSCRIPTION_ID
+    $applicationId,
+    $tenantId,
+    $subscription
 )
 
 # The default Github color for verbose is very orangeish which implies warning
