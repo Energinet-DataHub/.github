@@ -1,0 +1,16 @@
+name: Azure OIDC login
+description: Azure login action
+
+#inputs:
+
+runs:
+  using: composite
+  steps:
+    - name: Create release tag
+      shell: pwsh
+      env:
+        AZURE_CLIENT_ID: ${{ inputs.azure_client_id }}
+        AZURE_TENANT_ID: ${{ inputs.azure_tenant_id }}
+        AZURE_SUBSCRIPTION_ID: ${{ inputs.azure_subscription_id }}
+      run: |
+        . /New-AzureLogin.ps1.ps1
