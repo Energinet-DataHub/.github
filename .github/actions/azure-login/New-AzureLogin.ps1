@@ -3,9 +3,9 @@
 Prepares the Az Module for use with an OIDC credential much more quickly than azure/login action
 #>
 param (
-    $applicationId,
-    $tenantId,
-    $subscription
+    $ClientId,
+    $TenantId,
+    $SubscriptionId
 )
 
 # The default Github color for verbose is very orangeish which implies warning
@@ -44,9 +44,9 @@ Set-GhEnvVar 'PSModulePath' $env:PSModulePath
 Clear-AzContext -Force #This is only necessary on self-hosted runners
 $connectAzAccountParams = @{
     ServicePrincipal = $true
-    ApplicationId    = $applicationId
-    TenantId         = $tenantId
-    Subscription     = $subscription
+    ApplicationId    = $ClientId
+    TenantId         = $TenantId
+    Subscription     = $SubscriptionId
     FederatedToken   = $token
     Environment      = 'azurecloud'
     Scope            = 'CurrentUser' #Future steps can use this context, it will be thrown away at the end of run
@@ -57,5 +57,5 @@ if (-not $context) { throw 'Connect-AzAccount ran but no context was returned. T
 "Connected to $($context.Context.Account)"
 
 Write-Host 'Logging in to Azure CLI...'
-az login --service-principal --tenant $tenantId --username $applicationId --federated-token $token
+az login --service-principal --tenant $TenantId --username $ClientId --federated-token $token
 #endregion Main
