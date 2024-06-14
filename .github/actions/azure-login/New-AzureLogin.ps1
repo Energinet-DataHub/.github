@@ -30,30 +30,32 @@ function Add-AzModuleToPath {
     $env:PSModulePath = $newPSModulePath
 }
 
-
-#region Main
 $token = Get-GitHubOIDCToken
-Add-AzModuleToPath
-#Export to additional steps in the job
-Set-GhEnvVar 'PSModulePath' $env:PSModulePath
 
-Clear-AzContext -Force #This is only necessary on self-hosted runners
-$connectAzAccountParams = @{
-    ServicePrincipal = $true
-    ApplicationId    = $ClientId
-    TenantId         = $TenantId
-    Subscription     = $SubscriptionId
-    FederatedToken   = $token
-    Environment      = 'azurecloud'
-    Scope            = 'CurrentUser' #Future steps can use this context, it will be thrown away at the end of run
-    WarningAction    = 'SilentlyContinue' #Suppresses a warning about the client assertion saved in AzureRmContext.json
+if ($false) {
+    #region Main
+    Add-AzModuleToPath
+    #Export to additional steps in the job
+    Set-GhEnvVar 'PSModulePath' $env:PSModulePath
+
+    Clear-AzContext -Force #This is only necessary on self-hosted runners
+    $connectAzAccountParams = @{
+        ServicePrincipal = $true
+        ApplicationId    = $ClientId
+        TenantId         = $TenantId
+        Subscription     = $SubscriptionId
+        FederatedToken   = $token
+        Environment      = 'azurecloud'
+        Scope            = 'CurrentUser' #Future steps can use this context, it will be thrown away at the end of run
+        WarningAction    = 'SilentlyContinue' #Suppresses a warning about the client assertion saved in AzureRmContext.json
+    }
+    $context = Connect-AzAccount @connectAzAccountParams
+    if (-not $context) {
+        throw 'Connect-AzAccount ran but no context was returned. This is probably a bug.'
+    }
+    "Connected to $($context.Context.Account)"
 }
-$context = Connect-AzAccount @connectAzAccountParams
-if (-not $context) {
-    throw 'Connect-AzAccount ran but no context was returned. This is probably a bug.'
-}
-"Connected to $($context.Context.Account)"
 
 Write-Host 'Logging in to Azure CLI...'
 az login --service-principal --tenant $TenantId --username $ClientId --federated-token $token | Out-Null
-#endregion Main
+Write-Host 'Azure CLI logged in'
