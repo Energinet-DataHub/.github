@@ -8,34 +8,28 @@ param (
     $SubscriptionId
 )
 
-function Get-GitHubOIDCToken {
-    $oidcTokenParams = @{
-        Uri            = $env:ACTIONS_ID_TOKEN_REQUEST_URL
-        Body           = @{
-            audience = 'api://AzureADTokenExchange'
-        }
-        Authentication = 'Bearer'
-        Token          = $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN | ConvertTo-SecureString -AsPlainText
-    }
-  (Invoke-RestMethod @oidcTokenParams).value
+function Set-GhEnvVar($Name, $Value) {
+
 }
 
-# function Set-GhEnvVar($Name, $Value) { "$Name=$Value" >> $env:GITHUB_ENV }
+$azBasePath = $isLinux ? '/usr/share' : 'C:\Modules'
+Write-Host 'azBasePath: ', $azBasePath
+$azModule = Get-ChildItem -Directory "$azBasePath/az*" -ErrorAction Stop | Select-Object -Last 1
+$newPSModulePath = $azModule.FullName, $env:PSModulePath -join [io.path]::PathSeparator
+$env:PSModulePath = $newPSModulePath
 
-# function Add-AzModuleToPath {
-#     if ($isMacOS) { throw 'Not supported on MacOS' }
-#     $azBasePath = $isLinux ? '/usr/share' : 'C:\Modules'
-#     $azModule = Get-ChildItem -Directory "$azBasePath/az*" -ErrorAction Stop | Select-Object -Last 1
-#     $newPSModulePath = $azModule.FullName, $env:PSModulePath -join [io.path]::PathSeparator
-#     $env:PSModulePath = $newPSModulePath
-# }
-
-
-#region Main
-$token = Get-GitHubOIDCToken
-# Add-AzModuleToPath
 # #Export to additional steps in the job
-# Set-GhEnvVar 'PSModulePath' $env:PSModulePath
+"$PSModulePath=$env:PSModulePath" >> $env:GITHUB_ENV
+
+$oidcTokenParams = @{
+    Uri            = $env:ACTIONS_ID_TOKEN_REQUEST_URL
+    Body           = @{
+        audience = 'api://AzureADTokenExchange'
+    }
+    Authentication = 'Bearer'
+    Token          = $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN | ConvertTo-SecureString -AsPlainText
+}
+$token = (Invoke-RestMethod @oidcTokenParams).value
 
 Clear-AzContext -Force #This is only necessary on self-hosted runners
 $connectAzAccountParams = @{
