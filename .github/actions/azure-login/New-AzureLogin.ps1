@@ -55,4 +55,7 @@ $connectAzAccountParams = @{
 $context = Connect-AzAccount @connectAzAccountParams
 if (-not $context) { throw 'Connect-AzAccount ran but no context was returned. This is probably a bug.' }
 "Connected to $($context.Context.Account)"
+
+Write-Host 'Logging in to Azure CLI...'
+az login --service-principal --tenant $tenantId --username $applicationId --federated-token $token
 #endregion Main
