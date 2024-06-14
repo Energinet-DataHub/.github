@@ -18,8 +18,8 @@ runs:
     - name: Log in to Azure using OIDC
       shell: pwsh
       env:
-        AZURE_CLIENT_ID: ${{ inputs.azure_client_id }}
-        AZURE_TENANT_ID: ${{ inputs.azure_tenant_id }}
-        AZURE_SUBSCRIPTION_ID: ${{ inputs.azure_subscription_id }}
+        AZURE_CLIENT_ID: ${{ inputs.client_id }}
+        AZURE_TENANT_ID: ${{ inputs.tenant_id }}
+        AZURE_SUBSCRIPTION_ID: ${{ inputs.subscription_id }}
       run: |
         ${{ github.action_path }}/New-AzureLogin.ps1
