@@ -6,7 +6,6 @@ param (
     $applicationId = $env:AZURE_CLIENT_ID,
     $tenantId = $env:AZURE_TENANT_ID,
     $subscription = $env:AZURE_SUBSCRIPTION_ID,
-    $resourceGroup = $env:AZURE_RESOURCEGROUP
 )
 
 # The default Github color for verbose is very orangeish which implies warning

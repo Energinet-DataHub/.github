@@ -1,7 +1,16 @@
 name: Azure OIDC login
 description: Azure login action
 
-#inputs:
+inputs:
+  azure_client_id:
+    description: "Azure client ID"
+    required: true
+  azure_tenant_id:
+    description: "Azure tenant ID"
+    required: true
+  azure_subscription_id:
+    description: "Azure subscription ID"
+    required: true
 
 runs:
   using: composite
@@ -13,4 +22,4 @@ runs:
         AZURE_TENANT_ID: ${{ inputs.azure_tenant_id }}
         AZURE_SUBSCRIPTION_ID: ${{ inputs.azure_subscription_id }}
       run: |
-        . /New-AzureLogin.ps1.ps1
+        ${{ github.action_path }}/New-AzureLogin.ps1.ps1
