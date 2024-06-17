@@ -28,7 +28,11 @@ runs:
             echo "isloggedin=true" >> $env:GITHUB_OUTPUT
           }
         }
-        catch { }
+        catch {
+          Write-Host 'We have exploded'
+          Write-Host $_.Message
+          Write-Host $_.Exception
+        }
 
     - name: Az CLI login
       if: ${{ steps.isloggedin.outputs.isloggedin == 'false' }}
@@ -37,6 +41,11 @@ runs:
         client-id: ${{ inputs.client_id }}
         tenant-id: ${{ inputs.tenant_id }}
         subscription-id: ${{ inputs.subscription_id }}
+
+    - name: Sleep for 11 minutes
+      shell: pwsh
+      run: |
+        Thread-Sleep -Minutes 11
 
     # - name: Log in to Azure using OIDC
     #   shell: pwsh
