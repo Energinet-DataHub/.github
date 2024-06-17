@@ -22,6 +22,7 @@ runs:
       run: |
         try {
           if ($null -eq (az account get-access-token --resource-type ms-graph 2>nul)) {
+            Write-Host 'Token not found, login is needed'
             echo "isloggedin=false" >> $env:GITHUB_OUTPUT
             exit 0
           } else {
