@@ -15,15 +15,33 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Log in to Azure using OIDC
+    - name: Is logged in
+      id: isloggedin
       shell: pwsh
       run: |
-        #$clientId = '${{ inputs.client_id }}'
-        #$tenantId = '${{ inputs.tenant_id }}'
-        #$subscriptionId = '${{ inputs.subscription_id }}'
+        if ($null -eq (az account show)) {
+          echo "isloggedin=false" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "isloggedin=true" >> $env:GITHUB_OUTPUT
+        }
 
-        $clientId = 'e3b3ad4b-772b-4141-aa1d-1701321edbad'
-        $tenantId = 'f7619355-6c67-4100-9a78-1847f30742e2'
-        $subscriptionId = '95146aa1-8115-4c82-8506-1f943227ceba'
+    - name: Az CLI login
+      if: ${{ steps.isloggedin.outputs.isloggedin == 'false' }}
+      uses: azure/login@v2
+      with:
+        client-id: ${{ vars.azure_spn_id }}
+        tenant-id: ${{ vars.azure_tenant_id }}
+        subscription-id: ${{ vars.azure_subscription_id }}
 
-        ${{ github.action_path }}/New-AzureLogin.ps1 -ClientId $clientId -TenantId $tenantId -SubscriptionId $subscriptionId
+    # - name: Log in to Azure using OIDC
+    #   shell: pwsh
+    #   run: |
+    #     #$clientId = '${{ inputs.client_id }}'
+    #     #$tenantId = '${{ inputs.tenant_id }}'
+    #     #$subscriptionId = '${{ inputs.subscription_id }}'
+
+    #     $clientId = 'e3b3ad4b-772b-4141-aa1d-1701321edbad'
+    #     $tenantId = 'f7619355-6c67-4100-9a78-1847f30742e2'
+    #     $subscriptionId = '95146aa1-8115-4c82-8506-1f943227ceba'
+
+    #     ${{ github.action_path }}/New-AzureLogin.ps1 -ClientId $clientId -TenantId $tenantId -SubscriptionId $subscriptionId
