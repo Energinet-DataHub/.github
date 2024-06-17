@@ -26,7 +26,7 @@ runs:
             echo "isloggedin=false" >> $env:GITHUB_OUTPUT
             exit 0
           } else {
-            Write-Host 'Token already exists'
+            Write-Host 'Token already exists, will bypass login step'
             echo "isloggedin=true" >> $env:GITHUB_OUTPUT
           }
         }
@@ -36,7 +36,7 @@ runs:
           Write-Host $_.Exception
         }
 
-    - name: Az CLI login
+    - name: Log in to Azure
       if: ${{ steps.isloggedin.outputs.isloggedin == 'false' }}
       uses: azure/login@v2
       with:
