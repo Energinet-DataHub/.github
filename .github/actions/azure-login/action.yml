@@ -21,7 +21,7 @@ runs:
       shell: pwsh
       run: |
         try {
-          if ($null -eq (az account get-access-token --resource-type ms-graph)) {
+          if ($null -eq (az account get-access-token --resource-type ms-graph 2>nul)) {
             echo "isloggedin=false" >> $env:GITHUB_OUTPUT
           } else {
             Write-Host 'Token already exists'
@@ -42,20 +42,7 @@ runs:
         tenant-id: ${{ inputs.tenant_id }}
         subscription-id: ${{ inputs.subscription_id }}
 
-    - name: Sleep for 11 minutes
-      shell: pwsh
-      run: |
-        Start-Sleep -Seconds 660
-
-    # - name: Log in to Azure using OIDC
+    # - name: Sleep for 11 minutes to test behaviour when id token has expired
     #   shell: pwsh
     #   run: |
-    #     #$clientId = '${{ inputs.client_id }}'
-    #     #$tenantId = '${{ inputs.tenant_id }}'
-    #     #$subscriptionId = '${{ inputs.subscription_id }}'
-
-    #     $clientId = 'e3b3ad4b-772b-4141-aa1d-1701321edbad'
-    #     $tenantId = 'f7619355-6c67-4100-9a78-1847f30742e2'
-    #     $subscriptionId = '95146aa1-8115-4c82-8506-1f943227ceba'
-
-    #     ${{ github.action_path }}/New-AzureLogin.ps1 -ClientId $clientId -TenantId $tenantId -SubscriptionId $subscriptionId
+    #     Start-Sleep -Seconds 660
