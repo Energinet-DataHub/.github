@@ -45,7 +45,7 @@ runs:
     - name: Sleep for 11 minutes
       shell: pwsh
       run: |
-        Thread-Sleep -Minutes 11
+        Start-Sleep -Seconds 660
 
     # - name: Log in to Azure using OIDC
     #   shell: pwsh
