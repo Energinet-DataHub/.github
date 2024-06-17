@@ -23,6 +23,7 @@ runs:
         try {
           if ($null -eq (az account get-access-token --resource-type ms-graph 2>nul)) {
             echo "isloggedin=false" >> $env:GITHUB_OUTPUT
+            exit 0
           } else {
             Write-Host 'Token already exists'
             echo "isloggedin=true" >> $env:GITHUB_OUTPUT
