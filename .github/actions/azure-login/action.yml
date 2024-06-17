@@ -21,7 +21,7 @@ runs:
       shell: pwsh
       run: |
         try {
-          if ($null -eq (az account show)) {
+          if ($null -eq (az account get-access-token --resource-type ms-graph)) {
             echo "isloggedin=false" >> $env:GITHUB_OUTPUT
           } else {
             Write-Host 'Token already exists'
