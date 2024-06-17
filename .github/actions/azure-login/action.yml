@@ -16,6 +16,7 @@ runs:
   using: composite
   steps:
     - name: Is logged in
+      continue-on-error: true
       id: isloggedin
       shell: pwsh
       run: |
