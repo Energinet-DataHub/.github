@@ -19,11 +19,15 @@ runs:
       id: isloggedin
       shell: pwsh
       run: |
-        if ($null -eq (az account show)) {
-          echo "isloggedin=false" >> $env:GITHUB_OUTPUT
-        } else {
-          echo "isloggedin=true" >> $env:GITHUB_OUTPUT
+        try {
+          if ($null -eq (az account show)) {
+            echo "isloggedin=false" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host 'Token already exists'
+            echo "isloggedin=true" >> $env:GITHUB_OUTPUT
+          }
         }
+        catch { }
 
     - name: Az CLI login
       if: ${{ steps.isloggedin.outputs.isloggedin == 'false' }}
