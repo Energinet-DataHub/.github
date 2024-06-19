@@ -27,13 +27,17 @@ runs:
   using: composite
   steps:
     - name: Download release
-      shell: bash
-      run: |
-        repo="${{ inputs.release_repository_path }}"
+      uses: nick-fields/retry@v3
+      with:
+        timeout_seconds: 30
+        max_attempts: 3
+        shell: bash
+        command: |
+          repo="${{ inputs.release_repository_path }}"
 
-        if echo $repo | grep -iqF "energinet-datahub"; then
-          gh release download -R "${{ inputs.release_repository_path }}" ${{ inputs.release_name }} -p "${{ inputs.release_name }}.zip"
-        else
-          wget https://github.com/${{ inputs.release_repository_path }}/releases/download/${{ inputs.release_name }}/${{ inputs.release_name }}.zip
-        fi
-        unzip ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
+          if echo $repo | grep -iqF "energinet-datahub"; then
+            gh release download -R "${{ inputs.release_repository_path }}" ${{ inputs.release_name }} -p "${{ inputs.release_name }}.zip"
+          else
+            wget https://github.com/${{ inputs.release_repository_path }}/releases/download/${{ inputs.release_name }}/${{ inputs.release_name }}.zip
+          fi
+          unzip ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
