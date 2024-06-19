@@ -18,10 +18,13 @@ description: Download and unzip release
 inputs:
   destination_folder_path:
     required: true
+    description: Path where unzipped files should be located
   release_repository_path:
     required: true
+    description: Path to the repository where the release is located
   release_name:
     required: true
+    description: Name of the release to download
 
 runs:
   using: composite
