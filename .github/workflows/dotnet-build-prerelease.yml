@@ -36,7 +36,6 @@ on:
       dotnet_version:
         description: Install specified .NET Core SDK version
         required: false
-        default: 8.0.300
         type: string
       operating_system:
         required: false
@@ -86,6 +85,7 @@ jobs:
           fi
 
       - name: Setup .NET ${{ inputs.dotnet_version }}
+        if: ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
