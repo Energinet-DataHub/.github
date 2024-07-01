@@ -152,10 +152,10 @@ function Compare-Versions {
 
 <#
     .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
+    Uses github CLI (gh) to retrieve a list of releases
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github.
+    Simple function wrapping a call with gh to retrieve the latest releases from github and filter out those containing any text followed by an underscore before the version.
 #>
 function Get-GithubReleases {
     param (
@@ -164,7 +164,14 @@ function Get-GithubReleases {
         [string]
         $GitHubRepository
     )
-    gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+
+    # Retrieve the list of releases
+    $allReleases = gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
+
+    # Filter out releases containing any text followed by an underscore before the version
+    $filteredReleases = $allReleases | Where-Object { $_.title -notmatch "_\d+(\.\d+)*$" }
+
+    return $filteredReleases
 }
 
 <#
