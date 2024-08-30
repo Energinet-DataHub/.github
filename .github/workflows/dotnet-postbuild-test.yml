@@ -311,6 +311,12 @@ jobs:
           $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
           $testFailures
 
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-tests-trx
+          path: .\TestResults\logs.trx
+
       - name: Publish test report
         if: always()
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
