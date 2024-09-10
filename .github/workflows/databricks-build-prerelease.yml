@@ -35,6 +35,10 @@ on:
       wheel_working_directory:
         required: true
         type: string
+      multiple_wheels:
+        required: false
+        type: boolean
+        default: false
       should_include_assets:
         required: false
         type: boolean
@@ -64,14 +68,52 @@ jobs:
           architecture: ${{ inputs.architecture }}
 
       # This creates the wheel in a subfolder "dist"
-      - name: Create Python Wheel for Databricks Jobs
+      - name: Create Single Python Wheel for Databricks Jobs
         shell: bash
+        if: ${{ ! inputs.multiple_wheels }}
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
           python setup.py sdist bdist_wheel
           mkdir "./artifacts"
           mv "./dist" "./artifacts"
+        env:
+          RELEASE_NUMBER: ${{ github.event.pull_request.number }}
+
+      # This creates the wheels in a subfolder "dist"
+      - name: Create Multiple Python Wheel for Databricks Jobs
+        shell: bash
+        if: ${{ inputs.multiple_wheels }}
+        working-directory: ${{ inputs.wheel_working_directory }}
+        run: |
+          pip install wheel
+          mkdir "./artifacts"
+
+          # Loop through all directories in the current path
+          for dir in */ ; do
+            # Check if setup.py exists in the directory
+            if [[ -f "$dir/setup.py" ]]; then
+              echo "Found setup.py in $dir. Running python setup.py..."
+
+              # Create a subfolder in artifacts with the same name as the current folder
+              output_dir="./artifacts/${dir%/}"
+              mkdir -p "$output_dir"
+              echo "Created output directory: $output_dir"
+
+              # Navigate into the directory
+              echo "Running python setup.py in $dir"
+              (cd "$dir" && python setup.py sdist bdist_wheel)
+
+              # Move the generated files to the artifacts subfolder
+              echo "Moving files to $output_dir"
+              mv "$dir/dist/"* "$output_dir/"
+
+              # Clean up the dist folder after moving the files
+              rm -rf "$dir/dist"
+            else
+              echo "No setup.py found in $dir"
+            fi
+          done
         env:
           RELEASE_NUMBER: ${{ github.event.pull_request.number }}
 
