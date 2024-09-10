@@ -35,6 +35,10 @@ on:
       wheel_working_directory:
         required: true
         type: string
+      multiple_wheels:
+        required: false
+        type: boolean
+        default: false
       should_include_assets:
         required: false
         type: boolean
@@ -64,8 +68,22 @@ jobs:
           architecture: ${{ inputs.architecture }}
 
       # This creates the wheel in a subfolder "dist"
-      - name: Create Python Wheel for Databricks Jobs
+      - name: Create Single Python Wheel for Databricks Jobs
         shell: bash
+        if: ${{ inputs.multiple_wheels == 'false' }}
+        working-directory: ${{ inputs.wheel_working_directory }}
+        run: |
+          pip install wheel
+          python setup.py sdist bdist_wheel
+          mkdir "./artifacts"
+          mv "./dist" "./artifacts"
+        env:
+          RELEASE_NUMBER: ${{ github.event.pull_request.number }}
+
+      # This creates the wheels in a subfolder "dist"
+      - name: Create Multiple Python Wheel for Databricks Jobs
+        shell: bash
+        if: ${{ inputs.multiple_wheels == 'true' }}
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
