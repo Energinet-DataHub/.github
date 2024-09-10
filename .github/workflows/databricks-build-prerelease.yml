@@ -69,9 +69,25 @@ jobs:
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
-          python setup.py sdist bdist_wheel
-          mkdir "./artifacts"
-          mv "./dist" "./artifacts"
+          mkdir -p artifacts
+
+          # Loop through all directories in the current path
+          for dir in */ ; do
+            # Check if setup.py exists in the directory
+            if [[ -f "$dir/setup.py" ]]; then
+              echo "Found setup.py in $dir. Running python setup.py..."
+              # Navigate into the directory
+              (cd "$dir" && python setup.py sdist bdist_wheel)
+
+              # Move the generated files to the artifacts subfolder
+              mv "$dir/dist/"* "$output_dir/"
+
+              # Clean up the dist folder after moving the files
+              rm -rf "$dir/dist"
+            else
+              echo "No setup.py found in $dir"
+            fi
+          done
         env:
           RELEASE_NUMBER: ${{ github.event.pull_request.number }}
 
