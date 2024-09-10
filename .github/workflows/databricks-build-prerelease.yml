@@ -87,7 +87,7 @@ jobs:
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
-          mkdir -p artifacts
+          mkdir "./artifacts"
 
           # Loop through all directories in the current path
           for dir in */ ; do
@@ -96,7 +96,7 @@ jobs:
               echo "Found setup.py in $dir. Running python setup.py..."
 
               # Create a subfolder in artifacts with the same name as the current folder
-              output_dir="artifacts/${dir%/}"
+              output_dir="./artifacts/${dir%/}"
               mkdir -p "$output_dir"
               echo "Created output directory: $output_dir"
 
