@@ -98,11 +98,14 @@ jobs:
               # Create a subfolder in artifacts with the same name as the current folder
               output_dir="artifacts/${dir%/}"
               mkdir -p "$output_dir"
+              echo "Created output directory: $output_dir"
 
               # Navigate into the directory
+              echo "Running python setup.py in $dir"
               (cd "$dir" && python setup.py sdist bdist_wheel)
 
               # Move the generated files to the artifacts subfolder
+              echo "Moving files to $output_dir"
               mv "$dir/dist/"* "$output_dir/"
 
               # Clean up the dist folder after moving the files
