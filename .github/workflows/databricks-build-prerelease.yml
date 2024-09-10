@@ -70,7 +70,7 @@ jobs:
       # This creates the wheel in a subfolder "dist"
       - name: Create Single Python Wheel for Databricks Jobs
         shell: bash
-        if: ${{ inputs.multiple_wheels == 'false' }}
+        if: ${{ ! inputs.multiple_wheels }}
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
@@ -83,7 +83,7 @@ jobs:
       # This creates the wheels in a subfolder "dist"
       - name: Create Multiple Python Wheel for Databricks Jobs
         shell: bash
-        if: ${{ inputs.multiple_wheels == 'true' }}
+        if: ${{ inputs.multiple_wheels }}
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
