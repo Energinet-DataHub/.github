@@ -76,6 +76,11 @@ jobs:
             # Check if setup.py exists in the directory
             if [[ -f "$dir/setup.py" ]]; then
               echo "Found setup.py in $dir. Running python setup.py..."
+
+              # Create a subfolder in artifacts with the same name as the current folder
+              output_dir="artifacts/${dir%/}"
+              mkdir -p "$output_dir"
+
               # Navigate into the directory
               (cd "$dir" && python setup.py sdist bdist_wheel)
 
