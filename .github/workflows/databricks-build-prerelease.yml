@@ -106,7 +106,7 @@ jobs:
 
               # Move the generated files to the artifacts subfolder
               echo "Moving files to $output_dir"
-              mv "$dir/dist/"* "$output_dir/"
+              mv "$dir/dist" "$output_dir/"
 
               # Clean up the dist folder after moving the files
               rm -rf "$dir/dist"
