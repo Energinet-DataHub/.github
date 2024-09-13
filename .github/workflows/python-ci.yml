@@ -34,6 +34,10 @@ on:
         required: false
         default: ubuntu-22.04
         type: string
+      tests_folder_path:
+        required: false
+        type: string
+        default: ""
       tests_filter_expression:
         description: Filter expression to use with pytest
         required: false
@@ -106,9 +110,10 @@ jobs:
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v13
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v14_14
         with:
           image_tag: ${{ inputs.image_tag }}
+          tests_folder_path: ${{ inputs.tests_folder_path}}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
 
       - name: Publish test report
