@@ -8,6 +8,10 @@ inputs:
   private_key:
     description: Github app private key
     required: true
+  owner:
+    description: Github app owner
+    required: false
+    default: Energinet-Datahub
 
 outputs:
   token:
@@ -23,4 +27,4 @@ runs:
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.private_key }}
-        owner: Energinet-Datahub
+        owner: ${{ inputs.owner }}
