@@ -11,8 +11,8 @@ yaml-files:
   - "*.yml"
   - .yamllint
 
-ignore: |
-  dependabot.yml
+ignore:
+  - .github/dependabot.yml
 
 rules:
   braces:
