@@ -175,7 +175,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run yamllint on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v13
+        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v14
         with:
           yaml_file_or_folder: .github
 
