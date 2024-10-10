@@ -11,9 +11,6 @@ yaml-files:
   - "*.yml"
   - .yamllint
 
-ignore: |
-  dependabot.yml
-
 rules:
   braces:
     min-spaces-inside: 1
