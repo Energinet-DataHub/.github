@@ -91,7 +91,7 @@ on:
       azurite_version:
         description: Install specified Azurite version
         required: false
-        default: 3.32.0
+        default: 3.33.0
         type: string
       azure_functions_core_tools_version:
         description: Install specified Azure Functions Core Tools version
