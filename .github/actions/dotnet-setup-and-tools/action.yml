@@ -16,8 +16,8 @@ name: Setup dotnet and tools
 description: Setup .NET and other tools typically used when building and testing .NET code
 
 inputs:
-  dotnet_version:
-    description: Install specified .NET Core SDK version
+  global_json_path:
+    description: Override the global.json file path
     required: false
   # Cosmos DB emulator
   use_cosmos_db_emulator:
@@ -36,7 +36,7 @@ inputs:
   azurite_version:
     description: Install specified Azurite version
     required: false
-    default: 3.32.0
+    default: 3.33.0
   azure_functions_core_tools_version:
     description: Install specified Azure Functions Core Tools version
     required: false
@@ -50,11 +50,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup .NET ${{ inputs.dotnet_version }}
-      if: ${{ inputs.dotnet_version }}
+    - name: Setup globale json path ${{ inputs.global_json_path }}
+      if: ${{ inputs.global_json_path }}
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ inputs.dotnet_version }}
+        global-json-file: ${{ inputs.global_json_path }}
       env:
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
 
