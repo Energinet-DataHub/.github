@@ -292,6 +292,7 @@ jobs:
       - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
         run: |
+          ls
           Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
