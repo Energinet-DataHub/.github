@@ -282,7 +282,7 @@ jobs:
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
 
-      - name: Wait for dotnet-tests artifact to be ready for download
+      - name: Download artifact
         if: ${{ inputs.download_artifact_name != '' }}
         uses: actions/download-artifact@v4
         with:
