@@ -54,7 +54,10 @@ on:
         required: false
         default: true
         type: boolean
-
+      job_context:
+        required: false
+        default: ""
+        type: string
 jobs:
   create_prerelease:
     runs-on: ${{ inputs.operating_system }}
@@ -146,6 +149,7 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
+          job_context: ${{ inputs.job_context }}
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request'
