@@ -307,6 +307,7 @@ jobs:
       - name: Run tests
         shell: pwsh
         run: |
+          ls ${{ github.workspace }}
           dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
