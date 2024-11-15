@@ -133,6 +133,10 @@ on:
         required: false
         default: ""
         type: string
+      download_artifact_name:
+        description: Name of an artifact containing tests to execute
+        required: false
+        type: string
 
 permissions:
   id-token: write
@@ -268,6 +272,7 @@ jobs:
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Wait for dotnet-tests artifact to be ready for download
+        if: ${{ inputs.download_artifact_name == '' }}
         uses: Wandalen/wretry.action@v1
         with:
           action: actions/download-artifact@v4
@@ -276,6 +281,13 @@ jobs:
             path: ${{ env.ARTIFACTS_PATH }}
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
+
+      - name: Wait for dotnet-tests artifact to be ready for download
+        if: ${{ inputs.download_artifact_name != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.download_artifact_name }}
+          path: ${{ env.ARTIFACTS_PATH }}
 
       - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
