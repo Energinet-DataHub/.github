@@ -35,12 +35,12 @@ runs:
         NC='\033[0m' # No Color
 
         # Check if URL is provided as an argument
-        if [ -z "${{ input.structurizr_url }}" ]; then
+        if [ -z "${{ inputs.structurizr_url }}" ]; then
             echo -e "${RED}Error: No URL provided${NC}"
             exit 1
         fi
 
-        URL=${{ input.structurizr_url }}
+        URL=${{ inputs.structurizr_url }}
 
         # Make the curl request and save the response to response.html
         if ! curl -s -L "$URL" > response.html; then
