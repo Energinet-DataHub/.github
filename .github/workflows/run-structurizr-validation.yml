@@ -32,6 +32,16 @@ jobs:
             -e STRUCTURIZR_WORKSPACE_FILENAME=dh-base-model.dsl \
             structurizr/lite
 
+      - name: Wait for Structurizr Lite to be ready
+        shell: bash
+        run: |
+          echo "Waiting for Structurizr Lite to be ready..."
+          until curl -s http://localhost:8080; do
+            echo "Still waiting..."
+            sleep 5
+          done
+          echo "Structurizr Lite is ready."
+
       - name: Validate Structurizr model
         uses: ./.github/actions/structurizr-validate-model
         with:
