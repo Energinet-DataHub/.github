@@ -124,7 +124,7 @@ jobs:
 
       - name: Validate diagrams
         if: steps.diagrams_changed.outputs.any_changed == 'true'
-        uses: Energinet-DataHub/.github/.github/actions/structurizr-validate-model@2ecb9837498d1a121c2cb50e81a5c1e5a69760e3
+        uses: Energinet-DataHub/.github/.github/actions/structurizr-validate-model@8483c92488df4d78b59fd58a1cf40eb50c732faf
 
       - name: Setup node
         if: steps.diagrams_changed.outputs.any_changed == 'true'
