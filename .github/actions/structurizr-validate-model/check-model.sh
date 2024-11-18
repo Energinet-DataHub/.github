@@ -5,8 +5,16 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
+# Check if URL is provided as an argument
+if [ -z "$1" ]; then
+    echo -e "${RED}Error: No URL provided${NC}"
+    exit 1
+fi
+
+URL=$1
+
 # Make the curl request and save the response to response.html
-if ! curl -s -L http://localhost:8080 > response.html; then
+if ! curl -s -L "$URL" > response.html; then
     echo -e "${RED}Error: Failed to make the API request${NC}"
     rm response.html
     exit 1
