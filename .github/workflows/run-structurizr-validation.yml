@@ -1,4 +1,4 @@
-name: CI orchestrator
+name: Dummy run - structurizr validation
 
 on:
   pull_request:
