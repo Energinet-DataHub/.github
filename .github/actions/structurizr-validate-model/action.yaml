@@ -19,7 +19,7 @@ inputs:
   structurizr_url:
     description: The URL to the Structurizr workspace
     required: true
-    default: "http://localhost:8080"
+    default: http://localhost:8080
 
 runs:
   using: composite
