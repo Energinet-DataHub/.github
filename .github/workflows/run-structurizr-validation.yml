@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - sondergaard/check-model-before-rendering
   workflow_dispatch: { }
 
 jobs:
