@@ -1,0 +1,88 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Validate structurizr model
+description: Validates the Structurizr model in the repository
+
+inputs:
+  structurizr_url:
+    description: The URL to the Structurizr workspace
+    required: true
+    default: http://localhost:8080
+
+runs:
+  using: composite
+  steps:
+    - name: Run bash script
+      shell: bash
+      run: |
+        #!/bin/bash
+
+        # ANSI color codes
+        RED='\033[0;31m'
+        GREEN='\033[0;32m'
+        NC='\033[0m' # No Color
+
+        # Check if URL is provided as an argument
+        if [ -z "${{ inputs.structurizr_url }}" ]; then
+            echo -e "${RED}Error: No URL provided${NC}"
+            exit 1
+        fi
+
+        URL=${{ inputs.structurizr_url }}
+
+        # Make the curl request and save the response to response.html
+        if ! curl -s -L "$URL" > response.html; then
+            echo -e "${RED}Error: Failed to make the API request${NC}"
+            echo -e "${RED}Response content:${NC}"
+            cat response.html
+            rm response.html
+            exit 1
+        fi
+
+        # Check if the response is HTML (looking for <html> tag)
+        if grep -q "<html" response.html; then
+            # Extract error message from HTML
+            error_message=$(awk '
+                /<h1>Error<\/h1>/ {flag=1; next}
+                flag && /<p>/ {
+                    capture=1
+                    sub(".*<p>", "")
+                }
+                capture {
+                    content = content $0
+                }
+                capture && /<\/p>/ {
+                    sub("</p>.*", "", content)
+                    gsub(/\n/, " ", content)
+                    print content
+                    exit
+                }
+            ' response.html)
+
+            if [ -n "$error_message" ]; then
+                echo -e "${RED}Error detected:${NC}"
+                echo -e "${RED}$error_message${NC}"
+                rm response.html
+                exit 2
+            else
+                echo -e "${GREEN}No error message found in the response.${NC}"
+                rm response.html
+                exit 0
+            fi
+        else
+            echo -e "${RED}Response is not HTML. Unable to process.${NC}"
+            rm response.html
+            exit 3
+        fi
