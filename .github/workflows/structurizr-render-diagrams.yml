@@ -115,6 +115,11 @@ jobs:
             -e STRUCTURIZR_WORKSPACE_FILENAME=${{ inputs.structurizr_workspace_filename }} \
             structurizr/lite
 
+      - name: Validate diagrams
+        if: steps.diagrams_changed.outputs.any_changed == 'true'
+        run: |
+          ../utilities/validate-structurizr/check-model.sh
+
       - name: Setup node
         if: steps.diagrams_changed.outputs.any_changed == 'true'
         uses: actions/setup-node@v4
