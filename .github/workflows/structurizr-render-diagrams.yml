@@ -59,8 +59,8 @@ on:
         type: string
         default: not-in-use # Having a default value makes the workflow simpler to develop
     secrets:
-      token:
-        description: Token used to checkout the repository
+      dh3serviceaccount_privatekey:
+        description: Private key used to issue short-lived tokens for authenticating Github API requests
         required: true
 
 jobs:
@@ -72,13 +72,20 @@ jobs:
       # Url for diagrams page in Structurizr Lite, when running in docker
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
     steps:
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
+        name: Generate Github token
+        id: generate_token
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
           # Link: https://github.com/stefanzweifel/git-auto-commit-action#commits-made-by-this-action-do-not-trigger-new-workflow-runs
-          token: ${{ secrets.token }}
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
         id: diagrams_changed
