@@ -1,0 +1,37 @@
+name: CI orchestrator
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: { }
+
+jobs:
+  validate-structurizr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # We experienced issues with using GitHub 'services' to run Structurizr Lite in docker;
+      # it caused an checkout error in the 'greenforce-frontend' repository.
+      # So instead we use an action to run the docker container; that way we can checkout the
+      # repository BEFORE we run Structurizr Lite.
+      - name: Prepare Structurizr Lite (docker)
+        shell: bash
+        run: |
+          # Structurizr Lite image from Docker Hub, see available tags here: https://hub.docker.com/r/structurizr/lite/tags
+          docker pull structurizr/lite
+          docker run \
+            -d \
+            -t \
+            -p 8080:8080 \
+            -v ${{ github.workspace }}:/usr/local/structurizr \
+            -e STRUCTURIZR_WORKSPACE_PATH=/docs/diagrams/c4-model \
+            -e STRUCTURIZR_WORKSPACE_FILENAME=dh-base-model.dsl \
+            structurizr/lite
+
+      - name: Validate Structurizr model
+        uses: ./.github/actions/structurizr-validate-model
+        with:
+          structurizr_url: http://localhost:8080
