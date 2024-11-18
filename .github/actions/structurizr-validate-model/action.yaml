@@ -45,6 +45,7 @@ runs:
         # Make the curl request and save the response to response.html
         if ! curl -s -L "$URL" > response.html; then
             echo -e "${RED}Error: Failed to make the API request${NC}"
+            cat response.html
             rm response.html
             exit 1
         fi
