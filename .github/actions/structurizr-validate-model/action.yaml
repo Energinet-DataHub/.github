@@ -27,4 +27,4 @@ runs:
     - name: Run bash script
       shell: bash
       run: |
-        ./${{ github.action_path }}/check-model.sh "${{ inputs.structurizr_url }}"
+        ./check-model.sh "${{ inputs.structurizr_url }}"
