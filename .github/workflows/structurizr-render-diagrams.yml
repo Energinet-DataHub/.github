@@ -122,9 +122,19 @@ jobs:
             -e STRUCTURIZR_WORKSPACE_FILENAME=${{ inputs.structurizr_workspace_filename }} \
             structurizr/lite
 
+      - name: Wait for Structurizr Lite to be ready
+        shell: bash
+        run: |
+          echo "Waiting for Structurizr Lite to be ready..."
+          until curl -s http://localhost:8080; do
+            echo "Still waiting..."
+            sleep 1
+          done
+          echo "Structurizr Lite is ready."
+
       - name: Validate diagrams
         if: steps.diagrams_changed.outputs.any_changed == 'true'
-        uses: Energinet-DataHub/.github/.github/actions/structurizr-validate-model@b47d67ed27649c8b29298b88b62d913e1aa28dac
+        uses: Energinet-DataHub/.github/.github/actions/structurizr-validate-model@c976637960c6e6df7188e223e9ac660370c7ad94
 
       - name: Setup node
         if: steps.diagrams_changed.outputs.any_changed == 'true'
