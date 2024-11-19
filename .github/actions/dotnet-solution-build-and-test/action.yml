@@ -16,25 +16,42 @@ name: Build and test dotnet solution
 description: Build a .NET solution, run tests and upload code coverage
 
 inputs:
+  dotnet_version:
+    description: Install specified .NET Core SDK version
+    required: false
   solution_file_path:
+    description: Path to the solution file to build
     required: true
   build_configuration:
+    description: Configuration to build the solution in
     required: false
     default: Release
   # Secrets required if we need to login to Azure and use Azure resources from automated tests
   azure_tenant_id:
+    description: Tenant ID for Azure AD
     required: false
   azure_subscription_id:
+    description: Subscription ID for Azure
     required: false
   azure_spn_id:
+    description: Service Principal ID for Azure
     required: false
   publish_test_report:
+    description: Publish test report as a comment on the PR
     required: false
     default: "false"
 
 runs:
   using: composite
   steps:
+    - name: Setup .NET ${{ inputs.dotnet_version }}
+      if: ${{ inputs.dotnet_version }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet_version }}
+      env:
+        DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+
     - name: Guard for Windows OS
       shell: bash
       run: |
