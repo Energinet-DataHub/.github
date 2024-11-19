@@ -46,6 +46,11 @@ runs:
           exit 1
         fi
 
+    - name: Dotnet version dump
+      shell: pwsh
+      run: |
+        dotnet --info
+
     - name: Restore NuGet packages
       shell: pwsh
       run: |
