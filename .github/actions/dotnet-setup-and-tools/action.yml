@@ -57,6 +57,8 @@ runs:
         global-json-file: ${{ inputs.global_json_path }}
       env:
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+    - shell: pwsh
+      run: echo '${{ steps.stepid.outputs.dotnet-version }}'
 
     # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
     # We have added a retry action to see if this can mitigate builds failing on this account.
