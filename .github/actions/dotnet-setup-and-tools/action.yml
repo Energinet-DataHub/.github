@@ -58,7 +58,12 @@ runs:
       env:
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
     - shell: pwsh
-      run: echo '${{ steps.stepid.outputs.dotnet-version }}'
+      run: echo ${{ steps.stepid.outputs.dotnet-version }}
+
+    - name: Dotnet version dump
+      shell: pwsh
+      run: |
+        dotnet --info
 
     # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
     # We have added a retry action to see if this can mitigate builds failing on this account.
