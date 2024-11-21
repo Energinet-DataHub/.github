@@ -57,8 +57,6 @@ runs:
         global-json-file: ${{ inputs.global_json_path }}
       env:
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
-    - shell: pwsh
-      run: echo ${{ steps.stepid.outputs.dotnet-version }}
 
     - name: Dotnet version dump
       shell: pwsh
