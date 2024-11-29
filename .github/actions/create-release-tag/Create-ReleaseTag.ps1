@@ -58,8 +58,8 @@ function Create-ReleaseTag {
     )
 
     Write-Host "Github event name is: $GitHubEvent"
-    $isPullRequest = $GitHubEvent -eq 'pull_request'
-    Write-Host "Is PR: $isPullRequest"
+    $isPushToMain = $GitHubEvent -eq 'push' -and $GitHubBranch -eq 'main'
+    Write-Host "Is push to main: $isPushToMain"
 
     $version = "$MajorVersion.$MinorVersion.$PatchVersion"
 
@@ -90,7 +90,7 @@ function Create-ReleaseTag {
     Write-Host "Validated version tag: $version"
 
     # Updating major version tag
-    if (!$isPullRequest) {
+    if ($isPushToMain) {
         Update-VersionTags -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
     }
     else {
