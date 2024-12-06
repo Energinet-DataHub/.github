@@ -47,6 +47,10 @@ on:
         required: false
         default: ubuntu-20.04 # Tools for python is not available in arch x64 on 22.04
         type: string
+      prerelease_prefix:
+        required: false
+        type: string
+        default: databricks
 
 jobs:
   create_prerelease:
@@ -54,8 +58,8 @@ jobs:
 
     env:
       RELEASE_FOLDER_PATH: ${{ inputs.wheel_working_directory }}/artifacts
-      RELEASE_VERSION: databricks_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: databricks_${{ github.event.pull_request.number }}.zip
+      RELEASE_VERSION: ${{ inputs.prerelease_prefix }}_${{ github.event.pull_request.number }}
+      RELEASE_ZIP_FILENAME: ${{ inputs.prerelease_prefix }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout
