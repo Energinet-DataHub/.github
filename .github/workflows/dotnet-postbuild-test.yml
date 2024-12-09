@@ -306,7 +306,7 @@ jobs:
           $destination = "${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0"
 
           # For the life of me, Copy-Item does not copy all subdirectories no matter what I do... I freaking give up now and use robocopy
-          robocopy ${{ env.ARTIFACTS_PATH }} $destination /MIR
+          robocopy ${{ env.ARTIFACTS_PATH }} $destination /MIR /NFL /NDL
 
           ls $destination
           if ($lastexitcode -eq 1) {
