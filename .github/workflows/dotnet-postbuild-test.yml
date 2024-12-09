@@ -299,10 +299,12 @@ jobs:
           name: ${{ inputs.download_artifact_name }}
           path: ${{ env.ARTIFACTS_PATH }}
 
-      - name: Copy test assemblies to workspace root
+      - name: Copy test assemblies
         if: ${{ inputs.download_artifact_name != '' }}
+        shell: pwsh
         run: |
-          cp -r ${{ env.ARTIFACTS_PATH }}/* ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          # mkdir ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
           ls ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
