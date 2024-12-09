@@ -303,9 +303,10 @@ jobs:
         if: ${{ inputs.download_artifact_name != '' }}
         shell: pwsh
         run: |
-          # mkdir ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
-          Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0 -Force
-          ls ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          $destination = ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination $destination -Force -ErrorAction SilentlyContinue
+
+          ls $destination
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
