@@ -307,7 +307,14 @@ jobs:
 
           # For the life of me, Copy-Item does not copy all subdirectories no matter what I do... I freaking give up now and use robocopy
           robocopy ${{ env.ARTIFACTS_PATH }} $destination /MIR
+
           ls $destination
+          if ($lastexitcode -eq 1) {
+            # Exitcode 1 = files were copied
+            # https://ss64.com/nt/robocopy-exit.html
+            exit 0
+          }
+
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
