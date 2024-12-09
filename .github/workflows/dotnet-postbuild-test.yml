@@ -303,7 +303,7 @@ jobs:
         if: ${{ inputs.download_artifact_name != '' }}
         shell: pwsh
         run: |
-          $destination = ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          $destination = "${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0"
           Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination $destination -Force -ErrorAction SilentlyContinue
 
           ls $destination
