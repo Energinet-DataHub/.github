@@ -304,7 +304,7 @@ jobs:
         shell: pwsh
         run: |
           # mkdir ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
-          Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
+          Copy-Item -Recurse -Path ${{ env.ARTIFACTS_PATH }}/* -Destination ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0 -Force
           ls ${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
