@@ -133,6 +133,19 @@ on:
         required: false
         default: ""
         type: string
+      download_artifact_name:
+        description: Name of an artifact containing tests to execute
+        required: false
+        type: string
+      testproject_name:
+        description: Name of the folder containing the test project
+        required: false
+        type: string
+      testproject_twin_name:
+        description: Name of the folder that the project should be unzipped to
+        required: false
+        type: string
+
 
 permissions:
   id-token: write
@@ -183,20 +196,26 @@ jobs:
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
-      - name: Wait for dotnet-tests artifact to be ready for download
-        uses: Wandalen/wretry.action@v1
+      - name: Download artifact  # Content is not zipped
+        uses: actions/download-artifact@v4
         with:
-          action: actions/download-artifact@v4
-          with: |
-            name: dotnet-tests
-            path: ${{ env.ARTIFACTS_PATH }}
-          attempt_limit: ${{ inputs.download_attempt_limit }}
-          attempt_delay: 15000
+          name: ${{ inputs.download_artifact_name }}
+          path: ${{ env.ARTIFACTS_PATH }}
 
-      - name: Unzip dotnet-tests-outputs.zip
+      - name: Copy test assemblies
         shell: pwsh
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+          $destination = "${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0"
+
+          # For the life of me, Copy-Item does not copy all subdirectories no matter what I do... I freaking give up now and use robocopy
+          robocopy ${{ env.ARTIFACTS_PATH }} $destination /MIR /NFL /NDL
+
+          ls $destination
+          if ($lastexitcode -eq 1) {
+            # Exitcode 1 = files were copied
+            # https://ss64.com/nt/robocopy-exit.html
+            exit 0
+          }
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
@@ -204,6 +223,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host 'Installing dotnet.coverage ...'
+
           dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
