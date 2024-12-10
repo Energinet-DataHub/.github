@@ -131,6 +131,10 @@ on:
         description: Name of the folder containing the test project
         required: false
         type: string
+      solution_file_path:
+        description: Path to the solution file
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -177,23 +181,28 @@ jobs:
           azurite_version: ${{ inputs.azurite_version }}
           use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
 
-      - name: Download test artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.testproject_artifact_name }}
-          path: ${{ env.ARTIFACT_TEST_PATH }}/
-
-      - name: Copy test assemblies
+      - name: Build solution
         shell: pwsh
         run: |
-          $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
-          robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
+          dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ inputs.build_configuration }}
 
-          if ($lastexitcode -eq 1) {
-            # Exitcode 1 = files were copied
-            # https://ss64.com/nt/robocopy-exit.html
-            exit 0
-          }
+      # - name: Download test artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: ${{ inputs.testproject_artifact_name }}
+      #     path: ${{ env.ARTIFACT_TEST_PATH }}/
+
+      # - name: Copy test assemblies
+      #   shell: pwsh
+      #   run: |
+      #     $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
+      #     robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
+
+      #     if ($lastexitcode -eq 1) {
+      #       # Exitcode 1 = files were copied
+      #       # https://ss64.com/nt/robocopy-exit.html
+      #       exit 0
+      #     }
 
       - name: Run tests
         uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@kerbou/2524-build-brs-pipeline
