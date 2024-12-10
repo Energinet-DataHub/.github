@@ -171,6 +171,9 @@ jobs:
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Set up test environment
         uses: ./actions/dotnet-setup-postbuild-test
         with:
