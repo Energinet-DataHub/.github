@@ -34,11 +34,6 @@ name: .NET test
 on:
   workflow_call:
     inputs:
-      job_name:
-        description: Set job name so it is easier to identify job in workflow summary
-        required: false
-        default: .NET CI Test
-        type: string
       tests_dll_file_path:
         description: Relative path from artifacts folder to test assembly
         required: true
@@ -67,11 +62,6 @@ on:
         required: false
         default: windows-2022
         type: string
-      download_attempt_limit:
-        description: Number of times we retry downloading dotnet-tests artifact (effectively waiting for the build job to complete)
-        required: false
-        default: 12
-        type: number
       use_cosmos_db_emulator:
         description: Install Cosmos DB emulator to support testing
         required: false
@@ -133,7 +123,7 @@ on:
         required: false
         default: ""
         type: string
-      download_artifact_name:
+      testproject_artifact_name:
         description: Name of an artifact containing tests to execute
         required: false
         type: string
@@ -141,8 +131,12 @@ on:
         description: Name of the folder containing the test project
         required: false
         type: string
-      testproject_twin_name:
+      testproject_sut_artifact_name:
         description: Name of the folder that the project should be unzipped to
+        required: false
+        type: string
+      testproject_sut_name:
+        description: Name of the folder containing the project to test
         required: false
         type: string
 
@@ -156,13 +150,14 @@ permissions:
 
 jobs:
   dotnet_ci_test:
-    name: ${{ inputs.job_name }}
+    name: Test ${{ inputs.testproject_name }}
     runs-on: ${{ inputs.operating_system }}
 
     environment: ${{ inputs.environment }}
 
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
+      ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
+      ARTIFACT_SUT_PATH: ${{ github.workspace }}\${{ inputs.testproject_sut_name }}
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       #
@@ -188,27 +183,27 @@ jobs:
           azurite_version: ${{ inputs.azurite_version }}
           use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
 
-      - name: Login to use Azure resources from automated tests
-        if: ${{ inputs.run_integration_tests == true }}
-        uses: azure/login@v2
-        with:
-          client-id: ${{ inputs.azure_integrationtest_spn_id }}
-          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
-          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
-
-      - name: Download artifact  # Content is not zipped
+      - name: Download test artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.download_artifact_name }}
-          path: ${{ env.ARTIFACTS_PATH }}
+          name: ${{ inputs.testproject_artifact_name }}
+          path: ${{ env.ARTIFACT_TEST_PATH }}/
+
+      - name: Download SUT artifact
+        if: ${{ inputs.testproject_sut_artifact_name }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.testproject_sut_artifact_name }}
+          path: ${{ env.ARTIFACT_SUT_PATH }}/
 
       - name: Copy test assemblies
         shell: pwsh
         run: |
-          $destination = "${{ github.workspace }}/source/${{ inputs.project_name}}/bin/Release/net8.0"
+          $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
+          robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
 
-          # For the life of me, Copy-Item does not copy all subdirectories no matter what I do... I freaking give up now and use robocopy
-          robocopy ${{ env.ARTIFACTS_PATH }} $destination /MIR /NFL /NDL
+          $destinationSUT = "${{ github.workspace }}/source/${{ inputs.testproject_sut_name}}/bin/Release/net8.0"
+          robocopy ${{ env.ARTIFACT_SUT_PATH }} $destinationSUT /MIR /NFL /NDL
 
           ls $destination
           if ($lastexitcode -eq 1) {
@@ -217,43 +212,14 @@ jobs:
             exit 0
           }
 
-      # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
-      # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
       - name: Run tests
-        shell: pwsh
-        run: |
-          Write-Host 'Installing dotnet.coverage ...'
-
-          dotnet tool install --global dotnet-coverage --version 17.5.0
-          # Configure content root for WebApplicationFactory<TEntryPoint>
-          if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
-          {
-            $Env:${{ inputs.aspnetcore_test_contentroot_variable_name }} = '${{ github.workspace }}${{ inputs.aspnetcore_test_contentroot_variable_value }}'
-          }
-          # Handle filter expression
-          if ( '${{ inputs.tests_filter_expression }}' -eq 'empty' )
-          {
-            dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
-              --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
-          }
-          else
-          {
-            dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
-              --filter '${{ inputs.tests_filter_expression }}' `
-              --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
-          }
-
-          $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
-          $testFailures
-
-      - name: Publish test report
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: ./actions/dotnet-run-tests-with-coverage-and-publish-report
         with:
-          check_name: Test results for ${{ inputs.tests_dll_file_path }}
-          comment_title: Test results for ${{ inputs.tests_dll_file_path }}
-          comment_mode: failures
-          files: |
-            **/TestResults/*.trx
+          aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
+          aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
+          tests_filter_expression: ${{ inputs.tests_filter_expression }}
+          tests_dll_file_path: ${{ inputs.tests_dll_file_path }}
+          run_integration_tests: ${{ inputs.run_integration_tests }}
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
