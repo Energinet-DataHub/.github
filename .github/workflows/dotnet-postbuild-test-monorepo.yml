@@ -175,7 +175,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up test environment
-        uses: ./.github/actions/dotnet-setup-postbuild-test
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-postbuild-test?ref=kerbou/2524-build-brs-pipeline
         with:
           dotnet_version: ${{ inputs.dotnet_version }}
           operating_system: ${{ inputs.operating_system }}
@@ -216,7 +216,7 @@ jobs:
           }
 
       - name: Run tests
-        uses: ./.github/actions/dotnet-run-tests-with-coverage-and-publish-report
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report?ref=kerbou/2524-build-brs-pipeline
         with:
           aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
           aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
