@@ -246,7 +246,7 @@ jobs:
           robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationOrchestrations /MIR /NFL /NDL
 
           $destinationProcessManager = "${{ github.workspace }}/source/${{inputs.testproject_processmanager_name}}/bin/Release/net8.0"
-          robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationProcessManager /MIR /NFL /NDL
+          robocopy ${{ env.ARTIFACT_PROCESSMANAGER_PATH }} $destinationProcessManager /MIR /NFL /NDL
 
           if ($lastexitcode -eq 1) {
             # Exitcode 1 = files were copied
