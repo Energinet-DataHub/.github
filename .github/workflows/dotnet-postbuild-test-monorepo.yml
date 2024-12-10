@@ -139,6 +139,11 @@ on:
         description: Name of the folder containing the project to test
         required: false
         type: string
+      testproject_sut_orchestrations_path:
+        description: Name of the folder containing the orchestrations project
+        required: false
+        type: string
+        default: ProcessManager.Orchestrations
 
 
 permissions:
@@ -158,6 +163,8 @@ jobs:
     env:
       ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
       ARTIFACT_SUT_PATH: ${{ github.workspace }}\${{ inputs.testproject_sut_name }}
+      ARTIFACT_ORCHESTRATIONS_PATH: ${{ github.workspace }}\${{ inputs.testproject_sut_orchestrations_path }}
+
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       #
@@ -192,6 +199,13 @@ jobs:
           name: ${{ inputs.testproject_artifact_name }}
           path: ${{ env.ARTIFACT_TEST_PATH }}/
 
+      - name: Download Orchestrations artifact
+        continue-on-error: true  # SUT artifact may not exist, if we are running i.e. subsystemtests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.testproject_sut_artifact_name }}
+          path: ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }}/
+
       - name: Download SUT artifact
         continue-on-error: true  # SUT artifact may not exist, if we are running i.e. subsystemtests
         if: ${{ inputs.testproject_sut_artifact_name }}
@@ -208,6 +222,9 @@ jobs:
 
           $destinationSUT = "${{ github.workspace }}/source/${{ inputs.testproject_sut_name}}/bin/Release/net8.0"
           robocopy ${{ env.ARTIFACT_SUT_PATH }} $destinationSUT /MIR /NFL /NDL
+
+          $destinationOrchestrations = "${{ github.workspace }}/source/${{inputs.testproject_sut_orchestrations_path}}/bin/Release/net8.0"
+          robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationOrchestrations /MIR /NFL /NDL
 
           ls $destination
           if ($lastexitcode -eq 1) {
