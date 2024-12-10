@@ -203,7 +203,7 @@ jobs:
         continue-on-error: true  # SUT artifact may not exist, if we are running i.e. subsystemtests
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.testproject_sut_artifact_name }}
+          name: ${{ inputs.testproject_sut_orchestrations_path }}
           path: ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }}/
 
       - name: Download SUT artifact
@@ -220,8 +220,10 @@ jobs:
           $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
           robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
 
-          $destinationSUT = "${{ github.workspace }}/source/${{ inputs.testproject_sut_name}}/bin/Release/net8.0"
-          robocopy ${{ env.ARTIFACT_SUT_PATH }} $destinationSUT /MIR /NFL /NDL
+          if (Test-Path '${{ env.ARTIFACT_SUT_PATH }}') {
+            $destinationSUT = "${{ github.workspace }}/source/${{ inputs.testproject_sut_name}}/bin/Release/net8.0"
+            robocopy ${{ env.ARTIFACT_SUT_PATH }} $destinationSUT /MIR /NFL /NDL
+          }
 
           $destinationOrchestrations = "${{ github.workspace }}/source/${{inputs.testproject_sut_orchestrations_path}}/bin/Release/net8.0"
           robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationOrchestrations /MIR /NFL /NDL
