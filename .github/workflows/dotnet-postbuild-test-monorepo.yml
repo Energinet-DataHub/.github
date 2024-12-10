@@ -226,7 +226,6 @@ jobs:
           $destinationOrchestrations = "${{ github.workspace }}/source/${{inputs.testproject_sut_orchestrations_path}}/bin/Release/net8.0"
           robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationOrchestrations /MIR /NFL /NDL
 
-          ls $destination
           if ($lastexitcode -eq 1) {
             # Exitcode 1 = files were copied
             # https://ss64.com/nt/robocopy-exit.html
