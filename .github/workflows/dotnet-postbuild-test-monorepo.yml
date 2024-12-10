@@ -184,7 +184,7 @@ jobs:
       - name: Build solution
         shell: pwsh
         run: |
-          dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ inputs.build_configuration }}
+          dotnet build ${{ inputs.solution_file_path }} --configuration Release
 
       # - name: Download test artifact
       #   uses: actions/download-artifact@v4
