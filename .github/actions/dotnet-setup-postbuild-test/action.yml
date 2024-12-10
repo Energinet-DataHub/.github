@@ -59,7 +59,7 @@ runs:
         fi
 
     - name: Setup .NET ${{ inputs.dotnet_version }}
-      if: ${{ inputs.dotnet_version }}
+      if: ${{ inputs.dotnet_version == 'true'}}
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ inputs.dotnet_version }}
@@ -69,7 +69,7 @@ runs:
     # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
     # We have added a retry action to see if this can mitigate builds failing on this account.
     - name: Setup Azure Cosmos DB Emulator (with retry)
-      if: ${{ inputs.use_cosmos_db_emulator == true }}
+      if: ${{ inputs.use_cosmos_db_emulator == 'true' }}
       uses: nick-fields/retry@v2
       with:
         timeout_minutes: 10
@@ -88,13 +88,13 @@ runs:
           }
 
     - name: Use Node v${{ inputs.node_version }}
-      if: ${{ inputs.use_azure_functions_tools == true }}
+      if: ${{ inputs.use_azure_functions_tools == 'true' }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node_version }}
 
     - name: Cache node modules
-      if: ${{ inputs.use_azure_functions_tools == true }}
+      if: ${{ inputs.use_azure_functions_tools == 'true' }}
       id: cache-nodemodules
       uses: actions/cache@v4
       with:
@@ -102,19 +102,19 @@ runs:
         path: ${{ github.workspace }}\node_modules
 
     - name: Install Azurite v${{ inputs.azurite_version }}
-      if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.use_azure_functions_tools == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
       shell: pwsh
       run: |
         npm install azurite@${{ inputs.azurite_version }}
 
     - name: Install Azure Functions Core Tools v${{ inputs.azure_functions_core_tools_version }}
-      if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.use_azure_functions_tools == 'true' && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
       shell: pwsh
       run: |
         npm install azure-functions-core-tools@${{ inputs.azure_functions_core_tools_version }}
 
     - name: Install SQL LocalDB 2019
-      if: ${{ inputs.use_sqllocaldb_2019 == true }}
+      if: ${{ inputs.use_sqllocaldb_2019 == 'true' }}
       shell: pwsh
       run: |
         Write-Host "Downloading..."
@@ -126,7 +126,7 @@ runs:
     # If a connection cannot be established within <timeout> seconds it fails.
     # We have added a retry action to see if this can mitigate builds failing on this account.
     - name: Verify SQL LocalDB 2019 (with retry)
-      if: ${{ inputs.use_sqllocaldb_2019 == true }}
+      if: ${{ inputs.use_sqllocaldb_2019 == 'true' }}
       uses: nick-fields/retry@v2
       with:
         timeout_minutes: 2
