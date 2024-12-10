@@ -131,31 +131,6 @@ on:
         description: Name of the folder containing the test project
         required: false
         type: string
-      testproject_sut_artifact_name:
-        description: Name of the folder that the project should be unzipped to
-        required: false
-        type: string
-      testproject_sut_name:
-        description: Name of the folder containing the project to test
-        required: false
-        type: string
-      testproject_orchestrations_name:
-        description: Name of the folder containing the orchestrations project
-        required: true
-        type: string
-      testproject_orchestrations_artifact_name:
-        description: Name of the artifact containing the orchestrations project
-        required: true
-        type: string
-      testproject_processmanager_name:
-        description: Name of the folder containing the orchestrations project
-        required: true
-        type: string
-      testproject_processmanager_artifact_name:
-        description: Name of the artifact containing the orchestrations project
-        required: true
-        type: string
-
 
 permissions:
   id-token: write
@@ -173,9 +148,6 @@ jobs:
 
     env:
       ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
-      ARTIFACT_SUT_PATH: ${{ github.workspace }}\${{ inputs.testproject_sut_name }}
-      ARTIFACT_ORCHESTRATIONS_PATH: ${{ github.workspace }}\${{ inputs.testproject_orchestrations_name }}
-      ARTIFACT_PROCESSMANAGER_PATH: ${{ github.workspace }}\${{ inputs.testproject_processmanager_name }}
 
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
@@ -211,42 +183,11 @@ jobs:
           name: ${{ inputs.testproject_artifact_name }}
           path: ${{ env.ARTIFACT_TEST_PATH }}/
 
-      - name: Download Orchestrations artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.testproject_orchestrations_artifact_name }}
-          path: ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }}/
-
-      - name: Download Orchestrations artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.testproject_processmanager_artifact_name }}
-          path: ${{ env.ARTIFACT_PROCESSMANAGER_PATH }}/
-
-      - name: Download SUT artifact
-        continue-on-error: true  # SUT artifact may not exist, if we are running i.e. subsystemtests
-        if: ${{ inputs.testproject_sut_artifact_name }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.testproject_sut_artifact_name }}
-          path: ${{ env.ARTIFACT_SUT_PATH }}/
-
       - name: Copy test assemblies
         shell: pwsh
         run: |
           $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
           robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
-
-          if (Test-Path '${{ env.ARTIFACT_SUT_PATH }}') {
-            $destinationSUT = "${{ github.workspace }}/source/${{ inputs.testproject_sut_name}}/bin/Release/net8.0"
-            robocopy ${{ env.ARTIFACT_SUT_PATH }} $destinationSUT /MIR /NFL /NDL
-          }
-
-          $destinationOrchestrations = "${{ github.workspace }}/source/${{inputs.testproject_orchestrations_name}}/bin/Release/net8.0"
-          robocopy ${{ env.ARTIFACT_ORCHESTRATIONS_PATH }} $destinationOrchestrations /MIR /NFL /NDL
-
-          $destinationProcessManager = "${{ github.workspace }}/source/${{inputs.testproject_processmanager_name}}/bin/Release/net8.0"
-          robocopy ${{ env.ARTIFACT_PROCESSMANAGER_PATH }} $destinationProcessManager /MIR /NFL /NDL
 
           if ($lastexitcode -eq 1) {
             # Exitcode 1 = files were copied
