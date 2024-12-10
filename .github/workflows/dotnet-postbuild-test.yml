@@ -163,17 +163,101 @@ jobs:
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
     steps:
-      - name: Set up test environment
-        uses: ./actions/dotnet-setup-postbuild-test
+      - name: Guard for Windows OS
+        shell: bash
+        run: |
+          echo "Runner OS is $RUNNER_OS"
+          if [ $RUNNER_OS == 'Windows' ]; then
+            echo "$RUNNER_OS is supported"
+          else
+            echo "$RUNNER_OS is not supported"
+            exit 1
+          fi
+
+      - name: Setup .NET ${{ inputs.dotnet_version }}
+        if: ${{ inputs.dotnet_version }}
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet_version: ${{ inputs.dotnet_version }}
-          operating_system: ${{ inputs.operating_system }}
-          use_cosmos_db_emulator: ${{ inputs.use_cosmos_db_emulator }}
-          node_version: ${{ inputs.node_version }}
-          use_azure_functions_tools: ${{ inputs.use_azure_functions_tools }}
-          azure_functions_core_tools_version: ${{ inputs.azure_functions_core_tools_version }}
-          azurite_version: ${{ inputs.azurite_version }}
-          use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
+          dotnet-version: ${{ inputs.dotnet_version }}
+        env:
+          DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+
+      # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
+      # We have added a retry action to see if this can mitigate builds failing on this account.
+      - name: Setup Azure Cosmos DB Emulator (with retry)
+        if: ${{ inputs.use_cosmos_db_emulator == true }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Start Cosmos DB Emulator..."
+            Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+            $error.Clear()
+            Start-CosmosDbEmulator -NoUI -Timeout 240
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
+
+      - name: Use Node v${{ inputs.node_version }}
+        if: ${{ inputs.use_azure_functions_tools == true }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Cache node modules
+        if: ${{ inputs.use_azure_functions_tools == true }}
+        id: cache-nodemodules
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
+          path: ${{ github.workspace }}\node_modules
+
+      - name: Install Azurite v${{ inputs.azurite_version }}
+        if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        shell: pwsh
+        run: |
+          npm install azurite@${{ inputs.azurite_version }}
+
+      - name: Install Azure Functions Core Tools v${{ inputs.azure_functions_core_tools_version }}
+        if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+        shell: pwsh
+        run: |
+          npm install azure-functions-core-tools@${{ inputs.azure_functions_core_tools_version }}
+
+      - name: Install SQL LocalDB 2019
+        if: ${{ inputs.use_sqllocaldb_2019 == true }}
+        shell: pwsh
+        run: |
+          Write-Host "Downloading..."
+          Import-Module BitsTransfer
+          Start-BitsTransfer -Source https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi -Destination SqlLocalDB.msi
+          Write-Host "Installing..."
+          Start-Process -FilePath "SqlLocalDB.msi" -Wait -ArgumentList "/qn", "/norestart", "/l*v SqlLocalDBInstall.log", "IACCEPTSQLLOCALDBLICENSETERMS=YES";
+
+      # If a connection cannot be established within <timeout> seconds it fails.
+      # We have added a retry action to see if this can mitigate builds failing on this account.
+      - name: Verify SQL LocalDB 2019 (with retry)
+        if: ${{ inputs.use_sqllocaldb_2019 == true }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          retry_on: error
+          shell: pwsh
+          command: |
+            Write-Host "Checking version..."
+            $error.Clear()
+            sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+            if ($error)
+            {
+              Write-Host "Failed"
+              Exit 1
+            }
 
       - name: Login to use Azure resources from automated tests
         if: ${{ inputs.run_integration_tests == true }}
@@ -203,7 +287,6 @@ jobs:
       - name: Run tests
         shell: pwsh
         run: |
-          Write-Host 'Installing dotnet.coverage ...'
           dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
