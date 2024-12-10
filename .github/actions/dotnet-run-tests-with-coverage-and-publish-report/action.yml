@@ -45,7 +45,7 @@ runs:
   using: composite
   steps:
     - name: Login to use Azure resources from automated tests
-      if: ${{ inputs.run_integration_tests == true }}
+      if: ${{ inputs.run_integration_tests == 'true' }}
       uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure_integrationtest_spn_id }}
