@@ -135,6 +135,10 @@ on:
         description: Path to the solution file
         required: true
         type: string
+      nuget_cache_key_prefix:
+        description: Prefix for caching NuGet packages
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -184,7 +188,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ inputs.testproject_artifact_name }}
+          key: ${{inputs.nuget_cache_key_prefix}}-${{ hashFiles('**/*.csproj') }}
 
       - name: Build solution
         shell: pwsh
