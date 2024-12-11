@@ -181,6 +181,11 @@ jobs:
           azurite_version: ${{ inputs.azurite_version }}
           use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
 
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ inputs.testproject_artifact_name }}
+
       - name: Build solution
         shell: pwsh
         run: |
