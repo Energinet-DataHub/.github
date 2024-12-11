@@ -137,8 +137,9 @@ on:
         type: string
       nuget_cache_key_prefix:
         description: Prefix for caching NuGet packages
-        required: true
+        required: false
         type: string
+        default: nuget-pr${{ github.event.pull_request.number }}
 
 permissions:
   id-token: write
@@ -187,7 +188,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{inputs.nuget_cache_key_prefix}}-${{ hashFiles('**/*.csproj') }}
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
 
       - name: Build solution
         shell: pwsh
