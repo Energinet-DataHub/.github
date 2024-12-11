@@ -174,6 +174,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+
       - name: Set up test environment
         uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@kerbou/2524-build-brs-pipeline
         with:
@@ -184,11 +189,6 @@ jobs:
           azure_functions_core_tools_version: ${{ inputs.azure_functions_core_tools_version }}
           azurite_version: ${{ inputs.azurite_version }}
           use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
 
       - name: Build solution
         shell: pwsh
