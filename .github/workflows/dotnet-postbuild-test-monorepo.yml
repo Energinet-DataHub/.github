@@ -174,10 +174,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up test environment
-        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-postbuild-test@kerbou/2524-build-brs-pipeline
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@kerbou/2524-build-brs-pipeline
         with:
           dotnet_version: ${{ inputs.dotnet_version }}
-          operating_system: ${{ inputs.operating_system }}
           use_cosmos_db_emulator: ${{ inputs.use_cosmos_db_emulator }}
           node_version: ${{ inputs.node_version }}
           use_azure_functions_tools: ${{ inputs.use_azure_functions_tools }}
