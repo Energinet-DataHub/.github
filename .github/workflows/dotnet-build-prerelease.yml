@@ -54,11 +54,10 @@ on:
         required: false
         default: true
         type: boolean
-
 jobs:
   create_prerelease:
     runs-on: ${{ inputs.operating_system }}
-
+    name: Build ${{ inputs.solution_file_path}}
     env:
       BUILD_CONFIGURATION: Release
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output

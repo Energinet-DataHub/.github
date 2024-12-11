@@ -1,0 +1,226 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: .NET test
+
+# DESCRIPTION:
+# This workflow will run tests and code coverage of .NET xUnit test projects
+# that has been previously builded and uploaded as the 'dotnet-tests' artifact.
+#
+# It is intended to run tests in one .NET xUnit test project, and support
+# filters, so developers can split the execution of tests on multiple runners
+# and utilize parallel execution to reduce the overall workflow execution time.
+#
+# To prepare the 'dotnet-tests' artifact run the 'dotnet-solution-ci-build.yml'
+# workflow as a job in parallel of the test workflow. This allows steps of the
+# test workflow to utilize the build time for setting up the job for executing tests.
+#
+# The download step will use a retry action to wait for the 'dotnet-tests'
+# artifact to be ready. Each failing download attempt will be written to the build
+# log as an error, but can be ignored. If the build takes too long, the test
+# job will fail after the last retry attempt.
+
+on:
+  workflow_call:
+    inputs:
+      tests_dll_file_path:
+        description: Relative path from artifacts folder to test assembly
+        required: true
+        type: string
+      tests_filter_expression:
+        description: Filter expression to use with dotnet test
+        required: false
+        default: empty
+        type: string
+      aspnetcore_test_contentroot_variable_name:
+        description: Name of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
+        required: false
+        default: empty # Cannot be '', it must contain a string that is also valid environment name
+        type: string
+      aspnetcore_test_contentroot_variable_value:
+        description: Value of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
+        required: false
+        default: ""
+        type: string
+      dotnet_version:
+        description: Install specified .NET Core SDK version
+        required: false
+        type: string
+      operating_system:
+        description: Must be a version of Windows, we do not support Linux for testing
+        required: false
+        default: windows-2022
+        type: string
+      use_cosmos_db_emulator:
+        description: Install Cosmos DB emulator to support testing
+        required: false
+        default: false
+        type: boolean
+      # Node and modules
+      use_azure_functions_tools:
+        description: Install Azurite and Azure Functions Core Tools to support testing
+        required: false
+        default: false
+        type: boolean
+      node_version:
+        description: Install specified Node.js version
+        required: false
+        default: "16"
+        type: string
+      azurite_version:
+        description: Install specified Azurite version
+        required: false
+        default: 3.33.0
+        type: string
+      azure_functions_core_tools_version:
+        description: Install specified Azure Functions Core Tools version
+        required: false
+        default: 4.0.6594
+        type: string
+      # SQL LocalDB 2019
+      use_sqllocaldb_2019:
+        required: false
+        default: false
+        type: boolean
+      environment:
+        description: Can be used to set environment for OIDC which is AzureAuth
+        required: false
+        default: ""
+        type: string
+      run_integration_tests:
+        description: Set to 'true' to log into Azure for executing integration tests
+        required: false
+        default: false
+        type: boolean
+      azure_integrationtest_spn_id:
+        description: Azure Service Principal for executing integration tests
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_tenant_id:
+        description: Azure Tenant ID for executing integration tests
+        required: false
+        default: ""
+        type: string
+      azure_integrationtest_subscription_id:
+        description: Azure subscription ID for executing integration tests
+        required: false
+        default: ""
+        type: string
+      azure_keyvault_url:
+        description: Azure Keyvault URL with secrets used in integration tests
+        required: false
+        default: ""
+        type: string
+      testproject_artifact_name:
+        description: Name of an artifact containing tests to execute
+        required: false
+        type: string
+      testproject_name:
+        description: Name of the folder containing the test project
+        required: false
+        type: string
+      solution_file_path:
+        description: Path to the solution file
+        required: true
+        type: string
+      nuget_cache_key_prefix:
+        description: Prefix for caching NuGet packages
+        required: false
+        type: string
+        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number }}
+
+permissions:
+  id-token: write
+  contents: read
+  issues: read # Needed by EnricoMi/publish-unit-test-result-action
+  checks: write # Needed by EnricoMi/publish-unit-test-result-action
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
+
+jobs:
+  dotnet_ci_test:
+    name: Test ${{ inputs.testproject_name }}
+    runs-on: ${{ inputs.operating_system }}
+
+    environment: ${{ inputs.environment }}
+
+    env:
+      ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
+
+      # Necessary to manage Azure resources from automated tests
+      AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
+      #
+      # Only relevant if 'use_azure_functions_tools' is TRUE
+      #
+      # Set value used by 'AzuriteManager'
+      #  Use 'AzuriteBlobFolderPath' for TestCommon version 4.2.0 and lower
+      AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
+      #  Use 'AzuriteFolderPath' for TestCommon version 4.3.0 and higher
+      AzuriteFolderPath: ${{ github.workspace }}\node_modules\.bin\
+      # Overrides settings in 'functionhost.settings.json'
+      FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+
+      - name: Set up test environment
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@kerbou/2524-build-brs-pipeline
+        with:
+          dotnet_version: ${{ inputs.dotnet_version }}
+          use_cosmos_db_emulator: ${{ inputs.use_cosmos_db_emulator }}
+          node_version: ${{ inputs.node_version }}
+          use_azure_functions_tools: ${{ inputs.use_azure_functions_tools }}
+          azure_functions_core_tools_version: ${{ inputs.azure_functions_core_tools_version }}
+          azurite_version: ${{ inputs.azurite_version }}
+          use_sqllocaldb_2019: ${{ inputs.use_sqllocaldb_2019 }}
+
+      - name: Build solution
+        shell: pwsh
+        run: |
+          dotnet build ${{ inputs.solution_file_path }} --configuration Release
+
+      # - name: Download test artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: ${{ inputs.testproject_artifact_name }}
+      #     path: ${{ env.ARTIFACT_TEST_PATH }}/
+
+      # - name: Copy test assemblies
+      #   shell: pwsh
+      #   run: |
+      #     $destination = "${{ github.workspace }}/source/${{ inputs.testproject_name}}/bin/Release/net8.0"
+      #     robocopy ${{ env.ARTIFACT_TEST_PATH }} $destination /MIR /NFL /NDL
+
+      #     if ($lastexitcode -eq 1) {
+      #       # Exitcode 1 = files were copied
+      #       # https://ss64.com/nt/robocopy-exit.html
+      #       exit 0
+      #     }
+
+      - name: Run tests
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@kerbou/2524-build-brs-pipeline
+        with:
+          aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
+          aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
+          tests_filter_expression: ${{ inputs.tests_filter_expression }}
+          tests_dll_file_path: ${{ inputs.tests_dll_file_path }}
+          run_integration_tests: ${{ inputs.run_integration_tests }}
+          azure_integrationtest_spn_id: ${{ inputs.azure_integrationtest_spn_id }}
+          azure_integrationtest_tenant_id: ${{ inputs.azure_integrationtest_tenant_id }}
+          azure_integrationtest_subscription_id: ${{ inputs.azure_integrationtest_subscription_id }}
