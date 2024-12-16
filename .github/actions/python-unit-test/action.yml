@@ -32,7 +32,6 @@ runs:
         repository_owner=${{ github.repository_owner }}
         repository_name=${repository/$repository_owner\//}
 
-        sudo chmod +x ./.docker/entrypoint.sh
         if [ -n "${{ inputs.tests_folder_path }}" ]; then
           IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --rm -w /home/jovyan/work/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_folder_path }}" "${{ inputs.tests_filter_expression }}"
         else
