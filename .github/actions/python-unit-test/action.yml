@@ -27,6 +27,7 @@ runs:
     - name: Execute python tests
       shell: bash
       run: |
+        chmod +x ./.docker/entrypoint.sh
         if [ -n "${{ inputs.tests_folder_path }}" ]; then
           IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --rm python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_folder_path }}" "${{ inputs.tests_filter_expression }}"
         else
