@@ -27,14 +27,10 @@ runs:
     - name: Execute python tests
       shell: bash
       run: |
-        # Small hack to get the repository name
-        repository=${{ github.repository }}
-        repository_owner=${{ github.repository_owner }}
-        repository_name=${repository/$repository_owner\//}
-
         chmod +x ./.docker/entrypoint.sh
+        # Execute as user 1001 as that is the user for the GitHub Actions runner
         if [ -n "${{ inputs.tests_folder_path }}" ]; then
-          IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_folder_path }}" "${{ inputs.tests_filter_expression }}"
+          IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --user 1001 --rm python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_folder_path }}" "${{ inputs.tests_filter_expression }}"
         else
-          IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --rm -u root -w //workspaces/${repository_name} python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
+          IMAGE_TAG=${{ inputs.image_tag }} docker compose -f .devcontainer/docker-compose.yml run --user 1001 --rm python-unit-test ./.docker/entrypoint.sh "${{ inputs.tests_filter_expression }}"
         fi
