@@ -83,7 +83,7 @@ jobs:
           string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: ${{ env.CONTEXT_PATH }}
           cache-from: type=gha
