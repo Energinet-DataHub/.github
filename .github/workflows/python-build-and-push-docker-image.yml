@@ -86,5 +86,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ${{ env.CONTEXT_PATH }}
+          cache-from: type=gha
+          cache-to: type=gha
           push: true
           tags: ${{ steps.image-name.outputs.lowercase }}${{ needs.determine_build.outputs.image_tag }}
