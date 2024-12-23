@@ -184,13 +184,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
-        env:
-          DOTNET_INSTALL_DIR: C:\Program Files\dotnet
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
@@ -291,6 +284,11 @@ jobs:
         shell: pwsh
         run: |
           Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
