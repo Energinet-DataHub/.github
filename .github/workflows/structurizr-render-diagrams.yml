@@ -65,7 +65,7 @@ on:
 
 jobs:
   render_structurizr_diagrams:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       # Location of Structurizr workspace files (*.dsl, *.json)
       DIAGRAMS_FOLDER: ${{ github.workspace }}/docs/diagrams/c4-model
