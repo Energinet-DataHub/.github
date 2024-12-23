@@ -86,7 +86,7 @@ on:
       node_version:
         description: Install specified Node.js version
         required: false
-        default: "16"
+        default: ""
         type: string
       azurite_version:
         description: Install specified Azurite version
@@ -207,7 +207,7 @@ jobs:
             }
 
       - name: Use Node v${{ inputs.node_version }}
-        if: ${{ inputs.use_azure_functions_tools == true }}
+        if: ${{ inputs.use_azure_functions_tools == true && inputs.node_version != '' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node_version }}
