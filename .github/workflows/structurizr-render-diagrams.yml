@@ -65,7 +65,7 @@ on:
 
 jobs:
   render_structurizr_diagrams:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       # Location of Structurizr workspace files (*.dsl, *.json)
       DIAGRAMS_FOLDER: ${{ github.workspace }}/docs/diagrams/c4-model
@@ -138,7 +138,7 @@ jobs:
           echo "Rendering diagram(s) ..."
           ! node export-diagrams.js ${{ env.DIAGRAMS_PAGE_URL }} png | grep png
           echo "Rendered diagram(s)"
-          rm -f *-key.png
+          rm *-key.png
           foldername=${{ inputs.structurizr_workspace_filename }}
           mkdir "$foldername"
           mv -f *.png "$foldername/"
