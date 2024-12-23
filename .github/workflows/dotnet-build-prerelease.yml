@@ -92,7 +92,6 @@ jobs:
           DOTNET_INSTALL_DIR: ${{ env.DOTNET_INSTALL_DIR }}
 
       - name: Cache NuGet packages
-        if: runner.os == 'Windows'
         uses: actions/cache@v4
         id: cache-nuget
         with:
