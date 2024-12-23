@@ -133,6 +133,11 @@ on:
         required: false
         default: ""
         type: string
+      nuget_cache_key_prefix:
+        description: Prefix for caching NuGet packages
+        required: false
+        type: string
+        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number }}
 
 permissions:
   id-token: write
@@ -181,6 +186,11 @@ jobs:
           dotnet-version: ${{ inputs.dotnet_version }}
         env:
           DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
