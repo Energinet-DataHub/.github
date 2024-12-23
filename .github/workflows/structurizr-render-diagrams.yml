@@ -138,7 +138,7 @@ jobs:
           echo "Rendering diagram(s) ..."
           ! node export-diagrams.js ${{ env.DIAGRAMS_PAGE_URL }} png | grep png
           echo "Rendered diagram(s)"
-          rm *-key.png
+          rm -f *-key.png
           foldername=${{ inputs.structurizr_workspace_filename }}
           mkdir "$foldername"
           mv -f *.png "$foldername/"
