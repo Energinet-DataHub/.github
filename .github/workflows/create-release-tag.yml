@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v13
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
         name: Generate Github token
         id: generate_token
         with:
@@ -22,8 +22,8 @@ jobs:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 14
-          minor_version: 22
-          patch_version: 4
+          minor_version: 23
+          patch_version: 0
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
