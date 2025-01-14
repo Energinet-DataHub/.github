@@ -68,7 +68,8 @@ jobs:
 
     steps:
       - name: Print Github context
-        run: echo "${{ toJson(github) }}"
+        run: |
+          echo "${{ toJson(github) }}"
 
       - name: Checkout repository
         uses: actions/checkout@v4
