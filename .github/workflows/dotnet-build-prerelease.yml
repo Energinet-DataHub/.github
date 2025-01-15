@@ -63,8 +63,6 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      RELEASE_VERSION: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Print Github context
@@ -74,6 +72,12 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Find related PR number
+        id: find_pull_request
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@kerbou/refactor-create-release-for-mergequeues
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
@@ -140,7 +144,7 @@ jobs:
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
-          filename: ${{ env.RELEASE_ZIP_FILENAME }}
+          filename: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}.zip
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create pre-release
@@ -148,8 +152,8 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-create-release@kerbou/refactor-create-release-for-mergequeues
         with:
           repo_token: ${{ github.token }}
-          automatic_release_tag: ${{ env.RELEASE_VERSION }}
+          automatic_release_tag: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}
           prerelease: true
-          title: ${{ env.RELEASE_VERSION }}
+          title: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}.zip
