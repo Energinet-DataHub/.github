@@ -46,23 +46,22 @@ function Find-RelatedPullRequestNumber {
         $CommitMessage
     )
 
-    # Set Headers
-    $headers = @{
-        "Authorization" = "Bearer $GithubToken"
-        "Content-Type"  = "application/json"
-        "User-Agent"    = "powershell/find-related-pr-number"
-    }
-
     $prNumber = $null
     switch ($GithubEvent) {
         "pull_request" {
             # Get PR from API as this is prior to merge
             $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
-            $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
 
+            $headers = @{
+                "Authorization" = "Bearer $GithubToken"
+                "Content-Type"  = "application/json"
+                "User-Agent"    = "powershell/find-related-pr-number"
+            }
+
+            $prData = Invoke-GithubGetPullRequestFromSha -PrUrl $prUrl -Headers $headers
             if ($prData.number) {
                 # Extract Pull Request Numbers
-                $prNumber = $prData.number[0]
+                $prNumber = $prData.number
             }
 
             if ($null -eq $prNumber) {
@@ -98,4 +97,14 @@ function Find-RelatedPullRequestNumber {
     }
 
     return $prNumber
+}
+
+function Invoke-GithubGetPullRequestFromSha {
+    param(
+        $PrUrl,
+        $Headers
+    )
+    $prData = Invoke-RestMethod -Uri $PrUrl -Headers $Headers -Method Get -Body
+    Write-Host "PR data: $prData"
+    return ($prData | ConvertFrom-Json)
 }
