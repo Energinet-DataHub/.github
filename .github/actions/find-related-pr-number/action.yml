@@ -29,12 +29,12 @@ runs:
         . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
         $prNumber = Find-RelatedPullRequestNumber `
-        -GithubToken "${{ github.token }}" `
-        -GithubEvent "${{ github.event_name }}" `
-        -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
-        -GithubRepository "${{ github.repository }}" `
-        -RefName "${{ github.ref_name }}" `
-        "
+          -GithubToken "${{ github.token }}" `
+          -GithubEvent "${{ github.event_name }}" `
+          -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
+          -GithubRepository "${{ github.repository }}" `
+          -RefName "${{ github.ref_name }}"
+
         Write-Host "PR number found: $prNumber"
 
         echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
