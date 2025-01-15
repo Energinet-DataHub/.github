@@ -39,7 +39,11 @@ function Find-RelatedPullRequestNumber {
 
         [Parameter(Mandatory)]
         [string]
-        $RefName
+        $RefName,
+
+        [Parameter(Mandatory)]
+        [string]
+        $CommitMessage
     )
 
     # Set Headers
@@ -52,7 +56,7 @@ function Find-RelatedPullRequestNumber {
     $prNumber = $null
     switch ($GithubEvent) {
         "pull_request" {
-            # Get Pull Requests
+            # Get PR from API as this is prior to merge
             $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
             $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
 
@@ -63,7 +67,16 @@ function Find-RelatedPullRequestNumber {
         }
 
         "merge_group" {
+            # Get PR from branch name as the SHA is a merge commit from the temporary merge queue branch
             $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
+            if ($Matches) {
+                $prNumber = $Matches[1]
+            }
+        }
+
+        "push" {
+            # After push to main
+            $CommitMessage -match "#\s*(\d+)"  # Example commit message: 'Create .gitignore in repository (#15)'
             if ($Matches) {
                 $prNumber = $Matches[1]
             }
