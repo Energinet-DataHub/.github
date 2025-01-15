@@ -22,6 +22,12 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Print Github context
+      shell: bash
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
     - name: Find related PR number
       id: find_pull_request_number
       shell: pwsh
