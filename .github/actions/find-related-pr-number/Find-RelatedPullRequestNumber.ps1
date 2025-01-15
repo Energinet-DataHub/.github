@@ -68,16 +68,18 @@ function Find-RelatedPullRequestNumber {
 
         "merge_group" {
             # Get PR from branch name as the SHA is a merge commit from the temporary merge queue branch
-            $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
-            if ($Matches) {
+            $hasMatch = $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
+            if ($hasMatch) {
+                Write-Host $Matches
                 $prNumber = $Matches[1]
             }
         }
 
         "push" {
             # After push to main
-            $CommitMessage -match "#\s*(\d+)"  # Example commit message: 'Create .gitignore in repository (#15)'
-            if ($Matches) {
+            $hasMatch = $CommitMessage -match "#\s*(\d+)$"  # Example commit message: 'Create .gitignore in repository (#15)'
+            if ($hasMatch) {
+                Write-Host $Matches
                 $prNumber = $Matches[1]
             }
         }
