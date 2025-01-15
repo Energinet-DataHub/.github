@@ -91,7 +91,7 @@ function Find-RelatedPullRequestNumber {
             }
 
             if ($null -eq $prNumber) {
-                Write-Output "::warning::No pull request number found for commit message '$CommitMessage'"
+                Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
             }
         }
     }
