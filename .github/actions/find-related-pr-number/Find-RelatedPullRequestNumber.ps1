@@ -64,6 +64,10 @@ function Find-RelatedPullRequestNumber {
                 # Extract Pull Request Numbers
                 $prNumber = $prData.number[0]
             }
+
+            if ($null -eq $prNumber) {
+                throw "No pull requests found for sha: $Sha"
+            }
         }
 
         "merge_group" {
@@ -72,6 +76,10 @@ function Find-RelatedPullRequestNumber {
             if ($hasMatch) {
                 Write-Host $Matches
                 $prNumber = $Matches[1]
+            }
+
+            if ($null -eq $prNumber) {
+                throw "No pull request number found for ref_name: $RefName"
             }
         }
 
@@ -82,11 +90,11 @@ function Find-RelatedPullRequestNumber {
                 Write-Host $Matches
                 $prNumber = $Matches[1]
             }
-        }
-    }
 
-    if ($null -eq $prNumber) {
-        throw "No pull requests found for sha: $Sha"
+            if ($null -eq $prNumber) {
+                Write-Output "::warning::No pull request number found for commit message '$CommitMessage'"
+            }
+        }
     }
 
     return $prNumber
