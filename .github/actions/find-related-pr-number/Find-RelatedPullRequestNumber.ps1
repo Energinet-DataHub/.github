@@ -27,19 +27,11 @@ function Find-RelatedPullRequestNumber {
 
         [Parameter(Mandatory)]
         [string]
-        $GithubEvent,
-
-        [Parameter(Mandatory)]
-        [string]
         $Sha,
 
         [Parameter(Mandatory)]
         [string]
-        $GithubRepository,
-
-        [Parameter(Mandatory)]
-        [string]
-        $RefName
+        $GithubRepository
     )
 
     # Set Headers
@@ -49,30 +41,19 @@ function Find-RelatedPullRequestNumber {
         "User-Agent"    = "powershell/find-related-pr-number"
     }
 
-    $prNumber = $null
-    switch ($GithubEvent) {
-        "pull_request" {
-            # Get Pull Requests
-            $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
-            $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
+    # Get Pull Requests
+    $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
+    $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
 
-            if ($prData.number) {
-                # Extract Pull Request Numbers
-                $prNumber = $prData.number[0]
-            }
-        }
+    # Extract Pull Request Numbers
+    $prNumbers = $prData.number
 
-        "merge_group" {
-            $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
-            if ($Matches) {
-                $prNumber = $Matches[1]
-            }
-        }
+    if ($prNumbers) {
+        return $prNumbers[0]
     }
-
-    if ($null -eq $prNumber) {
+    else {
         throw "No pull requests found for sha: $Sha."
     }
 
-    return $prNumber
+    return $prNumbers
 }

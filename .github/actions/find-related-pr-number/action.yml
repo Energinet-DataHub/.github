@@ -14,6 +14,15 @@
 name: Find current pull request
 description: Finds the pull request associated with the current commit.
 
+inputs:
+  github_token:
+    required: false
+    description: GitHub token used to create an authenticated client. Defaults to github provided token.
+    default: ${{ github.token }}
+  sha:
+    required: false
+    description: SHA used to get the related pull request for. Defaults to current pull request SHA or the commit SHA.
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
 outputs:
   pull_request_number:
     description: The pull request number if the pull request was found
@@ -28,13 +37,8 @@ runs:
       run: |
         . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
-        $prNumber = Find-RelatedPullRequestNumber `
-        -GithubToken "${{ github.token }}" `
-        -GithubEvent "${{ github.event_name }}" `
-        -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
+        $prNumber = Find-RelatedPullRequestNumber -Sha "${{ inputs.sha }}" `
         -GithubRepository "${{ github.repository }}" `
-        -RefName "${{ github.ref_name }}" `
-        "
-        Write-Host "PR number found: $prNumber"
+        -GithubToken "${{ inputs.github_token }}"
 
-        Write-Host "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
+        echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
