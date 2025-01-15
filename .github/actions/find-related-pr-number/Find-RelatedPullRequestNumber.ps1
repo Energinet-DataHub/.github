@@ -104,7 +104,6 @@ function Invoke-GithubGetPullRequestFromSha {
         $PrUrl,
         $Headers
     )
-    $prData = Invoke-RestMethod -Uri $PrUrl -Headers $Headers -Method Get
-    Write-Host "PR data: $prData"
-    return ($prData | ConvertFrom-Json)
+    $prData = Invoke-WebRequest -Uri $PrUrl -Headers $Headers
+    return ($prData.Content | ConvertFrom-Json -Depth 10)
 }
