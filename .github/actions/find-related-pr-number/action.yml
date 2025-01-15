@@ -37,4 +37,4 @@ runs:
         "
         Write-Host "PR number found: $prNumber"
 
-        Write-Host "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
+        echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
