@@ -145,7 +145,7 @@ jobs:
 
       - name: Create pre-release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@kerbou/refactor-create-release-for-mergequeues
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ env.RELEASE_VERSION }}
