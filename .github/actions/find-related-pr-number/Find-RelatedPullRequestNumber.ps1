@@ -77,7 +77,7 @@ function Find-RelatedPullRequestNumber {
 
         "push" {
             # After push to main
-            $hasMatch = $CommitMessage -match "#\s*(\d+)$"  # Example commit message: 'Create .gitignore in repository (#15)'
+            $hasMatch = $CommitMessage -match "#\s*(\d+)"  # Example commit message: 'Create .gitignore in repository (#15)'
             if ($hasMatch) {
                 Write-Host $Matches
                 $prNumber = $Matches[1]
@@ -86,7 +86,7 @@ function Find-RelatedPullRequestNumber {
     }
 
     if ($null -eq $prNumber) {
-        throw "No pull requests found for sha: $Sha."
+        throw "No pull requests found for sha: $Sha"
     }
 
     return $prNumber
