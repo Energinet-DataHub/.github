@@ -41,7 +41,7 @@ function Find-RelatedPullRequestNumber {
         [string]
         $RefName,
 
-        [Parameter(Mandatory)]
+        # Empty when creating PR. It's relevant on push to main only
         [string]
         $CommitMessage
     )
