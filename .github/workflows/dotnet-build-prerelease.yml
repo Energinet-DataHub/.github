@@ -139,12 +139,18 @@ jobs:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
 
+      - name: Get release version strings
+        id: get_release_version_strings
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@kerbou/2749-enable-merge-queues
+        with:
+          release_name_prefix: ${{ inputs.release_name_prefix }}
+
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
-          filename: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}.zip
+          filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create pre-release
@@ -152,8 +158,8 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-create-release@kerbou/refactor-create-release-for-mergequeues
         with:
           repo_token: ${{ github.token }}
-          automatic_release_tag: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}
+          automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
           prerelease: true
-          title: ${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}
+          title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}.zip
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
