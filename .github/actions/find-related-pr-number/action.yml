@@ -29,7 +29,7 @@ runs:
   using: composite
   steps:
     - name: Print Github context
-      if: ${{ inputs.debug_enabled == "true" }}
+      if: ${{ inputs.debug_enabled == 'true' }}
       shell: bash
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
