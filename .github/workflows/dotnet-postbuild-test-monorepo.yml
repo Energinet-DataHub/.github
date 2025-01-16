@@ -139,7 +139,7 @@ on:
         description: Prefix for caching NuGet packages
         required: false
         type: string
-        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number }}
+        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }}
 
 permissions:
   id-token: write
