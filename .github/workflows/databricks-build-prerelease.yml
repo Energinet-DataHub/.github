@@ -146,7 +146,7 @@ jobs:
         uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
-          automatic_release_tag: ${{ env.RELEASE_VERSION }}
+          automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
           prerelease: true
           title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
