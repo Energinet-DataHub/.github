@@ -84,7 +84,7 @@ function Find-RelatedPullRequestNumber {
 
         "push" {
             # After push to main
-            $hasMatch = $CommitMessage -match "#\s*(\d+)"  # Example commit message: 'Create .gitignore in repository (#15)'
+            $hasMatch = $CommitMessage -match "\(#(\d+)\)$"    # Example commit message: 'Create .gitignore in repository (#15)'
             if ($hasMatch) {
                 Write-Host $Matches
                 $prNumber = $Matches[1]
