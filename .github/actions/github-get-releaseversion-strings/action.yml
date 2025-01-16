@@ -1,0 +1,34 @@
+name: Get release version strings
+description: Return release version strings given a release name prefix
+
+inputs:
+  release_name_prefix:
+    description: The release prefix, i.e. 'dotnet'
+    required: true
+
+outputs:
+  release_version:
+    description: Github installation token - expires after 1 hour
+    value: steps.set_release_version_strings.outputs.release_version
+  release_zip_filename:
+    description: Github installation token - expires after 1 hour
+    value: steps.set_release_version_strings.outputs.release_zip_filename
+
+runs:
+  using: composite
+  steps:
+    - name: Find associated pull request
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+      id: find_pull_request
+
+    - name: Set release version strings
+      id: set_release_version_strings
+      shell: pwsh
+      run: |
+        $releasePrefix = "${{ inputs.release_name_prefix }}"
+        $prNumber="${{ steps.find_pull_request.outputs.pull_request_number }}"
+        $releaseVersion = "$releasePrefix_$prNumber"
+        $releaseZipFilename = "$releasePrefix_$prNumber.zip"
+
+        echo "release_version=$releaseVersion" >> $env:GITHUB_OUTPUT
+        echo "release_zip_filename=$releaseZipFilename" >> $env:GITHUB_OUTPUT
