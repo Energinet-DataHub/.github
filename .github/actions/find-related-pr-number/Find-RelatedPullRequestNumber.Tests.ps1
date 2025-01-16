@@ -69,4 +69,19 @@ Describe "Find-RelatedPullRequestNumber" {
             | Should -Be $null
         }
     }
+
+    Context 'on push event with commit message containing hyphens' {
+        It 'should not throw error' {
+            Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title"}' | ConvertFrom-Json }
+
+            Find-RelatedPullRequestNumber `
+                -GithubToken $script:GithubToken `
+                -GithubEvent 'push' `
+                -Sha '1a2b3df4' `
+                -GithubRepository $script:Repository `
+                -RefName 'main' `
+                -CommitMessage 'Revert "2453: remove deprecated instrumentation key from shared (#2759)" (#2763)' `
+            | Should -Be 2759
+        }
+    }
 }
