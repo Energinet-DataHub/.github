@@ -65,11 +65,6 @@ jobs:
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
 
     steps:
-      - name: Print Github context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
