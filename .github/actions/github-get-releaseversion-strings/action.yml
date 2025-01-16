@@ -9,10 +9,10 @@ inputs:
 outputs:
   release_version:
     description: Release version, i.e. 'dotnet_4711'
-    value: steps.set_release_version_strings.outputs.release_version
+    value: ${{ steps.set_release_version_strings.outputs.release_version }}
   release_zip_filename:
     description: Release version ZIP filename, i.e. 'dotnet_4711.zip'
-    value: steps.set_release_version_strings.outputs.release_zip_filename
+    value: ${{ steps.set_release_version_strings.outputs.release_zip_filename }}
 
 runs:
   using: composite
