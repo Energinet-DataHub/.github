@@ -75,7 +75,7 @@ jobs:
 
       - name: Find related PR number
         id: find_pull_request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@kerbou/refactor-create-release-for-mergequeues
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -155,7 +155,7 @@ jobs:
 
       - name: Create pre-release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: Energinet-DataHub/.github/.github/actions/github-create-release@kerbou/refactor-create-release-for-mergequeues
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
