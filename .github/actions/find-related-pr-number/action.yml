@@ -14,6 +14,12 @@
 name: Find current pull request
 description: Finds the pull request associated with the current commit.
 
+inputs:
+  debug_enabled:
+    description: Enable debug output
+    required: false
+    default: "false"
+
 outputs:
   pull_request_number:
     description: The pull request number if the pull request was found
@@ -23,6 +29,7 @@ runs:
   using: composite
   steps:
     - name: Print Github context
+      if: ${{ inputs.debug_enabled == "true" }}
       shell: bash
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
