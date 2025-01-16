@@ -18,7 +18,7 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@kerbou/2749-enable-merge-queues
       id: find_pull_request
 
     - name: Set release version strings
