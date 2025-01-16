@@ -26,9 +26,9 @@ runs:
       shell: pwsh
       run: |
         $releasePrefix = "${{ inputs.release_name_prefix }}"
-        $prNumber="${{ steps.find_pull_request.outputs.pull_request_number }}"
-        $releaseVersion = "$releasePrefix_$prNumber"
-        $releaseZipFilename = "$releasePrefix_$prNumber.zip"
+        $prNumber = "${{ steps.find_pull_request.outputs.pull_request_number }}"
+        $releaseVersion = "$($releasePrefix)_$($prNumber)"
+        $releaseZipFilename = "$($releasePrefix)_$($prNumber).zip"
 
         Write-Host "release_version=$releaseVersion"
         Write-Host "release_zip_filename=$releaseZipFilename"
