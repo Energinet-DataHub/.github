@@ -15,10 +15,18 @@ if ([string]::IsNullOrEmpty($env:GH_CONTEXT)) {
 }
 
 $context = $env:GH_CONTEXT | ConvertFrom-Json
+
 $GithubRepository = $context.repository
 $TargetSha = if ($context.event.after) { $context.event.after } else { $context.sha }
-$PullRequstNumber = $context.event.number
+$PullRequestNumber = $context.event.number
+if ($null -eq $PullRequestNumber) {
+    $context.ref_name -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
+    if ($Matches) {
+        $PullRequestNumber = $Matches[1]
+    }
+}
 
+Write-Host "PR number: $PullRequestNumber"
 Write-Host "Sha: $TargetSha"
 
 <#
@@ -173,5 +181,5 @@ function Get-ChangeNotes {
     Wrapping a "gh api /repos/{repo}/pulls/{pr_number}/commits" call
 #>
 function Invoke-GithubPrCommitHistory {
-    gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$GithubRepository/pulls/$PullRequstNumber/commits" | ConvertFrom-Json
+    gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$GithubRepository/pulls/$PullRequestNumber/commits" | ConvertFrom-Json
 }
