@@ -27,33 +27,83 @@ function Find-RelatedPullRequestNumber {
 
         [Parameter(Mandatory)]
         [string]
+        $GithubEvent,
+
+        [Parameter(Mandatory)]
+        [string]
         $Sha,
 
         [Parameter(Mandatory)]
         [string]
-        $GithubRepository
+        $GithubRepository,
+
+        [Parameter(Mandatory)]
+        [string]
+        $RefName,
+
+        # Empty when creating PR. It's relevant on push to main only
+        [string]
+        $CommitMessage
     )
 
-    # Set Headers
-    $headers = @{
-        "Authorization" = "Bearer $GithubToken"
-        "Content-Type"  = "application/json"
-        "User-Agent"    = "powershell/find-related-pr-number"
+    $prNumber = $null
+    switch ($GithubEvent) {
+        "pull_request" {
+            # Get PR from API as this is prior to merge
+            $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
+
+            $headers = @{
+                "Authorization" = "Bearer $GithubToken"
+                "Content-Type"  = "application/json"
+                "User-Agent"    = "powershell/find-related-pr-number"
+            }
+
+            $prData = Invoke-GithubGetPullRequestFromSha -PrUrl $prUrl -Headers $headers
+            if ($prData.number) {
+                # Extract Pull Request Numbers
+                $prNumber = $prData.number
+            }
+
+            if ($null -eq $prNumber) {
+                throw "No pull requests found for sha: $Sha"
+            }
+        }
+
+        "merge_group" {
+            # Get PR from branch name as the SHA is a merge commit from the temporary merge queue branch
+            $hasMatch = $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
+            if ($hasMatch) {
+                Write-Host $Matches
+                $prNumber = $Matches[1]
+            }
+
+            if ($null -eq $prNumber) {
+                throw "No pull request number found for ref_name: $RefName"
+            }
+        }
+
+        "push" {
+            # After push to main
+            $hasMatch = $CommitMessage -match "#\s*(\d+)"  # Example commit message: 'Create .gitignore in repository (#15)'
+            if ($hasMatch) {
+                Write-Host $Matches
+                $prNumber = $Matches[1]
+            }
+
+            if ($null -eq $prNumber) {
+                Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
+            }
+        }
     }
 
-    # Get Pull Requests
-    $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
-    $prData = Invoke-RestMethod -Uri $prUrl -Headers $headers -Method Get -Body ConvertTo-Json
+    return $prNumber
+}
 
-    # Extract Pull Request Numbers
-    $prNumbers = $prData.number
-
-    if ($prNumbers) {
-        return $prNumbers[0]
-    }
-    else {
-        throw "No pull requests found for sha: $Sha."
-    }
-
-    return $prNumbers
+function Invoke-GithubGetPullRequestFromSha {
+    param(
+        $PrUrl,
+        $Headers
+    )
+    $prData = Invoke-WebRequest -Uri $PrUrl -Headers $Headers
+    return ($prData.Content | ConvertFrom-Json -Depth 10)
 }
