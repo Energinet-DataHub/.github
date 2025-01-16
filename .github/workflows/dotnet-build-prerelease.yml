@@ -73,12 +73,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find related PR number
-        id: find_pull_request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v4
