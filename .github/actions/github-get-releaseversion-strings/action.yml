@@ -35,9 +35,7 @@ runs:
         $prNumber = "${{ steps.find_pull_request.outputs.pull_request_number }}"
         $releaseVersion = "$($releasePrefix)_$($prNumber)"
         $releaseZipFilename = "$($releasePrefix)_$($prNumber).zip"
-
         Write-Host "release_version=$releaseVersion"
         Write-Host "release_zip_filename=$releaseZipFilename"
-
         echo "release_version=$releaseVersion" >> $env:GITHUB_OUTPUT
         echo "release_zip_filename=$releaseZipFilename" >> $env:GITHUB_OUTPUT
