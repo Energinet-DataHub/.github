@@ -5,6 +5,10 @@ inputs:
   release_name_prefix:
     description: The release prefix, i.e. 'dotnet'
     required: true
+  debug_enabled:
+    description: Enable debug output
+    required: false
+    default: "false"
 
 outputs:
   release_version:
@@ -18,8 +22,10 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@kerbou/2749-enable-merge-queues
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
       id: find_pull_request
+      with:
+        debug_enabled: ${{ inputs.debug_enabled }}
 
     - name: Set release version strings
       id: set_release_version_strings
