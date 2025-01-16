@@ -81,7 +81,7 @@ Describe "Find-RelatedPullRequestNumber" {
                 -GithubRepository $script:Repository `
                 -RefName 'main' `
                 -CommitMessage 'Revert "2453: remove deprecated instrumentation key from shared (#2759)" (#2763)' `
-            | Should -Be 2759
+            | Should -Be 2763
         }
     }
 }
