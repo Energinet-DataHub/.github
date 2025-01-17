@@ -7,6 +7,7 @@ Describe "Find-RelatedPullRequestNumber" {
 
     Context 'unknown event' {
         It 'should warn if event could not be recognized' {
+            Mock Invoke-GithubGetPullRequestFromSha { return $null }
             Mock Write-Host { }
             # Looks up PR-number in Github API
             $obj = Find-RelatedPullRequestNumber `

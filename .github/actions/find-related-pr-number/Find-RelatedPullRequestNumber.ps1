@@ -49,47 +49,46 @@ function Find-RelatedPullRequestNumber {
     )
 
     $prNumber = $null
-    switch ($GithubEvent) {
-        "schedule" {
-            # To be implemented in https://app.zenhub.com/workspaces/the-outlaws-6193fe815d79fc0011e741b1/issues/gh/energinet-datahub/team-the-outlaws/2770
 
-            # If $refname is main, look up PR number using SHA
-            # If PR-number is not found, throw error
-            # This will fail scheduled workflows with merge queues enabled.
-            # And that is OK, product team must refactor workflows in CI to
-            # avoid looking up PR numbers in a merge-queue-enabled context
-        }
-        "pull_request" {
-            $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
-            if ($prData.number) {
-                $prNumber = $prData.number
+    $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
+    if ($prData.number) {
+        # Happy path
+        $prNumber = $prData.number
+    }
+
+    if ($null -eq $prNumber) {
+        # Not so happy path... best effort ahead
+        switch ($GithubEvent) {
+            "schedule" {
+                # To be implemented in https://app.zenhub.com/workspaces/the-outlaws-6193fe815d79fc0011e741b1/issues/gh/energinet-datahub/team-the-outlaws/2770
+
+                # If $refname is main, look up PR number using SHA
+                # If PR-number is not found, throw error
+                # This will fail scheduled workflows with merge queues enabled.
+                # And that is OK, product team must refactor workflows in CI to
+                # avoid looking up PR numbers in a merge-queue-enabled context
+            }
+            "pull_request" {
+                #
+                if ($null -eq $prNumber) {
+                    throw "No pull requests found for sha: $Sha"
+                }
             }
 
-            if ($null -eq $prNumber) {
-                throw "No pull requests found for sha: $Sha"
-            }
-        }
+            "merge_group" {
+                # Get PR from branch name as the SHA is a merge commit from the temporary merge queue branch
+                $hasMatch = $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
+                if ($hasMatch) {
+                    Write-Host $Matches
+                    $prNumber = $Matches[1]
+                }
 
-        "merge_group" {
-            # Get PR from branch name as the SHA is a merge commit from the temporary merge queue branch
-            $hasMatch = $RefName -match "queue/main/pr-(\d+)"  # Constructs a $Matches variable
-            if ($hasMatch) {
-                Write-Host $Matches
-                $prNumber = $Matches[1]
+                if ($null -eq $prNumber) {
+                    throw "No pull request number found for ref_name: $RefName"
+                }
             }
 
-            if ($null -eq $prNumber) {
-                throw "No pull request number found for ref_name: $RefName"
-            }
-        }
-
-        "push" {
-            # After push to main
-            $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
-            if ($prData.number) {
-                $prNumber = $prData.number
-            }
-            else {
+            "push" {
                 # Latest commit on push does not refer to a PR. We will attempt to deduct the PR using the commit message.
                 # At this point, this is a best effort exercise. You should as a developer in general not rely on looking up PR number
                 # when working on main as you cannot be 100% sure you can always backtrack your commit to a PR when working on main
@@ -107,9 +106,9 @@ function Find-RelatedPullRequestNumber {
                     Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
                 }
             }
-        }
-        default {
-            Write-Host "::warning::Unknown event: $GithubEvent, unable to look up PR"
+            default {
+                Write-Host "::warning::Unknown event: $GithubEvent, unable to look up PR"
+            }
         }
     }
     return $prNumber
