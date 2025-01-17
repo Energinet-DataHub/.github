@@ -130,7 +130,7 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@kerbou/2769-fix-bug-with-newlines-in-commit-message
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v14
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
 
