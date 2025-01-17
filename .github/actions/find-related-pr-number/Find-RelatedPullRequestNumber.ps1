@@ -106,6 +106,9 @@ function Find-RelatedPullRequestNumber {
                 }
             }
         }
+        default {
+            Write-Host "::warning::Unknown event: $GithubEvent, unable to look up PR"
+        }
     }
     return $prNumber
 }

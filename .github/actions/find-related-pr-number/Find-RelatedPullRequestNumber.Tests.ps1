@@ -5,6 +5,22 @@ Describe "Find-RelatedPullRequestNumber" {
         $script:Repository = 'myrepo'
     }
 
+    Context 'unknown event' {
+        It 'should warn if event could not be recognized' {
+            Mock Write-Host { }
+            # Looks up PR-number in Github API
+            $obj = Find-RelatedPullRequestNumber `
+                -GithubToken $script:GithubToken `
+                -GithubEvent 'unknown_event' `
+                -Sha 'ab34bed2' `
+                -GithubRepository $script:Repository `
+                -RefName '/my/refname' `
+                -CommitMessage 'Fancy commit message'
+            $obj | Should -Be $null
+            Should -Invoke -CommandName Write-Host -ParameterFilter { $Object -eq '::warning::Unknown event: unknown_event, unable to look up PR' }
+        }
+    }
+
     Context 'pull_request event' {
         It 'should return PR number when SHA returns PR' {
             Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
@@ -35,7 +51,7 @@ Describe "Find-RelatedPullRequestNumber" {
         }
     }
     Context 'merge_group event' {
-        It 'should return PR number from branch name' {
+        It 'should return PR number from branch name when Github context does not contain PR number' {
             Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title"}' | ConvertFrom-Json }
             # Gets PR-number from refname
             Find-RelatedPullRequestNumber `
@@ -49,6 +65,20 @@ Describe "Find-RelatedPullRequestNumber" {
         }
     }
     Context 'push event' {
+        It 'should return PR number when SHA returns PR' {
+            Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
+
+            # Looks up PR-number in Github API
+            Find-RelatedPullRequestNumber `
+                -GithubToken $script:GithubToken `
+                -GithubEvent 'push' `
+                -Sha 'ab34bed2' `
+                -GithubRepository $script:Repository `
+                -RefName '/my/refname' `
+                -CommitMessage 'Fancy commit message' `
+            | Should -Be '4711'
+        }
+
         It 'should return PR number on push event with valid commit message when SHA returns null' -ForEach @(
             @{ CommitMessage = "Merge PR to main (#4711)"; Expected = '4711' }
             @{ CommitMessage = "Merge PR to main"; Expected = $null }
@@ -67,18 +97,6 @@ Describe "Find-RelatedPullRequestNumber" {
                 -RefName 'main' `
                 -CommitMessage $CommitMessage `
             | Should -Be $Expected
-        }
-
-
-
-        It 'should return correct PR number' -ForEach @(
-            @{ CommitMessage = "Merge PR to main (#4711)"; Expected = '4711' }
-            @{ CommitMessage = 'Revert "2453: remove deprecated instrumentation key from shared (#2759)" (#2763)'; Expected = '2763' }
-            @{ CommitMessage = "Feat: Add new silver schema (#100) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>"; Expected = '100'
-            }
-        ) {
-            $prNumber = $CommitMessage -match "\(#(\d+)\)(?!.*\(#\d+\))"
-            $Matches[1] | Should -Be $Expected
         }
     }
 }
