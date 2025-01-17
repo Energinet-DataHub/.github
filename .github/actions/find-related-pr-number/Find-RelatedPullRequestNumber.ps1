@@ -51,6 +51,8 @@ function Find-RelatedPullRequestNumber {
     $prNumber = $null
     switch ($GithubEvent) {
         "schedule" {
+            # To be implemented in https://app.zenhub.com/workspaces/the-outlaws-6193fe815d79fc0011e741b1/issues/gh/energinet-datahub/team-the-outlaws/2770
+
             # If $refname is main, look up PR number using SHA
             # If PR-number is not found, throw error
             # This will fail scheduled workflows with merge queues enabled.
