@@ -18,6 +18,8 @@
 
     .DESCRIPTION
     This function uses the GitHub API to find the open pull request numbers for a given base branch.
+    If merge queues is enabled on repository, we will attempt to deduct the PR-number from other sources of information
+    such as branch name or commit message
 #>
 function Find-RelatedPullRequestNumber {
     param (
@@ -48,19 +50,16 @@ function Find-RelatedPullRequestNumber {
 
     $prNumber = $null
     switch ($GithubEvent) {
+        "schedule" {
+            # If $refname is main, look up PR number using SHA
+            # If PR-number is not found, throw error
+            # This will fail scheduled workflows with merge queues enabled.
+            # And that is OK, product team must refactor workflows in CI to
+            # avoid looking up PR numbers in a merge-queue-enabled context
+        }
         "pull_request" {
-            # Get PR from API as this is prior to merge
-            $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
-
-            $headers = @{
-                "Authorization" = "Bearer $GithubToken"
-                "Content-Type"  = "application/json"
-                "User-Agent"    = "powershell/find-related-pr-number"
-            }
-
-            $prData = Invoke-GithubGetPullRequestFromSha -PrUrl $prUrl -Headers $headers
+            $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
             if ($prData.number) {
-                # Extract Pull Request Numbers
                 $prNumber = $prData.number
             }
 
@@ -84,26 +83,59 @@ function Find-RelatedPullRequestNumber {
 
         "push" {
             # After push to main
-            $hasMatch = $CommitMessage -match "\(#(\d+)\)$"    # Example commit message: 'Create .gitignore in repository (#15)'
-            if ($hasMatch) {
-                Write-Host $Matches
-                $prNumber = $Matches[1]
+            $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
+            if ($prData.number) {
+                $prNumber = $prData.number
             }
+            else {
+                # Latest commit on push does not refer to a PR. We will attempt to deduct the PR using the commit message.
+                # At this point, this is a best effort exercise. You should as a developer in general not rely on looking up PR number
+                # when working on main as you cannot be 100% sure you can always backtrack your commit to a PR when working on main
 
-            if ($null -eq $prNumber) {
-                Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
+                # See examples of commit messages in Pester tests'
+                $hasMatch = $CommitMessage -match "\(#(\d+)\)(?!.*\(#\d+\))"
+                if ($hasMatch) {
+                    Write-Host $Matches
+                    $prNumber = $Matches[1]
+                }
+
+                if ($null -eq $prNumber) {
+                    # If no PR was found, we don't want to fail your workflow, as this will cause i.e. CD dispatch events to fail hard
+                    # i.e. when merge queue is enabled on your repository
+                    Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
+                }
             }
         }
     }
-
     return $prNumber
 }
 
+
+
+
 function Invoke-GithubGetPullRequestFromSha {
     param(
-        $PrUrl,
-        $Headers
+        [Parameter(Mandatory)]
+        [string]
+        $GithubRepository,
+
+        [Parameter(Mandatory)]
+        [string]
+        $Sha,
+
+        [Parameter(Mandatory)]
+        [string]
+        $GithubToken
     )
-    $prData = Invoke-WebRequest -Uri $PrUrl -Headers $Headers
+
+    $headers = @{
+        "Authorization" = "Bearer $GithubToken"
+        "Content-Type"  = "application/json"
+        "User-Agent"    = "powershell/find-related-pr-number"
+    }
+
+    $prUrl = "https://api.github.com/repos/$GithubRepository/commits/$Sha/pulls"
+
+    $prData = Invoke-WebRequest -Uri $prUrl -Headers $headers
     return ($prData.Content | ConvertFrom-Json -Depth 10)
 }
