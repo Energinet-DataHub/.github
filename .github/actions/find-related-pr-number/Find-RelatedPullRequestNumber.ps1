@@ -59,20 +59,17 @@ function Find-RelatedPullRequestNumber {
     if ($null -eq $prNumber) {
         # Not so happy path... best effort ahead
         switch ($GithubEvent) {
-            "schedule" {
-                # To be implemented in https://app.zenhub.com/workspaces/the-outlaws-6193fe815d79fc0011e741b1/issues/gh/energinet-datahub/team-the-outlaws/2770
 
-                # If $refname is main, look up PR number using SHA
-                # If PR-number is not found, throw error
+            "schedule" {
+                # If PR-number is not found on schedule event, throw error
                 # This will fail scheduled workflows with merge queues enabled.
-                # And that is OK, product team must refactor workflows in CI to
-                # avoid looking up PR numbers in a merge-queue-enabled context
+                # Product team must refactor workflows in CI to
+                # avoid looking up PR numbers in a merge-queue-enabled context using scheduled workflows
+                throw "No pull requests found for sha: $Sha"
             }
             "pull_request" {
-                #
-                if ($null -eq $prNumber) {
-                    throw "No pull requests found for sha: $Sha"
-                }
+                # Given this is a pull_request event, we're currently between a rock and a hard place...
+                throw "No pull requests found for sha: $Sha"
             }
 
             "merge_group" {
@@ -93,7 +90,7 @@ function Find-RelatedPullRequestNumber {
                 # At this point, this is a best effort exercise. You should as a developer in general not rely on looking up PR number
                 # when working on main as you cannot be 100% sure you can always backtrack your commit to a PR when working on main
 
-                # See examples of commit messages in Pester tests'
+                # See examples of commit messages in Pester tests
                 $hasMatch = $CommitMessage -match "\(#(\d+)\)(?!.*\(#\d+\))"
                 if ($hasMatch) {
                     Write-Host $Matches
@@ -101,7 +98,7 @@ function Find-RelatedPullRequestNumber {
                 }
 
                 if ($null -eq $prNumber) {
-                    # If no PR was found, we don't want to fail your workflow, as this will cause i.e. CD dispatch events to fail hard
+                    # If no PR was found, we don't want to fail your workflow, as this will cause  CD dispatch events to fail hard
                     # i.e. when merge queue is enabled on your repository
                     Write-Host "::warning::No pull request number found for commit message '$CommitMessage'"
                 }

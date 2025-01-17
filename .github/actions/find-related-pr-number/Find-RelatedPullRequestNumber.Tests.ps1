@@ -22,6 +22,23 @@ Describe "Find-RelatedPullRequestNumber" {
         }
     }
 
+    Context 'scheduled event' {
+        It 'should throw error when Sha return null' {
+            Mock Invoke-GithubGetPullRequestFromSha { return $null }
+
+            # Looks up PR-number in Github API
+            { Find-RelatedPullRequestNumber `
+                    -GithubToken $script:GithubToken `
+                    -GithubEvent 'schedule' `
+                    -Sha 'ab34bed2' `
+                    -GithubRepository $script:Repository `
+                    -RefName '/my/refname' `
+                    -CommitMessage 'Fancy commit message'
+            } | Should -Throw -ExpectedMessage "No pull requests found for sha: ab34bed2"
+        }
+    }
+
+
     Context 'pull_request event' {
         It 'should return PR number when SHA returns PR' {
             Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
