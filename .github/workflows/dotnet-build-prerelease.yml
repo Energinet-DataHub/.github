@@ -63,8 +63,6 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      RELEASE_VERSION: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}
-      RELEASE_ZIP_FILENAME: ${{ inputs.release_name_prefix }}_${{ github.event.pull_request.number }}.zip
 
     steps:
       - name: Checkout repository
@@ -124,27 +122,33 @@ jobs:
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: ./.github/actions/dotnet-prepare-outputs
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
 
+      - name: Get release version strings
+        id: get_release_version_strings
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v14
+        with:
+          release_name_prefix: ${{ inputs.release_name_prefix }}
+
       - name: Zip files for prerelease
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: thedoctor0/zip-release@0.6.2
         with:
           type: zip
-          filename: ${{ env.RELEASE_ZIP_FILENAME }}
+          filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create pre-release
-        if: github.event_name == 'pull_request'
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
-          automatic_release_tag: ${{ env.RELEASE_VERSION }}
+          automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
           prerelease: true
-          title: ${{ env.RELEASE_VERSION }}
+          title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
-            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}

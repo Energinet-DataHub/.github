@@ -82,7 +82,7 @@ Describe "Find-RelatedPullRequestNumber" {
             | Should -Be '4711'
         }
     }
-    Context 'push event' {
+    Context 'push event on main' {
         It 'should return PR number when SHA returns PR' {
             Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
 

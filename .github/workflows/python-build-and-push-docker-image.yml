@@ -44,11 +44,15 @@ jobs:
       image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
 
     steps:
+      - name: Find associated pull request
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+        id: find_pull_request
+
       - name: Set image tag environmental variable
         id: set_image_tag
         run: |
           if [[ ${{ env.IS_PULL_REQUEST_TRIGGERED }} == true && ${{ inputs.docker_changed }} == true ]]; then
-            echo "image_tag=pre-release-pr${{ github.event.pull_request.number }}" >>$GITHUB_OUTPUT
+            echo "image_tag=pre-release-pr${{ steps.find_pull_request.outputs.pull_request_number }}" >>$GITHUB_OUTPUT
           else
             echo "image_tag=latest" >>$GITHUB_OUTPUT
           fi
