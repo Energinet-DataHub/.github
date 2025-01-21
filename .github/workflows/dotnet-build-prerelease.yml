@@ -86,6 +86,22 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore ${{ inputs.solution_file_path }}
 
+      - name: Block FluentAssertions v8
+        run: |   
+          dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
+
+          # Find all versions of FluentAssertions
+          jq -r '[.. | objects | select(.topLevelPackages? != null) | .topLevelPackages[] | select(.id == "FluentAssertions") | .requestedVersion]' versions.json > fluentassertions-versions.json
+
+          # Check if any version is greater than or equal to 8.0.0
+          forbidden_version=$(jq -r '.[] | select(. >= "8.0.0")' fluentassertions-versions.json)
+          if [ -n "$forbidden_version" ]; then
+            echo -e "\e[31mForbidden 'FluentAssertions' version $forbidden_version found\e[0m"
+            exit 1
+          else
+            echo -e "\e[32mAll 'FluentAssertions' versions are less than 8.0.0\e[0m"
+          fi
+
       - name: Build solution
         run: |
           # We build the GitHub PR and SHA (last merge commit on PR) into the .NET assembly meta data:
