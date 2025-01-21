@@ -87,7 +87,7 @@ jobs:
         run: dotnet restore ${{ inputs.solution_file_path }}
 
       - name: Block FluentAssertions v8
-        run: |   
+        run: |
           dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
 
           # Find all versions of FluentAssertions
