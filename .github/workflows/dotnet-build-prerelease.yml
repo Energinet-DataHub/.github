@@ -96,10 +96,8 @@ jobs:
           # Check if any version is greater than or equal to 8.0.0
           forbidden_version=$(jq -r '.[] | select(. >= "8.0.0")' fluentassertions-versions.json)
           if [ -n "$forbidden_version" ]; then
-            echo -e "\e[31mForbidden 'FluentAssertions' version $forbidden_version found\e[0m"
+            echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' version $forbidden_version found"
             exit 1
-          else
-            echo -e "\e[32mAll 'FluentAssertions' versions are less than 8.0.0\e[0m"
           fi
 
       - name: Build solution
