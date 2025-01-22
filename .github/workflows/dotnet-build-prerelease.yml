@@ -91,7 +91,7 @@ jobs:
           dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
 
           # Find all versions of FluentAssertions
-          jq -r '[.. | objects | select(.topLevelPackages? != null) | .topLevelPackages[] | select(.id == "FluentAssertions") | .requestedVersion]' versions.json > fluentassertions-versions.json
+          jq -r '[.. | objects | select(.topLevelPackages? != null) | .topLevelPackages[] | select(.id == "FluentAssertions") | .requestedVersion | gsub("\\[|\\]"; "")]' versions.json > fluentassertions-versions.json
 
           # Check if any version is greater than or equal to 8.0.0
           forbidden_version=$(jq -r '.[] | select(. >= "8.0.0")' fluentassertions-versions.json)
