@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "parameters": "",
+  "projects": [
+    {
+      "path": "...",      
+      "frameworks": [
+        {
+          "framework": "net7.0",
+          "topLevelPackages": [
+            {
+              "id": "FluentAssertions",
+              "requestedVersion": "6.5.1",
+              "resolvedVersion": "7.0.0"
+            },
+            {
+              "id": "AnotherPackage",
+              "requestedVersion": "2.2.0",
+              "resolvedVersion": "2.2.0"
+            },
+            {
+              "id": "YetAnotherPackage",
+              "requestedVersion": "1.4.0",
+              "resolvedVersion": "1.4.0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
