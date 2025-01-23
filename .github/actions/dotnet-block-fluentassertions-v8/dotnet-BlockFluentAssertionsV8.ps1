@@ -18,8 +18,8 @@
 
     .DESCRIPTION
     This function checks if the project(s) contains a reference to FluentAssertions-v8 or higher.
-    If the project file contains a reference to FluentAssertions-v8 or higher, the function will terminate with an exit code of 1.
-    If the project file does not contain a reference to FluentAssertions-v8 or higher, the function will terminate with an exit code of 0.
+    If the project file contains a reference to FluentAssertions-v8 or higher, the function will return $true.
+    If the project file does not contain a reference to FluentAssertions-v8 or higher, the function will return $false.
 #>
 function Block-FluentAssertionsV8 {
     param (
@@ -31,7 +31,7 @@ function Block-FluentAssertionsV8 {
     # Read and parse the JSON file
     $dependencies = Get-FluentAssertionsVersion $jsonFilePath
     if ($null -eq $dependencies) {
-        exit 0
+        return $false
     }
 
     # Check if any version is greater than or equal to 8.0.0
@@ -42,11 +42,10 @@ function Block-FluentAssertionsV8 {
 
     if ($forbidden_version) {
         Write-Host "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' version $forbidden_version found"
-        exit 1
+        return $true
     }
 
-    Write-Host "::notice title='Check Passed'::No forbidden FluentAssertions versions detected."
-    exit 0
+    return $false
 }
 
 function Get-FluentAssertionsVersion {
@@ -58,7 +57,7 @@ function Get-FluentAssertionsVersion {
 
     if (-Not (Test-Path $jsonFilePath)) {
         Write-Host "::error title='File not found'::The file $jsonFilePath does not exist."
-        exit 1
+        return $null
     }
 
     # Read and parse the JSON file
