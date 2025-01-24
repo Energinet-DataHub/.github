@@ -88,16 +88,14 @@ jobs:
 
       - name: Block FluentAssertions v8
         run: |
-          dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
+          dotnet list ${{ inputs.solution_file_path }} package --format json --include-transitive > versions.json
 
-          # Find all versions of FluentAssertions
-          jq -r '[.. | objects | select(.topLevelPackages? != null) | .topLevelPackages[] | select(.id == "FluentAssertions") | .requestedVersion | gsub("\\[|\\]"; "")]' versions.json > fluentassertions-versions.json
+          # Find all versions of FluentAssertions greater than or equal to 8.0.0
+          forbidden_version=$(jq -r '.. | objects | select(.id == "FluentAssertions" and .resolvedVersion >= "8.0.0") | .resolvedVersion' versions.json)
 
-          # Check if any version is greater than or equal to 8.0.0
-          forbidden_version=$(jq -r '.[] | select(. >= "8.0.0")' fluentassertions-versions.json)
           if [ -n "$forbidden_version" ]; then
-            echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' version $forbidden_version found"
-            exit 1
+          echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' versions $forbidden_version found"
+          exit 1
           fi
 
       - name: Build solution
