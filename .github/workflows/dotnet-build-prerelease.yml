@@ -94,7 +94,7 @@ jobs:
           forbidden_version=$(jq -r '.. | objects | select(.id == "FluentAssertions" and .resolvedVersion >= "8.0.0") | .resolvedVersion' versions.json)
 
           if [ -n "$forbidden_version" ]; then
-          echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' versions $forbidden_version found"
+          echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' version $forbidden_version found"
           exit 1
           fi
 
