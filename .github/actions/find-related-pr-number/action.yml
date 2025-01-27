@@ -49,7 +49,7 @@ runs:
           -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
           -GithubRepository "${{ github.repository }}" `
           -RefName "${{ github.ref_name }}" `
-          -CommitMessage '${{ github.event.commits[0].message || '' }}' `
+          -CommitMessage '$commitMessage'`
 
         Write-Host "PR number found: $prNumber"
 
