@@ -101,8 +101,8 @@ Describe "Find-RelatedPullRequestNumber" {
             @{ CommitMessage = "Merge PR to main (#4711)"; Expected = '4711' }
             @{ CommitMessage = "Merge PR to main"; Expected = $null }
             @{ CommitMessage = 'Revert "2453: remove deprecated instrumentation key from shared (#2759)" (#2763)'; Expected = '2763' }
-            @{ CommitMessage = "Feat: Add new silver schema (#100) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>"; Expected = '100'
-            }
+            @{ CommitMessage = "Feat: Add new silver schema (#100) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>"; Expected = '100' }
+            @{ CommitMessage = 'feat: Added testcommon.etl function to write when files to storage (#84) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>'; Expected = '84' }
         ) {
             Mock Invoke-GithubGetPullRequestFromSha { return $null }
 
