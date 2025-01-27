@@ -41,6 +41,8 @@ runs:
       run: |
         . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
+        $commitMessage = '${{ github.event.commits[0].message || '' }}' -Replace "'", ""
+
         $prNumber = Find-RelatedPullRequestNumber `
           -GithubToken "${{ github.token }}" `
           -GithubEvent "${{ github.event_name }}" `
