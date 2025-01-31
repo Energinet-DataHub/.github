@@ -103,6 +103,26 @@ Describe "Find-RelatedPullRequestNumber" {
             @{ CommitMessage = 'Revert "2453: remove deprecated instrumentation key from shared (#2759)" (#2763)'; Expected = '2763' }
             @{ CommitMessage = "Feat: Add new silver schema (#100) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>"; Expected = '100' }
             @{ CommitMessage = 'feat: Added testcommon.etl function to write when files to storage (#84) $([System.Environment]::NewLine) Co-authored-by: root <root@TEK-8130.localdomain>'; Expected = '84' }
+            @{ CommitMessage = "Message with ' (#2678)"; Expected = '2678' }
+            @{ CommitMessage = "Message with '' (#2354)"; Expected = '2354' }
+            @{ CommitMessage = 'Message with " (#9882)'; Expected = '9882' }
+            @{ CommitMessage = 'Message with "" (#5671)'; Expected = '5671' }
+            @{ CommitMessage = 'Message with " and '' (#9821)'; Expected = '9821' }
+            @{ CommitMessage = @"
+This is a multiline commit message with "quotes" and 'single quotes'
+lots of lines
+
+Special characters !"#¤%&/()=?`*'~
+PR numbers that should be ignores: (#123) , (#124) . (#125)
+
+And finally the PR number that should be found: (#9821)
+
+and even more lines to increase the confusion
+
+()
+#
+"@; Expected                 = '9821'
+            }
         ) {
             Mock Invoke-GithubGetPullRequestFromSha { return $null }
 

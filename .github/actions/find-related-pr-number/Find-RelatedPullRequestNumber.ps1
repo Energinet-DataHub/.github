@@ -91,10 +91,12 @@ function Find-RelatedPullRequestNumber {
                 # when working on main as you cannot be 100% sure you can always backtrack your commit to a PR when working on main
 
                 # See examples of commit messages in Pester tests
-                $hasMatch = $CommitMessage -match "\(#(\d+)\)(?!.*\(#\d+\))"
-                if ($hasMatch) {
-                    Write-Host $Matches
-                    $prNumber = $Matches[1]
+                $prMatches = [regex]::Matches($CommitMessage, "\(#(\d+)\)")
+
+                if ($prMatches.Count -gt 0) {
+                    Write-Host $prMatches
+                    # Get the last match and the second capture group, which contains the PR number without surrounding (#)
+                    $prNumber = $prMatches[-1].Groups[1].Value
                 }
 
                 if ($null -eq $prNumber) {
@@ -110,7 +112,6 @@ function Find-RelatedPullRequestNumber {
     }
     return $prNumber
 }
-
 
 
 
