@@ -25,6 +25,10 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository, so gh cli can interact with it
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
         id: find_pull_request
@@ -34,6 +38,7 @@ jobs:
         shell: bash
         run: |
           echo "release_name=${{ inputs.release_name_prefix }}_${{ steps.find_pull_request.outputs.pull_request_number }}" >>$GITHUB_OUTPUT
+
 
       - name: Promote ${{ steps.set_release_name.outputs.release_name }} and update ${{ inputs.release_name_prefix }}_latest
         shell: pwsh
