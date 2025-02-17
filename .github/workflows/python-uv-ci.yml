@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Discover Pyproject
-        uses: ./.github/actions/python-discover-pyproject
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@ci/python-cicd
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -129,7 +129,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install tools
-        uses: ./.github/actions/asdf-install-tools
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@ci/python-cicd
 
       - name: Check if ${{ matrix.inputs.name }} has changed
         uses: dorny/paths-filter@v3
@@ -168,7 +168,7 @@ jobs:
           subscription-id: ${{ inputs.azure_subscription_id }}
 
       - name: Test ${{ matrix.inputs.name }}
-        uses: ./.github/actions/python-test
+        uses: Energinet-DataHub/.github/.github/actions/python-test@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.name }}
@@ -181,7 +181,7 @@ jobs:
         run: uv build --wheel --directory ${{ matrix.inputs.path }}
 
       - name: Create prerelease for ${{ matrix.inputs.name }}
-        uses: ./.github/actions/python-create-prerelease
+        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@ci/python-cicd
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.name }}
