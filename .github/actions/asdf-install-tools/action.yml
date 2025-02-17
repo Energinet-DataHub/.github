@@ -20,9 +20,16 @@ runs:
       uses: asdf-vm/actions/setup@v3
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
-    - name: Cache asdf
-      uses: actions/cache@v4
-      if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
+    - name: Restore asdf cache
+      uses: actions/cache/restore@v4
+      id: cache-asdf-restore
+      with:
+        path: /home/runner/.asdf
+        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+
+    - name: Save asdf cache
+      uses: actions/cache/save@v4
+      if: always() && steps.cache-asdf-restore.outputs.cache-hit != 'true'
       with:
         path: /home/runner/.asdf
         key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
