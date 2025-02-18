@@ -58,7 +58,7 @@ jobs:
             team_email=${{ vars.email_mandalorian }}
           elif [ ${{ inputs.team_name }} == 'Raccoons' ]; then
             team_email=${{ vars.email_raccoons }}
-          elif [ ${{ inputs.team_name }} == 'TheOutlaws' ]; then
+          elif [ ${{ inputs.team_name }} == 'TeamFusion' ]; then
             team_email=${{ vars.email_teamfusion }}
           elif [ ${{ inputs.team_name }} == 'Volt' ]; then
             team_email=${{ vars.email_volt }}
