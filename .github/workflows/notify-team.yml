@@ -59,7 +59,7 @@ jobs:
           elif [ ${{ inputs.team_name }} == 'Raccoons' ]; then
             team_email=${{ vars.email_raccoons }}
           elif [ ${{ inputs.team_name }} == 'TheOutlaws' ]; then
-            team_email=${{ vars.email_theoutlaws }}
+            team_email=${{ vars.email_teamfusion }}
           elif [ ${{ inputs.team_name }} == 'Volt' ]; then
             team_email=${{ vars.email_volt }}
           elif [ ${{ inputs.team_name}} == 'TeamFrontend' ]; then
@@ -68,7 +68,7 @@ jobs:
             team_email=${{ vars.email_teamesettdeprecated }}
           else
             # Fallback
-            team_email=${{ vars.email_theoutlaws }}
+            team_email=${{ vars.email_teamfusion }}
           fi
 
           echo "::add-mask::$team_email"
