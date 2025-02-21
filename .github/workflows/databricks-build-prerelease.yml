@@ -45,7 +45,7 @@ on:
         default: false
       operating_system:
         required: false
-        default: ubuntu-20.04 # Tools for python is not available in arch x64 on 22.04
+        default: ubuntu-latest
         type: string
       prerelease_prefix:
         required: false
