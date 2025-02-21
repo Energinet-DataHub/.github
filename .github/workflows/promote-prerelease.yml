@@ -25,6 +25,7 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository, so gh cli can interact with it
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -45,9 +46,15 @@ jobs:
         run: |
           Write-Host 'Promoting ${{ steps.set_release_name.outputs.release_name }} from pre-release to release'
           gh release edit ${{ steps.set_release_name.outputs.release_name }} --prerelease=false
+          if ($LastExitCode -ne 0) {
+            throw "Error: The release ${{ steps.set_release_name.outputs.release_name }} cannot be promoted from pre-release to release as it does not exist"
+          }
 
           Write-Host 'Deleting ${{ inputs.release_name_prefix }}_latest if exists'
           gh release delete ${{ inputs.release_name_prefix }}_latest --yes
 
           Write-Host 'Creating new ${{ inputs.release_name_prefix }}_latest'
           gh release create ${{ inputs.release_name_prefix }}_latest --title ${{ inputs.release_name_prefix }}_latest --notes "RELEASE_NAME=${{ steps.set_release_name.outputs.release_name }}" --latest
+          if ($LastExitCode -ne 0) {
+            throw "Error: The release ${{ inputs.release_name_prefix }}_latest cannot be created"
+          }

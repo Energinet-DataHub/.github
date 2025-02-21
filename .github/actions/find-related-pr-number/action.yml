@@ -41,13 +41,20 @@ runs:
       run: |
         . ${{ github.action_path }}/Find-RelatedPullRequestNumber.ps1
 
+        # github.event.commits[0].message can contain linesbreak single/double qoutes, which can break the templated script.
+        # To avoid this, we use a here-string for the commit message.
+
+        $commitMessage = @"
+          ${{ github.event.commits[0].message || '' }}
+        "@
+
         $prNumber = Find-RelatedPullRequestNumber `
           -GithubToken "${{ github.token }}" `
           -GithubEvent "${{ github.event_name }}" `
           -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
           -GithubRepository "${{ github.repository }}" `
           -RefName "${{ github.ref_name }}" `
-          -CommitMessage '${{ github.event.commits[0].message || '' }}' `
+          -CommitMessage $commitMessage
 
         Write-Host "PR number found: $prNumber"
 
