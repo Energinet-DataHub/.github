@@ -167,6 +167,13 @@ jobs:
           tenant-id: ${{ inputs.azure_tenant_id }}
           subscription-id: ${{ inputs.azure_subscription_id }}
 
+      - name: Lint and Format ${{ matrix.inputs.name }}
+        uses: Energinet-DataHub/.github/.github/actions/python-lint@ci/python-cicd
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        with:
+          name: ${{ matrix.inputs.name }}
+          path: ${{ matrix.inputs.path }}
+
       - name: Test ${{ matrix.inputs.name }}
         uses: Energinet-DataHub/.github/.github/actions/python-test@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}

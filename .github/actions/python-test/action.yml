@@ -1,5 +1,5 @@
-name: UV Test
-description: Test a package with UV
+name: Python Test
+description: Test a package with pytest
 inputs:
   name:
     description: The name of the package
@@ -15,10 +15,6 @@ inputs:
     description: Additional arguments to pass to pytest
     required: false
     default: ""
-  github_token:
-    description: The GitHub token
-    required: false
-    default: ${{ github.token }}
 runs:
   using: composite
   steps:
@@ -31,14 +27,6 @@ runs:
         cache-dependency-glob: |
           ${{ inputs.path }}/pyproject.toml
           ${{ inputs.path }}/uv.lock
-
-    - name: Lint
-      shell: bash
-      run: uv run --directory ${{ inputs.path }} ruff check
-
-    - name: Format
-      shell: bash
-      run: uv run --directory ${{ inputs.path }} ruff format --check
 
     - name: Test
       shell: bash
