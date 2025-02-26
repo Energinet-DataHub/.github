@@ -44,10 +44,11 @@ runs:
       shell: bash
       run: uv run --directory ${{ inputs.path }} pytest ${{ inputs.tests_path }} ${{ inputs.pytest_addopts }}
 
-    - name: Coverage comment
-      uses: MishaKav/pytest-coverage-comment@main
+    - name: Publish test report
+      uses: EnricoMi/publish-unit-test-result-action/composite@v2
       with:
-        github-token: ${{ inputs.github_token }}
-        unique-id-for-comment: ${{ inputs.name }}-${{ inputs.path }}
-        title: Coverage report for '${{ inputs.name }}'
-        pytest-xml-coverage-path: ${{ inputs.path }}/coverage.xml
+        check_name: Python test results for '${{ inputs.path }}'
+        comment_title: Python test results for '${{ inputs.name }}'
+        comment_mode: failures
+        files: |
+          ${{ inputs.path }}/coverage.xml
