@@ -38,7 +38,7 @@ runs:
     - name: Setup Environment
       shell: bash
       run: |
-        VERSION=$(cat ${{ matrix.inputs.path }}/pyproject.toml| grep -o "version.*" | cut -d'=' -f2 | tr -d '"' | tr -d ' ')
+        VERSION=$(cat ${{ inputs.path }}/pyproject.toml| grep -o "version.*" | cut -d'=' -f2 | tr -d '"' | tr -d ' ')
         if [[ "${{ inputs.create_versioned_release }}" == "true" ]]; then
           echo "RELEASE_VERSION=${{ inputs.name }}_${VERSION}_${{ inputs.issue-number }}" >> $GITHUB_ENV
         else
