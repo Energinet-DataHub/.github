@@ -30,10 +30,10 @@ runs:
 
     - name: Test
       shell: bash
-      run: uv run --directory ${{ inputs.path }} pytest ${{ inputs.tests_path }} ${{ inputs.pytest_addopts }}
+      run: uv run --directory ${{ inputs.path }} pytest ${{ inputs.tests_path }} ${{ inputs.pytest_addopts }} --junit-xml=coverage.xml
 
     - name: Publish test report
-      uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      uses: EnricoMi/publish-unit-test-result-action/linux@v2
       with:
         check_name: Python test results for '${{ inputs.path }}'
         comment_title: Python test results for '${{ inputs.name }}'
