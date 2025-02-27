@@ -16,9 +16,9 @@ outputs:
     description: |
       Details about discovered python projects. This is a list of dictionaries
       with the following keys:
-      - name: The name of the package
-      - path: The path to the package
-      - version: The version of the package
+      - package_name: The name of the package
+      - package_path: The path to the package
+      - package_version: The version of the package
       - release_name: (optional) The name of the release, e.g., "{package_name}_{issue_number}"
           or "{package_name}_{version}_{issue_number}" if versioned-release is true
     value: ${{ steps.package_matrix.outputs.matrix }}

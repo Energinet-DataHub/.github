@@ -31,7 +31,7 @@ class ResultType:
     package_name: str
     package_version: str
     package_path: str
-    release_name: str | None
+    release_name: str
 
 
 def parse_args():
