@@ -35,8 +35,8 @@ runs:
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/linux@v2
       with:
-        check_name: Python test results for '${{ inputs.path }}'
-        comment_title: Python test results for '${{ inputs.name }}'
+        check_name: Python test results for '${{ inputs.path }}' with ${{ inputs.pytest_addopts }}
+        comment_title: Python test results for '${{ inputs.name }}' with ${{ inputs.pytest_addopts }}
         comment_mode: failures
         files: |
           ${{ inputs.path }}/coverage.xml
