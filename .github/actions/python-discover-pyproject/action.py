@@ -84,9 +84,9 @@ def create_matrix(packages_dir: str, issue_number: str | int, versioned_release=
 
     Returns:
         list: A list of dictionaries with the following keys:
-            - name: The name of the package
-            - version: The version of the package
-            - path: The path to the package
+            - package_name: The name of the package
+            - package_version: The version of the package
+            - package_path: The path to the package
             - release_name: The name of the release (if any)
     """
     packages = Path(packages_dir).rglob("pyproject.toml")
