@@ -33,7 +33,7 @@ runs:
       id: package_matrix
       shell: bash
       run: |
-        if [ "$versioned_release" = 'true' ]; then
+        if [ "${{ inputs.versioned-release }}" = 'true' ]; then
             python ${{ github.action_path }}/action.py \
               --packages-dir ${{ inputs.path }} \
               --issue-number ${{ inputs.issue-number }} \
