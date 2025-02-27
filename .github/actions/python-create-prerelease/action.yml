@@ -1,21 +1,15 @@
 name: Create Prerelease
 description: Create a prerelease for a package
 inputs:
-  name:
+  package_name:
     description: The name of the package
     required: true
-  path:
+  package_path:
     description: The path to the package
     required: true
-  issue-number:
-    description: The issue or PR number
+  release_name:
+    description: The name of the release
     required: true
-  create_versioned_release:
-    description: |
-      If true, the release name will be "{package_name}_{version}_{issue_number}".
-      Otherwise, the release name will be "{package_name}_{issue_number}".
-    required: false
-    default: "true"
   create_subsystem_release:
     description: |
       If true, the release will include a directory called `subsystem_tests`, which
@@ -38,25 +32,19 @@ runs:
     - name: Setup Environment
       shell: bash
       run: |
-        VERSION=$(cat ${{ inputs.path }}/pyproject.toml| grep -o "version.*" | cut -d'=' -f2 | tr -d '"' | tr -d ' ')
-        if [[ "${{ inputs.create_versioned_release }}" == "true" ]]; then
-          echo "RELEASE_VERSION=${{ inputs.name }}_${VERSION}_${{ inputs.issue-number }}" >> $GITHUB_ENV
-        else
-          echo "RELEASE_VERSION=${{ inputs.name }}_${{ inputs.issue-number }}" >> $GITHUB_ENV
-        fi
-        echo "RELEASE_ZIP_FILENAME=${{ inputs.name }}_${{ inputs.issue-number }}.zip" >> $GITHUB_ENV
-        echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.name }}-release/artifacts" >> $GITHUB_ENV
+        echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
+        echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
-    - name: Build ${{ inputs.name }}
+    - name: Build ${{ inputs.package_name }}
       shell: bash
-      run: uv build --wheel --directory ${{ inputs.path }}
+      run: uv build --wheel --directory ${{ inputs.package_path }}
 
-    - name: Copy files for ${{ inputs.name }} prerelease
+    - name: Copy files for ${{ inputs.package_name }} prerelease
       shell: bash
       run: |
         mkdir -p ${{ env.RELEASE_FOLDER_PATH }}
-        if [ -d ${{ inputs.path }}/dist ]; then
-          cp -r ${{ inputs.path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
+        if [ -d ${{ inputs.package_path }}/dist ]; then
+          cp -r ${{ inputs.package_path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
         fi
         if [[ ${{ inputs.create_subsystem_release }} == 'true' ]]; then
           rsync -avm \
@@ -67,11 +55,11 @@ runs:
               --include="README.md" \
               --include=".python-version" \
               --exclude="*" \
-              ${{ inputs.path }}/ \
+              ${{ inputs.package_path }}/ \
               ${{ env.RELEASE_FOLDER_PATH }}/subsystem_tests/
         fi
 
-    - name: Zip files for ${{ inputs.name }} prerelease
+    - name: Zip files for ${{ inputs.package_name }} prerelease
       uses: thedoctor0/zip-release@0.7.6
       with:
         type: zip
@@ -82,8 +70,8 @@ runs:
       uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
       with:
         repo_token: ${{ inputs.github_token }}
-        automatic_release_tag: ${{ env.RELEASE_VERSION }}
+        automatic_release_tag: ${{ inputs.release_name }}
         prerelease: true
-        title: ${{ env.RELEASE_VERSION }}
+        title: ${{ inputs.release_name }}
         files: |
           ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}

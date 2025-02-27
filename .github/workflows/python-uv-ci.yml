@@ -108,6 +108,8 @@ jobs:
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
+          versioned-release: ${{ inputs.create_versioned_release }}
+          issue-number: ${{ github.event.number }}
 
   #
   # Test Packages
@@ -131,15 +133,15 @@ jobs:
       - name: Install tools
         uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@ci/python-cicd
 
-      - name: Check if ${{ matrix.inputs.name }} has changed
+      - name: Check if ${{ matrix.inputs.package_name }} has changed
         uses: dorny/paths-filter@v3
         id: changes
         with:
           filters: |
             is_changed:
-              - ${{ matrix.inputs.path }}/**
+              - ${{ matrix.inputs.package_path }}/**
             is_src_changed:
-              - ${{ matrix.inputs.path }}/src/**
+              - ${{ matrix.inputs.package_path }}/src/**
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
@@ -147,7 +149,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           LATEST_RELEASE=$(gh release list --json isLatest,name -q '.[] | select(.isLatest) | .name' -L 1000)
-          NEW_VERSION=$(cat ${{ matrix.inputs.path }}/pyproject.toml| grep -o "version.*" | cut -d'=' -f2 | tr -d '"' | tr -d ' ')
+          NEW_VERSION=$(cat ${{ matrix.inputs.package_path }}/pyproject.toml| grep -o "version.*" | cut -d'=' -f2 | tr -d '"' | tr -d ' ')
           OLD_VERSION=$(echo $LATEST_RELEASE | grep -o "[0-9]*\.[0-9]*\.[0-9]*" | cut -d'_' -f2)
           if [ "$OLD_VERSION" == "$NEW_VERSION" ]; then
             echo "Version $NEW_VERSION is the same as $OLD_VERSION. Please update the version in pyproject.toml."
@@ -167,32 +169,31 @@ jobs:
           tenant-id: ${{ inputs.azure_tenant_id }}
           subscription-id: ${{ inputs.azure_subscription_id }}
 
-      - name: Lint and Format ${{ matrix.inputs.name }}
+      - name: Lint and Format ${{ matrix.inputs.package_name }}
         uses: Energinet-DataHub/.github/.github/actions/python-lint@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
-          name: ${{ matrix.inputs.name }}
-          path: ${{ matrix.inputs.path }}
+          name: ${{ matrix.inputs.package_name }}
+          path: ${{ matrix.inputs.package_path }}
 
-      - name: Test ${{ matrix.inputs.name }}
+      - name: Test ${{ matrix.inputs.package_name }}
         uses: Energinet-DataHub/.github/.github/actions/python-test@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
-          name: ${{ matrix.inputs.name }}
-          path: ${{ matrix.inputs.path }}
+          name: ${{ matrix.inputs.package_name }}
+          path: ${{ matrix.inputs.package_path }}
           tests_path: ${{ inputs.tests_directory }}
           pytest_addopts: ${{ inputs.pytest_addopts }}
 
-      - name: Build ${{ matrix.inputs.name }}
+      - name: Build ${{ matrix.inputs.package_name }}
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
-        run: uv build --wheel --directory ${{ matrix.inputs.path }}
+        run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
-      - name: Create prerelease for ${{ matrix.inputs.name }}
+      - name: Create prerelease for ${{ matrix.inputs.package_name }}
         uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@ci/python-cicd
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         with:
-          name: ${{ matrix.inputs.name }}
-          path: ${{ matrix.inputs.path }}
-          issue-number: ${{ github.event.number }}
-          create_versioned_release: ${{ inputs.create_versioned_release }}
+          package_name: ${{ matrix.inputs.package_name }}
+          package_path: ${{ matrix.inputs.package_path }}
+          release_name: ${{ matrix.inputs.release_name }}
           create_subsystem_release: ${{ inputs.create_subsystem_release }}
