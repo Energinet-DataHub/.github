@@ -170,14 +170,14 @@ jobs:
           subscription-id: ${{ inputs.azure_subscription_id }}
 
       - name: Lint and Format ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-lint@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
 
       - name: Test ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-test@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@ci/python-cicd
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
