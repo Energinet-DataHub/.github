@@ -144,14 +144,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Promote prerelease
+      - name: Check if ${{ matrix.inputs.package_name }} has changed
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            is_changed:
+              - ${{ matrix.inputs.package_path }}/**
+
+      - name: Promote prerelease ${{ matrix.inputs.release_name }}
         uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@ci/python-cicd
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           release_name: ${{ matrix.packages.release_name }}
           postfix_latest: ${{ inputs.postfix_latest }}
 
-      - name: Check Dispatch Variables
+      - name: Check Dispatch Variables for ${{ matrix.inputs.release_name }}
         id: check_dispatch_variables
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
         run: |
           SHOULD_DISPATCH=false
           if [[ "${{ inputs.environment_repository_path }}" && "${{ inputs.dh3serviceaccount_appid }}" && "${{ secrets.dh3serviceaccount_privatekey }}" ]]; then
@@ -159,27 +169,27 @@ jobs:
           fi
           echo "SHOULD_DISPATCH=$SHOULD_DISPATCH" >>$GITHUB_OUTPUT
 
-      - name: Create Dispatch Event name
+      - name: Create Dispatch Event name for ${{ matrix.inputs.release_name }}
         id: create_dispatch_event_name
-        if: ${{ inputs.dispatch_deployment_event && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
+        if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         run: |
           event_name="${{ inputs.subsystem_name }}-${{ matrix.packages.package_name }}-deployment-request-domain"
           lowercase_event_name=$(echo $event_name | tr '[:upper:]' '[:lower:]')
           echo "Dispatching event: $lowercase_event_name"
           echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
 
-      - name: Dispatch Release
+      - name: Dispatch Release for ${{ matrix.inputs.release_name }}
         uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@ci/python-cicd
-        if: ${{ inputs.dispatch_deployment_event && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
+        if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         with:
           event_name: ${{ steps.create_dispatch_event_name.outputs.event_name }}
           repository: ${{ inputs.environment_repository_path }}
           app_id: ${{ inputs.dh3serviceaccount_appid }}
           private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
-      - name: Notify Team of failed deployment
+      - name: Notify Team of failed deployment for ${{ matrix.inputs.release_name }}
         uses: Energinet-DataHub/.github/.github/actions/send-email@v14
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.changes.outputs.is_changed == 'true' }}
         with:
           sendgrid-api-key: ${{ secrets.send_grid_api_key }}
           team-name: ${{ inputs.subsystem_name }}
