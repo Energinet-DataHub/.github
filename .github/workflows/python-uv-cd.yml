@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install tools
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v14
 
   #
   # Build Release Matrix
@@ -120,7 +120,7 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
         id: find_pull_request
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v14
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -153,7 +153,7 @@ jobs:
               - ${{ matrix.inputs.package_path }}/**
 
       - name: Promote prerelease ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@v14
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           release_name: ${{ matrix.packages.release_name }}
@@ -179,7 +179,7 @@ jobs:
           echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
 
       - name: Dispatch Release for ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@v14
         if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         with:
           event_name: ${{ steps.create_dispatch_event_name.outputs.event_name }}

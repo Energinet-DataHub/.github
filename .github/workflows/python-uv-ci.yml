@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v14
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install tools
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v14
 
       - name: Check if ${{ matrix.inputs.package_name }} has changed
         uses: dorny/paths-filter@v3
@@ -170,14 +170,14 @@ jobs:
           subscription-id: ${{ inputs.azure_subscription_id }}
 
       - name: Lint and Format ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@v14
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
 
       - name: Test ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v14
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
@@ -190,7 +190,7 @@ jobs:
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
       - name: Create prerelease for ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@ci/python-cicd
+        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         with:
           package_name: ${{ matrix.inputs.package_name }}
