@@ -158,6 +158,12 @@ jobs:
             echo "Version $NEW_VERSION is older than $OLD_VERSION. Please update the version in pyproject.toml."
             exit 1
           else
+              RELEASE_NOTES=$(cat ${{ matrix.inputs.package_path }}/release-notes.md)
+              if [[ $RELEASE_NOTES != "*## Version $NEW_VERSION*" ]]; then
+                  echo "'## Version $NEW_VERSION' not found in release notes"
+                  echo "Please add the release notes for version $NEW_VERSION in '${{ matrix.inputs.package_path }}/release-notes.md'"
+                  exit 1
+              fi
               echo "Version $NEW_VERSION is newer than $OLD_VERSION. Proceeding with the release..."
           fi
 
