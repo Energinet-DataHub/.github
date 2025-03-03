@@ -27,7 +27,6 @@ runs:
         GH_TOKEN: ${{ github.token }}
       run: |
         echo 'Promoting ${{ inputs.release_name }} from pre-release to release'
-        gh release edit ${{ inputs.release_name }} --prerelease=false
 
         echo 'Checking if ${{ env.LATEST_RELEASE }} exists'
         set +e
