@@ -25,6 +25,10 @@ inputs:
     description: The GitHub workspace
     required: false
     default: ${{ github.workspace }}
+  rsync_args:
+    description: The arguments to pass to rsync
+    required: false
+    default: "-avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --exclude='*'"
 runs:
   using: composite
   steps:
@@ -46,14 +50,7 @@ runs:
           cp -r ${{ inputs.package_path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
         fi
         if [[ ${{ inputs.create_subsystem_release }} == 'true' ]]; then
-          rsync -avm \
-              --exclude="**/__pycache__/" \
-              --include="src/***" \
-              --include="tests/***" \
-              --include="pyproject.toml" \
-              --include="README.md" \
-              --include=".python-version" \
-              --exclude="*" \
+          rsync ${{ inputs.rsync_args }} \
               ${{ inputs.package_path }}/ \
               ${{ env.RELEASE_FOLDER_PATH }}/subsystem_tests/
         fi
