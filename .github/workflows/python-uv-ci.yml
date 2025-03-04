@@ -84,6 +84,14 @@ on:
           Any paths should be considered relative to the package directory.
         required: false
         default: ""
+      package_source_code_directory:
+        type: string
+        description: |
+          The directory where the source code of the package is located.
+          This is used in versioned releases to check whether version and
+          release notes have been updated.
+        required: false
+        default: src
 
 permissions:
   id-token: write
@@ -141,7 +149,7 @@ jobs:
             is_changed:
               - ${{ matrix.inputs.package_path }}/**
             is_src_changed:
-              - ${{ matrix.inputs.package_path }}/src/**
+              - ${{ matrix.inputs.package_path }}/${{ inputs.package_source_code_directory }}/**
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
