@@ -1,0 +1,42 @@
+name: Python Test
+description: Test a package with pytest
+inputs:
+  name:
+    description: The name of the package
+    required: true
+  path:
+    description: The path to the package
+    required: true
+  tests_path:
+    description: The path to the tests
+    required: false
+    default: tests
+  pytest_addopts:
+    description: Additional arguments to pass to pytest
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+        ignore-nothing-to-cache: true
+        cache-suffix: ${{ inputs.name }}
+        cache-dependency-glob: |
+          ${{ inputs.path }}/pyproject.toml
+          ${{ inputs.path }}/uv.lock
+
+    - name: Test
+      shell: bash
+      run: uv run --directory ${{ inputs.path }} pytest ${{ inputs.tests_path }} ${{ inputs.pytest_addopts }} --junit-xml=coverage.xml
+
+    - name: Publish test report
+      uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      with:
+        check_name: Python test results for '${{ inputs.path }}' with ${{ inputs.pytest_addopts }}
+        comment_title: Python test results for '${{ inputs.name }}' with ${{ inputs.pytest_addopts }}
+        comment_mode: failures
+        files: |
+          ${{ inputs.path }}/coverage.xml

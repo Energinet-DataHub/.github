@@ -1,0 +1,47 @@
+name: Discover Pyproject
+description: Discover pyproject.toml files in the repository
+inputs:
+  path:
+    description: The path to discover pyproject.toml files in
+    required: true
+  issue-number:
+    description: The issue number to comment on with the discovered pyproject.toml files
+    required: true
+  versioned-release:
+    description: Whether to create a versioned release
+    required: false
+    default: "false"
+outputs:
+  matrix:
+    description: |
+      Details about discovered python projects. This is a list of dictionaries
+      with the following keys:
+      - package_name: The name of the package
+      - package_path: The path to the package
+      - package_version: The version of the package
+      - release_name: (optional) The name of the release, e.g., "{package_name}_{issue_number}"
+          or "{package_name}_{version}_{issue_number}" if versioned-release is true
+    value: ${{ steps.package_matrix.outputs.matrix }}
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11 # tomllib was added in Python 3.11
+    - name: Create Package Matrix
+      id: package_matrix
+      shell: bash
+      run: |
+        if [ "${{ inputs.versioned-release }}" = 'true' ]; then
+            python ${{ github.action_path }}/action.py \
+              --packages-dir ${{ inputs.path }} \
+              --issue-number ${{ inputs.issue-number }} \
+              --versioned-release \
+              --gh-output-key matrix
+        else
+            python ${{ github.action_path }}/action.py \
+              --packages-dir ${{ inputs.path }} \
+              --issue-number ${{ inputs.issue-number }} \
+              --gh-output-key matrix
+        fi

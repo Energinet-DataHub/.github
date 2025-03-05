@@ -1,0 +1,198 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Python UV CD
+
+on:
+  workflow_call:
+    inputs:
+      packages_directory:
+        type: string
+        description: |
+          Directory to search for python packages in. This recursively searches
+          for directories containing a pyproject.toml file. All directories
+          discovered are considered packages.
+          Defaults to workspace root.
+        required: false
+        default: ${{ github.workspace }}
+      subsystem_name:
+        type: string
+        description: |
+          The name of the subsystem in which the deployment is made.
+        required: true
+      notification_email:
+        type: string
+        description: |
+          The email to use to notify in case of a failed deployment.
+        required: true
+      sender_email:
+        type: string
+        description: |
+          The email of the sender of the email notification.
+        required: true
+      create_versioned_release:
+        type: boolean
+        description: |
+          If true, the release name will be "{package_name}_{version}_{issue_number}".
+          Otherwise, the release name will be "{package_name}_{issue_number}".
+        required: false
+        default: false
+      postfix_latest:
+        type: boolean
+        description: |
+          Whether to postfix the release name with "_latest".
+        required: false
+        default: true
+      dispatch_deployment_event:
+        type: boolean
+        description: |
+          Whether to dispatch a deployment event. If true, the following inputs are required:
+          - environment_repository_path
+          - dh3serviceaccount_appid
+          - dh3serviceaccount_privatekey (secret)
+          This creates an event with the name "<subsystem_name>-<package_name>-deployment-request-domain".
+        required: false
+        default: false
+      environment_repository_path:
+        type: string
+        description: |
+          The path to the repository where the deployment event is dispatched.
+          Must be set if dispatch_deployment_event is true.
+        required: false
+        default: ""
+      dh3serviceaccount_appid:
+        type: string
+        description: |
+          The app id of the service account used to dispatch the deployment event.
+          Must be set if dispatch_deployment_event is true.
+        required: false
+        default: ""
+    secrets:
+      gh_token:
+        required: true
+        description: |
+          The GitHub token used to access the GitHub API.
+      send_grid_api_key:
+        required: true
+        description: |
+          This is used to send an email notification in case of a failed deployment.
+      dh3serviceaccount_privatekey:
+        required: false
+        description: |
+          The private key of the service account used to dispatch the deployment event.
+          Must be set if dispatch_deployment_event is true.
+
+jobs:
+  #
+  # With this, tool cache will be available in all jobs. This is a workaround as you cannot share a cache that was
+  # created in a PR workflow. See more here: https://github.com/actions/cache?tab=readme-ov-file#cache-scopes
+  #
+  cd_tools:
+    name: Install tools in Default for caching
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v14
+
+  #
+  # Build Release Matrix
+  #
+  cd_release_matrix:
+    name: Build Release Matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.release_matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find associated pull request
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+        id: find_pull_request
+      - name: Discover Pyproject
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v14
+        id: package_matrix
+        with:
+          path: ${{ inputs.packages_directory }}
+          versioned-release: ${{ inputs.create_versioned_release }}
+          issue-number: ${{ steps.find_pull_request.outputs.pull_request_number }}
+  #
+  # Promote prerelease
+  #
+  cd_promote_prerelease:
+    name: Promote prerelease
+    runs-on: ubuntu-24.04
+    needs: cd_release_matrix
+    if: ${{ needs.cd_release_matrix.outputs.matrix != '[]' }}
+    strategy:
+      matrix:
+        packages: ${{ fromJson(needs.cd_release_matrix.outputs.matrix) }}
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if ${{ matrix.inputs.package_name }} has changed
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            is_changed:
+              - ${{ matrix.inputs.package_path }}/**
+
+      - name: Promote prerelease ${{ matrix.inputs.release_name }}
+        uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@v14
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        with:
+          release_name: ${{ matrix.packages.release_name }}
+          postfix_latest: ${{ inputs.postfix_latest }}
+
+      - name: Check Dispatch Variables for ${{ matrix.inputs.release_name }}
+        id: check_dispatch_variables
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        run: |
+          SHOULD_DISPATCH=false
+          if [[ "${{ inputs.environment_repository_path }}" && "${{ inputs.dh3serviceaccount_appid }}" && "${{ secrets.dh3serviceaccount_privatekey }}" ]]; then
+            SHOULD_DISPATCH=true
+          fi
+          echo "SHOULD_DISPATCH=$SHOULD_DISPATCH" >>$GITHUB_OUTPUT
+
+      - name: Create Dispatch Event name for ${{ matrix.inputs.release_name }}
+        id: create_dispatch_event_name
+        if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
+        run: |
+          event_name="${{ inputs.subsystem_name }}-${{ matrix.packages.package_name }}-deployment-request-domain"
+          lowercase_event_name=$(echo $event_name | tr '[:upper:]' '[:lower:]')
+          echo "Dispatching event: $lowercase_event_name"
+          echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
+
+      - name: Dispatch Release for ${{ matrix.inputs.release_name }}
+        uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@v14
+        if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
+        with:
+          event_name: ${{ steps.create_dispatch_event_name.outputs.event_name }}
+          repository: ${{ inputs.environment_repository_path }}
+          app_id: ${{ inputs.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
+      - name: Notify Team of failed deployment for ${{ matrix.inputs.release_name }}
+        uses: Energinet-DataHub/.github/.github/actions/send-email@v14
+        if: ${{ failure() && steps.changes.outputs.is_changed == 'true' }}
+        with:
+          sendgrid-api-key: ${{ secrets.send_grid_api_key }}
+          team-name: ${{ inputs.subsystem_name }}
+          to: ${{ inputs.notification_email }}
+          from: ${{ inputs.sender_email }}
+          subject: "Deployment Failed: Measurements '${{ matrix.inputs.name }}'"
