@@ -28,7 +28,7 @@ inputs:
   rsync_args:
     description: The arguments to pass to rsync
     required: false
-    default: "-avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --exclude='*'"
+    default: -avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --exclude='*'
 runs:
   using: composite
   steps:
