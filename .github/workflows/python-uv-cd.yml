@@ -110,10 +110,10 @@ jobs:
   # Build Release Matrix
   #
   cd_release_matrix:
-    name: Build Release Matrix
+    name: Build Package Matrix
     runs-on: ubuntu-24.04
     outputs:
-      matrix: ${{ steps.release_matrix.outputs.matrix }}
+      matrix: ${{ steps.package_matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
       - name: Find associated pull request
@@ -126,17 +126,18 @@ jobs:
           path: ${{ inputs.packages_directory }}
           versioned-release: ${{ inputs.create_versioned_release }}
           issue-number: ${{ steps.find_pull_request.outputs.pull_request_number }}
+
   #
   # Promote prerelease
   #
   cd_promote_prerelease:
     name: Promote prerelease
     runs-on: ubuntu-24.04
-    needs: cd_release_matrix
+    needs: [cd_release_matrix]
     if: ${{ needs.cd_release_matrix.outputs.matrix != '[]' }}
     strategy:
       matrix:
-        packages: ${{ fromJson(needs.cd_release_matrix.outputs.matrix) }}
+        inputs: ${{ fromJson(needs.cd_release_matrix.outputs.matrix) }}
     permissions:
       contents: write
       checks: write
@@ -156,7 +157,7 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@v14
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
-          release_name: ${{ matrix.packages.release_name }}
+          release_name: ${{ matrix.inputs.release_name }}
           postfix_latest: ${{ inputs.postfix_latest }}
 
       - name: Check Dispatch Variables for ${{ matrix.inputs.release_name }}
@@ -173,7 +174,7 @@ jobs:
         id: create_dispatch_event_name
         if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         run: |
-          event_name="${{ inputs.subsystem_name }}-${{ matrix.packages.package_name }}-deployment-request-domain"
+          event_name="${{ inputs.subsystem_name }}-${{ matrix.inputs.package_name }}-deployment-request-domain"
           lowercase_event_name=$(echo $event_name | tr '[:upper:]' '[:lower:]')
           echo "Dispatching event: $lowercase_event_name"
           echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
