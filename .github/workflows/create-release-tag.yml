@@ -23,7 +23,7 @@ jobs:
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 14
           minor_version: 28
-          patch_version: 2
+          patch_version: 3
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
