@@ -171,6 +171,11 @@ jobs:
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
     steps:
+      - name: Enable long filenames
+        shell: pwsh
+        run: |
+          sudo git config --system core.longpaths true
+
       - name: Check out repository
         uses: actions/checkout@v4
 
