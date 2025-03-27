@@ -67,21 +67,29 @@ on:
         description: Private key used to issue short-lived tokens for authenticating Github API requests
 
 jobs:
-  chain_bench_scan_example:
-    runs-on: ubuntu-latest
-    name: Test Job
+  scan:
+    name: Scan
+    runs-on: ubuntu-20.04
     steps:
-      - name: Chain Bench
-        id: chain-bench
-        uses: aquasecurity/chain-bench-action@v1.0.0
-        with:
-          repository-url: ${{ github.server_url }}/${{ github.repository }} # Compiles to https://github.com/aquasecurity/chain-bench-action
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          scm-platform: github #Optional parameter for dedicated SCM servers
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      # Using the github action output from the scan step "chain-bench-result" (JSON so you can run rego/jq against it)
-      - name: Echo
-        run: echo ${{ steps.chain-bench.outputs.chain-bench-result }}
+    - name: Manual Trivy Setup
+      uses: aquasecurity/setup-trivy@v0.2.0
+      with:
+        cache: true
+        version: v0.60.1
+
+    - name: Run Trivy vulnerability scanner in repo mode
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL'
+        skip-setup-trivy: true
+
   md_check:
     name: Markdown Check
     if: ${{ inputs.skip_markdown_check != 'true' }}
