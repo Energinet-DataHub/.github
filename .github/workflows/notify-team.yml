@@ -19,7 +19,7 @@ name: Notify team
 # by sending an email to their MS Team Channel or possibly direct mails.
 #
 # Note: Variables prefixed "EMAIL_" are organization variables allowing this reusable workflow to access them
-# regardless of where the workflow is used
+# regardless of where the workflow is used.
 
 on:
   workflow_call:

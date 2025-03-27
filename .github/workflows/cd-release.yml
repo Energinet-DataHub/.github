@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  #
+  # A
   # Automatic Release (create release tag)
   #
   create_release:

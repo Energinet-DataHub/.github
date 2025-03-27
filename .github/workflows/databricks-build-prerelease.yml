@@ -86,7 +86,7 @@ jobs:
         env:
           RELEASE_NUMBER: ${{ steps.find_pull_request.outputs.pull_request_number }}
 
-      # This creates the wheels in a subfolder "dist"
+      # This creates the wheels in a subfolder dist
       - name: Create Multiple Python Wheel for Databricks Jobs
         shell: bash
         if: ${{ inputs.multiple_wheels }}

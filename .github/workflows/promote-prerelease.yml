@@ -25,7 +25,7 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository, so gh cli can interact with it
+      # Checkout the repository, so gh cli can interact with it.
       - name: Checkout
         uses: actions/checkout@v4
 
