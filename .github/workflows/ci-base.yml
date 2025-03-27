@@ -67,15 +67,6 @@ on:
         description: Private key used to issue short-lived tokens for authenticating Github API requests
 
 jobs:
-  scan:
-    name: Scan
-    runs-on: ubuntu-20.04
-    steps:
-      - name: 'Checkout Repository'
-        uses: actions/checkout@v4
-      - name: 'Dependency Review'
-        uses: actions/dependency-review-action@v4
-
   md_check:
     name: Markdown Check
     if: ${{ inputs.skip_markdown_check != 'true' }}
