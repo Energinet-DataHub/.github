@@ -126,7 +126,7 @@ jobs:
     name: Test Packages
     runs-on: ubuntu-24.04
     needs: [ci_matrix]
-    # Environment is used when using OIDC to login and access the integration test environment.
+    # Environment is used when using OIDC to login and access the integration test environment
     environment: ${{ inputs.environment }}
     env:
       # Necessary to manage Azure resources from automated tests

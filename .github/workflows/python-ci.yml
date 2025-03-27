@@ -79,7 +79,7 @@ permissions:
   contents: read # Required for use of OIDC in GitHub
   issues: read # Needed by EnricoMi/publish-unit-test-result-action
   checks: write # Needed by EnricoMi/publish-unit-test-result-action
-  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action.
+  pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
   packages: read # Required for downloading docker image from GitHub packages
 
 jobs:

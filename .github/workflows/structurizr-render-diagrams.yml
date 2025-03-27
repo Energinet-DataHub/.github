@@ -42,7 +42,7 @@ name: Render C4 diagrams using Structurizr Lite
 #  3. Ensure that later jobs are executed even if some are skipped (by using 'if' and 'always()')
 #
 # If the jobs where instead executed in parallel and more than one needed to make an auto commit,
-# the second commit would fail..
+# the second commit would fail.
 
 on:
   workflow_call:

@@ -96,7 +96,7 @@ on:
 jobs:
   #
   # With this, tool cache will be available in all jobs. This is a workaround as you cannot share a cache that was
-  # created in a PR workflow. See more here: https://github.com/actions/cache?tab=readme-ov-file#cache-scopes.
+  # created in a PR workflow. See more here: https://github.com/actions/cache?tab=readme-ov-file#cache-scopes
   #
   cd_tools:
     name: Install tools in Default for caching
