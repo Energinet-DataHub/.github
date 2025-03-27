@@ -71,21 +71,10 @@ jobs:
     name: Scan
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Manual Trivy Setup
-      uses: aquasecurity/setup-trivy@v0.2.2
-
-    - name: Run Trivy vulnerability scanner in repo mode
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'repo'
-        ignore-unfixed: true
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        severity: 'CRITICAL'
-        skip-setup-trivy: true
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@v4
 
   md_check:
     name: Markdown Check
