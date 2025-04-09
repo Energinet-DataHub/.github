@@ -41,11 +41,49 @@ on:
         required: false
         default: ""
         type: string
+      pr_list:
+        description: JSON list of PRs to determine who merged them
+        required: false
+        type: string
 
 jobs:
   notify_team:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate GitHub token
+        id: generate_token
+        uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
+        with:
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
+
+      - name: Get PR Owner(s)
+        id: pr_owner
+        if: ${{ inputs.pr_list != '' }}
+        uses: ./.github/actions/get-pr-owner
+        with:
+          github_token: ${{ steps.generate_token.outputs.token }}
+          pr_list: ${{ inputs.pr_list }}
+
+      - name: Build email content
+        id: email_content
+        shell: bash
+        run: |
+          content="<html><body><br>${{ inputs.body }}"
+
+          if [ -n "${{ steps.pr_owner.outputs.pr_owner || '' }}" ]; then
+            content="$content<br><b>Merged by:</b><br>${{ steps.pr_owner.outputs.pr_owner }}"
+          fi
+
+          content="$content</body></html>"
+
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$content" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Determine email
         id: get_email
         shell: bash
@@ -82,4 +120,4 @@ jobs:
           to: ${{ steps.get_email.outputs.team_email }}
           from: ${{ vars.email_internal_sender }}
           subject: ${{ inputs.subject }}
-          content: ${{ inputs.body }}
+          content: ${{ steps.email_content.outputs.content }}
