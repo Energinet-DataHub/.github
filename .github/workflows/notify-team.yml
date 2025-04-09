@@ -74,7 +74,6 @@ jobs:
         run: |
           content="<html><body><br>${{ inputs.body }}"
 
-          
           if [ -n "${{ steps.pr_owner.outputs.pr_owner || '' }}" ]; then
             content="$content<br><b>Merged by:</b><br>${{ steps.pr_owner.outputs.pr_owner }}"
           fi
