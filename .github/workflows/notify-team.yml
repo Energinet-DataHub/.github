@@ -62,6 +62,7 @@ jobs:
 
       - name: Get PR Owner(s)
         id: pr_owner
+        if: ${{ inputs.pr_list != '' }}
         uses: Energinet-DataHub/.github/.github/actions/get-pr-owner@admmu/2982-add-pr-owner-to-notify-team
         with:
           github_token: ${{ steps.generate_token.outputs.token }}
@@ -73,9 +74,9 @@ jobs:
         run: |
           content="<html><body><br>${{ inputs.body }}"
 
-          pr_owner="${{ steps.pr_owner.outputs.pr_owner }}"
-          if [ -n "$pr_owner" ]; then
-            content="$content<br><b>Merged by:</b><br>$pr_owner"
+          
+          if [ -n "${{ steps.pr_owner.outputs.pr_owner || '' }}" ]; then
+            content="$content<br><b>Merged by:</b><br>${{ steps.pr_owner.outputs.pr_owner }}"
           fi
 
           content="$content</body></html>"
