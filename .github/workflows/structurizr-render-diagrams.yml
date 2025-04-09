@@ -82,7 +82,7 @@ jobs:
 
       - name: Determine if Structurizr files has changed since last pushed commit to the remote branch
         id: diagrams_changed
-        uses: tj-actions/changed-files@v46.0.1
+        uses: tj-actions/changed-files@v46.0.5
         with:
           since_last_remote_commit: true
           files: |
@@ -145,7 +145,7 @@ jobs:
 
       - name: Commit PNG images
         if: steps.diagrams_changed.outputs.any_changed == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Auto generated diagrams
           file_pattern: ${{ env.DIAGRAMS_FOLDER }}/**/*.png
