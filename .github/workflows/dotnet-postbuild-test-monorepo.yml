@@ -192,7 +192,7 @@ jobs:
             echo "NUGET_PACKAGES=${{ github.workspace }}\.nuget\packages" >> $env:GITHUB_ENV
           }
           else {
-            echo "NUGET_PACKAGES=~\.nuget\packages" >> $env:GITHUB_ENV
+            echo "NUGET_PACKAGES=$env:USERPROFILE\.nuget\packages" >> $env:GITHUB_ENV
           }
 
       - uses: actions/cache@v4
