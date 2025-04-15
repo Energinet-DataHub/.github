@@ -183,6 +183,8 @@ jobs:
         with:
           path: ~/.nuget/packages
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ inputs.nuget_cache_key_prefix }}-
 
       - name: Set up test environment
         uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@v14
