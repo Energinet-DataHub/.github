@@ -289,6 +289,8 @@ jobs:
         with:
           path: ~/.nuget/packages
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ inputs.nuget_cache_key_prefix }}-
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
