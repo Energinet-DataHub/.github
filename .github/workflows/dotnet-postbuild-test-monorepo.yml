@@ -162,7 +162,7 @@ jobs:
 
     env:
       ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
-      NUGET_PACKAGES: ${{ inputs.use_workspace_for_nuget_cache == 'true' && format('{0}/.nuget/packages', github.workspace) || '~/.nuget/packages' }}
+      NUGET_PACKAGES2: ${{ (inputs.use_workspace_for_nuget_cache == 'true' && format('{0}/.nuget/packages', github.workspace)) || '~/.nuget/packages' }}
 
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
@@ -184,6 +184,15 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Set NUGET_PACKAGES environment variable
+        shell: pwsh
+        run: |
+          if [ "${{ inputs.use_workspace_for_nuget_cache }}" = "true" ]; then
+            echo "NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages" >> $env:GITHUB_ENV
+          else
+            echo "NUGET_PACKAGES=~/.nuget/packages" >> $env:GITHUB_ENV
+          fi
 
       - uses: actions/cache@v4
         with:
