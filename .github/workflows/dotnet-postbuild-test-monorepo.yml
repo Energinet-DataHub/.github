@@ -189,10 +189,10 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ inputs.use_workspace_for_nuget_cache }}" -eq "true") {
-            echo "NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages" >> $env:GITHUB_ENV
+            echo "NUGET_PACKAGES=${{ github.workspace }}\.nuget\packages" >> $env:GITHUB_ENV
           }
           else {
-            echo "NUGET_PACKAGES=~/.nuget/packages" >> $env:GITHUB_ENV
+            echo "NUGET_PACKAGES=~\.nuget\packages" >> $env:GITHUB_ENV
           }
 
       - uses: actions/cache@v4
