@@ -187,7 +187,7 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: ${{ inputs.nuget_cache_path }}
+          path: ${{ env.NUGET_PACKAGES }}
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-
