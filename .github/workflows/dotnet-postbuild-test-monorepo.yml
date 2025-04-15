@@ -188,11 +188,12 @@ jobs:
       - name: Set NUGET_PACKAGES environment variable
         shell: pwsh
         run: |
-          if [ "${{ inputs.use_workspace_for_nuget_cache }}" = "true" ]; then
+          if ("${{ inputs.use_workspace_for_nuget_cache }}" -eq "true") {
             echo "NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages" >> $env:GITHUB_ENV
-          else
+          }
+          else {
             echo "NUGET_PACKAGES=~/.nuget/packages" >> $env:GITHUB_ENV
-          fi
+          }
 
       - uses: actions/cache@v4
         with:
