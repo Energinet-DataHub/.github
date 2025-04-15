@@ -140,6 +140,11 @@ on:
         required: false
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }} # PR number is not available in merge_group event (Merge queue)
+      nuget_cache_path:
+        description: Path to nuget packages cachee (default ~/.nuget/packages)
+        required: false
+        type: string
+        default: ~/.nuget/packages
 
 permissions:
   id-token: write
@@ -181,7 +186,7 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: ~/.nuget/packages
+          path: ${{ inputs.nuget_cache_path }}
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ inputs.nuget_cache_key_prefix }}-
