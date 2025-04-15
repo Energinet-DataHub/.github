@@ -187,9 +187,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ inputs.nuget_cache_path }}
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
-            ${{ inputs.nuget_cache_key_prefix }}-
+            ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-
 
       - name: Set up test environment
         uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@v14
