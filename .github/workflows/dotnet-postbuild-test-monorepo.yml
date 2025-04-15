@@ -141,7 +141,7 @@ on:
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }} # PR number is not available in merge_group event (Merge queue)
       use_workspace_for_nuget_cache:
-        description: If true nuget packages will be placed in ${{ github.workspace }}\.nuget\packages otherwise ~/.nuget/packages
+        description: If true nuget packages will be placed in ${{ github.workspace }}/.nuget/packages otherwise ~/.nuget/packages
         required: false
         default: false
         type: boolean
@@ -162,7 +162,7 @@ jobs:
 
     env:
       ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
-      NUGET_PACKAGES: ${{ inputs.use_workspace_for_nuget_cache != 'true' && '~/.nuget/packages' || format('{0}\.nuget\packages', github.workspace) }}
+      NUGET_PACKAGES: ${{ inputs.use_workspace_for_nuget_cache == 'true' && format('{0}/.nuget/packages', github.workspace) || '~/.nuget/packages' }}
 
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
