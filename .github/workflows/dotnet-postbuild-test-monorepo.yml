@@ -162,7 +162,7 @@ jobs:
 
     env:
       ARTIFACT_TEST_PATH: ${{ github.workspace }}\${{ inputs.testproject_name }}
-      NUGET_PACKAGES: ${{ inputs.nuget_cache_path }}
+      NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
 
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
