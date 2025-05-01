@@ -175,6 +175,13 @@ jobs:
               echo "Version $NEW_VERSION is newer than $OLD_VERSION. Proceeding with the release..."
           fi
 
+      - name: Lint and Format ${{ matrix.inputs.package_name }}
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@v14
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        with:
+          name: ${{ matrix.inputs.package_name }}
+          path: ${{ matrix.inputs.package_path }}
+
       - name: Login to access Azure resources
         uses: azure/login@v2
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
@@ -183,16 +190,33 @@ jobs:
           tenant-id: ${{ inputs.azure_tenant_id }}
           subscription-id: ${{ inputs.azure_subscription_id }}
 
-      - name: Lint and Format ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@v14
-        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+      - name: Fetch secrets from Azure KeyVault
+        id: secrets
+        if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
+        run: |
+          workspace_url=$(az keyvault secret show --name "dbw-domain-test-workspace-url" --vault-name kvintgratwe002 --query "value" | tr -d '"')
+          echo "workspace_url=https://$dbw_workspace_url" >>$GITHUB_OUTPUT
+          workspace_token=$(az keyvault secret show --name "dbw-domain-test-workspace-token" --vault-name kvintgratwe002 --query "value" | tr -d '"')
+          echo "workspace_token=$workspace_token" >>$GITHUB_OUTPUT
+          warehouse_id=$(az keyvault secret show --name "dbw-sql-endpoint-id" --vault-name kvintgratwe002 --query "value" | tr -d '"')
+          echo "warehouse_id=$warehouse_id" >>$GITHUB_OUTPUT
+
+      - name: Test Integration ${{ matrix.inputs.package_name }}
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v14
+        if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
+        env:
+          DATABRICKS_HOST: ${{ steps.secrets.outputs.workspace_url }}
+          DATABRICKS_TOKEN: ${{ steps.secrets.outputs.workspace_token }}
+          DATABRICKS_WAREHOUSE_ID: ${{ steps.secrets.outputs.warehouse_id }}
         with:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
+          tests_path: ${{ inputs.tests_directory }}
+          pytest_addopts: ${{ inputs.pytest_addopts }}
 
       - name: Test ${{ matrix.inputs.package_name }}
         uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v14
-        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id == '' && inputs.azure_tenant_id == '' && inputs.azure_subscription_id == ''  }}
         with:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
