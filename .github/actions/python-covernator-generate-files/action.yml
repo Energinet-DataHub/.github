@@ -1,0 +1,50 @@
+name: Generate covernator files
+description: Generate covernator files for a Python project and upload them as artifacts
+
+inputs:
+  project_directory:
+    required: true
+  project_name:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: covernator-step
+      name: Run covernator
+      shell: bash
+      run: |
+        uv run --directory ${{ inputs.project_directory }} \
+          python -c "from geh_common.covernator_streamlit import main; main()" \
+          -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} || \
+          { echo 'Covernator not found, please install it first'; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; }
+
+    - name: Upload covernator files
+      id: artifact-upload-step
+      if: ${{ steps.covernator-step.outputs.skip != 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: covernator-files-${{ inputs.project_name }}
+        path: /tmp/covernator_output_folder/${{ inputs.project_name }}/**
+
+    - name: Prepare pr-comment message
+      id: pr-comment-message
+      shell: bash
+      run: |
+        if [[ "${{ steps.covernator-step.outputs.skip }}" == "true" ]]; then
+          echo "message=Ⓧ Generation of files was skipped. Check the logs, if this was unintended behavior." >> $GITHUB_OUTPUT
+        else
+          echo "message=✅ Covernator files have been generated (for ${{ inputs.project_directory }}) and uploaded as artifacts.<br>You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }})." >> $GITHUB_OUTPUT
+        fi
+
+    - uses: mshick/add-pr-comment@v2
+      name : Add PR-comment with artifact url
+      with:
+        message-id: ${{ inputs.project_name }}
+        message: |
+          # Covernator (${{ inputs.project_name }})
+
+          ${{ steps.pr-comment-message.outputs.message }}
+
+
+
