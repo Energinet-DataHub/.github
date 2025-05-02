@@ -6,6 +6,10 @@ inputs:
     required: true
   project_name:
     required: true
+  geh_common_version:
+    required: true
+    description: The version of geh_common to use. This is used to install the geh_common package from the repository.
+    default: "5.8.9"
 
 runs:
   using: "composite"
@@ -14,6 +18,8 @@ runs:
       name: Run covernator
       shell: bash
       run: |
+        uv venv
+        uv pip install geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common
         uv run --directory ${{ inputs.project_directory }} \
           python -c "from geh_common.covernator_streamlit import main; main()" \
           -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} || \
@@ -38,13 +44,10 @@ runs:
         fi
 
     - uses: mshick/add-pr-comment@v2
-      name : Add PR-comment with artifact url
+      name: Add PR-comment with artifact url
       with:
         message-id: ${{ inputs.project_name }}
         message: |
           # Covernator (${{ inputs.project_name }})
 
           ${{ steps.pr-comment-message.outputs.message }}
-
-
-
