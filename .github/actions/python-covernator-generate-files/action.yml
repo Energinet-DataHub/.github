@@ -8,17 +8,30 @@ inputs:
   project_name:
     required: true
     description: The name of the project, which will also be used for the artifact name
+  geh_common_version:
+    required: true
+    description: The version of geh_common to use. This is used to install the geh_common package from the repository.
+    default: "5.8.9"
 
 runs:
   using: "composite"
   steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
     - id: covernator-step
       name: Run covernator
       shell: bash
       run: |
-        uv run --directory ${{ inputs.project_directory }} \
-          python -c "from geh_common.covernator_streamlit import main; main()" \
-          -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} || \
+        uv venv
+        source .venv/bin/activate
+        uv pip install "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@achter/covernator_ci_functionality#subdirectory=source/geh_common"
+        cd ${{ inputs.project_directory }}
+        python -c "from geh_common.covernator_streamlit import main; main()" \
+          -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} -k stats || \
           { echo 'Covernator not found, please install it first'; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; }
 
     - name: Upload covernator files
@@ -40,4 +53,4 @@ runs:
           ✅ Covernator files have been generated (for ${{ inputs.project_name }}) and uploaded as artifacts.
           You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }}).
           
-          ${{ steps.output.stats }}
+          ${{ steps.covernator-step.outputs.stats }}
