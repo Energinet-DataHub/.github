@@ -4,8 +4,10 @@ description: Generate covernator files for a Python project and upload them as a
 inputs:
   project_directory:
     required: true
+    description: The directory where the pyproject.toml file is located
   project_name:
     required: true
+    description: The name of the project, which will also be used for the artifact name
 
 runs:
   using: "composite"
@@ -27,24 +29,15 @@ runs:
         name: covernator-files-${{ inputs.project_name }}
         path: /tmp/covernator_output_folder/${{ inputs.project_name }}/**
 
-    - name: Prepare pr-comment message
-      id: pr-comment-message
-      shell: bash
-      run: |
-        if [[ "${{ steps.covernator-step.outputs.skip }}" == "true" ]]; then
-          echo "message=Ⓧ Generation of files was skipped. Check the logs, if this was unintended behavior." >> $GITHUB_OUTPUT
-        else
-          echo "message=✅ Covernator files have been generated (for ${{ inputs.project_directory }}) and uploaded as artifacts.<br>You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }})." >> $GITHUB_OUTPUT
-        fi
-
     - uses: mshick/add-pr-comment@v2
       name : Add PR-comment with artifact url
+      if: ${{ steps.covernator-step.outputs.skip != 'true' }}
       with:
         message-id: ${{ inputs.project_name }}
         message: |
           # Covernator (${{ inputs.project_name }})
-
-          ${{ steps.pr-comment-message.outputs.message }}
-
-
-
+          
+          ✅ Covernator files have been generated (for ${{ inputs.project_name }}) and uploaded as artifacts.
+          You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }}).
+          
+          ${{ steps.output.stats }}
