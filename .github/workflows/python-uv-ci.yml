@@ -195,7 +195,7 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
         run: |
           workspace_url=$(az keyvault secret show --name "dbw-domain-test-workspace-url" --vault-name kvintgratwe002 --query "value" | tr -d '"')
-          echo "workspace_url=https://$dbw_workspace_url" >>$GITHUB_OUTPUT
+          echo "workspace_url=https://$workspace_url" >>$GITHUB_OUTPUT
           workspace_token=$(az keyvault secret show --name "dbw-domain-test-workspace-token" --vault-name kvintgratwe002 --query "value" | tr -d '"')
           echo "workspace_token=$workspace_token" >>$GITHUB_OUTPUT
           warehouse_id=$(az keyvault secret show --name "dbw-sql-endpoint-id" --vault-name kvintgratwe002 --query "value" | tr -d '"')
