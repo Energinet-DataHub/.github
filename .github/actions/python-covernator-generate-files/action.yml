@@ -11,7 +11,7 @@ inputs:
   geh_common_version:
     required: true
     description: The version of geh_common to use. This is used to install the geh_common package from the repository.
-    default: "5.8.9"
+    default: "5.8.11"
 
 runs:
   using: "composite"
@@ -28,7 +28,7 @@ runs:
       run: |
         uv venv
         source .venv/bin/activate
-        uv pip install "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@achter/covernator_ci_functionality#subdirectory=source/geh_common"
+        uv pip install "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
         cd ${{ inputs.project_directory }}
         python -c "from geh_common.covernator_streamlit import main; main()" \
           -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} -k stats || \
