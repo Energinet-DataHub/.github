@@ -11,14 +11,14 @@ inputs:
   geh_common_version:
     required: true
     description: The version of geh_common to use. This is used to install the geh_common package from the repository.
-    default: "5.8.11"
+    default: 5.8.11
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Checkout
       uses: actions/checkout@v4
-    
+
     - name: Install uv
       uses: astral-sh/setup-uv@v5
 
@@ -43,14 +43,14 @@ runs:
         path: /tmp/covernator_output_folder/${{ inputs.project_name }}/**
 
     - uses: mshick/add-pr-comment@v2
-      name : Add PR-comment with artifact url
+      name: Add PR-comment with artifact url
       if: ${{ steps.covernator-step.outputs.skip != 'true' }}
       with:
         message-id: ${{ inputs.project_name }}
         message: |
           # Covernator (${{ inputs.project_name }})
-          
+
           ✅ Covernator files have been generated (for ${{ inputs.project_name }}) and uploaded as artifacts.
           You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }}).
-          
+
           ${{ steps.covernator-step.outputs.stats }}
