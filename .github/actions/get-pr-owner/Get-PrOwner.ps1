@@ -25,11 +25,14 @@ foreach ($pr in $prList) {
     Write-Host "Checking PR #$prNumber in $repo..."
 
     try {
-        $prInfo = gh pr view $prNumber --repo $repo --json mergedBy | ConvertFrom-Json
+        $prInfo = gh pr view $prNumber --repo $repo --json number,mergedBy,url,mergedAt | ConvertFrom-Json
         $owner = $prInfo.mergedBy.login
+        $url = $prInfo.url
+        $utcDate = [datetime]$prInfo.mergedAt
+        $localDate = $utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
 
         if ($owner) {
-            $mergedByList += "${repo} PR #${prNumber}: ${owner}"
+            $mergedByList += "<a href='$url'>PR #$($prInfo.number)</a><br>By: <b>$owner</b> on $localDate"
         } else {
             Write-Warning "PR #$prNumber in $repo is not merged or missing 'mergedBy'"
         }
@@ -41,7 +44,7 @@ foreach ($pr in $prList) {
 if ($mergedByList.Count -eq 0) {
     $summary = "No merged PRs found"
 } else {
-    $summary = $mergedByList -join "<br>"
+    $summary = $mergedByList -join "<br><br>"
 }
 
 Write-Host "Merged PR summary:"
