@@ -140,6 +140,11 @@ on:
         required: false
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }} # PR number is not available in merge_group event (Merge queue)
+      use_workspace_for_nuget_cache:
+        description: If true packages will be placed in .nuget/packages in the runner workspace
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   id-token: write
@@ -179,10 +184,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set NUGET_PACKAGES environment variable
+        shell: pwsh
+        run: |
+          if ("${{ inputs.use_workspace_for_nuget_cache }}" -eq "true") {
+            echo "NUGET_PACKAGES=${{ github.workspace }}\.nuget\packages" >> $env:GITHUB_ENV
+          }
+          else {
+            echo "NUGET_PACKAGES=$env:USERPROFILE\.nuget\packages" >> $env:GITHUB_ENV
+          }
+
       - uses: actions/cache@v4
         with:
-          path: ~/.nuget/packages
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-
 
       - name: Set up test environment
         uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@v14
