@@ -21,17 +21,23 @@ $mergedByList = @()
 foreach ($pr in $prList) {
     $repo = $pr.repo
     $prNumber = $pr.pr_number
+    $releaseName = $pr.release_name
 
     Write-Host "Checking PR #$prNumber in $repo..."
 
     try {
-        $prInfo = gh pr view $prNumber --repo $repo --json mergedBy | ConvertFrom-Json
-        $owner = $prInfo.mergedBy.login
+        $prInfo = gh pr view $prNumber --repo $repo --json number,mergedBy,url,mergedAt | ConvertFrom-Json
 
-        if ($owner) {
-            $mergedByList += "${repo} PR #${prNumber}: ${owner}"
+        if ($prInfo.mergedBy -and $prInfo.mergedAt) {
+            $mergedByList += [PSCustomObject]@{
+                Number       = $prInfo.number
+                Owner        = $prInfo.mergedBy.login
+                Url          = $prInfo.url
+                MergedAt     = [datetime]$prInfo.mergedAt
+                ReleaseName  = $releaseName
+            }
         } else {
-            Write-Warning "PR #$prNumber in $repo is not merged or missing 'mergedBy'"
+            Write-Warning "PR #$prNumber in $repo is not merged or missing fields"
         }
     } catch {
         Write-Warning "Failed to fetch PR info for $repo/#$prNumber"
@@ -41,7 +47,10 @@ foreach ($pr in $prList) {
 if ($mergedByList.Count -eq 0) {
     $summary = "No merged PRs found"
 } else {
-    $summary = $mergedByList -join "<br>"
+    $sorted = $mergedByList | Sort-Object MergedAt -Descending
+    $summary = ($sorted | ForEach-Object {
+        "<a href='$($_.Url)'>PR #$($_.Number)</a>: Release name: <b>$($_.ReleaseName)</b><br>By: <b>$($_.Owner)</b> on $($_.MergedAt.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss'))"
+    }) -join "<br><br>"
 }
 
 Write-Host "Merged PR summary:"
