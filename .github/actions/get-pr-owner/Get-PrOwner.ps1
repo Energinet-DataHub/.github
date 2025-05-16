@@ -21,6 +21,7 @@ $mergedByList = @()
 foreach ($pr in $prList) {
     $repo = $pr.repo
     $prNumber = $pr.pr_number
+    $releaseName = $pr.release_name
 
     Write-Host "Checking PR #$prNumber in $repo..."
 
@@ -32,7 +33,7 @@ foreach ($pr in $prList) {
         $localDate = $utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
 
         if ($owner) {
-            $mergedByList += "<a href='$url'>PR #$($prInfo.number)</a><br>By: <b>$owner</b> on $localDate"
+            $mergedByList += "<a href='$url'>PR #$($prInfo.number)</a>: Release name: <b>$releaseName</b><br>By: <b>$owner</b> on $localDate"
         } else {
             Write-Warning "PR #$prNumber in $repo is not merged or missing 'mergedBy'"
         }
