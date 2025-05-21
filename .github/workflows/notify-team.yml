@@ -63,7 +63,7 @@ jobs:
       - name: Get PR Owner(s)
         id: pr_owner
         if: ${{ inputs.pr_list != '' }}
-        uses: Energinet-DataHub/.github/.github/actions/get-pr-owner@v14
+        uses: Energinet-DataHub/.github/.github/actions/get-pr-owner@admmu/3044-change-to-centeral-eu-time
         with:
           github_token: ${{ steps.generate_token.outputs.token }}
           pr_list: ${{ inputs.pr_list }}
