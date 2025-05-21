@@ -48,8 +48,10 @@ if ($mergedByList.Count -eq 0) {
     $summary = "No merged PRs found"
 } else {
     $sorted = $mergedByList | Sort-Object MergedAt -Descending
+    $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Central Europe Standard Time")
     $summary = ($sorted | ForEach-Object {
-        "<a href='$($_.Url)'>PR #$($_.Number)</a>: Release name: <b>$($_.ReleaseName)</b><br>By: <b>$($_.Owner)</b> on $($_.MergedAt.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss'))"
+        $localTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($_.MergedAt, $timeZone).ToString('yyyy-MM-dd HH:mm:ss')
+        "<a href='$($_.Url)'>PR #$($_.Number)</a>: Release name: <b>$($_.ReleaseName)</b><br>By: <b>$($_.Owner)</b> on $localTime"
     }) -join "<br><br>"
 }
 
