@@ -75,7 +75,7 @@ runs:
       id: run_tests
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ (startsWith(inputs.max_concurrent_processes, 'empty') && '-m') || ('-m:' + inputs.max_concurrent_processes) }} ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ (startsWith(inputs.max_concurrent_processes, 'empty') && '-m') || format('-m:{0}', inputs.max_concurrent_processes) }} ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
