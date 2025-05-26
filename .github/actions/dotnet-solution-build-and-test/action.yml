@@ -36,7 +36,7 @@ inputs:
   # Documentation: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test#--maxcpucount
   max_concurrent_processes:
     required: false
-    default: "" # Microsoft documentation states this is '1' by default, but it seems to be '' (empty) in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially.
+    default: "0" # Microsoft documentation states this is '1' by default, but it seems to be '0' in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially.
 
 runs:
   using: composite
