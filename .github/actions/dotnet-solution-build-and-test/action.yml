@@ -36,7 +36,7 @@ inputs:
   # Documentation: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test#--maxcpucount
   max_concurrent_processes:
     required: false
-    default: "0" # Microsoft documentation states this is '1' by default, but it seems to be '0' in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially.
+    default: "empty" # Microsoft documentation states this is '1' by default, but it seems to be '' (empty) in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially.
 
 runs:
   using: composite
@@ -75,7 +75,7 @@ runs:
       id: run_tests
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test -m:${{ inputs.max_concurrent_processes }} ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test ${{ (startsWith(inputs.max_concurrent_processes, 'empty') && '-m') || '-m:inputs.max_concurrent_processes' }} ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
