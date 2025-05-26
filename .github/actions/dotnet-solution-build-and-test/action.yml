@@ -31,6 +31,12 @@ inputs:
   publish_test_report:
     required: false
     default: "false"
+  # Use 'max_concurrent_processes' to limit the number of test processes running in parallel.
+  # Inspired by: https://github.com/nunit/nunit3-vs-adapter/discussions/950#discussioncomment-2073842
+  # Documentation: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test#--maxcpucount
+  max_concurrent_processes:
+    required: false
+    default: "" # Microsoft documentation states this is '1' by default, but it seems to be '' (empty) in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially.
 
 runs:
   using: composite
@@ -69,7 +75,7 @@ runs:
       id: run_tests
       run: |
         dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test -m:1 ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        dotnet test -m:${{ inputs.max_concurrent_processes }} ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/composite@v2
