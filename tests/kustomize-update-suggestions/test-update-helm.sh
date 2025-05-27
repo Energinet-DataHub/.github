@@ -21,6 +21,8 @@ reset_resources() {
     echo "resources: $RESOURCES"
     echo "script: $SCRIPT"
     echo "tmp: $TMP"
+    echo "contents of $RESOURCES:"
+    ls -l "$RESOURCES"
 }
 
 reset_resources
