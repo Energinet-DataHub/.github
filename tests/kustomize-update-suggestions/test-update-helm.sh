@@ -10,7 +10,7 @@ TMP=/tmp/logs
 export PATH="$BASE/mocks:$PATH"
 
 reset_resources() {
-    find "$TMP" -type f -not -name .gitignore -delete
+    find "$TMP" -type f -not -name .keep -delete
     rm -rf "$RESOURCES" 2>/dev/null
     mkdir -p "$RESOURCES"
     cp -r "$FIXTURES" "$RESOURCES"
