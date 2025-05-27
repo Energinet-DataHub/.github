@@ -16,8 +16,10 @@ reset_resources() {
     rm -rf "$RESOURCES" 2>/dev/null
     mkdir -p "$RESOURCES"
     cp -r "$FIXTURES" "$RESOURCES"
-    echo "script: $SCRIPT"
+    echo "fixtures: $FIXTURES"
     echo "resources: $RESOURCES"
+    echo "script: $SCRIPT"
+    echo "tmp: $TMP"
 }
 
 reset_resources
