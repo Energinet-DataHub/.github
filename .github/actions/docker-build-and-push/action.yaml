@@ -10,7 +10,7 @@ inputs:
     description: The full image name excluding ghcr.io/<my_container>
     required: true
   image-tag:
-    description: "The image tag"
+    description: The image tag
     required: true
   docker-context:
     description: The path for the docker build context, defaults to '.'
