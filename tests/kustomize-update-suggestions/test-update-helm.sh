@@ -3,7 +3,7 @@
 set +e
 
 BASE=$(dirname "$0")
-SCRIPT="$BASE/../../actions/kustomize-update-suggestions/update-helm.sh"
+SCRIPT="$BASE/../../.github/actions/kustomize-update-suggestions/update-helm.sh"
 FIXTURES="$BASE/fixtures"
 RESOURCES="/tmp/fixtures"
 TMP=/tmp/logs
