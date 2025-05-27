@@ -31,10 +31,12 @@ reset_resources() {
 
 reset_resources
 echo "Test cert-manager is marked as updatable"
-cat << EOF >"$TMP/expected/tmp/logs/expected"
+cat << EOF >"$TMP/expected"
 + yq -ie '(.helmCharts[] | select(.name == "cert-manager") | .version) = "3.0.0"' /tmp/fixtures/fixtures/kustomization.yaml
 + yq -ie '(.helmCharts[] | select(.name == "thanos") | .version) = "2.0.0"' /tmp/fixtures/fixtures/kustomization.yaml
 EOF
+echo "contents of $TMP/expected/tmp/fixtures/fixtures:"
+ls -l "$TMP/expected/tmp/fixtures/fixtures"
 bash "$SCRIPT" "$RESOURCES" /dev/null >"$TMP/out" 2>&1
 diff "$TMP/expected" "$TMP/out" || exit 1
 
