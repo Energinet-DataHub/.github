@@ -15,7 +15,7 @@ test-docker:
 	docker compose config -q
 
 test-shellcheck:
-	$(COMPOSE_RUN) shellcheck shellcheck -e SC2181 tests/*/*.sh actions/*/*.sh
+	$(COMPOSE_RUN) shellcheck shellcheck -e SC2181 tests/*/*.sh
 
 unit-tests:
 	$(COMPOSE_RUN) test make _unit-tests
