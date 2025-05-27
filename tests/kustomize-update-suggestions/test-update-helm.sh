@@ -11,6 +11,7 @@ FIXTURES="$BASE/fixtures"
 RESOURCES="/tmp/fixtures"
 TMP=/tmp/logs
 export PATH="$BASE/mocks:$PATH"
+echo "path: $PATH"
 
 reset_resources() {
     find "$TMP" -type f -not -name .keep -delete
