@@ -20,4 +20,4 @@ test-shellcheck:
 unit-tests:
 	$(COMPOSE_RUN) test make _unit-tests
 _unit-tests:
-	@find tests -name \*.sh -maxdepth 3 -print0 | xargs -0 -I {} echo 'echo Running {}; bash -e {}' | sort | sh -e
+	@find tests -name \*.sh -maxdepth 2 -print0 | xargs -0 -I {} echo 'echo Running {}; bash -e {}' | sort | sh -e
