@@ -8,10 +8,10 @@ inputs:
     default: .
   path-excludes:
     description: Paths to exclude from scanning
-    default: ''
+    default: ""
   type:
     description: Type of updates to suggest.
-    default: helm
+    default: "helm"
   patch:
     description: The name of the created artifact that contains suggestions in a patch file.
   tag-configuration:
