@@ -2,7 +2,7 @@
 
 set +e
 
-echo "$0"
+echo "argument 0: $0"
 BASE=$(dirname "$0")
 SCRIPT="$BASE/../../actions/kustomize-update-suggestions/update-helm.sh"
 FIXTURES="$BASE/fixtures"
