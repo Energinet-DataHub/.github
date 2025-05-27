@@ -3,6 +3,7 @@
 set +e
 
 echo "argument 0: $0"
+echo "pwd: $(pwd)"
 BASE=$(dirname "$0")
 SCRIPT="$BASE/../../actions/kustomize-update-suggestions/update-helm.sh"
 FIXTURES="$BASE/fixtures"
