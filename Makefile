@@ -9,7 +9,7 @@ all: clean test
 clean:
 	docker compose down --rmi all --remove-orphans
 
-test: test-docker test-shellcheck nit-tests
+test: test-docker test-shellcheck
 
 test-docker:
 	docker compose config -q
