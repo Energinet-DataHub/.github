@@ -23,6 +23,8 @@ reset_resources() {
     echo "tmp: $TMP"
     echo "contents of $FIXTURES:"
     ls -l "$FIXTURES"
+    echo "contents of $FIXTURES/fixtures:"
+    ls -l "$FIXTURES/fixtures"
     echo "contents of $RESOURCES:"
     ls -l "$RESOURCES"
 }
