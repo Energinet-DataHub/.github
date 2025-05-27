@@ -4,7 +4,7 @@ description: |
 
 inputs:
   image-name:
-    description: "The full image name excluding ghcr.io/<my_container>"
+    description: The full image name excluding ghcr.io/<my_container>
     required: true
   image-tag:
     description: The image tag
