@@ -17,6 +17,7 @@ reset_resources() {
     mkdir -p "$RESOURCES"
     cp -r "$FIXTURES" "$RESOURCES"
     echo "script: $SCRIPT"
+    echo "resources: $RESOURCES"
 }
 
 reset_resources
