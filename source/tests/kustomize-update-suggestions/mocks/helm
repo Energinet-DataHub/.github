@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ "$3" = "cert-manager" ]; then
+    echo "version: 3.0.0"
+else
+    echo "version: 2.0.0"
+fi

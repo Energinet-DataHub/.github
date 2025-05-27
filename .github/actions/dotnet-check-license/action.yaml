@@ -1,0 +1,109 @@
+name: Dotnet Check License
+
+description: Verifies only allowed licenses are in use
+
+inputs:
+  project-folder:
+    description: The project folder (not recommended, use a specific file), project file or solution file to check.
+    required: true
+  allowed-licenses-file:
+    description: |
+      The file containing the licenses allowed.
+      The contents should be a JSON array of strings. One for each valid license type.
+      Example:
+      ```json
+      [
+        "MIT",
+        "MS-EULA",
+        "Apache-2.0"
+      ]
+      ```
+    required: false
+    default: .allowed-licenses.json
+  license-mapping-file:
+    description: |
+      This file allows for mapping license URIs to license types.
+      Example:
+      ```json
+      {
+        "https://example.com/LICENSE.txt":"Apache-2.0"
+      }
+      ```
+    required: false
+  license-ignore-file:
+    description: |
+      This file allows for ignoring nuget packages.
+      Example:
+      ```json
+      [
+        "Nuget.Name"
+      ]
+      ```
+    required: false
+  license-override-file:
+    description: |
+      This file allows for overriding licenses for nuget packages.
+      Example:
+      ```json
+      [
+        {
+          "Id": "MockQueryable.NSubstitute",
+          "Version": "7.0.3",
+          "License": "MIT"
+        }
+      ]
+      ```
+    required: false
+  tool-version:
+    default: 3.1.2
+    description: The version of the nuget-license tool to use
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
+    - name: Install nuget-license tool
+      shell: bash
+      run: dotnet tool install --global nuget-license --version ${{ inputs.tool-version }}
+
+    - name: Add mapping argument
+      shell: bash
+      if: inputs.license-mapping-file
+      run: echo "ARGUMENTS=--licenseurl-to-license-mappings ${{ inputs.license-mapping-file }}" | tee -a $GITHUB_ENV
+
+    - name: Add ignore argument
+      shell: bash
+      if: inputs.license-ignore-file
+      run: |
+        echo "ARGUMENTS=--ignored-packages ${{ inputs.license-ignore-file }} ${{ env.ARGUMENTS }}" | tee -a $GITHUB_ENV
+
+        echo '### Ignored NuGet packages:' >> $GITHUB_STEP_SUMMARY
+        jq -r '.[]' < '${{ inputs.license-ignore-file }}' | xargs -I {} echo '- {}' >> $GITHUB_STEP_SUMMARY
+
+    - name: Add override argument
+      shell: bash
+      if: inputs.license-override-file
+      run: echo "ARGUMENTS=--override-package-information ${{ inputs.license-override-file }} ${{ env.ARGUMENTS }}" | tee -a $GITHUB_ENV
+
+    - name: Auto-correct project argument
+      shell: bash
+      run: |
+        if [ -d '${{ inputs.project-folder }}' ]; then
+          file=$(find '${{ inputs.project-folder }}' \( -iname "*.csproj" -o -iname "*.sln" \) | head -n1)
+          if [ -z "$file" ]; then
+            echo "::error::No project was found in '${{ inputs.project-folder }}'."
+            exit 1
+          fi
+          echo "PROJECT=$file" | tee -a $GITHUB_ENV
+        else
+          echo "PROJECT=${{ inputs.project-folder }}" | tee -a $GITHUB_ENV
+        fi
+
+    - name: Run license check
+      shell: bash
+      run: |
+        dotnet restore ${{ env.PROJECT }}
+        ~/.dotnet/tools/nuget-license --input ${{ env.PROJECT }} --allowed-license-types ${{ inputs.allowed-licenses-file }} ${{ env.ARGUMENTS }}
