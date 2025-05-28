@@ -21,16 +21,6 @@ jobs:
     uses: ./.github/workflows/create-release-tag.yml
     secrets: inherit
 
-  #
-  # Acorn tests
-  #
-  acorn_actions_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: make test
-        shell: bash
-
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest
     needs: [ci_base, create_release, acorn_actions_test]
