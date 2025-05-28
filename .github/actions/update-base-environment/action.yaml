@@ -74,7 +74,7 @@ runs:
 
     - name: Resolve version
       if: inputs.image-version == ''
-      uses: Energinet-DataHub/acorn-actions/actions/docker-image-version@v1 # TODO: This needs to be changed
+      uses: Energinet-DataHub/.github/.github/actions/docker-image-version
 
     - name: Override version
       if: inputs.image-version != ''
