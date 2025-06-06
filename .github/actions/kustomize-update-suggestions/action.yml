@@ -1,0 +1,102 @@
+name: Kustomize update suggestions
+description: |
+  Can scan various parts of kustomization files and suggest updates
+
+inputs:
+  path:
+    description: A path to scan in
+    default: .
+  path-excludes:
+    description: Paths to exclude from scanning
+    default: ""
+  type:
+    description: Type of updates to suggest.
+    default: helm
+  patch:
+    description: The name of the created artifact that contains suggestions in a patch file.
+  tag-configuration:
+    description: The configuration for choosing docker images
+    default: |
+      alpine:3
+
+runs:
+  using: composite
+  steps:
+    - name: Validate Path
+      shell: bash
+      env:
+        TARGET: ${{ inputs.path }}
+      run: |
+        if [ ! -d "$TARGET" ]; then
+          echo "::error title=Invalid path::Invalid path '$TARGET', directory does not exist."
+          exit 1
+        fi
+
+    - name: Validate Type
+      shell: bash
+      env:
+        TYPE: ${{ inputs.type }}
+      run: |
+        ALLOWED_TYPES=("helm" "images")
+        if [[ ! " ${ALLOWED_TYPES[@]} " =~ " ${TYPE} " ]]; then
+          echo "::error title=Invalid type::Invalid type '${TYPE}'. Allowed values are: ${ALLOWED_TYPES[*]}"
+          exit 1
+        fi
+
+    - name: Validate Patch
+      shell: bash
+      env:
+        TARGET: ${{ inputs.patch }}
+      run: |
+        if [ -f "$TARGET" ]; then
+          echo "::error title=Invalid path::Invalid path '$TARGET', file already exists."
+          exit 1
+        fi
+
+    - name: Prepare configurations
+      shell: bash
+      env:
+        TAGGING: ${{ inputs.tag-configuration }}
+        EXCLUDES: ${{ inputs.path-excludes }}
+        PATCH: ${{ inputs.patch }}
+      run: |
+        tagging=$(mktemp)
+        printf '%s\n' "$TAGGING" | tee $tagging
+        echo "tagging=$tagging" | tee -a $GITHUB_ENV
+
+        excludes=$(mktemp)
+        printf '%s\n' "$EXCLUDES" | tee $excludes
+        echo "excludes=$excludes" | tee -a $GITHUB_ENV
+
+        echo "patch=${PATCH:-${{ inputs.type }}.patch}" | tee -a $GITHUB_ENV
+
+    - name: Generate
+      shell: bash
+      run: |
+        echo "::group::Logs"
+        ${{ github.action_path }}/update-${{ inputs.type }}.sh ${{ inputs.path }} ${{ env.excludes }} ${{ env.tagging }}
+        echo "::endgroup::"
+
+    - name: Create patch
+      shell: bash
+      run: |
+        git add ${{ inputs.path }}
+        git diff --cached --ignore-blank-lines --ignore-space-at-eol ${{ inputs.path }} | tee ${{ env.patch }}
+
+    - name: Print summary
+      shell: bash
+      run: |
+        {
+          echo "<details>"
+          echo "<summary>View $(wc -l < "${{ env.patch }}") patch lines</summary>"
+          echo "<pre>"
+          cat "${{ env.patch }}" | grep -E "\S+" || true
+          echo "</pre>"
+          echo "</details>"
+        } >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.patch }}
+        path: ${{ env.patch }}

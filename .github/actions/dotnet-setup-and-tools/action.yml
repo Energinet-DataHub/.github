@@ -36,7 +36,7 @@ inputs:
   azurite_version:
     description: Install specified Azurite version
     required: false
-    default: 3.33.0
+    default: 3.34.0
   azure_functions_core_tools_version:
     description: Install specified Azure Functions Core Tools version
     required: false

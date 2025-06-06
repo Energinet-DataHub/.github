@@ -1,0 +1,196 @@
+name: Update base environment
+description: ""
+
+inputs:
+  configuration:
+    description: The configuration file
+    required: false
+  configurations:
+    description: A newline separated list of configuration files
+    required: false
+  github-app-id:
+    description: A github app id.
+    required: true
+  github-app-private-key:
+    description: A github app private key.
+    required: true
+  branch:
+    description: The branch in the environment repository to target.
+    required: true
+    default: ${{ github.event_name == 'push' && github.ref_name == 'main' && 'main' || github.event.pull_request.head.ref }}
+  repository:
+    description: The environment repository
+    required: false
+    default: ${{ github.repository_owner }}/eo-base-environment
+  dry_run:
+    description: Perform all actions but without committing changes
+    required: false
+    default: "false"
+  registry-push:
+    description: Push local image reference to its configured registry
+    required: false
+    default: "false"
+  image-version:
+    description: Override the image version to be this given version instead
+    required: false
+    default: ""
+  allow-changeless-verify-push-skip:
+    description: Allow skipping verification of push when no changes have been made
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Verify configuration(s)
+      shell: bash
+      if: inputs.configuration == '' && inputs.configurations == ''
+      run: exit 1
+
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Generate token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.github-app-id }}
+        private-key: ${{ inputs.github-app-private-key }}
+        owner: ${{ github.repository_owner }}
+
+    - name: Checkout environment repository
+      uses: actions/checkout@v4
+      with:
+        path: base
+        repository: ${{ inputs.repository }}
+        token: ${{ steps.generate-token.outputs.token }}
+        ref: main
+
+    - name: Use correct branch
+      working-directory: base
+      shell: bash
+      if: ${{ inputs.branch != 'main' }}
+      run: git fetch && git checkout ${{ inputs.branch }} 2>/dev/null || git checkout -b ${{ inputs.branch }}
+
+    - name: Resolve version
+      if: inputs.image-version == ''
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = 'push' ] && [ "${{ github.ref_name }}" = 'main' ]; then
+          version="$(git rev-parse --short ${{ github.sha }})"
+        elif [ "${{ github.event_name }}" = 'pull_request' ]; then
+          version="${{ github.sha }}-pr.${{ github.event.pull_request.number }}"
+        else
+          >&2 echo "::error:: Unsupported invocation: ${{ github.event_name }}"
+          exit 1
+        fi
+        echo "version=${version}" >> $GITHUB_OUTPUT
+        echo "version=${version}" >> $GITHUB_ENV
+        echo "version: $version"
+
+    - name: Override version
+      if: inputs.image-version != ''
+      shell: bash
+      run: echo "version=${{ inputs.image-version }}" | tee -a $GITHUB_ENV
+
+    - name: Update references
+      shell: bash
+      working-directory: base
+      if: inputs.configuration != ''
+      run: |
+        configuration="../${{ inputs.configuration }}"
+        repo=$(yq '.repo' < "$configuration")
+        name=$(yq '.name' < "$configuration")
+
+        image="$repo/$name:${{ env.version }}"
+        yq -ojson .references < "$configuration" | jq -rc '.[]' | while read -r reference; do
+          file=$(jq -r -c '.file' <<< "$reference")
+          path=$(jq -r -c '.path' <<< "$reference")
+          echo yq -ie "'($path) = \"$image\"'" "$file" | bash -x
+        done
+
+    - name: Update multiple references
+      shell: bash
+      working-directory: base
+      if: inputs.configurations != ''
+      env:
+        LIST: ${{ inputs.configurations }}
+      run: |
+        while read file; do
+          [ -z "$file" ] && continue
+          configuration="../$file"
+          repo=$(yq '.repo' < "$configuration")
+          name=$(yq '.name' < "$configuration")
+
+          image="$repo/$name:${{ env.version }}"
+          yq -ojson .references < "$configuration" | jq -rc '.[]' | while read -r reference; do
+            file=$(jq -r -c '.file' <<< "$reference")
+            path=$(jq -r -c '.path' <<< "$reference")
+            echo yq -ie "'($path) = \"$image\"'" "$file" | bash -x
+          done
+        done <<< $LIST
+
+    - name: Log in to the Container registry
+      if: inputs.registry-push == 'true'
+      uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+        ecr: false
+
+    - name: Push image reference to Container registry
+      shell: bash
+      working-directory: base
+      if: inputs.configuration != '' && inputs.registry-push == 'true'
+      run: |
+        configuration="../${{ inputs.configuration }}"
+        repo=$(yq '.repo' < "$configuration")
+        name=$(yq '.name' < "$configuration")
+        image="$repo/$name:${{ env.version }}"
+
+        docker push "$image"
+
+    - name: Push multiple image references to Container registry
+      shell: bash
+      working-directory: base
+      if: inputs.configurations != '' && inputs.registry-push == 'true'
+      env:
+        LIST: ${{ inputs.configurations }}
+      run: |
+        while read file; do
+          [ -z "$file" ] && continue
+          configuration="../$file"
+          repo=$(yq '.repo' < "$configuration")
+          name=$(yq '.name' < "$configuration")
+          image="$repo/$name:${{ env.version }}"
+
+          docker push "$image"
+        done <<< $LIST
+
+    - name: Set CHANGES_MADE
+      shell: bash
+      working-directory: base
+      run: |
+        CHANGES_MADE=$(git diff --quiet > /dev/null 2>&1 && echo "false" || echo "true")
+
+        echo "CHANGES_MADE=${CHANGES_MADE}" | tee -a $GITHUB_ENV
+
+    - name: Commit changes
+      id: commit
+      if: ${{ inputs.dry_run != 'true' }}
+      uses: EndBug/add-and-commit@v9
+      with:
+        fetch: true
+        message: Use ${{ env.version }}
+        new_branch: ${{ github.event_name == 'push' && github.ref_name == 'main' && 'main' || inputs.branch }}
+        push: --force-with-lease --set-upstream origin ${{ github.event_name == 'push' && github.ref_name == 'main' && 'main' || inputs.branch }}
+        default_author: github_actions
+        cwd: base
+
+    - name: Verify changes were pushed
+      shell: bash
+      if: ${{ inputs.dry_run == 'false' && steps.commit.outputs.pushed == 'false' && (inputs.allow-changeless-verify-push-skip == 'false' || env.CHANGES_MADE == 'true') }}
+      run: |
+        echo "::error::Nothing was committed or pushed"
+        exit 1
