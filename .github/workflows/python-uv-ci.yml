@@ -120,10 +120,10 @@ jobs:
           issue-number: ${{ github.event.number }}
 
   #
-  # Test Packages
+  # Test Packages and Create Prerelease
   #
   ci_test:
-    name: Test Packages
+    name: Test Packages and Create Prerelease
     runs-on: ubuntu-24.04
     needs: [ci_matrix]
     # Environment is used when using OIDC to login and access the integration test environment
