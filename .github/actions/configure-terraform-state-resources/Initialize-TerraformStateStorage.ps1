@@ -126,7 +126,7 @@ function Initialize-TerraformStateStorage {
 
     Initialize-ResourceGroupIsCreated -ResourceGroupName $ResourceGroupName -Location $location
     Initialize-StorageAccountIsCreated -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName -Location $location
-    Initialize-ContainerIsCreated -StorageAccountName $StorageAccountName
+    Initialize-ContainerIsCreated -ContainerName $DomainNameShort -StorageAccountName $storageAccountName
 
     Initialize-StorageAccountRoleContributorIsAssigned `
         -StorageAccountName $StorageAccountName `
