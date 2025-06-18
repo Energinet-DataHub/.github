@@ -4,208 +4,218 @@ This action ensures that the landing zone contains a resource group, storage acc
 It also assigns the required permissions to the storage account.
 #>
 
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 function Initialize-TerraformStateStorage {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $EnvironmentShort,
-        [Parameter(Mandatory)]
-        [string]
-        $EnvironmentInstance,
-        [Parameter(Mandatory)]
-        [string]
-        $AzureSpnObjectId,
-        [Parameter(Mandatory)]
-        [string]
-        $AzureSubscriptionId
+        [Parameter(Mandatory)][string]$AzureSpnObjectId,
+        [Parameter(Mandatory)][string]$AzureSubscriptionId,
+        [Parameter()][string]$EnvironmentShort,
+        [Parameter()][string]$EnvironmentInstance,
+        [Parameter()][string]$ResourceGroupName,
+        [Parameter()][string]$StorageAccountName,
+        [Parameter()][string]$GroupRoleAssignments
     )
-    $location = "westeurope"
 
+    $location = "westeurope"
     $DomainNameShort = "tfs"
-    $TfStateNamingParts = $DomainNameShort, $EnvironmentShort, "we", $EnvironmentInstance
-    $ResourceGroupName = (, "rg" + $TfStateNamingParts) -Join "-"
-    $StorageAccountName = (, "st" + $TfStateNamingParts) -Join ""
+
+    # Derive names if not provided
+    if (-not $ResourceGroupName -or -not $StorageAccountName) {
+        if (-not $EnvironmentShort -or -not $EnvironmentInstance) {
+            Write-Error "Either ResourceGroupName and StorageAccountName OR EnvironmentShort and EnvironmentInstance must be provided."
+            exit 1
+        }
+        $TfStateNamingParts = $DomainNameShort, $EnvironmentShort, "we", $EnvironmentInstance
+        $ResourceGroupName = "rg-" + ($TfStateNamingParts -join "-")
+        $StorageAccountName = "st" + ($TfStateNamingParts -join "")
+    }
+
+    $scope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Storage/storageAccounts/$StorageAccountName"
 
     Initialize-ResourceGroupIsCreated -ResourceGroupName $ResourceGroupName -Location $location
+    Initialize-StorageAccountIsCreated -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName -Location $location
+    Initialize-ContainerIsCreated -StorageAccountName $StorageAccountName
 
-    Initialize-StorageAccountIsCreated -StorageAccountName $storageAccountName -ResourceGroupName $ResourceGroupName -Location $location
-
-    Initialize-ContainerIsCreated -ContainerName $DomainNameShort -StorageAccountName $storageAccountName
-
-    Initialize-StorageAccountRoleContributorIsAssigned -StorageAccountName $storageAccountName `
+    Initialize-StorageAccountRoleContributorIsAssigned `
+        -StorageAccountName $StorageAccountName `
         -PrincipalObjectId $AzureSpnObjectId `
         -PrincipalType "ServicePrincipal" `
         -Role "Storage Blob Data Contributor" `
-        -Scope "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+        -Scope $scope
 
-    Initialize-StorageAccountRetentionAndVersioning -StorageAccountName $storageAccountName -ResourceGroupName $ResourceGroupName -AzureSubscriptionId $AzureSubscriptionId
+    Initialize-StorageAccountRetentionAndVersioning `
+        -StorageAccountName $StorageAccountName `
+        -ResourceGroupName $ResourceGroupName `
+        -AzureSubscriptionId $AzureSubscriptionId
+
+    # Built-in environment-based group assignments
+    if ($EnvironmentShort) {
+        switch ($EnvironmentShort) {
+            "u" { $group = "SEC-G-Datahub-PlatformDevelopersAzure" }
+            "d" { $group = "SEC-A-Datahub-Test-001-Contributor-Controlplane" }
+            "t" { $group = "SEC-A-Datahub-PreProd-001-Contributor-Controlplane" }
+            "p" { $group = "SEC-A-Datahub-Prod-001-Contributor-Controlplane" }
+            default {
+                Write-Error "Unsupported environment short: $EnvironmentShort"
+                exit 1
+            }
+        }
+
+        $groupObjectId = az ad group show --group "$group" --query id -o tsv
+        if (-not $groupObjectId) {
+            Write-Error "Failed to resolve group object ID for $group"
+            exit 1
+        }
+
+        Assign-ADGroupRoles -GroupObjectId $groupObjectId -Role "Storage Blob Data Contributor" -Scope $scope
+    }
+
+    # Optional custom group assignments
+    if ($GroupRoleAssignments) {
+        try {
+            $assignments = $GroupRoleAssignments | ConvertFrom-Json
+            foreach ($a in $assignments) {
+                Assign-ADGroupRoles -GroupObjectId $a.object_id -Role $a.role -Scope $scope
+            }
+        } catch {
+            Write-Error "Invalid JSON format for GroupRoleAssignments. Ensure it's a JSON array with object_id and role fields."
+            throw $_
+        }
+    }
 }
 
 function Initialize-ResourceGroupIsCreated {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $ResourceGroupName,
-        [Parameter(Mandatory)]
-        [string]
-        $Location
+        [string]$ResourceGroupName,
+        [string]$Location
     )
 
-    $groupExists = az group exists --name $ResourceGroupName
-    if ($groupExists -eq "false") {
-        Write-Host "Resource group $ResourceGroupName for storing Terraform state will be created"
-        $response = az group create --name "$ResourceGroupName" `
-            --location "$Location" `
-            --query "properties.provisioningState" | ConvertFrom-Json
-
-        Write-Host "Resource group creation response is: $response"
-
+    if ((az group exists --name $ResourceGroupName) -eq "false") {
+        Write-Host "Creating resource group $ResourceGroupName"
+        $response = az group create --name $ResourceGroupName --location $Location --query "properties.provisioningState" | ConvertFrom-Json
         if ($response -ne "Succeeded") {
-            Write-Error "Failed to create resource group for storing Terraform state"
+            Write-Error "Failed to create resource group"
             exit 1
         }
-    }
-    else {
-        Write-Host "Resource group $ResourceGroupName for storing Terraform state already exists"
+    } else {
+        Write-Host "Resource group $ResourceGroupName already exists"
     }
 }
 
 function Initialize-StorageAccountIsCreated {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $StorageAccountName,
-        [Parameter(Mandatory)]
-        [string]
-        $ResourceGroupName,
-        [Parameter(Mandatory)]
-        [string]
-        $Location
+        [string]$StorageAccountName,
+        [string]$ResourceGroupName,
+        [string]$Location
     )
 
-    $storageAccountNameAvailable = az storage account check-name --name $StorageAccountName --query 'nameAvailable' | ConvertFrom-Json
-    if ($storageAccountNameAvailable -eq $true) {
-        Write-Host "Storage account $StorageAccountName for storing Terraform state will be created"
-        $response = az storage account create --name "$StorageAccountName" `
-            --resource-group "$ResourceGroupName" `
-            --location "$Location" `
-            --min-tls-version "TLS1_2" `
-            --sku "Standard_LRS" `
+    $available = az storage account check-name --name $StorageAccountName --query 'nameAvailable' | ConvertFrom-Json
+    if ($available) {
+        Write-Host "Creating storage account $StorageAccountName"
+        $response = az storage account create `
+            --name $StorageAccountName `
+            --resource-group $ResourceGroupName `
+            --location $Location `
+            --min-tls-version TLS1_2 `
+            --sku Standard_LRS `
             --allow-shared-key-access false `
             --allow-blob-public-access false `
             --query "provisioningState" | ConvertFrom-Json
 
-        Write-Host "Storage account creation response is: $response"
-
         if ($response -ne "Succeeded") {
-            Write-Error "Failed to create storage account for storing Terraform state"
+            Write-Error "Failed to create storage account"
             exit 1
         }
-    }
-    else {
-        Write-Host "Storage account $StorageAccountName for storing Terraform state already exists"
+    } else {
+        Write-Host "Storage account $StorageAccountName already exists"
     }
 }
 
 function Initialize-ContainerIsCreated {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $ContainerName,
-        [Parameter(Mandatory)]
-        [string]
-        $StorageAccountName
+        [string]$StorageAccountName
     )
 
-    $containerExists = az storage container exists --name "$ContainerName" `
-        --account-name "$StorageAccountName" `
-        --query "exists" --auth-mode login | ConvertFrom-Json
-
-    if ($containerExists -eq $false) {
-        Write-Host "Container $ContainerName for storing Terraform state will be created"
-        $response = az storage container create --name "$ContainerName" `
-            --account-name "$StorageAccountName" `
-            --auth-mode "login" `
-            --query "created" | ConvertFrom-Json
-
-        Write-Host "Container creation response is: $response"
-
-        if ($response -ne "true") {
-            Write-Error "Failed to create container for storing Terraform state"
+    $exists = az storage container exists --name "tfs" --account-name $StorageAccountName --auth-mode login --query "exists" | ConvertFrom-Json
+    if (-not $exists) {
+        Write-Host "Creating container 'tfs'"
+        $created = az storage container create --name "tfs" --account-name $StorageAccountName --auth-mode login --query "created" | ConvertFrom-Json
+        if (-not $created) {
+            Write-Error "Failed to create blob container"
             exit 1
         }
-    }
-    else {
-        Write-Host "Container $ContainerName for storing Terraform state already exists"
+    } else {
+        Write-Host "Container 'tfs' already exists"
     }
 }
 
 function Initialize-StorageAccountRoleContributorIsAssigned {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $StorageAccountName,
-        [Parameter(Mandatory)]
-        [string]
-        $PrincipalObjectId,
-        [Parameter(Mandatory)]
-        [string]
-        $PrincipalType,
-        [Parameter(Mandatory)]
-        [string]
-        $Role,
-        [Parameter(Mandatory)]
-        [string]
-        $Scope
+        [string]$StorageAccountName,
+        [string]$PrincipalObjectId,
+        [string]$PrincipalType,
+        [string]$Role,
+        [string]$Scope
     )
 
-    $roleAssignmentExists = az role assignment list --assignee "$PrincipalObjectId" `
-        --role "$Role" `
-        --scope "$Scope" `
-        --query "[].principalId" | ConvertFrom-Json
-
-    if ($null -eq $roleAssignmentExists) {
-        Write-Host "Role $Role will be assigned to $PrincipalObjectId on scope $Scope"
-        $response = az role assignment create --assignee-object-id "$PrincipalObjectId" `
-            --assignee-principal-type "$PrincipalType" `
-            --role "$Role" `
-            --scope "$Scope" `
-            --query "principalId" | ConvertFrom-Json
-
-        if ($response -ne $PrincipalObjectId) {
-            Write-Error "Failed to assign role $Role to $PrincipalObjectId on scope $Scope"
+    $exists = az role assignment list --assignee "$PrincipalObjectId" --role "$Role" --scope "$Scope" --query "[].principalId" | ConvertFrom-Json
+    if (-not $exists) {
+        Write-Host "Assigning $Role to $PrincipalObjectId"
+        $assigned = az role assignment create --assignee-object-id $PrincipalObjectId --assignee-principal-type $PrincipalType --role $Role --scope $Scope --query "principalId" | ConvertFrom-Json
+        if ($assigned -ne $PrincipalObjectId) {
+            Write-Error "Failed to assign role"
             exit 1
         }
-    }
-    else {
-        Write-Host "Role $Role is already assigned to $PrincipalObjectId on scope $Scope"
+    } else {
+        Write-Host "$Role already assigned to $PrincipalObjectId"
     }
 }
 
 function Initialize-StorageAccountRetentionAndVersioning {
     param(
-        [Parameter(Mandatory)]
-        [string]
-        $StorageAccountName,
-        [Parameter(Mandatory)]
-        [string]
-        $ResourceGroupName,
-        [Parameter(Mandatory)]
-        [string]
-        $AzureSubscriptionId
+        [string]$StorageAccountName,
+        [string]$ResourceGroupName,
+        [string]$AzureSubscriptionId
     )
 
-    $currentPolicy = az storage account blob-service-properties show --account-name "$StorageAccountName" --resource-group "$ResourceGroupName" --subscription "$AzureSubscriptionId" | ConvertFrom-Json
+    $policy = az storage account blob-service-properties show `
+        --account-name $StorageAccountName `
+        --resource-group $ResourceGroupName `
+        --subscription $AzureSubscriptionId | ConvertFrom-Json
 
-    if ($null -eq $currentPolicy.isVersioningEnabled || $null -eq $currentPolicy.deleteRetentionPolicy || $false -eq $currentPolicy.deleteRetentionPolicy.enabled) {
-        Write-Host "Versioning and retention will be enabled for storage account $StorageAccountName"
-        # Retention must be larger than restore days, otherwise the restore policy will not be applied
-        # 22 is the default datahub retention period
-        az storage account blob-service-properties update --enable-delete-retention true --enable-versioning true --enable-change-feed true `
-            --enable-container-delete-retention true --container-delete-retention-days 23 --delete-retention-days 23 --restore-days 22 --change-feed-days 23 `
-            --enable-restore-policy true -n "$StorageAccountName" -g "$ResourceGroupName" --subscription "$AzureSubscriptionId"
+    if (-not $policy.isVersioningEnabled -or -not $policy.deleteRetentionPolicy -or -not $policy.deleteRetentionPolicy.enabled) {
+        Write-Host "Enabling retention + versioning for $StorageAccountName"
+        az storage account blob-service-properties update `
+            --enable-delete-retention true `
+            --enable-versioning true `
+            --enable-change-feed true `
+            --enable-container-delete-retention true `
+            --container-delete-retention-days 23 `
+            --delete-retention-days 23 `
+            --restore-days 22 `
+            --enable-restore-policy true `
+            --account-name $StorageAccountName `
+            --resource-group $ResourceGroupName `
+            --subscription $AzureSubscriptionId | Out-Null
+    } else {
+        Write-Host "Retention + versioning already enabled"
     }
-    else {
-        Write-Host "Versioning and retention are already enabled for storage account $StorageAccountName"
+}
+
+function Assign-ADGroupRoles {
+    param(
+        [string]$GroupObjectId,
+        [string]$Role,
+        [string]$Scope
+    )
+
+    $exists = az role assignment list --assignee $GroupObjectId --role $Role --scope $Scope --query "[].principalId" | ConvertFrom-Json
+    if (-not $exists) {
+        Write-Host "Assigning $Role to group $GroupObjectId"
+        az role assignment create --assignee-object-id $GroupObjectId --role $Role --scope $Scope | Out-Null
+    } else {
+        Write-Host "$Role already assigned to group $GroupObjectId"
     }
 }

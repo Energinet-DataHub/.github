@@ -3,7 +3,7 @@ description: Ensures that a storage account and container are created for storin
 
 inputs:
   azure_spn_id:
-    required: true
+    required: false
     description: Id of the SPN used to deploy the infrastructure
   azure_spn_object_id:
     required: true
@@ -12,19 +12,29 @@ inputs:
     required: true
     description: Subscription that the infrastructure code is deployed into.
   azure_tenant_id:
-    required: true
+    required: false
     description: Tenant that the infrastructure code is deployed into.
   environment_instance:
-    required: true
+    required: false
     description: Environment instance that the infrastructure code is deployed into.
   environment_short:
-    required: true
+    required: false
     description: Shortest name for environment  (i.ex. dev)
+  resource_group_name:
+    required: false
+    description: Name of the resource group (if not derived)
+  storageaccount_name:
+    required: false
+    description: Name of the storage account (if not derived)
+  group_role_assignments:
+    required: false
+    description: JSON array of group object ID and role pairs
 
 runs:
   using: composite
   steps:
-    - name: Az CLI login
+    - name: Azure Login (Optional)
+      if: ${{ inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' }}
       uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure_spn_id }}
@@ -36,7 +46,10 @@ runs:
       run: |
         . ${{ github.action_path }}/Initialize-TerraformStateStorage.ps1
 
-        Initialize-TerraformStateStorage -EnvironmentShort ${{ inputs.environment_short }} `
-                                         -EnvironmentInstance ${{ inputs.environment_instance }} `
-                                         -AzureSpnObjectId ${{ inputs.azure_spn_object_id }} `
-                                         -AzureSubscriptionId ${{ inputs.azure_subscription_id }} `
+        Initialize-TerraformStateStorage `  -AzureSpnObjectId "${{ inputs.azure_spn_object_id }}" `
+                                            -AzureSubscriptionId "${{ inputs.azure_subscription_id }}" `
+                                            -EnvironmentShort "${{ inputs.environment_short }}" `
+                                            -EnvironmentInstance "${{ inputs.environment_instance }}" `
+                                            -ResourceGroupName "${{ inputs.resource_group_name }}" `
+                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `
+                                            -GroupRoleAssignments "${{ inputs.group_role_assignments }}"
