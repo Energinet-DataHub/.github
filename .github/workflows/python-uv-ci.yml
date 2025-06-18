@@ -123,7 +123,7 @@ jobs:
   # Test Packages and Create Prerelease
   #
   ci_test:
-    name: Test Packages and Create Prerelease
+    name: Create Prerelease and Test Packages
     runs-on: ubuntu-24.04
     needs: [ci_matrix]
     # Environment is used when using OIDC to login and access the integration test environment
