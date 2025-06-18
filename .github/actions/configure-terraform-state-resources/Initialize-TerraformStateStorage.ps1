@@ -7,6 +7,83 @@ It also assigns the required permissions to the storage account.
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
+function Initialize-ResourceGroupIsCreated {
+    param(
+        [string]$ResourceGroupName,
+        [string]$Location
+    )
+
+    $exists = az group exists --name $ResourceGroupName | ConvertFrom-Json
+    if (-not $exists) {
+        az group create --name $ResourceGroupName --location $Location | Out-Null
+    }
+}
+
+function Initialize-StorageAccountIsCreated {
+    param(
+        [string]$StorageAccountName,
+        [string]$ResourceGroupName,
+        [string]$Location
+    )
+
+    $exists = az storage account show --name $StorageAccountName --resource-group $ResourceGroupName --query "name" -o tsv 2>$null
+    if (-not $exists) {
+        az storage account create `
+            --name $StorageAccountName `
+            --resource-group $ResourceGroupName `
+            --location $Location `
+            --sku Standard_LRS `
+            --kind StorageV2 `
+            --enable-hierarchical-namespace true `
+            | Out-Null
+    }
+}
+
+function Initialize-ContainerIsCreated {
+    param(
+        [string]$StorageAccountName
+    )
+
+    $key = az storage account keys list --account-name $StorageAccountName --query "[0].value" -o tsv
+    $exists = az storage container exists --account-name $StorageAccountName --account-key $key --name "tfstate" --query "exists" -o tsv
+
+    if ($exists -ne "true") {
+        az storage container create --account-name $StorageAccountName --account-key $key --name "tfstate" | Out-Null
+    }
+}
+
+function Initialize-StorageAccountRoleContributorIsAssigned {
+    param(
+        [string]$StorageAccountName,
+        [string]$PrincipalObjectId,
+        [string]$PrincipalType,
+        [string]$Role,
+        [string]$Scope
+    )
+
+    $exists = az role assignment list --assignee-object-id $PrincipalObjectId --role $Role --scope $Scope --query "[].principalId" | ConvertFrom-Json
+    if (-not $exists) {
+        az role assignment create --assignee-object-id $PrincipalObjectId --role $Role --scope $Scope --assignee-principal-type $PrincipalType | Out-Null
+    }
+}
+
+function Initialize-StorageAccountRetentionAndVersioning {
+    param(
+        [string]$StorageAccountName,
+        [string]$ResourceGroupName,
+        [string]$AzureSubscriptionId
+    )
+
+    az storage account blob-service-properties update `
+        --account-name $StorageAccountName `
+        --resource-group $ResourceGroupName `
+        --subscription $AzureSubscriptionId `
+        --enable-versioning true `
+        --delete-retention-days 30 `
+        --enable-delete-retention true `
+        | Out-Null
+}
+
 function Initialize-TerraformStateStorage {
     param(
         [Parameter(Mandatory)][string]$AzureSpnObjectId,
