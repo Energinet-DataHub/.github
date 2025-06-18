@@ -21,18 +21,11 @@ function Initialize-TerraformStateStorage {
     $location = "westeurope"
     $DomainNameShort = "tfs"
 
-    # Derive names if not provided
-    if (-not $ResourceGroupName -or -not $StorageAccountName) {
-        if (-not $EnvironmentShort -or -not $EnvironmentInstance) {
-            Write-Error "Either ResourceGroupName and StorageAccountName OR EnvironmentShort and EnvironmentInstance must be provided."
-            exit 1
-        }
-        $TfStateNamingParts = $DomainNameShort, $EnvironmentShort, "we", $EnvironmentInstance
-        $ResourceGroupName = "rg-" + ($TfStateNamingParts -join "-")
-        $StorageAccountName = "st" + ($TfStateNamingParts -join "")
-    }
+    $names = Get-TerraformNaming -DomainNameShort $DomainNameShort -EnvironmentShort $EnvironmentShort -EnvironmentInstance $EnvironmentInstance -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName
+    $ResourceGroupName = $names.ResourceGroupName
+    $StorageAccountName = $names.StorageAccountName
 
-    $scope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Storage/storageAccounts/$StorageAccountName"
+    $scope = Get-TerraformScope -SubscriptionId $AzureSubscriptionId -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName
 
     Initialize-ResourceGroupIsCreated -ResourceGroupName $ResourceGroupName -Location $location
     Initialize-StorageAccountIsCreated -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName -Location $location
@@ -50,161 +43,89 @@ function Initialize-TerraformStateStorage {
         -ResourceGroupName $ResourceGroupName `
         -AzureSubscriptionId $AzureSubscriptionId
 
-    # Built-in environment-based group assignments
-    if ($EnvironmentShort) {
-        switch ($EnvironmentShort) {
-            "u" { $group = "SEC-G-Datahub-PlatformDevelopersAzure" }
-            "d" { $group = "SEC-A-Datahub-Test-001-Contributor-Controlplane" }
-            "t" { $group = "SEC-A-Datahub-PreProd-001-Contributor-Controlplane" }
-            "p" { $group = "SEC-A-Datahub-Prod-001-Contributor-Controlplane" }
-            default {
-                Write-Error "Unsupported environment short: $EnvironmentShort"
-                exit 1
-            }
-        }
-
-        $groupObjectId = az ad group show --group "$group" --query id -o tsv
-        if (-not $groupObjectId) {
-            Write-Error "Failed to resolve group object ID for $group"
-            exit 1
-        }
-
-        Assign-ADGroupRoles -GroupObjectId $groupObjectId -Role "Storage Blob Data Contributor" -Scope $scope
-    }
-
-    # Optional custom group assignments
-    if ($GroupRoleAssignments) {
-        try {
-            $assignments = $GroupRoleAssignments | ConvertFrom-Json
-            foreach ($a in $assignments) {
-                Assign-ADGroupRoles -GroupObjectId $a.object_id -Role $a.role -Scope $scope
-            }
-        } catch {
-            Write-Error "Invalid JSON format for GroupRoleAssignments. Ensure it's a JSON array with object_id and role fields."
-            throw $_
-        }
-    }
+    Grant-EnvironmentBasedGroupRoles -EnvironmentShort $EnvironmentShort -Scope $scope
+    Grant-CustomGroupRoles -GroupRoleAssignments $GroupRoleAssignments -Scope $scope
 }
 
-function Initialize-ResourceGroupIsCreated {
+function Get-TerraformNaming {
     param(
+        [string]$DomainNameShort,
+        [string]$EnvironmentShort,
+        [string]$EnvironmentInstance,
         [string]$ResourceGroupName,
-        [string]$Location
-    )
-
-    if ((az group exists --name $ResourceGroupName) -eq "false") {
-        Write-Host "Creating resource group $ResourceGroupName"
-        $response = az group create --name $ResourceGroupName --location $Location --query "properties.provisioningState" | ConvertFrom-Json
-        if ($response -ne "Succeeded") {
-            Write-Error "Failed to create resource group"
-            exit 1
-        }
-    } else {
-        Write-Host "Resource group $ResourceGroupName already exists"
-    }
-}
-
-function Initialize-StorageAccountIsCreated {
-    param(
-        [string]$StorageAccountName,
-        [string]$ResourceGroupName,
-        [string]$Location
-    )
-
-    $available = az storage account check-name --name $StorageAccountName --query 'nameAvailable' | ConvertFrom-Json
-    if ($available) {
-        Write-Host "Creating storage account $StorageAccountName"
-        $response = az storage account create `
-            --name $StorageAccountName `
-            --resource-group $ResourceGroupName `
-            --location $Location `
-            --min-tls-version TLS1_2 `
-            --sku Standard_LRS `
-            --allow-shared-key-access false `
-            --allow-blob-public-access false `
-            --query "provisioningState" | ConvertFrom-Json
-
-        if ($response -ne "Succeeded") {
-            Write-Error "Failed to create storage account"
-            exit 1
-        }
-    } else {
-        Write-Host "Storage account $StorageAccountName already exists"
-    }
-}
-
-function Initialize-ContainerIsCreated {
-    param(
         [string]$StorageAccountName
     )
 
-    $exists = az storage container exists --name "tfs" --account-name $StorageAccountName --auth-mode login --query "exists" | ConvertFrom-Json
-    if (-not $exists) {
-        Write-Host "Creating container 'tfs'"
-        $created = az storage container create --name "tfs" --account-name $StorageAccountName --auth-mode login --query "created" | ConvertFrom-Json
-        if (-not $created) {
-            Write-Error "Failed to create blob container"
+    if (-not $ResourceGroupName -or -not $StorageAccountName) {
+        if (-not $EnvironmentShort -or -not $EnvironmentInstance) {
+            Write-Error "Either ResourceGroupName and StorageAccountName OR EnvironmentShort and EnvironmentInstance must be provided."
             exit 1
         }
-    } else {
-        Write-Host "Container 'tfs' already exists"
+        $parts = $DomainNameShort, $EnvironmentShort, "we", $EnvironmentInstance
+        $ResourceGroupName = "rg-" + ($parts -join "-")
+        $StorageAccountName = "st" + ($parts -join "")
     }
+
+    return @{ ResourceGroupName = $ResourceGroupName; StorageAccountName = $StorageAccountName }
 }
 
-function Initialize-StorageAccountRoleContributorIsAssigned {
+function Get-TerraformScope {
     param(
-        [string]$StorageAccountName,
-        [string]$PrincipalObjectId,
-        [string]$PrincipalType,
-        [string]$Role,
+        [string]$SubscriptionId,
+        [string]$ResourceGroupName,
+        [string]$StorageAccountName
+    )
+    return "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Storage/storageAccounts/$StorageAccountName"
+}
+
+function Grant-EnvironmentBasedGroupRoles {
+    param(
+        [string]$EnvironmentShort,
         [string]$Scope
     )
 
-    $exists = az role assignment list --assignee "$PrincipalObjectId" --role "$Role" --scope "$Scope" --query "[].principalId" | ConvertFrom-Json
-    if (-not $exists) {
-        Write-Host "Assigning $Role to $PrincipalObjectId"
-        $assigned = az role assignment create --assignee-object-id $PrincipalObjectId --assignee-principal-type $PrincipalType --role $Role --scope $Scope --query "principalId" | ConvertFrom-Json
-        if ($assigned -ne $PrincipalObjectId) {
-            Write-Error "Failed to assign role"
+    if (-not $EnvironmentShort) { return }
+
+    switch ($EnvironmentShort) {
+        "u" { $group = "SEC-G-Datahub-PlatformDevelopersAzure" }
+        "d" { $group = "SEC-A-Datahub-Test-001-Contributor-Controlplane" }
+        "t" { $group = "SEC-A-Datahub-PreProd-001-Contributor-Controlplane" }
+        "p" { $group = "SEC-A-Datahub-Prod-001-Contributor-Controlplane" }
+        default {
+            Write-Error "Unsupported environment short: $EnvironmentShort"
             exit 1
         }
-    } else {
-        Write-Host "$Role already assigned to $PrincipalObjectId"
     }
+
+    $groupObjectId = az ad group show --group "$group" --query id -o tsv
+    if (-not $groupObjectId) {
+        Write-Error "Failed to resolve group object ID for $group"
+        exit 1
+    }
+
+    Grant-ADGroupRoles -GroupObjectId $groupObjectId -Role "Storage Blob Data Contributor" -Scope $Scope
 }
 
-function Initialize-StorageAccountRetentionAndVersioning {
+function Grant-CustomGroupRoles {
     param(
-        [string]$StorageAccountName,
-        [string]$ResourceGroupName,
-        [string]$AzureSubscriptionId
+        [string]$GroupRoleAssignments,
+        [string]$Scope
     )
 
-    $policy = az storage account blob-service-properties show `
-        --account-name $StorageAccountName `
-        --resource-group $ResourceGroupName `
-        --subscription $AzureSubscriptionId | ConvertFrom-Json
+    if (-not $GroupRoleAssignments) { return }
 
-    if (-not $policy.isVersioningEnabled -or -not $policy.deleteRetentionPolicy -or -not $policy.deleteRetentionPolicy.enabled) {
-        Write-Host "Enabling retention + versioning for $StorageAccountName"
-        az storage account blob-service-properties update `
-            --enable-delete-retention true `
-            --enable-versioning true `
-            --enable-change-feed true `
-            --enable-container-delete-retention true `
-            --container-delete-retention-days 23 `
-            --delete-retention-days 23 `
-            --restore-days 22 `
-            --enable-restore-policy true `
-            --account-name $StorageAccountName `
-            --resource-group $ResourceGroupName `
-            --subscription $AzureSubscriptionId | Out-Null
-    } else {
-        Write-Host "Retention + versioning already enabled"
+    try {
+        $assignments = $GroupRoleAssignments | ConvertFrom-Json
+        foreach ($a in $assignments) {
+            Grant-ADGroupRoles -GroupObjectId $a.object_id -Role $a.role -Scope $Scope
+        }
+    } catch {
+        Write-Error "Invalid JSON format for GroupRoleAssignments. Ensure it's a JSON array with object_id and role fields."
+        throw $_
     }
 }
 
-function Assign-ADGroupRoles {
+function Grant-ADGroupRoles {
     param(
         [string]$GroupObjectId,
         [string]$Role,
