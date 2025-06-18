@@ -182,11 +182,11 @@ jobs:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
 
-        #
-        # Build and Create Prerelease steps
-        # Note: Conceptually this should be done after the tests, but we want to
-        #       enable manual deployment before waiting for tests to pass to enhance DX.
-        #
+      #
+      # Build and Create Prerelease steps
+      # Note: Conceptually this should be done after the tests, but we want to
+      #       enable manual deployment before waiting for tests to pass to enhance DX.
+      #
       - name: Build ${{ matrix.inputs.package_name }}
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
@@ -200,9 +200,9 @@ jobs:
           release_name: ${{ matrix.inputs.release_name }}
           create_subsystem_release: ${{ inputs.create_subsystem_release }}
 
-        #
-        # Testing steps
-        #
+      #
+      # Testing steps
+      #
 
       - name: Login to access Azure resources
         uses: azure/login@v2
