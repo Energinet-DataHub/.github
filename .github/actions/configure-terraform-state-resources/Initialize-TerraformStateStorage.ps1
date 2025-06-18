@@ -41,14 +41,34 @@ function Initialize-StorageAccountIsCreated {
 
 function Initialize-ContainerIsCreated {
     param(
-        [string]$StorageAccountName
+        [Parameter(Mandatory)]
+        [string]
+        $ContainerName,
+        [Parameter(Mandatory)]
+        [string]
+        $StorageAccountName
     )
 
-    $key = az storage account keys list --account-name $StorageAccountName --query "[0].value" -o tsv
-    $exists = az storage container exists --account-name $StorageAccountName --account-key $key --name "tfstate" --query "exists" -o tsv
+    $containerExists = az storage container exists --name "$ContainerName" `
+        --account-name "$StorageAccountName" `
+        --query "exists" --auth-mode login | ConvertFrom-Json
 
-    if ($exists -ne "true") {
-        az storage container create --account-name $StorageAccountName --account-key $key --name "tfstate" | Out-Null
+    if ($containerExists -eq $false) {
+        Write-Host "Container $ContainerName for storing Terraform state will be created"
+        $response = az storage container create --name "$ContainerName" `
+            --account-name "$StorageAccountName" `
+            --auth-mode "login" `
+            --query "created" | ConvertFrom-Json
+
+        Write-Host "Container creation response is: $response"
+
+        if ($response -ne "true") {
+            Write-Error "Failed to create container for storing Terraform state"
+            exit 1
+        }
+    }
+    else {
+        Write-Host "Container $ContainerName for storing Terraform state already exists"
     }
 }
 
