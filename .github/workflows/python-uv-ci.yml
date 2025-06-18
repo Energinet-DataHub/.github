@@ -182,6 +182,28 @@ jobs:
           name: ${{ matrix.inputs.package_name }}
           path: ${{ matrix.inputs.package_path }}
 
+        #
+        # Build and Create Prerelease steps
+        # Note: Conceptually this should be done after the tests, but we want to
+        #       enable manual deployment before waiting for tests to pass to enhance DX.
+        #
+      - name: Build ${{ matrix.inputs.package_name }}
+        if: ${{ steps.changes.outputs.is_changed == 'true' }}
+        run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
+
+      - name: Create prerelease for ${{ matrix.inputs.package_name }}
+        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
+        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
+        with:
+          package_name: ${{ matrix.inputs.package_name }}
+          package_path: ${{ matrix.inputs.package_path }}
+          release_name: ${{ matrix.inputs.release_name }}
+          create_subsystem_release: ${{ inputs.create_subsystem_release }}
+
+        #
+        # Testing steps
+        #
+
       - name: Login to access Azure resources
         uses: azure/login@v2
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
@@ -222,16 +244,3 @@ jobs:
           path: ${{ matrix.inputs.package_path }}
           tests_path: ${{ inputs.tests_directory }}
           pytest_addopts: ${{ inputs.pytest_addopts }}
-
-      - name: Build ${{ matrix.inputs.package_name }}
-        if: ${{ steps.changes.outputs.is_changed == 'true' }}
-        run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
-
-      - name: Create prerelease for ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
-        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
-        with:
-          package_name: ${{ matrix.inputs.package_name }}
-          package_path: ${{ matrix.inputs.package_path }}
-          release_name: ${{ matrix.inputs.release_name }}
-          create_subsystem_release: ${{ inputs.create_subsystem_release }}
