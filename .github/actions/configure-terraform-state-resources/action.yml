@@ -41,14 +41,15 @@ runs:
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
 
-    - name: Run wrapper script
+    - name: Run script to ensure storage for Terraform state exists
       shell: pwsh
-      run: ./entrypoint.ps1
-      env:
-        AZURE_SPN_OBJECT_ID: ${{ inputs.azure_spn_object_id }}
-        AZURE_SUBSCRIPTION_ID: ${{ inputs.azure_subscription_id }}
-        ENVIRONMENT_SHORT: ${{ inputs.environment_short }}
-        ENVIRONMENT_INSTANCE: ${{ inputs.environment_instance }}
-        RESOURCE_GROUP_NAME: ${{ inputs.resource_group_name }}
-        STORAGE_ACCOUNT_NAME: ${{ inputs.storageaccount_name }}
-        GROUP_ROLE_ASSIGNMENTS: ${{ inputs.group_role_assignments }}
+      run: |
+        . ${{ github.action_path }}/Initialize-TerraformStateStorage.ps1
+
+        Initialize-TerraformStateStorage `  -AzureSpnObjectId "${{ inputs.azure_spn_object_id }}" `
+                                            -AzureSubscriptionId "${{ inputs.azure_subscription_id }}" `
+                                            -EnvironmentShort "${{ inputs.environment_short }}" `
+                                            -EnvironmentInstance "${{ inputs.environment_instance }}" `
+                                            -ResourceGroupName "${{ inputs.resource_group_name }}" `
+                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `
+                                            -GroupRoleAssignments "${{ inputs.group_role_assignments }}"
