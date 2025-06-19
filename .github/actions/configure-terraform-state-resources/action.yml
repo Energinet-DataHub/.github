@@ -52,4 +52,4 @@ runs:
                                             -EnvironmentInstance "${{ inputs.environment_instance }}" `
                                             -ResourceGroupName "${{ inputs.resource_group_name }}" `
                                             -StorageAccountName "${{ inputs.storageaccount_name }}" `
-                                            -GroupRoleAssignments '${{ inputs.group_role_assignments }}'
+                                            -GroupRoleAssignments "${{ inputs.group_role_assignments }}"
