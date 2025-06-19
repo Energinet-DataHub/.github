@@ -185,7 +185,8 @@ function Grant-CustomGroupRoles {
     Write-Host "Raw GroupRoleAssignments input: $GroupRoleAssignments"
 
     try {
-        $assignments = $GroupRoleAssignments | ConvertFrom-Json
+        $assignments = @($GroupRoleAssignments | ConvertFrom-Json)
+        Write-Host "Parsed assignments: $($assignments | ConvertTo-Json -Depth 5)"
         foreach ($a in $assignments) {
             if ($a.group_name) {
                 $groupObjectId = az ad group show --group "$a.group_name" --query id -o tsv
