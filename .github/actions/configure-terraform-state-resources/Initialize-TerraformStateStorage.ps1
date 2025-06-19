@@ -140,7 +140,6 @@ function Initialize-TerraformStateStorage {
         -ResourceGroupName $ResourceGroupName `
         -AzureSubscriptionId $AzureSubscriptionId
 
-    Grant-EnvironmentBasedGroupRoles -EnvironmentShort $EnvironmentShort -Scope $scope
     Grant-CustomGroupRoles -GroupRoleAssignments $GroupRoleAssignments -Scope $scope
 }
 
@@ -175,34 +174,6 @@ function Get-TerraformScope {
     return "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Storage/storageAccounts/$StorageAccountName"
 }
 
-function Grant-EnvironmentBasedGroupRoles {
-    param(
-        [string]$EnvironmentShort,
-        [string]$Scope
-    )
-
-    if (-not $EnvironmentShort) { return }
-
-    switch ($EnvironmentShort) {
-        "u" { $group = "SEC-G-Datahub-PlatformDevelopersAzure" }
-        "d" { $group = "SEC-A-Datahub-Test-001-Contributor-Controlplane" }
-        "t" { $group = "SEC-A-Datahub-PreProd-001-Contributor-Controlplane" }
-        "p" { $group = "SEC-A-Datahub-Prod-001-Contributor-Controlplane" }
-        default {
-            Write-Error "Unsupported environment short: $EnvironmentShort"
-            exit 1
-        }
-    }
-
-    $groupObjectId = az ad group show --group "$group" --query id -o tsv
-    if (-not $groupObjectId) {
-        Write-Error "Failed to resolve group object ID for $group"
-        exit 1
-    }
-
-    Grant-ADGroupRoles -GroupObjectId $groupObjectId -Role "Storage Blob Data Contributor" -Scope $Scope
-}
-
 function Grant-CustomGroupRoles {
     param(
         [string]$GroupRoleAssignments,
@@ -214,7 +185,20 @@ function Grant-CustomGroupRoles {
     try {
         $assignments = $GroupRoleAssignments | ConvertFrom-Json
         foreach ($a in $assignments) {
-            Grant-ADGroupRoles -GroupObjectId $a.object_id -Role $a.role -Scope $Scope
+            if ($a.group_name) {
+                $groupObjectId = az ad group show --group "$a.group_name" --query id -o tsv
+                if (-not $groupObjectId) {
+                    Write-Error "Failed to resolve group object ID for $($a.group_name)"
+                    exit 1
+                }
+            } elseif ($a.object_id) {
+                $groupObjectId = $a.object_id
+            } else {
+                Write-Error "Each assignment must include either 'group_name' or 'object_id'"
+                exit 1
+            }
+
+            Grant-ADGroupRoles -GroupObjectId $groupObjectId -Role $a.role -Scope $Scope
         }
     } catch {
         Write-Error "Invalid JSON format for GroupRoleAssignments. Ensure it's a JSON array with object_id and role fields."
