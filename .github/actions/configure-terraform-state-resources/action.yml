@@ -48,4 +48,4 @@ runs:
                                             -EnvironmentShort "${{ inputs.environment_short }}" `
                                             -EnvironmentInstance "${{ inputs.environment_instance }}" `
                                             -ResourceGroupName "${{ inputs.resource_group_name }}" `
-                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `                                            
+                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `
