@@ -1,0 +1,51 @@
+name: Configure resources for storing Terraform state are configured
+description: Ensures that a storage account and container are created for storing Terraform state exists in the landing zone
+
+inputs:
+  azure_spn_id:
+    required: false
+    description: Id of the SPN used to deploy the infrastructure
+  azure_spn_object_id:
+    required: true
+    description: Object id of the SPN used to deploy the infrastructure
+  azure_subscription_id:
+    required: true
+    description: Subscription that the infrastructure code is deployed into.
+  azure_tenant_id:
+    required: false
+    description: Tenant that the infrastructure code is deployed into.
+  environment_instance:
+    required: false
+    description: Environment instance that the infrastructure code is deployed into.
+  environment_short:
+    required: false
+    description: Shortest name for environment  (i.ex. dev)
+  resource_group_name:
+    required: false
+    description: Name of the resource group (if not derived)
+  storageaccount_name:
+    required: false
+    description: Name of the storage account (if not derived)
+
+runs:
+  using: composite
+  steps:
+    - name: Azure Login (Optional)
+      if: ${{ inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' }}
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure_spn_id }}
+        tenant-id: ${{ inputs.azure_tenant_id }}
+        subscription-id: ${{ inputs.azure_subscription_id }}
+
+    - name: Run script to ensure storage for Terraform state exists
+      shell: pwsh
+      run: |
+        . ${{ github.action_path }}/Initialize-TerraformStateStorage.ps1
+
+        Initialize-TerraformStateStorage `  -AzureSpnObjectId "${{ inputs.azure_spn_object_id }}" `
+                                            -AzureSubscriptionId "${{ inputs.azure_subscription_id }}" `
+                                            -EnvironmentShort "${{ inputs.environment_short }}" `
+                                            -EnvironmentInstance "${{ inputs.environment_instance }}" `
+                                            -ResourceGroupName "${{ inputs.resource_group_name }}" `
+                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `
