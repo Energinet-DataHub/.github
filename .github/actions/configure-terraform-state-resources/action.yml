@@ -26,9 +26,6 @@ inputs:
   storageaccount_name:
     required: false
     description: Name of the storage account (if not derived)
-  group_role_assignments:
-    required: false
-    description: JSON array of group object ID and role pairs
 
 runs:
   using: composite
@@ -51,5 +48,4 @@ runs:
                                             -EnvironmentShort "${{ inputs.environment_short }}" `
                                             -EnvironmentInstance "${{ inputs.environment_instance }}" `
                                             -ResourceGroupName "${{ inputs.resource_group_name }}" `
-                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `
-                                            -GroupRoleAssignments "${{ inputs.group_role_assignments }}"
+                                            -StorageAccountName "${{ inputs.storageaccount_name }}" `                                            

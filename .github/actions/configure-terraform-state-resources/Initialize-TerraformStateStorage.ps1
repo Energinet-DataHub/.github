@@ -111,8 +111,7 @@ function Initialize-TerraformStateStorage {
         [Parameter()][string]$EnvironmentShort,
         [Parameter()][string]$EnvironmentInstance,
         [Parameter()][string]$ResourceGroupName,
-        [Parameter()][string]$StorageAccountName,
-        [Parameter()][string]$GroupRoleAssignments
+        [Parameter()][string]$StorageAccountName
     )
 
     $location = "westeurope"
@@ -140,6 +139,7 @@ function Initialize-TerraformStateStorage {
         -ResourceGroupName $ResourceGroupName `
         -AzureSubscriptionId $AzureSubscriptionId
 
+    $GroupRoleAssignments = $env:GROUP_ROLE_ASSIGNMENTS    
     Grant-CustomGroupRoles -GroupRoleAssignments $GroupRoleAssignments -Scope $scope
 }
 
