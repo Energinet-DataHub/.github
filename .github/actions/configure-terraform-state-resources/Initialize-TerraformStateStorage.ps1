@@ -182,8 +182,6 @@ function Grant-CustomGroupRoles {
 
     if (-not $GroupRoleAssignments) { return }
 
-    Write-Host "Raw GroupRoleAssignments input: $GroupRoleAssignments"
-
     try {
         $assignmentsRaw = $GroupRoleAssignments | ConvertFrom-Json
 
@@ -192,8 +190,6 @@ function Grant-CustomGroupRoles {
         } else {
             $assignments = $assignmentsRaw
         }
-
-        Write-Host "Parsed assignments: $($assignments | ConvertTo-Json -Depth 5)"
 
         foreach ($a in $assignments) {
             if ($a.group_name) {
