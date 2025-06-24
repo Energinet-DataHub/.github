@@ -96,9 +96,12 @@ function Invoke-GithubReleaseList {
     param (
         [string]$TagName
     )
-    gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest" `
-    | ConvertFrom-Json
-    | Where-Object { $_.name -eq $TagName }
+    $response = gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest" | ConvertFrom-Json | Where-Object { $_.name -eq $TagName }
+    if ($response.Count -gt 1) {
+        Write-Warning "Multiple releases found with tag name '$TagName'. Using the first one, as the other one will be deleted next."
+        return $response[0]
+    }
+    return $response
 }
 
 <#
