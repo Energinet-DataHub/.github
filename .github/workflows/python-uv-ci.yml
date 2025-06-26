@@ -195,6 +195,7 @@ jobs:
         run: |
           pip install pip-tools
           pip-compile ${{ matrix.inputs.package_path }}/pyproject.toml
+          cat ${{ matrix.inputs.package_path }}/requirements.txt
 
       - name: Component detection
         uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
