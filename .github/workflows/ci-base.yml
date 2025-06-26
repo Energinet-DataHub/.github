@@ -233,10 +233,3 @@ jobs:
         with:
           folder: ${{ github.workspace }}
 
-  github_advanced_security:
-    name: Run Advanced Security checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Component detection
-        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6

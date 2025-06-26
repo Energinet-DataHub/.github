@@ -166,3 +166,7 @@ jobs:
           title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
+
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+
