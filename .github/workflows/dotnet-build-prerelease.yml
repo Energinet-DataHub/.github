@@ -151,6 +151,12 @@ jobs:
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
 
+      - name: Add SBOM to release
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        run: |
+          dotnet tool install --global Microsoft.Sbom.DotNetTool
+          sbom-tool generate -b . -bc . -pn $ -pv 1.0.0 -ps OwnerName -nsb https://sbom.mycompany.com -V Verbose -manifestDirPath ${{ env.RELEASE_FOLDER_PATH }}
+
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: thedoctor0/zip-release@0.6.2
