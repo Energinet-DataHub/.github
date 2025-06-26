@@ -153,9 +153,10 @@ jobs:
 
       - name: Add SBOM to release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        working-directory: ${{ env.RELEASE_FOLDER_PATH }}
         run: |
           dotnet tool install --global Microsoft.Sbom.DotNetTool
-          sbom-tool generate -b . -bc . -pn $ -pv 1.0.0 -ps OwnerName -nsb https://sbom.mycompany.com -V Verbose -manifestDirPath ${{ env.RELEASE_FOLDER_PATH }} -li true
+          sbom-tool generate -b . -bc . -pn $ -pv 1.0.0 -ps OwnerName -nsb https://sbom.mycompany.com -V Verbose -li true
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
