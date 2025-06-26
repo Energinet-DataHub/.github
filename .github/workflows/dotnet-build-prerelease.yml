@@ -86,6 +86,9 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore ${{ inputs.solution_file_path }}
 
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+
       - name: Block FluentAssertions v8
         run: |
           dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
@@ -166,7 +169,3 @@ jobs:
           title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
-
-      - name: Component detection
-        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
-
