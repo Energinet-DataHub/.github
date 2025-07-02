@@ -19,6 +19,7 @@ name: Basic QA validation
 # repositories. A given repository might be able to skip certain rules but
 # at least some of the rules are relevant for all repositories.
 
+
 on:
   workflow_call:
     inputs:

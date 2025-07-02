@@ -21,6 +21,7 @@ name: Notify team
 # Note: Variables prefixed "EMAIL_" are organization variables allowing this reusable workflow to access them
 # regardless of where the workflow is used
 
+
 on:
   workflow_call:
     inputs:

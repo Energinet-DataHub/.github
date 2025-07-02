@@ -22,6 +22,7 @@ name: Databricks build - prerelease
 # and then create a prerelease package containing this wheel.
 # The prerelease name will be in the format 'databricks_<PR-number>'.
 
+
 on:
   workflow_call:
     inputs:
