@@ -19,7 +19,6 @@ name: Basic QA validation
 # repositories. A given repository might be able to skip certain rules but
 # at least some of the rules are relevant for all repositories.
 
-
 on:
   workflow_call:
     inputs:
@@ -67,6 +66,9 @@ on:
         required: true
         description: Private key used to issue short-lived tokens for authenticating Github API requests
 
+permissions:
+  contents: read
+ 
 jobs:
   md_check:
     name: Markdown Check
