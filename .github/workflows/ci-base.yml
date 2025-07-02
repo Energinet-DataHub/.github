@@ -66,6 +66,9 @@ on:
         required: true
         description: Private key used to issue short-lived tokens for authenticating Github API requests
 
+permissions:
+  contents: read
+
 jobs:
   md_check:
     name: Markdown Check
