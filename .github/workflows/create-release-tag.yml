@@ -1,8 +1,10 @@
 name: Create release tag
 
-
 on:
   workflow_call: {}
+
+permissions:
+  contents: write
 
 jobs:
   create_release:

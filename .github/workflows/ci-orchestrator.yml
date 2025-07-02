@@ -1,10 +1,12 @@
 name: CI orchestrator
 
-
 on:
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: write
 
 jobs:
   #

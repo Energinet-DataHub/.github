@@ -44,7 +44,6 @@ name: Render C4 diagrams using Structurizr Lite
 # If the jobs where instead executed in parallel and more than one needed to make an auto commit,
 # the second commit would fail.
 
-
 on:
   workflow_call:
     inputs:

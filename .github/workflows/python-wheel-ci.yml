@@ -13,7 +13,6 @@
 # limitations under the License.
 name: Python Wheel CI
 
-
 on:
   workflow_call:
     inputs:

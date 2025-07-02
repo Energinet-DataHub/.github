@@ -1,10 +1,12 @@
 name: CD Release
 
-
 on:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
 
 jobs:
   #
