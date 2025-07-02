@@ -68,7 +68,7 @@ on:
 
 permissions:
   contents: read
- 
+
 jobs:
   md_check:
     name: Markdown Check
