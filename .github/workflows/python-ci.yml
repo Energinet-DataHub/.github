@@ -118,7 +118,7 @@ jobs:
 
       - name: Publish test report
         if: always()
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
           check_name: Python test results for ${{ inputs.test_report_path }}
           comment_title: Python test results
