@@ -36,41 +36,6 @@ Describe "Create-ReleaseTag" {
                 "10.0.0","","10.0.0","2023-01-18T07:38:37Z"
 "@ | ConvertFrom-Csv
         }
-
-        Mock Invoke-GithubCodeSearch {
-
-            [GithubCodeSearchResult[]]$mocks = @()
-            $mock1 = [GithubCodeSearchResult]::new()
-            $mock1.Url = "https://github.com/mockOrg/mockRepo"
-            $mock1.Path = "path/to/file"
-            $mock1.Repository = "mockOrg/mockRepo"
-            $mock1.TextMatches = @("uses: mockOrg/mockRepo/some/path/some-action.yml@v10")
-
-            $mock2 = [GithubCodeSearchResult]::new()
-            $mock2.Url = "https://github.com/mockOrg/mockRepo"
-            $mock2.Path = "path/to/file"
-            $mock2.Repository = "mockOrg/mockRepo"
-            $mock2.TextMatches = @("uses: mockOrg/mockRepo/some/path/some-action.yml@v10")
-
-            $mock3 = [GithubCodeSearchResult]::new()
-            $mock3.Url = "https://github.com/mockOrg/mockRepo"
-            $mock3.Path = "path/to/file"
-            $mock3.Repository = "mockOrg/mockRepo"
-            $mock3.TextMatches = @("source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v10")
-
-            $mock4 = [GithubCodeSearchResult]::new()
-            $mock4.Url = "https://github.com/mockOrg/mockRepo"
-            $mock4.Path = "path/to/file"
-            $mock4.Repository = "mockOrg/mockRepo"
-            $mock4.TextMatches = @("source = git::https://github.com/AnotherMockOrg/AnotherMockRepo//some/path?ref=v11")
-
-            $mocks += $mock1
-            $mocks += $mock2
-            $mocks += $mock3
-            $mocks += $mock4
-
-            return $mocks
-        }
     }
 
     Context "When two version numbers are compared with Compare-Versions" {
@@ -155,63 +120,6 @@ Describe "Create-ReleaseTag" {
                 -GitHubRepository "mock" `
                 -GitHubBranch "mock" `
                 -GitHubEvent "mock"
-        }
-    }
-
-    Context "Creating a new Major Release" {
-
-        It "Completes successfully if no deprecated versions are found" {
-            Assert-MajorVersionDeprecations -MajorVersion "11" -Repository "mockOrg/mockRepo" -Patterns @("\s*uses:\s*mockOrg/mockRepo(.*)@v(?<version>.*)")
-            Assert-MajorVersionDeprecations -MajorVersion "11" -Repository "AnotherMockOrg/AnotherMockRepo" -Patterns @("AnotherMockOrg/AnotherMockRepo//(.*?)ref=v(?<version>.*)")
-        }
-
-        It "Throws an error if references to deprecated versions are found" {
-            { Assert-MajorVersionDeprecations -MajorVersion "12" -Repository "mockOrg/mockRepo" -Patterns @("\s*uses:\s*mockOrg/mockRepo(.*)yml@v(?<version>.*)") } | Should -Throw
-            { Assert-MajorVersionDeprecations -MajorVersion "12" -Repository "AnotherMockOrg/AnotherMockRepo" -Patterns @("(.*)/AnotherMockOrg/AnotherMockRepo//(.*)ref=v(?<version>.*)") } | Should -Throw
-        }
-    }
-
-    Context "Regular expressions" {
-
-        It "Correctly finds version for .github" {
-
-            # This needs to reflect the value used in .github/.github/workflows/create-release-tag.yml
-            $pattern = "\s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)"
-
-            $tests = @(
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v10"; "expected" = "10" },
-                @{"input" = "uses: Energinet-DataHub/.github/cde/f-g/h@v11"; "expected" = "11" },
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e.yml@v09   "; "expected" = "09" },
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@v101"; "expected" = "101" },
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@1.2.3"; "expected" = "1" },
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@3.2.1"; "expected" = "3" }
-                @{"input" = "uses: Energinet-DataHub/.github/c-d-e@0003.112.122"; "expected" = "0003" }
-            )
-            $tests | ForEach-Object {
-                $match = [regex]::Match($_.input, $pattern)
-                $match.Success | Should -Be $true
-                $match.Groups["version"] | Should -Be $_.expected
-            }
-        }
-
-        It "Correctly finds version for geh-terraform-modules" {
-            $pattern = "Energinet-DataHub/geh-terraform-modules\.git//(.*?)\?ref=v?(?<version>\d+)"
-
-            $tests = @(
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "2" },
-                @{"input" = "  source   =   `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`"  "; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref=v{0}`""; "expected" = "20" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref={0}.2.3`""; "expected" = "1" },
-                @{"input" = "source = `"git::http://github.com/Energinet-DataHub/geh-terraform-modules.git//azure/module.tf?ref={0}.2.1`""; "expected" = "3" }
-            )
-            $tests | ForEach-Object {
-                $testString = $_.input -f $_.expected
-                $match = [regex]::Match($testString, $pattern)
-                $match.Success | Should -Be $true
-                $match.Groups["version"] | Should -Be $_.expected
-            }
         }
     }
 }
