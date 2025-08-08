@@ -86,6 +86,9 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore ${{ inputs.solution_file_path }}
 
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+
       - name: Block FluentAssertions v8
         run: |
           dotnet list ${{ inputs.solution_file_path }} package --format json > versions.json
@@ -147,6 +150,13 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v14
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
+
+      - name: Add SBOM to release
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        working-directory: ${{ env.RELEASE_FOLDER_PATH }}
+        run: |
+          dotnet tool install --global Microsoft.Sbom.DotNetTool
+          sbom-tool generate -b . -bc . -pn $ -pv 1.0.0 -ps OwnerName -nsb https://sbom.mycompany.com -V Verbose -li true
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'

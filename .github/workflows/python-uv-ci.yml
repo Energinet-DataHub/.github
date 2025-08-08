@@ -191,6 +191,15 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
+      - name: Install pip tools
+        run: |
+          pip install pip-tools
+          pip-compile ${{ matrix.inputs.package_path }}/pyproject.toml
+          cat ${{ matrix.inputs.package_path }}/requirements.txt
+
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+
       - name: Create prerelease for ${{ matrix.inputs.package_name }}
         uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
