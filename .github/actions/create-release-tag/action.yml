@@ -31,9 +31,6 @@ inputs:
     description: "Branch on which tags will be created. Default: main"
     required: false
     default: main
-  usage_patterns:
-    description: "A list of regular expressions (separated by a whitespace) used to identify major version references in other repositories. Must contain a named group: (?<version>\\d+)"
-    required: false
 
 runs:
   using: composite
@@ -46,7 +43,6 @@ runs:
         $patch = ${{ inputs.patch_version }}
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
-        $usage_patterns = "${{ inputs.usage_patterns }}" -split " "
         $eventName = "${{ github.event_name }}"
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
@@ -57,4 +53,3 @@ runs:
         -GithubRepository $repo `
         -GithubBranch $targetBranch `
         -GithubEvent $eventName `
-        -UsagePatterns $usage_patterns
