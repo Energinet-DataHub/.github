@@ -12,7 +12,7 @@ inputs:
 
 outputs:
   pr_number:
-    description: The pull request number for the release i.e. '4711.zip'
+    description: The pull request number for the release i.e. '4711'
     value: ${{ steps.set_release_version_strings.outputs.pr_number }}
   release_version:
     description: Release version, i.e. 'dotnet_4711'
