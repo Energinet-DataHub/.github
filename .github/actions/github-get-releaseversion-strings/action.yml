@@ -37,5 +37,6 @@ runs:
         $releaseZipFilename = "$($releasePrefix)_$($prNumber).zip"
         Write-Host "release_version=$releaseVersion"
         Write-Host "release_zip_filename=$releaseZipFilename"
+        echo "pr_number=$prNumber" >> $env:GITHUB_OUTPUT
         echo "release_version=$releaseVersion" >> $env:GITHUB_OUTPUT
         echo "release_zip_filename=$releaseZipFilename" >> $env:GITHUB_OUTPUT
