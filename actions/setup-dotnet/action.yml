@@ -1,5 +1,8 @@
 name: Setup dotnet and tools
-description: Setup .NET. This action will install the .net SDK as setup in global.json. If 'dotnet_version' is specified, it will install that version instead.
+description: |
+  Setup .NET. This action will install the .net SDK as setup in global.json. If 'dotnet_version' is provided, it will install that version instead.
+
+  Do not set dotnet_version to the current LTS version, as that version will be downloaded and installed by (default)[https://github.com/actions/setup-dotnet/issues/642].
 
 inputs:
   global_json_directory:
