@@ -1,0 +1,23 @@
+name: Setup dotnet and tools
+description: Setup .NET. This action will install the .net SDK as setup in global.json. If 'dotnet_version' is specified, it will install that version instead.
+
+inputs:
+  global_json_directory:
+    description: Path to the directory containing global.json. Usually solution directory.
+    required: true
+
+  dotnet_version:
+    description: Install specified .NET Core SDK version
+    required: false
+
+steps:
+  - uses: actions/setup-dotnet@v4
+    if: ${{ inputs.dotnet_version == '' }}
+    with:
+      global-json-file: ${{ solution_directory }}/global.json
+
+  - name: Setup .NET ${{ inputs.dotnet_version }}
+    if: ${{ inputs.dotnet_version != '' }}
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: ${{ inputs.dotnet_version }}
