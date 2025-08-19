@@ -2,8 +2,7 @@ name: Globally installs Azure Functions Core Tools and Azurite
 description: |
   If npm is not installed, it will install the latest LTS version of Node.js.
 
-  Azure Functions Core Tools is needed when running the Azure Functions locally.
-  It is not needed for publishing the FunctionApp.
+  Azure Functions Core Tools is needed when running the Azure Functions locally. But is not needed for publishing the FunctionApp.
 
   Azurite is a storage emulator and is needed when running applications / tests, and the application requires a local storage.
 inputs:

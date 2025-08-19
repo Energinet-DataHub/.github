@@ -14,7 +14,7 @@ steps:
   - uses: actions/setup-dotnet@v4
     if: ${{ inputs.dotnet_version == '' }}
     with:
-      global-json-file: ${{ solution_directory }}/global.json
+      global-json-file: ${{ inputs.global_json_directory }}/global.json
 
   - name: Setup .NET ${{ inputs.dotnet_version }}
     if: ${{ inputs.dotnet_version != '' }}
