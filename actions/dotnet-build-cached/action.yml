@@ -23,27 +23,29 @@ inputs:
     description: The SHA to use for the build metadata
     required: true
 
-steps:
+runs:
+  using: composite
+  steps:
 
-  - name: Cache NuGet packages
-    uses: actions/cache@v4
-    id: cache-nuget
-    with:
-      path: ~/.nuget/packages
-      key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} # hash of project files
-      restore-keys: |
-        ${{ runner.os }}-nuget-
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      id: cache-nuget
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} # hash of project files
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
-  - name: Restore NuGet packages
-    run: dotnet restore ${{ inputs.solution_directory }}/${{ inputs.solution_filename }}
+    - name: Restore NuGet packages
+      run: dotnet restore ${{ inputs.solution_directory }}/${{ inputs.solution_filename }}
 
 
-    # We build the GitHub PR and SHA (last merge commit on PR) into the .NET assembly meta data:
-    #   The full 'InformationalVersion' format is '<version>+PR_<pr number>+SHA_<sha>'.
-    #
-    #   The value of 'SourceRevisionId' is appended to the assembly attribute 'InformationalVersion', separated by a '+' sign.
-    #   See: https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#generateassemblyinfo
-    #
-  - name: Build solution
-    run: |
-      dotnet build ${{ inputs.solution_directory }}/${{ inputs.solution_filename }} --no-restore --configuration ${{ inputs.configuration }} -p:SourceRevisionId=PR_${{ inputs.pull_request_number }}+SHA_${{ inputs.sha }}
+      # We build the GitHub PR and SHA (last merge commit on PR) into the .NET assembly meta data:
+      #   The full 'InformationalVersion' format is '<version>+PR_<pr number>+SHA_<sha>'.
+      #
+      #   The value of 'SourceRevisionId' is appended to the assembly attribute 'InformationalVersion', separated by a '+' sign.
+      #   See: https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#generateassemblyinfo
+      #
+    - name: Build solution
+      run: |
+        dotnet build ${{ inputs.solution_directory }}/${{ inputs.solution_filename }} --no-restore --configuration ${{ inputs.configuration }} -p:SourceRevisionId=PR_${{ inputs.pull_request_number }}+SHA_${{ inputs.sha }}

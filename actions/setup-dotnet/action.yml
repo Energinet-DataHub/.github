@@ -10,14 +10,16 @@ inputs:
     description: Install specified .NET Core SDK version
     required: false
 
-steps:
-  - uses: actions/setup-dotnet@v4
-    if: ${{ inputs.dotnet_version == '' }}
-    with:
-      global-json-file: ${{ inputs.global_json_directory }}/global.json
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-dotnet@v4
+      if: ${{ inputs.dotnet_version == '' }}
+      with:
+        global-json-file: ${{ inputs.global_json_directory }}/global.json
 
-  - name: Setup .NET ${{ inputs.dotnet_version }}
-    if: ${{ inputs.dotnet_version != '' }}
-    uses: actions/setup-dotnet@v4
-    with:
-      dotnet-version: ${{ inputs.dotnet_version }}
+    - name: Setup .NET ${{ inputs.dotnet_version }}
+      if: ${{ inputs.dotnet_version != '' }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet_version }}
