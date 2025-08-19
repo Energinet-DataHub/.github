@@ -37,6 +37,7 @@ runs:
           ${{ runner.os }}-nuget-
 
     - name: Restore NuGet packages
+      shell: pwsh
       run: dotnet restore ${{ inputs.solution_directory }}/${{ inputs.solution_filename }}
 
 
@@ -47,5 +48,6 @@ runs:
       #   See: https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#generateassemblyinfo
       #
     - name: Build solution
+      shell: pwsh
       run: |
         dotnet build ${{ inputs.solution_directory }}/${{ inputs.solution_filename }} --no-restore --configuration ${{ inputs.configuration }} -p:SourceRevisionId=PR_${{ inputs.pull_request_number }}+SHA_${{ inputs.sha }}
