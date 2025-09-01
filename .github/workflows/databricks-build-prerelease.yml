@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -136,7 +136,7 @@ jobs:
           release_name_prefix: ${{ inputs.prerelease_prefix }}
 
       - name: Zip files for prerelease
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}

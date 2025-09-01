@@ -93,7 +93,7 @@ jobs:
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Static checks
         uses: TrueBrain/actions-flake8@v2
