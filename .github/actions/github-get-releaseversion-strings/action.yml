@@ -11,6 +11,9 @@ inputs:
     default: "false"
 
 outputs:
+  pr_number:
+    description: The pull request number for the release i.e. '4711'
+    value: ${{ steps.set_release_version_strings.outputs.pr_number }}
   release_version:
     description: Release version, i.e. 'dotnet_4711'
     value: ${{ steps.set_release_version_strings.outputs.release_version }}
@@ -37,5 +40,6 @@ runs:
         $releaseZipFilename = "$($releasePrefix)_$($prNumber).zip"
         Write-Host "release_version=$releaseVersion"
         Write-Host "release_zip_filename=$releaseZipFilename"
+        echo "pr_number=$prNumber" >> $env:GITHUB_OUTPUT
         echo "release_version=$releaseVersion" >> $env:GITHUB_OUTPUT
         echo "release_zip_filename=$releaseZipFilename" >> $env:GITHUB_OUTPUT

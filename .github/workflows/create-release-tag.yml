@@ -3,6 +3,9 @@ name: Create release tag
 on:
   workflow_call: {}
 
+permissions:
+  contents: write
+
 jobs:
   create_release:
     runs-on: ubuntu-latest
@@ -22,8 +25,8 @@ jobs:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
           major_version: 14
-          minor_version: 39
-          patch_version: 1
+          minor_version: 46
+          patch_version: 0
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:

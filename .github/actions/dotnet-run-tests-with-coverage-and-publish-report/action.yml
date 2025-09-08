@@ -85,7 +85,7 @@ runs:
 
     - name: Publish test report
       if: always()
-      uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
       with:
         check_name: Test results for ${{ inputs.tests_dll_file_path }}
         comment_title: Test results for ${{ inputs.tests_dll_file_path }}
