@@ -28,6 +28,8 @@ if ($null -eq $PullRequestNumber) {
 
 Write-Host "PR number: $PullRequestNumber"
 Write-Host "Sha: $TargetSha"
+Write-Output "pull_request_number=$PullRequestNumber" >> $env:GITHUB_OUTPUT
+Write-Output "sha=$TargetSha" >> $env:GITHUB_OUTPUT
 
 <#
     .SYNOPSIS
