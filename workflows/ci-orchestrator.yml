@@ -13,7 +13,7 @@ jobs:
   # License and Markdown Check
   #
   ci_base:
-    uses: ./.github/workflows/ci-base.yml
+    uses: ./workflows/ci-base.yml
     secrets:
       dh3serviceaccount_privatekey: ${{ secrets.dh3serviceaccount_privatekey}}
 
@@ -21,7 +21,7 @@ jobs:
   # Automatic Release (verify if release tag exists)
   #
   create_release:
-    uses: ./.github/workflows/create-release-tag.yml
+    uses: ./workflows/create-release-tag.yml
     secrets: inherit
 
   allow_merge_ci_orchestrator:

@@ -25,7 +25,7 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+      uses: Energinet-DataHub/.github/actions/find-related-pr-number@v14
       id: find_pull_request
       with:
         debug_enabled: ${{ inputs.debug_enabled }}
