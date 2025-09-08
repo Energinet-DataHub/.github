@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install tools
-        uses: Energinet-DataHub/.github/actions/asdf-install-tools@v14
+        uses: Energinet-DataHub/.github/actions/asdf-install-tools@v15
 
   #
   # Build Release Matrix
@@ -117,10 +117,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v14
+        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v15
         id: find_pull_request
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/actions/python-discover-pyproject@v14
+        uses: Energinet-DataHub/.github/actions/python-discover-pyproject@v15
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -154,7 +154,7 @@ jobs:
               - ${{ matrix.inputs.package_path }}/**
 
       - name: Promote prerelease ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/actions/github-promote-prerelease@v14
+        uses: Energinet-DataHub/.github/actions/github-promote-prerelease@v15
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           release_name: ${{ matrix.inputs.release_name }}
@@ -180,7 +180,7 @@ jobs:
           echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
 
       - name: Dispatch Release for ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/actions/dispatch-deployment-event@v14
+        uses: Energinet-DataHub/.github/actions/dispatch-deployment-event@v15
         if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         with:
           event_name: ${{ steps.create_dispatch_event_name.outputs.event_name }}
@@ -189,7 +189,7 @@ jobs:
           private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
       - name: Notify Team of failed deployment for ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/actions/send-email@v14
+        uses: Energinet-DataHub/.github/actions/send-email@v15
         if: ${{ failure() && steps.changes.outputs.is_changed == 'true' }}
         with:
           sendgrid-api-key: ${{ secrets.send_grid_api_key }}
