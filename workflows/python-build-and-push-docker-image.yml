@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v15
+        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v14
         id: find_pull_request
 
       - name: Set image tag environmental variable

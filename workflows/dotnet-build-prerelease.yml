@@ -101,7 +101,7 @@ jobs:
           fi
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v15
+        uses: Energinet-DataHub/.github/actions/find-related-pr-number@v14
         id: find_pull_request
 
       - name: Build solution
@@ -148,7 +148,7 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/actions/github-get-releaseversion-strings@v15
+        uses: Energinet-DataHub/.github/actions/github-get-releaseversion-strings@v14
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
 
@@ -162,7 +162,7 @@ jobs:
 
       - name: Create pre-release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: Energinet-DataHub/.github/actions/github-create-release@v15
+        uses: Energinet-DataHub/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
