@@ -139,7 +139,7 @@ We default to use Windows when testing as we currently also use Windows as the h
 For code coverage tools to work with the compiled tests we must use:
 
 - `dotnet publish` on each test project. This is handled in the `dotnet-tests-prepare-outputs` action in each domain.
-- `dotnet-coverage` to test and collect coverage of each test project. This is handled in the [dotnet-postbuild-test.yml](.github/workflows/dotnet-postbuild-test.yml) workflow.
+- `dotnet-coverage` to test and collect coverage of each test project. This is handled in the [dotnet-postbuild-test.yml](workflows/dotnet-postbuild-test.yml) workflow.
 
 Example from a `dotnet-tests-prepare-outputs`:
 
@@ -238,7 +238,7 @@ Optional `image_tag` can be set which the custom action `python-unit-test` is be
 
 ### Python Build and Push Docker Image
 
-File: [python-build-and-push-docker-image.yml](.github/workflows/python-build-and-push-docker-image.yml)
+File: [python-build-and-push-docker-image.yml](workflows/python-build-and-push-docker-image.yml)
 
 This workflow can be used to build and push docker image used for Python.
 
@@ -253,7 +253,7 @@ The workflow gives one output variable:
 
 ### Notify Team
 
-File: [notify-team.yml](.github/workflows/notify-team.yml)
+File: [notify-team.yml](workflows/notify-team.yml)
 
 > Ideally we would not have to implement a workflow like this, but at the moment we do not feel GitHub allows us to configure notifications specific enough for us to get important notifications and avoid noisy notifications.
 
@@ -271,7 +271,7 @@ The secrets are created as organizational secrets in the Energinet organization,
 
 ### Structurizr Lite: Render diagrams
 
-File: [structurizr-render-diagrams.yml](.github/workflows/structurizr-render-diagrams.yml)
+File: [structurizr-render-diagrams.yml](workflows/structurizr-render-diagrams.yml)
 
 Read the documentation in the workflow file, including information about `inputs` and `secrets`.
 
