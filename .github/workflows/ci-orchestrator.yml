@@ -13,7 +13,7 @@ jobs:
   # License and Markdown Check
   #
   ci_base:
-    uses: ./workflows/ci-base.yml
+    uses: ./.github/workflows/ci-base.yml
     secrets:
       dh3serviceaccount_privatekey: ${{ secrets.dh3serviceaccount_privatekey}}
 
