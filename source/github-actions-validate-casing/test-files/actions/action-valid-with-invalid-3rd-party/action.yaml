@@ -11,23 +11,23 @@ jobs:
           releaseRepositoryPath: foo
 
       - name: Energinet valid action
-        uses: Energinet-DataHub/.github/.github/actions/action@v14
+        uses: Energinet-DataHub/.github/actions/action@v15
         with:
           load_test_config_file: bar
 
       - name: Energinet valid action
-        uses: ./.github/actions/action@v14
+        uses: ./.github/actions/action@v15
         with:
           load_test_config_file: baz
 
   job2:
     - name: 3rd party invalid action
-      uses: someprovider/anotheraction@v14
+      uses: someprovider/anotheraction@v15
       with:
         loadTestConfigFile: bar
 
   job3:
     - name: Energinet valid action
-      uses: ./.github/actions/action@v14
+      uses: ./.github/actions/action@v15
       with:
         load_test_config_file: baz
