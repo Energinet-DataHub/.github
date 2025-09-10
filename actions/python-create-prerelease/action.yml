@@ -63,7 +63,7 @@ runs:
         directory: ${{ env.RELEASE_FOLDER_PATH }}
 
     - name: Create prerelease for ${{ inputs.name }}
-      uses: Energinet-DataHub/.github/actions/github-create-release@v14
+      uses: Energinet-DataHub/.github/actions/github-create-release@v15
       with:
         repo_token: ${{ inputs.github_token }}
         automatic_release_tag: ${{ inputs.release_name }}

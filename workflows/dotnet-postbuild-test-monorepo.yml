@@ -202,7 +202,7 @@ jobs:
             ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-
 
       - name: Set up test environment
-        uses: Energinet-DataHub/.github/actions/dotnet-setup-and-tools@v14
+        uses: Energinet-DataHub/.github/actions/dotnet-setup-and-tools@v15
         with:
           dotnet_version: ${{ inputs.dotnet_version }}
           use_cosmos_db_emulator: ${{ inputs.use_cosmos_db_emulator }}
@@ -236,7 +236,7 @@ jobs:
       #     }
 
       - name: Run tests
-        uses: Energinet-DataHub/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@v14
+        uses: Energinet-DataHub/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@v15
         with:
           aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
           aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
