@@ -203,7 +203,7 @@ As a good practice also add a comment to the class inheriting from `WebApplicati
 
 ### Python CI Test and Coverage
 
-File: [python-ci.yml](.github/workflows/python-ci.yml)
+File: [python-ci.yml](workflows/python-ci.yml)
 
 This workflow can be used to validate python code and execute python tests.
 
