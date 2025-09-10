@@ -116,8 +116,8 @@ Teams should ensure developers configure their local development environment to 
 
 Files:
 
-- [dotnet-build-prerelease.yml](.github/workflows/dotnet-build-prerelease.yml)
-- [dotnet-postbuild-test.yml](.github/workflows/dotnet-postbuild-test.yml)
+- [dotnet-build-prerelease.yml](workflows/dotnet-build-prerelease.yml)
+- [dotnet-postbuild-test.yml](workflows/dotnet-postbuild-test.yml)
 
 These workflows are intended to run in parallel. While we build the .NET solution on one runner we can utilize this build time to setup other runners for the test execution.
 
