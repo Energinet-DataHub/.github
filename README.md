@@ -62,13 +62,13 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 ---
 
-1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
+1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/.github/releases)
 2. Find the major version release and click on its name (e.g. `v7`).
 
    - This will open the release.
    - Click the `Delete (icon)` and choose to delete the release.
 
-3. Navigate to [Tags](https://github.com/Energinet-DataHub/.github/tags)
+3. Navigate to [Tags](https://github.com/Energinet-DataHub/.github/.github/tags)
 
 4. Find the major version tag and click on its name (e.g. `v7`).
 
@@ -77,7 +77,7 @@ After we have merged a Pull Request, and created or updated any artifact within 
 
 Then we can create the new major version tag for a specific commit:
 
-1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
+1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/.github/releases)
 
 2. Click `Draft a new release` then fill in the formular:
 

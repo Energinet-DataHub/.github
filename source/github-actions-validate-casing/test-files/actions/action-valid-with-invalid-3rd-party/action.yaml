@@ -11,7 +11,7 @@ jobs:
           releaseRepositoryPath: foo
 
       - name: Energinet valid action
-        uses: Energinet-DataHub/.github/actions/action@v2
+        uses: Energinet-DataHub/.github/.github/actions/action@v2
         with:
           load_test_config_file: bar
 
