@@ -13,5 +13,5 @@ jobs:
   # Automatic Release (create release tag)
   #
   create_release:
-    uses: ./workflows/create-release-tag.yml
+    uses: ./.github/workflows/create-release-tag.yml
     secrets: inherit # Needed for organization scope GH_TOKEN

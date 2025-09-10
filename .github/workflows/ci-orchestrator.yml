@@ -21,7 +21,7 @@ jobs:
   # Automatic Release (verify if release tag exists)
   #
   create_release:
-    uses: ./workflows/create-release-tag.yml
+    uses: ./.github/workflows/create-release-tag.yml
     secrets: inherit
 
   allow_merge_ci_orchestrator:
