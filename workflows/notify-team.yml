@@ -55,7 +55,7 @@ jobs:
 
       - name: Generate GitHub token
         id: generate_token
-        uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
+        uses: Energinet-DataHub/.github/actions/github-create-token@v15
         with:
           app_id: ${{ vars.dh3serviceaccount_appid }}
           private_key: ${{ secrets.dh3serviceaccount_privatekey }}
@@ -63,7 +63,7 @@ jobs:
       - name: Get PR Owner(s)
         id: pr_owner
         if: ${{ inputs.pr_list != '' }}
-        uses: Energinet-DataHub/.github/.github/actions/get-pr-owner@v14
+        uses: Energinet-DataHub/.github/actions/get-pr-owner@v15
         with:
           github_token: ${{ steps.generate_token.outputs.token }}
           pr_list: ${{ inputs.pr_list }}
@@ -113,7 +113,7 @@ jobs:
           echo "team_email=$team_email" >>$GITHUB_OUTPUT
 
       - name: Send email
-        uses: Energinet-DataHub/.github/.github/actions/send-email@v14
+        uses: Energinet-DataHub/.github/actions/send-email@v15
         with:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
