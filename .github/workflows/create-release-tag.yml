@@ -20,12 +20,12 @@ jobs:
           private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
       - name: Create release
-        uses: ./.github/actions/create-release-tag
+        uses: ./actions/create-release-tag
         with:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
-          major_version: 14
-          minor_version: 47
+          major_version: 15
+          minor_version: 0
           patch_version: 0
           repository_path: Energinet-DataHub/.github
           usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)

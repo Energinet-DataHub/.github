@@ -317,7 +317,7 @@ function Add-IfCasingFailure {
         $Failures
     )
 
-    $isMaintainedLocally = ($('./.github', 'energinet-datahub/.github/') | Where-Object {
+    $isMaintainedLocally = ($('./.github', 'Energinet-DataHub/.github/.github/') | Where-Object {
             $DefinitionContext.ToLower().StartsWith($_) }
     ).Count -gt 0
 

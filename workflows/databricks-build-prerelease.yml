@@ -143,7 +143,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
