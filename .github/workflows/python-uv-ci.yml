@@ -191,14 +191,41 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
-      - name: Create prerelease for ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
-        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
+      - name: Setup Environment
+        shell: bash
+        run: |
+          echo "RELEASE_ZIP_FILENAME=${{ matrix.inputs.release_name }}.zip" >> $GITHUB_ENV
+          echo "RELEASE_FOLDER_PATH=${{ github.workspace }}/${{ matrix.inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
+
+      - name: Copy files for ${{ matrix.inputs.package_name }} prerelease
+        shell: bash
+        run: |
+          mkdir -p ${{ env.RELEASE_FOLDER_PATH }}
+          if [ -d ${{ matrix.inputs.package_path }}/dist ]; then
+            cp -r ${{ matrix.inputs.package_path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
+          fi
+          if [[ ${{ matrix.inputs.create_subsystem_release }} == 'true' ]]; then
+            rsync -avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --exclude='*' \
+                ${{ matrix.inputs.package_path }}/ \
+                ${{ env.RELEASE_FOLDER_PATH }}/subsystem_tests/
+          fi
+
+      - name: Zip files for ${{ matrix.inputs.package_name }} prerelease
+        uses: thedoctor0/zip-release@0.7.6
         with:
-          package_name: ${{ matrix.inputs.package_name }}
-          package_path: ${{ matrix.inputs.package_path }}
-          release_name: ${{ matrix.inputs.release_name }}
-          create_subsystem_release: ${{ inputs.create_subsystem_release }}
+          type: zip
+          filename: ${{ env.RELEASE_ZIP_FILENAME }}
+          directory: ${{ env.RELEASE_FOLDER_PATH }}
+
+      - name: Create prerelease for ${{ matrix.inputs.name }}
+        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
+        with:
+          repo_token: ${{ github.token }}
+          automatic_release_tag: ${{ matrix.inputs.release_name }}
+          prerelease: true
+          title: ${{ matrix.inputs.release_name }}
+          files: |
+            ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
 
       #
       # Testing steps
