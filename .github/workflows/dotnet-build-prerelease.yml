@@ -37,10 +37,6 @@ on:
         description: Install specified .NET Core SDK version
         required: false
         type: string
-      operating_system:
-        required: false
-        default: ubuntu-22.04
-        type: string
       release_name_prefix:
         required: false
         type: string
@@ -63,6 +59,7 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
+      SBOM_PATH: ${{ github.workspace }}/sbom.json
 
     steps:
       - name: Checkout repository
@@ -115,6 +112,13 @@ jobs:
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
+      - name: Install tools for SBOM generation
+        uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@v14
+
+      - name: Generate SBOM
+        run: |
+          syft . -o spdx-json --package-scope all | parlay ecosystems enrich - | jq . > ${{ env.SBOM_PATH }}
+
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
@@ -145,6 +149,7 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
+          sbom_path: ${{ env.SBOM_PATH }}
 
       - name: Get release version strings
         id: get_release_version_strings
