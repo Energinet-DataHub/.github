@@ -192,12 +192,14 @@ jobs:
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
       - name: Setup Environment
+        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         shell: bash
         run: |
           echo "RELEASE_ZIP_FILENAME=${{ matrix.inputs.release_name }}.zip" >> $GITHUB_ENV
           echo "RELEASE_FOLDER_PATH=${{ github.workspace }}/${{ matrix.inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
       - name: Copy files for ${{ matrix.inputs.package_name }} prerelease
+        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         shell: bash
         run: |
           mkdir -p ${{ env.RELEASE_FOLDER_PATH }}
@@ -211,6 +213,7 @@ jobs:
           fi
 
       - name: Zip files for ${{ matrix.inputs.package_name }} prerelease
+        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
@@ -218,6 +221,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease for ${{ matrix.inputs.name }}
+        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
         with:
           repo_token: ${{ github.token }}
