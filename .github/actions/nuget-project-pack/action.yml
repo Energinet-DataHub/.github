@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     - name: Get version suffix property value
-      uses: Energinet-DataHub/.github/actions/nuget-get-version-suffix@v15
+      uses: Energinet-DataHub/.github/.github/actions/nuget-get-version-suffix@v14
       id: get_version_suffix
 
     - name: Pack project
