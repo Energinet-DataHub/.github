@@ -85,7 +85,7 @@ Describe "Assert-GithubVersionReferences" {
             Mock Get-Content {
                 return @"
                 mock
-                    uses: Energinet-DataHub/.github/actions/action@{0}
+                    uses: Energinet-DataHub/.github/.github/actions/action@{0}
                 Mock
 "@ -f "v49"
             }
