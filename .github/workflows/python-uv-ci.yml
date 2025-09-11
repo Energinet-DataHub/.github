@@ -191,17 +191,12 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
-      - name: Setup Environment
+      - name: Setup environment & Copy files for ${{ matrix.inputs.package_name }} prerelease
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         shell: bash
         run: |
           echo "RELEASE_ZIP_FILENAME=${{ matrix.inputs.release_name }}.zip" >> $GITHUB_ENV
           echo "RELEASE_FOLDER_PATH=${{ github.workspace }}/${{ matrix.inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
-
-      - name: Copy files for ${{ matrix.inputs.package_name }} prerelease
-        if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
-        shell: bash
-        run: |
           mkdir -p ${{ env.RELEASE_FOLDER_PATH }}
           if [ -d ${{ matrix.inputs.package_path }}/dist ]; then
             cp -r ${{ matrix.inputs.package_path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
