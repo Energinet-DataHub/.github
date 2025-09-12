@@ -37,10 +37,6 @@ on:
         description: Install specified .NET Core SDK version
         required: false
         type: string
-      operating_system:
-        required: false
-        default: ubuntu-22.04
-        type: string
       release_name_prefix:
         required: false
         type: string
@@ -56,13 +52,14 @@ on:
         type: boolean
 jobs:
   create_prerelease:
-    runs-on: ${{ inputs.operating_system }}
+    runs-on: ubuntu-22.04
     name: Build ${{ inputs.solution_file_path}}
     env:
       BUILD_CONFIGURATION: Release
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
+      SBOM_PATH: ${{ github.workspace }}/sbom.json
 
     steps:
       - name: Checkout repository
@@ -115,6 +112,20 @@ jobs:
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
+      - name: Install tools for SBOM generation
+        uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@dotnet-build-prerelease-generate-sbom
+
+      - name: Generate SBOM
+        run: |
+          echo "Running syft"
+          syft . -o spdx-json > sbom_raw.json
+          echo "Running jq"
+          jq . sbom_raw.json > ${{ env.SBOM_PATH }}
+          # echo "Running parlay"
+          # parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
+          # echo "Running jq"
+          # jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
+
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
@@ -145,6 +156,7 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
+          sbom_path: ${{ env.SBOM_PATH }}
 
       - name: Get release version strings
         id: get_release_version_strings
