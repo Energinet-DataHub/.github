@@ -126,6 +126,10 @@ jobs:
           # echo "Running jq"
           # jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
 
+      - name: Display SBOM
+        run: |
+          cat ${{ env.SBOM_PATH }}
+
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
