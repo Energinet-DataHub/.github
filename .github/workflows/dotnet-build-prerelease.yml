@@ -113,7 +113,7 @@ jobs:
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
       - name: Install tools for SBOM generation
-        uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@v14
+        uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@dotnet-build-prerelease-generate-sbom
 
       - name: Generate SBOM
         run: |
