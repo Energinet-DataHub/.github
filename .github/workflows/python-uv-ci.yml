@@ -198,7 +198,7 @@ jobs:
           echo "RELEASE_ZIP_FILENAME=${{ matrix.inputs.release_name }}.zip" >> $GITHUB_ENV
           echo "RELEASE_FOLDER_PATH=${{ github.workspace }}/${{ matrix.inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
-      - name: Setup environment & Copy files for ${{ matrix.inputs.package_name }} prerelease
+      - name: Copy files for ${{ matrix.inputs.package_name }} prerelease
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         shell: bash
         run: |
@@ -206,7 +206,7 @@ jobs:
           if [ -d ${{ matrix.inputs.package_path }}/dist ]; then
             cp -r ${{ matrix.inputs.package_path }}/dist ${{ env.RELEASE_FOLDER_PATH }}/dist
           fi
-          if [[ ${{ matrix.inputs.create_subsystem_release }} == 'true' ]]; then
+          if [[ ${{ inputs.create_subsystem_release }} == 'true' ]]; then
             rsync -avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --exclude='*' \
                 ${{ matrix.inputs.package_path }}/ \
                 ${{ env.RELEASE_FOLDER_PATH }}/subsystem_tests/
