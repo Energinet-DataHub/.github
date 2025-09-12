@@ -38,6 +38,19 @@ runs:
         echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
         echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
+    - name: Install tools for SBOM generation
+      uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@v14
+
+    - name: Generate SBOM
+      shell: bash
+      run: |
+        echo "Running syft"
+        syft . -o spdx-json > sbom_raw.json
+        echo "Running parlay"
+        parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
+        echo "Running jq"
+        jq . sbom_enriched.json > "${{ inputs.package_path }}/sbom.json"
+
     - name: Build ${{ inputs.package_name }}
       shell: bash
       run: uv build --wheel --directory ${{ inputs.package_path }}
