@@ -44,12 +44,7 @@ runs:
     - name: Generate SBOM
       shell: bash
       run: |
-        echo "Running syft"
-        syft . -o spdx-json > sbom_raw.json
-        echo "Running parlay"
-        parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
-        echo "Running jq"
-        jq . sbom_enriched.json > "${{ inputs.package_path }}/sbom.json"
+        syft . -o spdx-json --package-scope all | jq . > sbom.json
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
