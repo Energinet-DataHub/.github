@@ -52,7 +52,7 @@ on:
         type: boolean
 jobs:
   create_prerelease:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build ${{ inputs.solution_file_path}}
     env:
       BUILD_CONFIGURATION: Release
