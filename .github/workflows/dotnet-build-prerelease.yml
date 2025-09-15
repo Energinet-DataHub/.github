@@ -119,12 +119,10 @@ jobs:
         run: |
           echo "Running syft"
           syft . -o spdx-json > sbom_raw.json
+          echo "Running parlay"
+          parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
           echo "Running jq"
-          jq . sbom_raw.json > ${{ env.SBOM_PATH }}
-          # echo "Running parlay"
-          # parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
-          # echo "Running jq"
-          # jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
+          jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
