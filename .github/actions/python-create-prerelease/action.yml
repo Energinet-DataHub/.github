@@ -38,13 +38,13 @@ runs:
         echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
         echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
-    - name: Install tools for SBOM generation
-      uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@v14
-
-    - name: Generate SBOM
-      shell: bash
-      run: |
-        syft . -o spdx-json | jq . > "${{ inputs.package_path }}/sbom.json"
+    - name: Generate SBOM for node_modules
+      uses: anchore/sbom-action@v0
+      with:
+        path: ${{ inputs.package_path }}
+        format: spdx-json
+        output-file: ${{ inputs.package_path }}
+        dependency-snapshot: true
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
