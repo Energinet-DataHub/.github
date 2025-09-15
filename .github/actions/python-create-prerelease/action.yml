@@ -44,7 +44,6 @@ runs:
         path: ${{ inputs.package_path }}
         format: spdx-json
         output-file: ${{ inputs.package_path }}/sbom.json
-        dependency-snapshot: false
 
     - name: Cat file
       shell: bash
