@@ -43,8 +43,12 @@ runs:
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ inputs.package_path }}
+        output-file: ${{ inputs.package_path }}/sbom.json
         dependency-snapshot: true
+
+    - name: Cat file
+      shell: bash
+      run: cat ${{ inputs.package_path }}/sbom.json
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
