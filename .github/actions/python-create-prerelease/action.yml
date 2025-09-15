@@ -38,7 +38,7 @@ runs:
         echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
         echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
-    - name: Generate SBOM for node_modules
+    - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
         path: ${{ inputs.package_path }}
