@@ -44,7 +44,7 @@ runs:
     - name: Generate SBOM
       shell: bash
       run: |
-        syft . -o spdx-json --package-scope all | jq . > sbom.json
+        syft . -o spdx-json | jq . > sbom.json
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
