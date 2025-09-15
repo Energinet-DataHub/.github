@@ -123,7 +123,7 @@ jobs:
       - name: Generate SBOM
         run: |
           echo "Running syft and parlay"
-          syft . -o spdx-json | parlay e enrich - | jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
+          syft . -o spdx-json | parlay e enrich - | jq . > ${{ env.SBOM_PATH }}
           # syft . -o spdx-json | jq . > sbom_raw.json
           # echo "Running parlay"
           # parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
