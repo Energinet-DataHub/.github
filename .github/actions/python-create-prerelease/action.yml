@@ -47,7 +47,8 @@ runs:
 
     - name: Cat file
       shell: bash
-      run: cat ${{ inputs.package_path }}/sbom.json
+      working-directory: ${{ inputs.package_path }}
+      run: ls -a
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
