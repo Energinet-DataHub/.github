@@ -43,7 +43,7 @@ runs:
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ inputs.package_path }}/src/sbom.json
+        output-file: ${{ inputs.package_path }}/src/geh_calculated_measurements/sbom.json
 
     - name: Cat file
       shell: bash
