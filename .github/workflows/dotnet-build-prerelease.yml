@@ -37,6 +37,11 @@ on:
         description: Install specified .NET Core SDK version
         required: false
         type: string
+      sbom_root_directory:
+        required: false
+        type: string
+        description: The root directory to generate the SBOM for. Defaults to the repository root.
+        default: .
       release_name_prefix:
         required: false
         type: string
@@ -70,11 +75,6 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
-
-      - name: Setup .NET 9.0.1xx
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '9.0.1xx'
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -123,12 +123,7 @@ jobs:
       - name: Generate SBOM
         run: |
           echo "Running syft and parlay"
-          syft . -o spdx-json | parlay e enrich - | jq . > ${{ env.SBOM_PATH }}
-          # syft . -o spdx-json | jq . > sbom_raw.json
-          # echo "Running parlay"
-          # parlay ecosystems enrich sbom_raw.json > sbom_enriched.json
-          # echo "Running jq"
-          # jq . sbom_enriched.json > ${{ env.SBOM_PATH }}
+          syft ${{ inputs.sbom_root_directory }} -o spdx-json | parlay ecosystems enrich - | jq . > ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
