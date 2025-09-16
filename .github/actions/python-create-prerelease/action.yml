@@ -46,8 +46,8 @@ runs:
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ inputs.package_source_code_directory }}/sbom.json
-        artifact-name: "sbom-${{ inputs.package_name }}"
+        output-file: ${{ inputs.package_source_code_directory }}/${{ inputs.package_name }}/sbom.json
+        artifact-name: sbom-${{ inputs.package_name }}
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
