@@ -199,6 +199,7 @@ jobs:
           package_path: ${{ matrix.inputs.package_path }}
           release_name: ${{ matrix.inputs.release_name }}
           create_subsystem_release: ${{ inputs.create_subsystem_release }}
+          package_source_code_directory: ${{ matrix.inputs.package_path }}/${{ inputs.package_source_code_directory }}
 
       #
       # Testing steps

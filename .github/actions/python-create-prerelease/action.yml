@@ -29,6 +29,9 @@ inputs:
     description: The arguments to pass to rsync
     required: false
     default: -avm --exclude='**/__pycache__/' --include='src/***' --include='tests/***' --include='pyproject.toml' --include='README.md' --include='.python-version' --include='*.json' --exclude='*'
+  package_source_code_directory:
+    description: The directory inside the package path that contains the source code and tests
+    required: true
 runs:
   using: composite
   steps:
@@ -43,7 +46,8 @@ runs:
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ inputs.package_path }}/src/sbom.json
+        output-file: ${{ inputs.package_source_code_directory }}/sbom.json
+        artifact-name: "sbom-${{ inputs.package_name }}"
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
