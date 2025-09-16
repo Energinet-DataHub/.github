@@ -33,9 +33,9 @@ on:
       solution_file_path:
         required: true
         type: string
-      dotnet_version:
-        description: Install specified .NET Core SDK version
-        required: false
+      dotnet_major_version:
+        description: Install specified .NET Core SDK version. Runs on Ubuntu only, so the consumer should not expect a version to be pre-installed.
+        required: true
         type: string
       sbom_root_directory:
         required: false
@@ -70,11 +70,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET ${{ inputs.dotnet_version }}
-        if: ${{ inputs.dotnet_version }}
+      - name: Setup .NET ${{ inputs.dotnet_major_version }}
+        if: ${{ inputs.dotnet_major_version }}
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ inputs.dotnet_version }}
+          dotnet-version: ${{ inputs.dotnet_major_version }}.0.1xx
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -117,13 +117,20 @@ jobs:
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
-      - name: Install tools for SBOM generation
-        uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@dotnet-build-prerelease-generate-sbom
+      # - name: Install tools for SBOM generation
+      #   uses: Energinet-DataHub/.github/.github/actions/install-sbom-tools@dotnet-build-prerelease-generate-sbom
 
-      - name: Generate SBOM
-        run: |
-          echo "Running syft and parlay"
-          syft ${{ inputs.sbom_root_directory }} -o spdx-json | parlay ecosystems enrich - | jq . > ${{ env.SBOM_PATH }}
+      # - name: Generate SBOM
+      #   run: |
+      #     echo "Running syft and parlay"
+      #     syft ${{ inputs.sbom_root_directory }} -o spdx-json | parlay ecosystems enrich - | jq . > ${{ env.SBOM_PATH }}
+
+      - name: Generate SBOM for node_modules
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ inputs.sbom_root_directory }}
+          format: spdx-json
+          output-file: ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
