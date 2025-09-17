@@ -138,7 +138,7 @@ jobs:
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
-      - name: Generate SBOM for node_modules
+      - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
           path: ${{ inputs.sbom_root_directory }}
