@@ -89,6 +89,10 @@ jobs:
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
+          # Check name of package_data
+          PACKAGE_NAME=$(grep -A1 "package_data" setup.py | grep '"' | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Package name: $PACKAGE_NAME"
+          cp ./sbom.json ./$PACKAGE_NAME/sbom.json
           python setup.py sdist bdist_wheel
           mkdir "./artifacts"
           mv "./dist" "./artifacts"
