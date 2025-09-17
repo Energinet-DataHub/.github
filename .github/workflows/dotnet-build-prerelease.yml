@@ -33,14 +33,16 @@ on:
       solution_file_path:
         required: true
         type: string
-      dotnet_version:
-        description: Install specified .NET Core SDK version
+      dotnet_major_version:
         required: false
         type: string
-      operating_system:
+        description: Install specified .NET Core SDK version. Runs on Ubuntu 24.04 only, so the consumer should not expect a version to be pre-installed. Alternatively, specify the version in a global.json file in the repository root.
+        default: ""
+      sbom_root_directory:
         required: false
-        default: ubuntu-22.04
         type: string
+        description: The root directory to generate the SBOM for. Defaults to the repository root.
+        default: .
       release_name_prefix:
         required: false
         type: string
@@ -56,23 +58,43 @@ on:
         type: boolean
 jobs:
   create_prerelease:
-    runs-on: ${{ inputs.operating_system }}
+    runs-on: ubuntu-24.04
     name: Build ${{ inputs.solution_file_path}}
     env:
       BUILD_CONFIGURATION: Release
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
+      SBOM_PATH: ${{ github.workspace }}/sbom.json
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET ${{ inputs.dotnet_version }}
-        if: ${{ inputs.dotnet_version }}
-        uses: actions/setup-dotnet@v4
+      - name: Check for existence of global.json
+        if: ${{ inputs.dotnet_major_version == '' }}
+        id: check_global_json
+        run: |
+          if [ -f "global.json" ]; then
+            echo "global_json_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "global_json_exists=false" >> $GITHUB_OUTPUT
+            echo "Neither 'dotnet_major_version' input nor 'global.json' file found."
+            echo "Failuring the workflow as .NET version is not specified."
+            exit 10
+          fi
+
+      - name: Setup .NET using global.json
+        if: ${{ steps.check_global_json.outputs.global_json_exists == 'true' }}
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ inputs.dotnet_version }}
+          global-json-file: global.json
+
+      - name: Setup .NET ${{ inputs.dotnet_major_version }}
+        if: ${{ inputs.dotnet_major_version }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ inputs.dotnet_major_version }}.0.1xx
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -95,6 +117,7 @@ jobs:
 
           # Check if any version is greater than or equal to 8.0.0
           forbidden_version=$(jq -r '.[] | select(. >= "8.0.0")' fluentassertions-versions.json)
+          echo "forbidden_version: '$forbidden_version'"
           if [ -n "$forbidden_version" ]; then
             echo -e "::error title='Forbidden FluentAssertions version detected'::Forbidden 'FluentAssertions' version $forbidden_version found"
             exit 1
@@ -114,6 +137,13 @@ jobs:
           #
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
+
+      - name: Generate SBOM for node_modules
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ inputs.sbom_root_directory }}
+          format: spdx-json
+          output-file: ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
@@ -145,6 +175,7 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
+          sbom_path: ${{ env.SBOM_PATH }}
 
       - name: Get release version strings
         id: get_release_version_strings
