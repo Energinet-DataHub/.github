@@ -41,12 +41,27 @@ runs:
         echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
         echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
+        # Check if code directory exists, else it is due to - being _
+        if [ ! -d "${{ inputs.package_source_code_directory }}/${{ inputs.package_name }}" ]; then
+          echo "The directory ${{ inputs.package_source_code_directory }}/${{ inputs.package_name }} does not exist. Trying with underscores instead of dashes."
+          PACKAGE_NAME_UNDERSCORES=$(echo "${{ inputs.package_name }}" | tr '-' '_')
+          if [ -d "${{ inputs.package_source_code_directory }}/${{ PACKAGE_NAME_UNDERSCORES }}" ]; then
+            echo "Found directory with underscores: ${{ inputs.package_source_code_directory }}/${{ PACKAGE_NAME_UNDERSCORES }}"
+            echo "PACKAGE_NAME_FOLDER=${{ PACKAGE_NAME_UNDERSCORES }}" >> $GITHUB_ENV
+          else
+            echo "Error: Neither ${{ inputs.package_source_code_directory }}/${{ inputs.package_name }} nor ${{ inputs.package_source_code_directory }}/${{ PACKAGE_NAME_UNDERSCORES }} exist."
+            exit 1
+          fi
+        else
+          echo "PACKAGE_NAME_FOLDER=${{ inputs.package_name }}" >> $GITHUB_ENV
+        fi
+
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ inputs.package_source_code_directory }}/${{ inputs.package_name }}/sbom.json
+        output-file: ${{ env.PACKAGE_NAME_FOLDER }}/sbom.json
         artifact-name: sbom-${{ inputs.package_name }}
 
     - name: Build ${{ inputs.package_name }}
