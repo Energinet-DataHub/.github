@@ -122,6 +122,14 @@ jobs:
             exit 1
           fi
 
+      - name: Upload versions.json and fluentassertions-versions.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-versions
+          path: |
+            versions.json
+            fluentassertions-versions.json
+
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
         id: find_pull_request
