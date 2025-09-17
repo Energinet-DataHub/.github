@@ -41,7 +41,7 @@ runs:
         echo "RELEASE_ZIP_FILENAME=${{ inputs.release_name }}.zip" >> $GITHUB_ENV
         echo "RELEASE_FOLDER_PATH=${{ inputs.github_workspace }}/${{ inputs.package_name }}-release/artifacts" >> $GITHUB_ENV
 
-        # Ensure package directory exists; fallback from "-" to "_"
+        # Ensure package directory exists; fallback from "-" to "_", as teams are not using the same naming convention
         PACKAGE_DIR="${{ inputs.package_source_code_directory }}/${{ inputs.package_name }}"
 
         if [ -d "$PACKAGE_DIR" ]; then
