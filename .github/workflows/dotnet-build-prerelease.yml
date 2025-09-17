@@ -79,6 +79,9 @@ jobs:
             echo "global_json_exists=true" >> $GITHUB_OUTPUT
           else
             echo "global_json_exists=false" >> $GITHUB_OUTPUT
+            echo "Neither 'dotnet_major_version' input nor 'global.json' file found."
+            echo "Failuring the workflow as .NET version is not specified."
+            exit 1
           fi
 
       - name: Setup .NET using global.json
