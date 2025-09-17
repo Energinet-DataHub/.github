@@ -73,6 +73,15 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
         id: find_pull_request
 
+      - name: Generate SBOM
+        if: ${{ ! inputs.multiple_wheels }}
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ inputs.wheel_working_directory }}
+          format: spdx-json
+          output-file: ${{ inputs.wheel_working_directory }}/sbom.json
+          artifact-name: sbom
+
       # This creates the wheel in a subfolder "dist"
       - name: Create Single Python Wheel for Databricks Jobs
         shell: bash
@@ -93,6 +102,7 @@ jobs:
         working-directory: ${{ inputs.wheel_working_directory }}
         run: |
           pip install wheel
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
           mkdir "./artifacts"
 
           # Loop through all directories in the current path
@@ -106,9 +116,13 @@ jobs:
               mkdir -p "$output_dir"
               echo "Created output directory: $output_dir"
 
-              # Navigate into the directory
+              cd "$dir"
+
+              echo "Generating SBOM"
+              syft . -o spdx-json | jq . > sbom.json
+
               echo "Running python setup.py in $dir"
-              (cd "$dir" && python setup.py sdist bdist_wheel)
+              (python setup.py sdist bdist_wheel)
 
               # Move the generated files to the artifacts subfolder
               echo "Moving files to $output_dir"
