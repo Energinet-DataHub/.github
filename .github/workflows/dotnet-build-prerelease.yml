@@ -34,9 +34,10 @@ on:
         required: true
         type: string
       dotnet_major_version:
-        description: Install specified .NET Core SDK version. Runs on Ubuntu only, so the consumer should not expect a version to be pre-installed.
-        required: true
+        required: false
         type: string
+        description: Install specified .NET Core SDK version. Runs on Ubuntu 24.04 only, so the consumer should not expect a version to be pre-installed. Alternatively, specify the version in a global.json file in the repository root.
+        default: ""
       sbom_root_directory:
         required: false
         type: string
@@ -69,6 +70,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Check for existence of global.json and output SDK version
+        if: ${{ inputs.dotnet_major_version == '' }}
+        id: global_json_sdk_version
+        run: |
+          if [ -f "global.json" ]; then
+            echo "global.json found. Contents:"
+            cat global.json
+            sdk_version=$(jq -r '.sdk.version' global.json)
+            echo "sdk_version=$sdk_version" >> $GITHUB_OUTPUT
+            echo "SDK version specified in global.json: $sdk_version"
+          else
+            echo "No global.json file found in the repository root."
+          fi
+
+      - name: Setup .NET version specified in global.json
+        if: ${{ steps.global_json_sdk_version.outputs.sdk_version }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ steps.global_json_sdk_version.outputs.sdk_version }}
 
       - name: Setup .NET ${{ inputs.dotnet_major_version }}
         if: ${{ inputs.dotnet_major_version }}
