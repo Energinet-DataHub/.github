@@ -71,25 +71,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check for existence of global.json and output SDK version
+      - name: Check for existence of global.json
         if: ${{ inputs.dotnet_major_version == '' }}
-        id: global_json_sdk_version
+        id: check_global_json
         run: |
           if [ -f "global.json" ]; then
-            echo "global.json found. Contents:"
-            cat global.json
-            sdk_version=$(jq -r '.sdk.version' global.json)
-            echo "sdk_version=$sdk_version" >> $GITHUB_OUTPUT
-            echo "SDK version specified in global.json: $sdk_version"
+            echo "global_json_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "No global.json file found in the repository root."
+            echo "global_json_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup .NET version specified in global.json
-        if: ${{ steps.global_json_sdk_version.outputs.sdk_version }}
+      - name: Setup .NET using global.json
+        if: ${{ steps.check_global_json.outputs.global_json_exists == 'true' }}
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ steps.global_json_sdk_version.outputs.sdk_version }}
+          global-json-file: global.json
 
       - name: Setup .NET ${{ inputs.dotnet_major_version }}
         if: ${{ inputs.dotnet_major_version }}
