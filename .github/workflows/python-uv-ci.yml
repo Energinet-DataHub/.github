@@ -192,7 +192,7 @@ jobs:
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
       - name: Create prerelease for ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@nhq/3289-pythonSBOM
+        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v14
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         with:
           package_name: ${{ matrix.inputs.package_name }}
