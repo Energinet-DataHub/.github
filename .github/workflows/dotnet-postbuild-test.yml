@@ -262,14 +262,6 @@ jobs:
               Exit 1
             }
 
-      - name: Login to use Azure resources from automated tests
-        if: ${{ inputs.run_integration_tests == true }}
-        uses: azure/login@v2
-        with:
-          client-id: ${{ inputs.azure_integrationtest_spn_id }}
-          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
-          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
-
       - name: Wait for dotnet-tests artifact to be ready for download
         uses: Wandalen/wretry.action@v1
         with:
@@ -279,6 +271,14 @@ jobs:
             path: ${{ env.ARTIFACTS_PATH }}
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
+
+      - name: Login to use Azure resources from automated tests
+        if: ${{ inputs.run_integration_tests == true }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
