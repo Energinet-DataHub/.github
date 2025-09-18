@@ -272,14 +272,6 @@ jobs:
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
 
-      - name: Login to use Azure resources from automated tests
-        if: ${{ inputs.run_integration_tests == true }}
-        uses: azure/login@v2
-        with:
-          client-id: ${{ inputs.azure_integrationtest_spn_id }}
-          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
-          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
-
       - name: Unzip dotnet-tests-outputs.zip
         shell: pwsh
         run: |
@@ -291,6 +283,14 @@ jobs:
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ inputs.nuget_cache_key_prefix }}-
+
+      - name: Login to use Azure resources from automated tests
+        if: ${{ inputs.run_integration_tests == true }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ inputs.azure_integrationtest_spn_id }}
+          tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
+          subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
