@@ -138,9 +138,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install tools
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v14
-
       - name: Check if ${{ matrix.inputs.package_name }} has changed
         uses: dorny/paths-filter@v3
         id: changes
@@ -150,6 +147,10 @@ jobs:
               - ${{ matrix.inputs.package_path }}/**
             is_src_changed:
               - ${{ matrix.inputs.package_path }}/${{ inputs.package_source_code_directory }}/**
+
+      - name: Install tools
+        if: ${{ steps.changes.outputs.is_src_changed == 'true' }}
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v14
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
