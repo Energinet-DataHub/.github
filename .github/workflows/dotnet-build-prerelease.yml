@@ -144,6 +144,7 @@ jobs:
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
       - name: Generate SBOM
+        if: ${{ inputs.sbom_root_directories == '' }}
         uses: anchore/sbom-action@v0
         with:
           path: ${{ inputs.sbom_root_directory }}
@@ -158,14 +159,14 @@ jobs:
           curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
 
           IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
-          combinedDir="combined"
-          mkdir -p $combinedDir
+          combinedDir="${{ github.workspace }}/combined"
+          mkdir -p "$combinedDir"
           for directory in "${DIRS[@]}"; do
-            source="/$directory"
+            source="${{ github.workspace }}/$directory"
             cp -r "$source/"* "$combinedDir/" -R
           done
 
-          syft $combinedDir -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+          syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
