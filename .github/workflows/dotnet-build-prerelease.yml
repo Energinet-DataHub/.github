@@ -41,8 +41,13 @@ on:
       sbom_root_directory:
         required: false
         type: string
-        description: The root directory to generate the SBOM for. Defaults to the repository root.
+        description: Root directory to generate the SBOM for. Defaults to the repository root.
         default: .
+      sbom_root_directories:
+        required: false
+        type: string
+        description: A list of root directories to generate the SBOMs for. Provide a comma-separated list of directories.
+        default: ""
       release_name_prefix:
         required: false
         type: string
