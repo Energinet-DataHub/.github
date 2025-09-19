@@ -46,7 +46,7 @@ on:
       sbom_root_directories:
         required: false
         type: string
-        description: A list of root directories to generate the SBOMs for. Provide a comma-separated list of directories.
+        description: A list of root directories to generate the SBOMs for. Provide a semicolon-separated list of directories.
         default: ""
       release_name_prefix:
         required: false
@@ -150,6 +150,22 @@ jobs:
           artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
           format: spdx-json
           output-file: ${{ env.SBOM_PATH }}
+
+      - name: Generate SBOMs for multiple root directories
+        if: ${{ inputs.sbom_root_directories != '' }}
+        shell: bash
+        run: |
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+
+          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
+          combinedDir="combined"
+          mkdir -p $combinedDir
+          for directory in "${DIRS[@]}"; do
+            source="/$directory"
+            cp -r "$source/"* "$combinedDir/" -R
+          done
+
+          syft $combinedDir -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet tests outputs
