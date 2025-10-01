@@ -22,4 +22,3 @@ updates:
       other-providers:
         patterns:
           - "*" # This will catch all other providers not specified above
-
