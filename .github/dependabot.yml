@@ -13,7 +13,6 @@ updates:
       - "NicolajAaH"
       - "djorgensendk"
       - "lanni-energinet"
-      - "Karl-koder"
       - "yusuftezel03"
       - "AdmirMuric"
     groups:
@@ -23,3 +22,4 @@ updates:
       other-providers:
         patterns:
           - "*" # This will catch all other providers not specified above
+
