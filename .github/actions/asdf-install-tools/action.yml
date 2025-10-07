@@ -34,7 +34,7 @@ runs:
 
     - name: Save asdf cache
       uses: actions/cache/save@v4
-      if: ${{ always() && steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
+      if: ${{ steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
       with:
         path: /home/runner/.asdf
         key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
