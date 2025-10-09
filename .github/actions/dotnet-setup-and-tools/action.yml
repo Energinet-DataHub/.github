@@ -62,7 +62,7 @@ runs:
     # We have added a retry action to see if this can mitigate builds failing on this account.
     - name: Setup Azure Cosmos DB Emulator (with retry)
       if: ${{ inputs.use_cosmos_db_emulator == 'true' }}
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3

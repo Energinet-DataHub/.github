@@ -17,10 +17,10 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v15
       id: find_pull_request
 
-    - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
+    - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v15
       name: Generate Github token
       id: generate_token
       with:
@@ -28,7 +28,7 @@ runs:
         private_key: ${{ inputs.private_key }}
 
     - name: Repository Dispatch
-      uses: peter-evans/repository-dispatch@v3
+      uses: peter-evans/repository-dispatch@v4
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ inputs.repository }}
