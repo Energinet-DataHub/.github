@@ -56,11 +56,6 @@ on:
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
         default: "false"
-      skip_validate_version_references:
-        required: false
-        type: string
-        description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
-        default: "false"
     secrets:
       dh3serviceaccount_privatekey:
         required: true
@@ -213,25 +208,3 @@ jobs:
           else {
             Write-Host "No Pester test files detected. Skipping Pester execution."
           }
-
-  github_validate_version_references:
-    name: Validate references to shared action/modules
-    if: ${{ inputs.skip_validate_version_references != 'true' }}
-    runs-on: ${{ inputs.operating_system }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
-        name: Generate Github token
-        id: generate_token
-        with:
-          app_id: ${{ vars.dh3serviceaccount_appid }}
-          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
-
-      - name: Run reference validation on local folder
-        uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@v14
-        env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
-        with:
-          folder: ${{ github.workspace }}
