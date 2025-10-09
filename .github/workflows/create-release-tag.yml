@@ -10,7 +10,7 @@ jobs:
   create_release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
         name: Generate Github token
