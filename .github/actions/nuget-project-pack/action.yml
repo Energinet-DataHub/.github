@@ -65,6 +65,6 @@ runs:
     - name: Verify SBOM inclusion
       shell: pwsh
       run: |
-        $pkg = Get-ChildItem "./source/App/source/Common/Common.csproj/bin/Release" -Filter "*.nupkg" | Select-Object -First 1
+        $pkg = Get-ChildItem "./source/App/source/Common/Common/bin/Release" -Filter "*.nupkg" | Select-Object -First 1
         Write-Host "Inspecting: $($pkg.FullName)"
         unzip -l $pkg.FullName | Select-String "sbom.spdx.json" | ForEach-Object { Write-Host $_.Line }
