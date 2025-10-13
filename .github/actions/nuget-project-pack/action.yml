@@ -29,26 +29,29 @@ runs:
       uses: Energinet-DataHub/.github/.github/actions/nuget-get-version-suffix@v14
       id: get_version_suffix
 
+    - name: Build project
+      shell: pwsh
+      run: |
+        dotnet build ${{ inputs.project_path }} `
+          --configuration ${{ inputs.build_configuration }} `
+          -p:SymbolPackageFormat=snupkg `
+          -p:RepositoryCommit=${{ github.sha }} `
+          ${{ steps.get_version_suffix.outputs.version_suffix_property }}
+
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
-        path: ${{ inputs.project_path }}
-        artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
+        path: ${{ inputs.project_path }}/bin/${{ inputs.build_configuration }}
+        artifact-name: sbom.spdx.json
         format: spdx-json
         output-file: ${{ github.workspace }}/sbom.json
-
-    - name: Move SBOM into manifest folder
-      shell: pwsh
-      run: |
-        $manifestDir = Join-Path "${{ inputs.project_path }}" "obj/_manifest/spdx_2.2"
-        New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
-        Copy-Item "${{ github.workspace }}/sbom.json" (Join-Path $manifestDir "manifest.spdx.json") -Force
 
     - name: Pack project
       shell: pwsh
       run: |
         dotnet pack ${{ inputs.project_path }} `
           --configuration ${{ inputs.build_configuration }} `
+          --no-build `
           --include-symbols `
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `
@@ -59,4 +62,4 @@ runs:
       run: |
         $pkg = Get-ChildItem "${{ inputs.project_path }}/bin/${{ inputs.build_configuration }}" -Filter "*.nupkg" | Select-Object -First 1
         Write-Host "Inspecting: $($pkg.FullName)"
-        unzip -l $pkg.FullName | Select-String "_manifest/spdx_2.2/manifest.spdx.json"
+        unzip -l $pkg.FullName | Select-String "sbom.spdx.json" | ForEach-Object { Write-Host $_.Line }
