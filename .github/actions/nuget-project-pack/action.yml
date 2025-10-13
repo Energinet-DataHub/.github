@@ -61,6 +61,7 @@ runs:
         dotnet pack ${{ inputs.project_path }} `
           --configuration ${{ inputs.build_configuration }} `
           --no-build `
+          --artifacts-path ./${{ steps.compute-dir.outputs.project_name }}/bin/${{ inputs.build_configuration }} `
           --include-symbols `
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `
