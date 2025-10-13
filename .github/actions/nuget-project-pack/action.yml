@@ -53,7 +53,7 @@ runs:
 
     - name: Cat SBOM
       shell: bash
-      run: cat ${{ github.workspace }}/sbom.json
+      run: cat "${{ github.workspace }}/sbom.json"
 
     - name: Pack project
       shell: pwsh
