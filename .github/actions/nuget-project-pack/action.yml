@@ -41,7 +41,7 @@ runs:
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
-        path: ${{ inputs.project_path }}/bin/${{ inputs.build_configuration }}
+        path: ${{ dirname(inputs.project_path) }}/bin/${{ inputs.build_configuration }}
         artifact-name: sbom.spdx.json
         format: spdx-json
         output-file: ${{ github.workspace }}/sbom.json
