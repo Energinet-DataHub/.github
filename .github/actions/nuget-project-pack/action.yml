@@ -51,6 +51,10 @@ runs:
         format: spdx-json
         output-file: ${{ github.workspace }}/sbom.json
 
+    - name: Cat SBOM
+      shell: bash
+      run: cat ${{ github.workspace }}/sbom.json
+
     - name: Pack project
       shell: pwsh
       run: |
@@ -61,10 +65,3 @@ runs:
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `
           ${{ steps.get_version_suffix.outputs.version_suffix_property }}
-
-    - name: Verify SBOM inclusion
-      shell: pwsh
-      run: |
-        $pkg = Get-ChildItem "./source/App/source/Common/bin/Release" -Filter "*.nupkg" | Select-Object -First 1
-        Write-Host "Inspecting: $($pkg.FullName)"
-        unzip -l $pkg.FullName | Select-String "sbom.spdx.json" | ForEach-Object { Write-Host $_.Line }
