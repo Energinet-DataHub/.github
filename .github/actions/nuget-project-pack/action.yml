@@ -41,13 +41,17 @@ runs:
     - name: Compute directory
       shell: bash
       id: compute-dir
-      run: echo "project_dir=$(dirname '${{ inputs.project_path }}')" >> $GITHUB_OUTPUT
+      run: |
+        echo "project_dir=$(dirname '${{ inputs.project_path }}')" >> $GITHUB_OUTPUT
+        # Get name from project_path (last part without .csproj)
+        project_name=$(basename "${{ inputs.project_path }}" .csproj)
+        echo "project_name=$project_name" >> $GITHUB_OUTPUT
 
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
         path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}
-        artifact-name: sbom.spdx.json
+        artifact-name: sbom-${{ steps.compute-dir.outputs.project_name }}.spdx.json
         format: spdx-json
         output-file: ${{ github.workspace }}/sbom.json
 
