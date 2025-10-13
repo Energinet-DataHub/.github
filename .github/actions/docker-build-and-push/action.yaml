@@ -43,7 +43,7 @@ runs:
     - name: Resolve container image name
       id: tag
       shell: bash
-      run: echo "LOWERCASED=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      run: echo "LOWERCASED=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV && echo "image=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}' | tr '[:upper:]' '[:lower:]'):${{ inputs.image-tag }}" >> $GITHUB_OUTPUT
 
     - name: Log in to the Container registry
       uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
