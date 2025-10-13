@@ -38,10 +38,15 @@ runs:
           -p:RepositoryCommit=${{ github.sha }} `
           ${{ steps.get_version_suffix.outputs.version_suffix_property }}
 
+    - name: Compute directory
+      shell: bash
+      id: compute-dir
+      run: echo "project_dir=$(dirname '${{ inputs.project_path }}')" >> $GITHUB_OUTPUT
+
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
-        path: ${{ dirname(inputs.project_path) }}/bin/${{ inputs.build_configuration }}
+        path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}
         artifact-name: sbom.spdx.json
         format: spdx-json
         output-file: ${{ github.workspace }}/sbom.json
