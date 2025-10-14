@@ -59,7 +59,7 @@ runs:
         path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}
         artifact-name: sbom-${{ steps.compute-dir.outputs.project_name }}.spdx.json
         format: spdx-json
-        output-file: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
+        output-file: ${{ github.workspace }}/sbom.json
 
     - name: Pack project
       shell: pwsh
@@ -76,16 +76,4 @@ runs:
       uses: actions/attest-sbom@v3
       with:
         subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
-        sbom-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
-
-    - uses: actions/upload-artifact@v4
-      name: Upload NuGet package for verification
-      with:
-        name: nuget-package-${{ steps.compute-dir.outputs.project_name }}
-        path: ./**/bin/${{ inputs.build_configuration }}/*.nupkg
-
-    - name: Upload SBOM for verification
-      uses: actions/upload-artifact@v4
-      with:
-        name: sbom-${{ steps.compute-dir.outputs.project_name }}
-        path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
+        sbom-path: ${{ github.workspace }}/sbom.json
