@@ -67,6 +67,13 @@ runs:
           -p:RepositoryCommit=${{ github.sha }} `
           ${{ steps.get_version_suffix.outputs.version_suffix_property }}
 
+    - name: Attest SBOM
+      uses: actions/attest-sbom@v3
+      with:
+        subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
+        sbom-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
+
+
     - uses: actions/upload-artifact@v4
       name: Upload NuGet package for verification
       with:
