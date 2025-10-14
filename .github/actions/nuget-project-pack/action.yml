@@ -29,11 +29,17 @@ runs:
       uses: Energinet-DataHub/.github/.github/actions/nuget-get-version-suffix@v14
       id: get_version_suffix
 
+    - name: Restore NuGet packages
+      shell: pwsh
+      run: |
+        dotnet restore ${{ inputs.project_path }}
+
     - name: Build project
       shell: pwsh
       run: |
         dotnet build ${{ inputs.project_path }} `
           --configuration ${{ inputs.build_configuration }} `
+          --no-restore `
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `
           ${{ steps.get_version_suffix.outputs.version_suffix_property }}
