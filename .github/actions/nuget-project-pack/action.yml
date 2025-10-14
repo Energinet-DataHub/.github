@@ -67,7 +67,6 @@ runs:
         dotnet pack ${{ inputs.project_path }} `
           --configuration ${{ inputs.build_configuration }} `
           --no-build `
-          --artifacts-path ./${{ steps.compute-dir.outputs.project_name }}/bin/${{ inputs.build_configuration }} `
           --include-symbols `
           -p:SymbolPackageFormat=snupkg `
           -p:RepositoryCommit=${{ github.sha }} `
@@ -78,7 +77,6 @@ runs:
       with:
         subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
         sbom-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
-
 
     - uses: actions/upload-artifact@v4
       name: Upload NuGet package for verification
