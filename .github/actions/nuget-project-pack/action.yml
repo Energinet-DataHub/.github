@@ -83,3 +83,9 @@ runs:
       with:
         name: nuget-package-${{ steps.compute-dir.outputs.project_name }}
         path: ./**/bin/${{ inputs.build_configuration }}/*.nupkg
+
+    - name: Upload SBOM for verification
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-${{ steps.compute-dir.outputs.project_name }}
+        path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/sbom.json
