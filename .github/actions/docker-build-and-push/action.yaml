@@ -46,7 +46,7 @@ runs:
       run: echo "LOWERCASED=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV && echo "image=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}' | tr '[:upper:]' '[:lower:]'):${{ inputs.image-tag }}" >> $GITHUB_OUTPUT
 
     - name: Log in to the Container registry
-      uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -55,7 +55,7 @@ runs:
 
     - name: Build and push Docker image
       id: build
-      uses: docker/build-push-action@2a7db1d68aab1a514ba647f39bcde60888a1753f
+      uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
       with:
         context: ${{ inputs.docker-context }}
         file: ${{ inputs.dockerfile }}
