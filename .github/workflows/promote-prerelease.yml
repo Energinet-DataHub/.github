@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v15
         id: find_pull_request
 
       - name: Set release_name

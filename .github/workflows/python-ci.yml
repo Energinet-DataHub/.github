@@ -110,7 +110,7 @@ jobs:
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v14
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v15
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_folder_path: ${{ inputs.tests_folder_path}}

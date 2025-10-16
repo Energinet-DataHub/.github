@@ -112,7 +112,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v14
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v15
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -226,7 +226,7 @@ jobs:
           echo "warehouse_id=$warehouse_id" >>$GITHUB_OUTPUT
 
       - name: Test Integration ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v14
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v15
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
         env:
           DATABRICKS_HOST: ${{ steps.secrets.outputs.workspace_url }}
@@ -239,7 +239,7 @@ jobs:
           pytest_addopts: ${{ inputs.pytest_addopts }}
 
       - name: Test ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v14
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v15
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id == '' && inputs.azure_tenant_id == '' && inputs.azure_subscription_id == ''  }}
         with:
           name: ${{ matrix.inputs.package_name }}
