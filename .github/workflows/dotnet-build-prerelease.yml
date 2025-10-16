@@ -145,7 +145,7 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ inputs.sbom_root_directories == '' }}
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.20.6
         with:
           path: ${{ inputs.sbom_root_directory }}
           artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json

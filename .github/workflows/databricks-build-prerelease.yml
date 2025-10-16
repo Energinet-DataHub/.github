@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ ! inputs.multiple_wheels }}
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.20.6
         with:
           path: ${{ inputs.wheel_working_directory }}
           format: spdx-json

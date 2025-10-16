@@ -61,7 +61,7 @@ runs:
         fi
 
     - name: Generate SBOM
-      uses: anchore/sbom-action@v0
+      uses: anchore/sbom-action@v0.20.6
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
