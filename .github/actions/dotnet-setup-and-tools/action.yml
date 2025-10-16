@@ -52,7 +52,7 @@ runs:
   steps:
     - name: Setup .NET ${{ inputs.dotnet_version }}
       if: ${{ inputs.dotnet_version }}
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ inputs.dotnet_version }}
       env:
@@ -81,7 +81,7 @@ runs:
 
     - name: Use Node v${{ inputs.node_version }}
       if: ${{ inputs.use_azure_functions_tools == 'true' }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node_version }}
 

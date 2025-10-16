@@ -27,7 +27,7 @@ jobs:
     steps:
       # Checkout the repository, so gh cli can interact with it
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
