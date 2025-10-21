@@ -12,22 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate Github token
+      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
+        name: Generate Github token
         id: generate_token
-        uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.dh3serviceaccount_appid }}
-          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
-          owner: Energinet-Datahub
+          app_id: ${{ vars.dh3serviceaccount_appid }}
+          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
       - name: Create release
         uses: ./.github/actions/create-release-tag
         with:
           # BE AWARE --> Updating to a new MAJOR version will delete deprecated versions on a nightly schedule.
           # See https://github.com/Energinet-DataHub/.github#release-procedure for details
-          major_version: 16
-          minor_version: 0
-          patch_version: 0
+          major_version: 15
+          minor_version: 3
+          patch_version: 2
           repository_path: Energinet-DataHub/.github
+          usage_patterns: \s*uses:\s*Energinet-DataHub/\.github(.*)@v?(?<version>\d+)
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}

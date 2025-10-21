@@ -20,13 +20,12 @@ runs:
       uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
       id: find_pull_request
 
-    - name: Generate Github token
+    - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
+      name: Generate Github token
       id: generate_token
-      uses: actions/create-github-app-token@v2
       with:
-        app-id: ${{ inputs.app_id }}
-        private-key: ${{ inputs.private_key }}
-        owner: Energinet-Datahub
+        app_id: ${{ inputs.app_id }}
+        private_key: ${{ inputs.private_key }}
 
     - name: Repository Dispatch
       uses: peter-evans/repository-dispatch@v3
