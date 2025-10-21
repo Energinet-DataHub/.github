@@ -61,7 +61,7 @@ runs:
         fi
 
     - name: Generate SBOM
-      uses: anchore/sbom-action@v0.20.6
+      uses: anchore/sbom-action@v0.20.8
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
@@ -93,7 +93,7 @@ runs:
         directory: ${{ env.RELEASE_FOLDER_PATH }}
 
     - name: Create prerelease for ${{ inputs.name }}
-      uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
+      uses: Energinet-Datahub/.github/.github/actions/github-create-release@v16
       with:
         repo_token: ${{ inputs.github_token }}
         automatic_release_tag: ${{ inputs.release_name }}
