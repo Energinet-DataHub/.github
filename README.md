@@ -45,6 +45,13 @@ git checkout -b <branch-name>
 git push
 
 ---
+> :warning: **Releases lower than two versions (i.e. v45 when v47 has been created) WILL BE DELETED !!**
+
+This is handled by a scheduled workflow **(/Energinet-DataHub/dh3-automation/blob/main/.github/workflows/rat-update-scheduled.yml)** out of `dh3-automation` every night.
+
+We **MUST** ensure that no references exists to releases of  `.github` and `geh-terraform-modules` about to be deleted.
+
+---
 
 ## Release process
 
