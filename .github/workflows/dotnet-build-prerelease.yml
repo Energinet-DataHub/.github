@@ -129,7 +129,7 @@ jobs:
           fi
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v15
         id: find_pull_request
 
       - name: Build solution
@@ -145,7 +145,7 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ inputs.sbom_root_directories == '' }}
-        uses: anchore/sbom-action@v0.20.6
+        uses: anchore/sbom-action@v0.20.8
         with:
           path: ${{ inputs.sbom_root_directory }}
           artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
@@ -177,7 +177,7 @@ jobs:
 
       - name: Zip dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ env.TESTS_ZIP_FILENAME }}
@@ -202,13 +202,13 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v15
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
@@ -216,7 +216,7 @@ jobs:
 
       - name: Create pre-release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v15
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
