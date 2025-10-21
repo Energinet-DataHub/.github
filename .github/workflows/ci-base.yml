@@ -56,11 +56,6 @@ on:
         type: string
         description: Set to true to skip executing Pester tests for Github actions in repository.
         default: "false"
-      skip_validate_version_references:
-        required: false
-        type: string
-        description: Set to true to skip validation of references to deprecated versions of GitHub reusable actions/workflows and Terraform modules.
-        default: "false"
     secrets:
       dh3serviceaccount_privatekey:
         required: true
@@ -177,10 +172,76 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run yamllint on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/yaml-lint@v15
-        with:
-          yaml_file_or_folder: .github
+
+      - name: Lint YAML files
+        shell: pwsh
+        run: |
+          $target = ".github"
+
+          if ((Test-Path -Path $target) -eq $false)
+          {
+            Write-Warning "Skipping YAML linting. Target '$($target)' not found."
+            exit 0
+          }
+
+          # Create yamllint config file
+          @"
+          #
+          # Uses a custom configuration.
+          # See also: https://yamllint.readthedocs.io/en/stable/configuration.html#default-configuration
+          #
+          # By default the script will exit with a return code 1 only when there is one or more error(s).
+          # See also https://yamllint.readthedocs.io/en/stable/configuration.html#errors-and-warnings
+          #
+
+          yaml-files:
+            - "*.yaml"
+            - "*.yml"
+            - .yamllint
+
+          rules:
+            braces:
+              min-spaces-inside: 1
+              max-spaces-inside: 1
+              min-spaces-inside-empty: 0
+              max-spaces-inside-empty: 0
+            brackets: enable
+            colons: enable
+            commas: enable
+            comments:
+              require-starting-space: true
+              ignore-shebangs: true
+              min-spaces-from-content: 1
+            comments-indentation: enable
+            document-end: disable
+            document-start: disable
+            empty-lines: enable
+            empty-values: disable
+            float-values: disable
+            hyphens: enable
+            indentation:
+              spaces: consistent
+              indent-sequences: consistent
+              check-multi-line-strings: false
+            key-duplicates: enable
+            key-ordering: disable
+            new-line-at-end-of-file: enable
+            new-lines: disable
+            octal-values: disable
+            quoted-strings:
+              quote-type: double
+              required: only-when-needed
+              extra-required: []
+              extra-allowed: []
+              allow-quoted-quotes: false
+            trailing-spaces: enable
+            truthy: disable
+          "@ | Set-Content -Encoding UTF8 .yamllint
+
+          pip install yamllint
+          yamllint -f colored -c .yamllint $target
+
+          Write-Host "YAML linting completed."
 
   github_actions_validate_casing:
     name: Validate casing in Github actions and workflows
@@ -191,7 +252,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run casing validation on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v15
         with:
           folder: .github
 
@@ -213,25 +274,3 @@ jobs:
           else {
             Write-Host "No Pester test files detected. Skipping Pester execution."
           }
-
-  github_validate_version_references:
-    name: Validate references to shared action/modules
-    if: ${{ inputs.skip_validate_version_references != 'true' }}
-    runs-on: ${{ inputs.operating_system }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: Energinet-DataHub/.github/.github/actions/github-create-token@v14
-        name: Generate Github token
-        id: generate_token
-        with:
-          app_id: ${{ vars.dh3serviceaccount_appid }}
-          private_key: ${{ secrets.dh3serviceaccount_privatekey }}
-
-      - name: Run reference validation on local folder
-        uses: Energinet-DataHub/.github/.github/actions/github-validate-version-references@v14
-        env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
-        with:
-          folder: ${{ github.workspace }}
