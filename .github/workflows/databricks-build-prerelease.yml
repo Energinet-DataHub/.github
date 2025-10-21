@@ -70,7 +70,7 @@ jobs:
           architecture: ${{ inputs.architecture }}
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v14
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v15
         id: find_pull_request
 
       - name: Generate SBOM
@@ -153,7 +153,7 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v14
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v15
         with:
           release_name_prefix: ${{ inputs.prerelease_prefix }}
 
@@ -165,7 +165,7 @@ jobs:
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v14
+        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v15
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
