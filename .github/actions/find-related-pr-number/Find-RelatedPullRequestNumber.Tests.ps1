@@ -108,6 +108,9 @@ Describe "Find-RelatedPullRequestNumber" {
             @{ CommitMessage = 'Message with " (#9882)'; Expected = '9882' }
             @{ CommitMessage = 'Message with "" (#5671)'; Expected = '5671' }
             @{ CommitMessage = 'Message with " and '' (#9821)'; Expected = '9821' }
+            @{ CommitMessage = 'Message with ` and '' (#9821)'; Expected = '9821' }
+            @{ CommitMessage = 'Message with ´ and '' (#9821)'; Expected = '9821' }
+            @{ CommitMessage = 'Message with ` and '' ${{ github.workspace }} (#9821)'; Expected = '9821' }
             @{ CommitMessage = @"
 This is a multiline commit message with "quotes" and 'single quotes'
 lots of lines
