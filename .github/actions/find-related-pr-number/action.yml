@@ -44,9 +44,9 @@ runs:
         # github.event.commits[0].message can contain linesbreak single/double qoutes, which can break the templated script.
         # To avoid this, we use a here-string for the commit message.
 
-        $commitMessage = @"
+        $commitMessage = @'
           ${{ github.event.commits[0].message || '' }}
-        "@
+        '@
 
         $prNumber = Find-RelatedPullRequestNumber `
           -GithubToken "${{ github.token }}" `
