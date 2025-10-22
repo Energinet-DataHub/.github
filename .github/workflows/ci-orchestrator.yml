@@ -25,7 +25,13 @@ jobs:
         run: |
           $commitMessage = @'
             ${{ github.workspace || "" }}
-            ` ´´ "" '' \ /@$& #123
+            ` 
+            ´´ 
+            "" 
+            '' 
+            \ 
+            /@$& 
+            #123
           '@
 
           Write-Host $commitMessage
