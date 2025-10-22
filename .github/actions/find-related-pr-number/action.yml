@@ -45,7 +45,7 @@ runs:
         # To avoid this, we use a here-string for the commit message.
 
         $commitMessage = @'
-          ${{ github.event.commits[0].message || "" }}
+          ${{ github.event.commits[0].message || '' }}
         '@
 
         Write-Host $commitMessage
