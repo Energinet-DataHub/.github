@@ -110,7 +110,7 @@ jobs:
     outputs:
       matrix: ${{ steps.package_matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Discover Pyproject
         uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v15
         id: package_matrix
@@ -136,7 +136,7 @@ jobs:
         inputs: ${{ fromJson(needs.ci_matrix.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check if ${{ matrix.inputs.package_name }} has changed
         uses: dorny/paths-filter@v3

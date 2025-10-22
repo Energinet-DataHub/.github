@@ -73,7 +73,7 @@ jobs:
       DIAGRAMS_PAGE_URL: http://localhost:8080/workspace/diagrams
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Repository checkout must be called with a PAT token with `repo` and `workflow` scopes.
           # Otherwise `stefanzweifel/git-auto-commit-action` used later in the workflow won't trigger new workflow runs.
@@ -117,7 +117,7 @@ jobs:
 
       - name: Setup node
         if: steps.diagrams_changed.outputs.any_changed == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
 
       # Script is available from https://github.com/structurizr/puppeteer
       - name: Prepare export-diagrams script
