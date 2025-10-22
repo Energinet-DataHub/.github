@@ -48,6 +48,8 @@ runs:
           ${{ github.event.commits[0].message || "" }}
         '@
 
+        Write-Host $commitMessage
+
         $prNumber = Find-RelatedPullRequestNumber `
           -GithubToken "${{ github.token }}" `
           -GithubEvent "${{ github.event_name }}" `
