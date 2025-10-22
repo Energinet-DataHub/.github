@@ -24,7 +24,6 @@ jobs:
         shell: pwsh
         run: |
           $commitMessage = @'
-            ${{ github.workspace || "" }}
             ` 
             ´´ 
             "" 
