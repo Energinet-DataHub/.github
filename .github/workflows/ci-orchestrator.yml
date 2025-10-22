@@ -18,15 +18,17 @@ jobs:
       dh3serviceaccount_privatekey: ${{ secrets.dh3serviceaccount_privatekey}}
 
   test:
-    - name: Find related PR number
-      shell: pwsh
-      run: |
-        $commitMessage = @'
-          ${{ github.workspace || "" }}
-          ` ´´ "" '' \ /@$& #123
-        '@
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find related PR number
+        shell: pwsh
+        run: |
+          $commitMessage = @'
+            ${{ github.workspace || "" }}
+            ` ´´ "" '' \ /@$& #123
+          '@
 
-        Write-Host $commitMessage
+          Write-Host $commitMessage
 
   #
   # Automatic Release (verify if release tag exists)
