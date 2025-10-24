@@ -1,58 +1,74 @@
-name: Generate covernator files
-description: Generate covernator files for a Python project and upload them as artifacts
+name: "Python - Covernator Commit"
+description: "Generate and commit Covernator coverage reports into the domain repo"
 
 inputs:
   project_directory:
     required: true
-    description: The directory where the pyproject.toml file is located
-  project_name:
-    required: true
-    description: The name of the project, which will also be used for the artifact name
+    description: "Base directory of the project (where the 'tests' folder resides)"
   geh_common_version:
     required: true
-    description: The version of geh_common to use. This is used to install the geh_common package from the repository.
-    default: 5.8.11
+    default: "7.2.1"
+    description: "geh_common package version (tag from opengeh-python-packages)"
+  commit_message:
+    required: false
+    default: "Update Covernator results [skip ci]"
+    description: "Commit message for the updated artifacts"
 
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - name: Checkout
+    - name: Checkout branch
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref || github.ref_name }}
+        fetch-depth: 0
+        persist-credentials: true
 
-    - name: Install uv
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
-    - id: covernator-step
-      name: Run covernator
+    - name: Install geh_common
       shell: bash
       run: |
-        uv venv
-        source .venv/bin/activate
-        uv pip install "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
-        cd ${{ inputs.project_directory }}
-        python -c "from geh_common.covernator_streamlit import main; main()" \
-          -g -o /tmp/covernator_output_folder/${{ inputs.project_name }} -k stats || \
-          { echo 'Covernator not found, please install it first'; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; }
+        uv pip install --system \
+          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
-    - name: Upload covernator files
-      id: artifact-upload-step
-      if: ${{ steps.covernator-step.outputs.skip != 'true' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: covernator-files-${{ inputs.project_name }}
-        path: /tmp/covernator_output_folder/${{ inputs.project_name }}/**
+    - name: Run Covernator
+      shell: bash
+      run: |
+        mkdir -p docs/covernator
+        python -m geh_common.covernator_streamlit.server \
+          -g \
+          -o docs/covernator \
+          -k stats \
+          -p ${{ inputs.project_directory }}
+        echo "Generated files in docs/covernator:"
+        ls -lah docs/covernator
+        echo "Preview stats.json:"
+        head -n 20 docs/covernator/stats.json || echo "stats.json missing"
 
-    - uses: mshick/add-pr-comment@v2
-      name: Add PR-comment with artifact url
-      if: ${{ steps.covernator-step.outputs.skip != 'true' }}
-      with:
-        message-id: ${{ inputs.project_name }}
-        message: |
-          # Covernator (${{ inputs.project_name }})
+    - name: Generate timestamp file
+      shell: bash
+      run: |
+        {
+          echo "# Timestamp"
+          echo
+          echo "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S')"
+        } > docs/covernator/here_is_the_time.md
+        cat docs/covernator/here_is_the_time.md
 
-          ✅ Covernator files have been generated (for ${{ inputs.project_name }}) and uploaded as artifacts.
-          You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }}).
-
-          ${{ steps.covernator-step.outputs.stats }}
-
-          geh-common version: ${{ inputs.geh_common_version }}
+    - name: Commit and push results
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      run: |
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+        git add docs/covernator
+        git commit -m "${{ inputs.commit_message }}" || { echo "No changes to commit"; exit 0; }
+        git push origin HEAD:${BRANCH_NAME}
