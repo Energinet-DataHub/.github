@@ -1,74 +1,33 @@
-name: "Python - Covernator Commit"
-description: "Generate and commit Covernator coverage reports into the domain repo"
+name: "Covernator test action"
+description: "Simple test action to verify branch-based execution from .github repo"
 
 inputs:
   project_directory:
-    required: true
-    description: "Base directory of the project (where the 'tests' folder resides)"
-  geh_common_version:
-    required: true
-    default: "7.2.1"
-    description: "geh_common package version (tag from opengeh-python-packages)"
-  commit_message:
     required: false
-    default: "Update Covernator results [skip ci]"
-    description: "Commit message for the updated artifacts"
+    default: "."
+    description: "Dummy input (kept for compatibility)"
+  geh_common_version:
+    required: false
+    default: "7.2.1"
+    description: "Dummy input (kept for compatibility)"
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout branch
-      uses: actions/checkout@v4
+    - name: Print CET time and context
+      id: print
+      shell: bash
+      run: |
+        echo "I am on a test branch of .github"
+        CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
+        echo "The time is $CET_TIME"
+        echo "time_message=The time is $CET_TIME" >> $GITHUB_OUTPUT
+
+    - name: Add PR comment (test branch)
+      uses: mshick/add-pr-comment@v2
       with:
-        ref: ${{ github.head_ref || github.ref_name }}
-        fetch-depth: 0
-        persist-credentials: true
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v5
-
-    - name: Install geh_common
-      shell: bash
-      run: |
-        uv pip install --system \
-          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
-
-    - name: Run Covernator
-      shell: bash
-      run: |
-        mkdir -p docs/covernator
-        python -m geh_common.covernator_streamlit.server \
-          -g \
-          -o docs/covernator \
-          -k stats \
-          -p ${{ inputs.project_directory }}
-        echo "Generated files in docs/covernator:"
-        ls -lah docs/covernator
-        echo "Preview stats.json:"
-        head -n 20 docs/covernator/stats.json || echo "stats.json missing"
-
-    - name: Generate timestamp file
-      shell: bash
-      run: |
-        {
-          echo "# Timestamp"
-          echo
-          echo "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S')"
-        } > docs/covernator/here_is_the_time.md
-        cat docs/covernator/here_is_the_time.md
-
-    - name: Commit and push results
-      shell: bash
-      env:
-        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-      run: |
-        git config user.name "github-actions"
-        git config user.email "ci@github.com"
-        git add docs/covernator
-        git commit -m "${{ inputs.commit_message }}" || { echo "No changes to commit"; exit 0; }
-        git push origin HEAD:${BRANCH_NAME}
+        message-id: covernator-test
+        message: |
+          🧪 **Covernator test branch action**
+          - I am on a test branch of `.github`
+          - The time is **${{ steps.print.outputs.time_message }}**
