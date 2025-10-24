@@ -54,3 +54,5 @@ runs:
           You can download them [here](${{ steps.artifact-upload-step.outputs.artifact-url }}).
 
           ${{ steps.covernator-step.outputs.stats }}
+
+          geh-common version: ${{ inputs.geh_common_version }}
