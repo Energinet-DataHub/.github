@@ -1,5 +1,5 @@
 name: "Python Covernator Commit"
-description: "Generate and display Covernator coverage results (Step 1: PR comment only)"
+description: "Generate and display Covernator coverage results with INFO/ERROR logs"
 
 inputs:
   project_directory:
@@ -49,23 +49,28 @@ runs:
         echo "▶ Generated files in docs/covernator:"
         ls -lah docs/covernator
 
-        # ✅ Compact JSON for parsing
+        # ✅ Compact JSON and extract details
         safe_json=$(jq -c . docs/covernator/stats.json)
-        echo "Compact JSON for output:"
-        echo "$safe_json"
-
-        # Extract core values
         total_cases=$(echo "$safe_json" | jq '.total_cases')
         total_scenarios=$(echo "$safe_json" | jq '.total_scenarios')
         total_groups=$(echo "$safe_json" | jq '.total_groups')
+
+        # Extract latest info and error messages (max 5 of each)
+        info_lines=$(echo "$safe_json" | jq -r '.logs.info[-5:][]?.message' | sed 's/^/- /')
+        error_lines=$(echo "$safe_json" | jq -r '.logs.error[-5:][]?.message' | sed 's/^/- /')
 
         echo "total_cases=$total_cases" >> "$GITHUB_OUTPUT"
         echo "total_scenarios=$total_scenarios" >> "$GITHUB_OUTPUT"
         echo "total_groups=$total_groups" >> "$GITHUB_OUTPUT"
 
-        # Keep full JSON base64 for later (Step 3)
-        encoded=$(echo "$safe_json" | base64 -w 0)
-        echo "stats_json_b64=$encoded" >> "$GITHUB_OUTPUT"
+        # Export logs as multiline outputs
+        echo "info_logs<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$info_lines" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+
+        echo "error_logs<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$error_lines" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
 
     - name: Get CET timestamp
       id: time
@@ -74,7 +79,7 @@ runs:
         CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
         echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
 
-    - name: Add PR comment with summary
+    - name: Add PR comment with summary and logs
       uses: mshick/add-pr-comment@v2
       with:
         message-id: covernator-stats
@@ -86,6 +91,16 @@ runs:
           • Total Cases: **${{ steps.covernator.outputs.total_cases }}**
           • Unique Scenarios: **${{ steps.covernator.outputs.total_scenarios }}**
           • Unique Groups: **${{ steps.covernator.outputs.total_groups }}**
+
+          **Recent INFO logs**
+          ```
+          ${{ steps.covernator.outputs.info_logs }}
+          ```
+
+          **Recent ERROR logs**
+          ```
+          ${{ steps.covernator.outputs.error_logs }}
+          ```
 
           **geh_common version:** ${{ inputs.geh_common_version }}
           **Branch:** `${{ github.ref_name }}`
