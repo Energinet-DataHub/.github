@@ -1,33 +1,38 @@
-name: "Covernator test action"
-description: "Simple test action to verify branch-based execution from .github repo"
+name: "Python Covernator Commit"
+description: "Generate and commit Covernator coverage results (test version for branch validation)"
 
 inputs:
   project_directory:
     required: false
     default: "."
-    description: "Dummy input (kept for compatibility)"
+    description: "Project root (kept for compatibility during testing)"
   geh_common_version:
     required: false
     default: "7.2.1"
-    description: "Dummy input (kept for compatibility)"
+    description: "geh_common version (kept for compatibility during testing)"
 
 runs:
   using: "composite"
   steps:
-    - name: Print CET time and context
-      id: print
+    - name: Display environment info
+      id: info
       shell: bash
       run: |
-        echo "I am on a test branch of .github"
+        echo "🧩 Running Python Covernator Commit (test version)"
+        echo "Repository: $GITHUB_REPOSITORY"
+        echo "Branch: ${GITHUB_REF_NAME:-unknown}"
+        echo "Project directory: ${{ inputs.project_directory }}"
         CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
         echo "The time is $CET_TIME"
-        echo "time_message=The time is $CET_TIME" >> $GITHUB_OUTPUT
+        echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
 
-    - name: Add PR comment (test branch)
+    - name: Add PR comment (dummy)
       uses: mshick/add-pr-comment@v2
       with:
-        message-id: covernator-test
+        message-id: covernator-commit-test
         message: |
-          🧪 **Covernator test branch action**
-          - I am on a test branch of `.github`
-          - The time is **${{ steps.print.outputs.time_message }}**
+          🧪 **Covernator Commit (test branch)**
+          - I am on a **test branch** of `.github`
+          - Repository: `${{ github.repository }}`
+          - Branch: `${{ github.ref_name }}`
+          - CET time: **${{ steps.info.outputs.time_cet }}**
