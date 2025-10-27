@@ -57,17 +57,24 @@ runs:
         echo "stats_json_b64=$encoded" >> "$GITHUB_OUTPUT"
 
     # Decode JSON and store to output file (safe for mshick/add-pr-comment)
-    - name: Decode stats JSON
+    - name: Decode stats JSON (safe compact)
       id: decode
       shell: bash
       run: |
         mkdir -p temp
         echo "${{ steps.covernator.outputs.stats_json_b64 }}" | base64 --decode > temp/stats.json
-        echo "Decoded JSON:"
+        echo "Decoded JSON (raw):"
         cat temp/stats.json
-        echo "stats_json<<EOF" >> "$GITHUB_OUTPUT"
-        cat temp/stats.json >> "$GITHUB_OUTPUT"
-        echo "EOF" >> "$GITHUB_OUTPUT"
+        echo
+
+        # Compact to single-line JSON using jq
+        safe_json=$(jq -c . temp/stats.json)
+        echo "Compact JSON for output:"
+        echo "$safe_json"
+
+        # Write safely to GITHUB_OUTPUT
+        echo "stats_json=$safe_json" >> "$GITHUB_OUTPUT"
+
 
     - name: Add PR comment with stats
       uses: mshick/add-pr-comment@v2
