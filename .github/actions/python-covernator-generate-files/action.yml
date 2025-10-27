@@ -13,6 +13,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # ✅ Fix: Ensure the calling repo is checked out
+    - name: Checkout domain repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        persist-credentials: true
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
