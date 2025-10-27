@@ -145,7 +145,7 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ inputs.sbom_root_directories == '' }}
-        uses: anchore/sbom-action@v0.20.6
+        uses: anchore/sbom-action@v0.20.9
         with:
           path: ${{ inputs.sbom_root_directory }}
           artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
@@ -177,7 +177,7 @@ jobs:
 
       - name: Zip dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ env.TESTS_ZIP_FILENAME }}
@@ -208,7 +208,7 @@ jobs:
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
