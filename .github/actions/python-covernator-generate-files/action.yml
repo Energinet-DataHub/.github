@@ -54,10 +54,10 @@ runs:
         echo "▶ Preview of stats.json:"
         head -n 20 docs/covernator/stats.json || echo "No stats.json found"
 
-        # Export JSON for next step
-        echo "stats_json<<EOF" >> $GITHUB_OUTPUT
-        cat docs/covernator/stats.json >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        # Export JSON safely as base64 to avoid multiline parsing issues
+        echo "Encoding stats.json for GitHub output"
+        encoded=$(base64 -w 0 docs/covernator/stats.json)
+        echo "stats_json_b64=$encoded" >> "$GITHUB_OUTPUT"
 
     - name: Add PR comment with stats
       uses: mshick/add-pr-comment@v2
@@ -68,10 +68,11 @@ runs:
           ✅ Successfully generated Covernator results for `${{ github.repository }}`
 
           **Stats summary**
-          \`\`\`json
-          ${{ steps.covernator.outputs.stats_json }}
-          \`\`\`
+          ```json
+          ${{ fromJson(base64Decode(steps.covernator.outputs.stats_json_b64)) }}
+          ```
 
           **geh_common version:** ${{ inputs.geh_common_version }}
           **Branch:** `${{ github.ref_name }}`
           **Generated:** $(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
+    
