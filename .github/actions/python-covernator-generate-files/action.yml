@@ -57,10 +57,10 @@ runs:
       run: |
         mkdir -p docs/covernator
         echo "▶ Running Covernator on ${{ inputs.project_directory }}"
+        # Removed '-k stats' to ensure CSVs are written
         python -m geh_common.covernator_streamlit.server \
           -g \
           -o docs/covernator \
-          -k stats \
           -p ${{ inputs.project_directory }}
 
         echo "▶ Generated files in docs/covernator:"
