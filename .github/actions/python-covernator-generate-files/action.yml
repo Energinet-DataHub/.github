@@ -1,5 +1,5 @@
 name: "Python Covernator Commit"
-description: "Generate and display Covernator coverage results with INFO/ERROR logs"
+description: "Generate, summarize, and commit Covernator coverage results with INFO/ERROR logs"
 
 inputs:
   project_directory:
@@ -9,16 +9,27 @@ inputs:
     required: false
     default: "7.2.1"
     description: "geh_common package version"
+  commit_message:
+    required: false
+    default: "Update Covernator results [skip ci]"
+    description: "Commit message used when pushing updated docs/covernator output"
 
 runs:
   using: "composite"
   steps:
+    # -------------------------------------------------------------------------
+    # 1️⃣ Checkout branch
+    # -------------------------------------------------------------------------
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
+        ref: ${{ github.head_ref || github.ref_name }}
         fetch-depth: 0
         persist-credentials: true
 
+    # -------------------------------------------------------------------------
+    # 2️⃣ Environment setup
+    # -------------------------------------------------------------------------
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
@@ -27,6 +38,9 @@ runs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
+    # -------------------------------------------------------------------------
+    # 3️⃣ Install geh_common
+    # -------------------------------------------------------------------------
     - name: Install geh_common
       shell: bash
       run: |
@@ -34,6 +48,9 @@ runs:
         uv pip install --system \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
+    # -------------------------------------------------------------------------
+    # 4️⃣ Run Covernator and capture stats
+    # -------------------------------------------------------------------------
     - name: Run Covernator locally
       id: covernator
       shell: bash
@@ -49,29 +66,43 @@ runs:
         echo "▶ Generated files in docs/covernator:"
         ls -lah docs/covernator
 
-        # ✅ Compact JSON and extract details
         safe_json=$(jq -c . docs/covernator/stats.json)
         total_cases=$(echo "$safe_json" | jq '.total_cases')
         total_scenarios=$(echo "$safe_json" | jq '.total_scenarios')
         total_groups=$(echo "$safe_json" | jq '.total_groups')
-
-        # Extract latest info and error messages (max 5 of each)
         info_lines=$(echo "$safe_json" | jq -r '.logs.info[-5:][]?.message' | sed 's/^/- /')
         error_lines=$(echo "$safe_json" | jq -r '.logs.error[-5:][]?.message' | sed 's/^/- /')
 
         echo "total_cases=$total_cases" >> "$GITHUB_OUTPUT"
         echo "total_scenarios=$total_scenarios" >> "$GITHUB_OUTPUT"
         echo "total_groups=$total_groups" >> "$GITHUB_OUTPUT"
+        echo "info_logs<<EOF" >> "$GITHUB_OUTPUT"; echo "$info_lines" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
+        echo "error_logs<<EOF" >> "$GITHUB_OUTPUT"; echo "$error_lines" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
 
-        # Export logs as multiline outputs
-        echo "info_logs<<EOF" >> "$GITHUB_OUTPUT"
-        echo "$info_lines" >> "$GITHUB_OUTPUT"
-        echo "EOF" >> "$GITHUB_OUTPUT"
+    # -------------------------------------------------------------------------
+    # 5️⃣ Commit and push results
+    # -------------------------------------------------------------------------
+    - name: Commit and push Covernator results
+      id: commit
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      run: |
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+        git add docs/covernator || true
+        if git diff --cached --quiet; then
+          echo "No Covernator output changes to commit."
+          echo "commit_status=skipped" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        git commit -m "${{ inputs.commit_message }}"
+        git push origin HEAD:${BRANCH_NAME}
+        echo "commit_status=committed" >> $GITHUB_OUTPUT
 
-        echo "error_logs<<EOF" >> "$GITHUB_OUTPUT"
-        echo "$error_lines" >> "$GITHUB_OUTPUT"
-        echo "EOF" >> "$GITHUB_OUTPUT"
-
+    # -------------------------------------------------------------------------
+    # 6️⃣ CET timestamp
+    # -------------------------------------------------------------------------
     - name: Get CET timestamp
       id: time
       shell: bash
@@ -79,13 +110,16 @@ runs:
         CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
         echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
 
+    # -------------------------------------------------------------------------
+    # 7️⃣ PR comment with stats and commit status
+    # -------------------------------------------------------------------------
     - name: Add PR comment with summary and logs
       uses: mshick/add-pr-comment@v2
       with:
-        message-id: covernator-stats
+        message-id: covernator-commit-summary
         message: |
           🧩 **Python Covernator Commit**
-          ✅ Successfully generated Covernator results for `${{ github.repository }}`
+          ✅ Successfully generated and committed Covernator results for `${{ github.repository }}`
 
           **Stats Summary**
           • Total Cases: **${{ steps.covernator.outputs.total_cases }}**
@@ -102,6 +136,7 @@ runs:
           ${{ steps.covernator.outputs.error_logs }}
           ```
 
+          **Commit status:** ${{ steps.commit.outputs.commit_status }}
           **geh_common version:** ${{ inputs.geh_common_version }}
           **Branch:** `${{ github.ref_name }}`
           **Generated:** ${{ steps.time.outputs.time_cet }}
