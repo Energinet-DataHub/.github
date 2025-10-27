@@ -13,7 +13,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # ✅ Fix: Ensure the calling repo is checked out
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
@@ -29,7 +28,6 @@ runs:
       uses: astral-sh/setup-uv@v5
 
     - name: Install geh_common
-      id: install
       shell: bash
       run: |
         echo "Installing geh_common version ${{ inputs.geh_common_version }}"
@@ -54,10 +52,22 @@ runs:
         echo "▶ Preview of stats.json:"
         head -n 20 docs/covernator/stats.json || echo "No stats.json found"
 
-        # Export JSON safely as base64 to avoid multiline parsing issues
-        echo "Encoding stats.json for GitHub output"
+        # Encode JSON safely
         encoded=$(base64 -w 0 docs/covernator/stats.json)
         echo "stats_json_b64=$encoded" >> "$GITHUB_OUTPUT"
+
+    # Decode JSON and store to output file (safe for mshick/add-pr-comment)
+    - name: Decode stats JSON
+      id: decode
+      shell: bash
+      run: |
+        mkdir -p temp
+        echo "${{ steps.covernator.outputs.stats_json_b64 }}" | base64 --decode > temp/stats.json
+        echo "Decoded JSON:"
+        cat temp/stats.json
+        echo "stats_json<<EOF" >> "$GITHUB_OUTPUT"
+        cat temp/stats.json >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
 
     - name: Add PR comment with stats
       uses: mshick/add-pr-comment@v2
@@ -69,10 +79,9 @@ runs:
 
           **Stats summary**
           ```json
-          ${{ fromJson(base64Decode(steps.covernator.outputs.stats_json_b64)) }}
+          ${{ steps.decode.outputs.stats_json }}
           ```
 
           **geh_common version:** ${{ inputs.geh_common_version }}
           **Branch:** `${{ github.ref_name }}`
           **Generated:** $(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
-    
