@@ -1,38 +1,70 @@
 name: "Python Covernator Commit"
-description: "Generate and commit Covernator coverage results (test version for branch validation)"
+description: "Generate and display Covernator coverage results (Step 1: stats in PR comment)"
 
 inputs:
   project_directory:
-    required: false
-    default: "."
-    description: "Project root (kept for compatibility during testing)"
+    required: true
+    description: "Path to the project root (where tests/ live)"
   geh_common_version:
     required: false
     default: "7.2.1"
-    description: "geh_common version (kept for compatibility during testing)"
+    description: "geh_common package version"
 
 runs:
   using: "composite"
   steps:
-    - name: Display environment info
-      id: info
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install geh_common
+      id: install
       shell: bash
       run: |
-        echo "🧩 Running Python Covernator Commit (test version)"
-        echo "Repository: $GITHUB_REPOSITORY"
-        echo "Branch: ${GITHUB_REF_NAME:-unknown}"
-        echo "Project directory: ${{ inputs.project_directory }}"
-        CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
-        echo "The time is $CET_TIME"
-        echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
+        echo "Installing geh_common version ${{ inputs.geh_common_version }}"
+        uv pip install --system \
+          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
-    - name: Add PR comment (dummy)
+    - name: Run Covernator locally
+      id: covernator
+      shell: bash
+      run: |
+        mkdir -p docs/covernator
+        echo "▶ Running Covernator on ${{ inputs.project_directory }}"
+        python -m geh_common.covernator_streamlit.server \
+          -g \
+          -o docs/covernator \
+          -k stats \
+          -p ${{ inputs.project_directory }}
+
+        echo "▶ Generated files in docs/covernator:"
+        ls -lah docs/covernator
+
+        echo "▶ Preview of stats.json:"
+        head -n 20 docs/covernator/stats.json || echo "No stats.json found"
+
+        # Export JSON for next step
+        echo "stats_json<<EOF" >> $GITHUB_OUTPUT
+        cat docs/covernator/stats.json >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Add PR comment with stats
       uses: mshick/add-pr-comment@v2
       with:
-        message-id: covernator-commit-test
+        message-id: covernator-stats
         message: |
-          🧪 **Covernator Commit (test branch)**
-          - I am on a **test branch** of `.github`
-          - Repository: `${{ github.repository }}`
-          - Branch: `${{ github.ref_name }}`
-          - CET time: **${{ steps.info.outputs.time_cet }}**
+          🧩 **Python Covernator Commit**
+          ✅ Successfully generated Covernator results for `${{ github.repository }}`
+
+          **Stats summary**
+          \`\`\`json
+          ${{ steps.covernator.outputs.stats_json }}
+          \`\`\`
+
+          **geh_common version:** ${{ inputs.geh_common_version }}
+          **Branch:** `${{ github.ref_name }}`
+          **Generated:** $(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
