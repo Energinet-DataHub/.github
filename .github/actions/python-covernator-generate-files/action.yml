@@ -1,5 +1,5 @@
 name: "Python Covernator Commit"
-description: "Generate, summarize, and commit Covernator coverage results with INFO/ERROR logs"
+description: "Generate, summarize, and commit Covernator coverage results with Markdown overview"
 
 inputs:
   project_directory:
@@ -28,7 +28,7 @@ runs:
         persist-credentials: true
 
     # -------------------------------------------------------------------------
-    # 2️⃣ Environment setup
+    # 2️⃣ Setup environment
     # -------------------------------------------------------------------------
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -49,7 +49,7 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run Covernator and capture stats
+    # 4️⃣ Run Covernator to generate artifacts
     # -------------------------------------------------------------------------
     - name: Run Covernator locally
       id: covernator
@@ -57,7 +57,6 @@ runs:
       run: |
         mkdir -p docs/covernator
         echo "▶ Running Covernator on ${{ inputs.project_directory }}"
-        # Removed '-k stats' to ensure CSVs are written
         python -m geh_common.covernator_streamlit.server \
           -g \
           -o docs/covernator \
@@ -80,7 +79,135 @@ runs:
         echo "error_logs<<EOF" >> "$GITHUB_OUTPUT"; echo "$error_lines" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Commit and push results
+    # 5️⃣ Generate Markdown coverage overview
+    # -------------------------------------------------------------------------
+    - name: Generate Markdown coverage overview
+      shell: bash
+      working-directory: docs/covernator
+      run: |
+        echo "📘 Generating Markdown coverage overview..."
+        chmod +x "$(pwd)"
+        bash -e <<'EOF'
+        #!/usr/bin/env bash
+        set -e
+        ALL_CASES="all_cases.csv"
+        CASE_COVERAGE="case_coverage.csv"
+        STATS="stats.json"
+        OUTPUT="coverage_overview.md"
+
+        if [[ ! -f "$ALL_CASES" || ! -f "$CASE_COVERAGE" || ! -f "$STATS" ]]; then
+          echo "❌ Missing input files. Ensure all_cases.csv, case_coverage.csv, and stats.json exist."
+          exit 1
+        fi
+
+        total_cases=$(jq '.total_cases' "$STATS")
+        total_scenarios=$(jq '.total_scenarios' "$STATS")
+        total_groups=$(jq '.total_groups' "$STATS")
+
+        implemented_true=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1 && tolower($4)=="true"{c++} END{print c+0}' "$ALL_CASES")
+        total_csv_cases=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{t++} END{print t+0}' "$ALL_CASES")
+        if [[ "$total_csv_cases" -gt 0 ]]; then
+          coverage_pct=$(awk -v c=$implemented_true -v t=$total_csv_cases 'BEGIN {printf "%.1f", (c/t)*100}')
+        else
+          coverage_pct="0.0"
+        fi
+
+        {
+          echo "# 🧩 Covernator Coverage Overview"
+          echo
+          echo "Generated: $(TZ='Europe/Copenhagen' date '+%Y-%m-%d %H:%M:%S %Z')"
+          echo
+          echo "## 📊 Summary"
+          echo "| Metric | Value |"
+          echo "|--------|--------|"
+          echo "| 🧾 Total Cases | $total_cases |"
+          echo "| 🧠 Total Scenarios | $total_scenarios |"
+          echo "| 🗂️ Total Groups | $total_groups |"
+          echo "| ⚙️ Implemented Cases | $implemented_true / $total_csv_cases ($coverage_pct%) |"
+          echo
+        } > "$OUTPUT"
+
+        normalize_group_name() {
+          local raw="$1"
+          local clean="${raw#geh_calculated_measurements/}"
+          clean="${clean//_/ }"
+          echo "$clean" | awk '{for (i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}'
+        }
+
+        awk -v FPAT='([^,]*)|(\"[^\"]+\")' '
+          function clean(s){gsub(/^"|"$/, "", s);gsub(/\r/,"",s);gsub(/^[ \t]+|[ \t]+$/,"",s);gsub(/[ \t]+/," ",s);return tolower(s)}
+          NR>1{grp=clean($1);cas=clean($3);key=grp"|"cas;count[key]++}
+          END{for(k in count)print k"\t"count[k]}
+        ' "$CASE_COVERAGE" > coverage_counts.tmp
+
+        declare -A GROUP_ERRORS
+        declare -a OTHER_ERRORS
+        mapfile -t KNOWN_GROUPS < <(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{gsub(/^"|"$/,"",$1);print $1}' "$ALL_CASES" | sort -u)
+
+        while IFS= read -r err; do
+          if [[ "$err" =~ \[geh_calculated_measurements\]\[([a-zA-Z0-9_]+)\] ]]; then
+            group_name="${BASH_REMATCH[1]}"
+            if printf '%s\n' "${KNOWN_GROUPS[@]}" | grep -qx "geh_calculated_measurements/${group_name}"; then
+              GROUP_ERRORS["$group_name"]+="- ${err}\n"
+            else
+              OTHER_ERRORS+=("$err")
+            fi
+          else
+            OTHER_ERRORS+=("$err")
+          fi
+        done < <(jq -r '.logs.error[]?.message' "$STATS")
+
+        groups=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{gsub(/^"|"$/,"",$1);print $1}' "$ALL_CASES" | sort | uniq)
+        for grp in $groups; do
+          group_display=$(normalize_group_name "$grp")
+          short_group="${grp#geh_calculated_measurements/}"
+          if [[ -n "${GROUP_ERRORS[$short_group]}" ]]; then
+            echo "## 🚨 $group_display" >> "$OUTPUT"
+          else
+            echo "## 📁 $group_display" >> "$OUTPUT"
+          fi
+          echo "### Case overview" >> "$OUTPUT"
+          echo "| Path | Case | Implemented | Covered by # scenarios |" >> "$OUTPUT"
+          echo "|----------|-----------|-------------|-------------|" >> "$OUTPUT"
+          awk -v grp="$grp" -v FPAT='([^,]*)|(\"[^\"]+\")' '
+            function clean(s){gsub(/^"|"$/,"",s);gsub(/\r/,"",s);gsub(/^[ \t]+|[ \t]+$/,"",s);return s}
+            BEGIN{while((getline line<"coverage_counts.tmp")>0){ns=split(line,a,"\t");coverage[a[1]]=a[2]}}
+            NR>1{
+              group=clean($1);path=clean($2);caseText=clean($3);implemented=clean($4)
+              if(group!=grp)next
+              key=tolower(group)"|"tolower(caseText)
+              covered=(coverage[key]?coverage[key]:0)
+              emoji=(covered==0?"⚠️":"✅")
+              impl_icon=(tolower(implemented)=="true"?"🧩":"⚠️")
+              printf "| %s | %s | %s %s | %s %d |\n", path, caseText, impl_icon, implemented, emoji, covered
+            }
+          ' "$ALL_CASES" >> "$OUTPUT"
+          echo >> "$OUTPUT"
+          if [[ -n "${GROUP_ERRORS[$short_group]}" ]]; then
+            echo "### ❌ ${group_display} Coverage Errors" >> "$OUTPUT"
+            echo -e "${GROUP_ERRORS[$short_group]}" >> "$OUTPUT"
+            echo >> "$OUTPUT"
+          fi
+        done
+        rm -f coverage_counts.tmp
+        {
+          echo "# 🧾 Logs"
+          echo
+          echo "## 📣 Info Logs"
+          jq -r '.logs.info[]?.message' "$STATS" | sed 's/^/- /' || echo "_No info logs_"
+          echo
+          echo "## ❌ Other Errors (not linked to specific groups)"
+          if ((${#OTHER_ERRORS[@]})); then
+            for e in "${OTHER_ERRORS[@]}"; do echo "- $e"; done
+          else
+            echo "_No other errors_"
+          fi
+        } >> "$OUTPUT"
+        echo "✅ Markdown coverage overview generated: $OUTPUT"
+        EOF
+
+    # -------------------------------------------------------------------------
+    # 6️⃣ Commit and push results
     # -------------------------------------------------------------------------
     - name: Commit and push Covernator results
       id: commit
@@ -101,7 +228,7 @@ runs:
         echo "commit_status=committed" >> $GITHUB_OUTPUT
 
     # -------------------------------------------------------------------------
-    # 6️⃣ CET timestamp
+    # 7️⃣ CET timestamp
     # -------------------------------------------------------------------------
     - name: Get CET timestamp
       id: time
@@ -111,7 +238,7 @@ runs:
         echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
 
     # -------------------------------------------------------------------------
-    # 7️⃣ PR comment with stats and commit status
+    # 8️⃣ PR comment summary
     # -------------------------------------------------------------------------
     - name: Add PR comment with summary and logs
       uses: mshick/add-pr-comment@v2
