@@ -32,12 +32,12 @@ runs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
-    - name: Install geh_common from feature branch
+    - name: Install geh_common
       shell: bash
       run: |
-        echo "Installing geh_common from branch ${{ inputs.geh_common_branch }}"
+        echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
         uv pip install --system \
-          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_branch }}#subdirectory=source/geh_common"
+          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     - name: Run Covernator (hybrid mode)
       id: covernator
