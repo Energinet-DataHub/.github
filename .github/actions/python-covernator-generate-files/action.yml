@@ -112,8 +112,15 @@ runs:
           coverage_pct="0.0"
         fi
 
+        # Detect subsystem name from group prefix
+        first_group=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR==2 {gsub(/^"|"$/, "", $1); print $1}' "$ALL_CASES")
+        subsystem_raw="${first_group%%/*}"                       # geh_calculated_measurements
+        subsystem_clean="${subsystem_raw#geh_}"                  # calculated_measurements
+        subsystem_title=$(echo "$subsystem_clean" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1')
+
+        # Markdown header with subsystem
         {
-          echo "# 🧩 Covernator Coverage Overview"
+          echo "# 🧩 Covernator Coverage Overview for $subsystem_title"
           echo
           echo "Generated: $(TZ='Europe/Copenhagen' date '+%Y-%m-%d %H:%M:%S %Z')"
           echo
