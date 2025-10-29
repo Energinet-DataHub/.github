@@ -50,8 +50,8 @@ runs:
       shell: bash
       run: |
         python - <<'PYCODE'
-        from geh_common.covernator_streamlit.commands import run_and_generate_markdown
-        run_and_generate_markdown("${{ inputs.project_directory }}")
+        from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
+        run_and_generate_markdown("source/geh_calculated_measurements")
         PYCODE
 
 
