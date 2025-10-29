@@ -49,11 +49,11 @@ runs:
     - name: Run Covernator + Markdown generator
       shell: bash
       run: |
-        python -c "
-import sys
-from geh_common.covernator_streamlit.commands import run_and_generate_markdown
-run_and_generate_markdown('${{ inputs.project_directory }}')
-"
+        python - <<'PYCODE'
+        from geh_common.covernator_streamlit.commands import run_and_generate_markdown
+        run_and_generate_markdown("${{ inputs.project_directory }}")
+        PYCODE
+
 
     # -------------------------------------------------------------------------
     # 5️⃣ Commit the results
