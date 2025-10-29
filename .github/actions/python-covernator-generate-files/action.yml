@@ -17,7 +17,7 @@ runs:
   using: composite
   steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
@@ -37,7 +37,7 @@ runs:
     - name: Upload covernator files
       id: artifact-upload-step
       if: ${{ steps.covernator-step.outputs.skip != 'true' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: covernator-files-${{ inputs.project_name }}
         path: /tmp/covernator_output_folder/${{ inputs.project_name }}/**
