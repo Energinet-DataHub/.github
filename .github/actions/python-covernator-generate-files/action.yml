@@ -7,7 +7,7 @@ inputs:
     description: "Path to the project root (where tests/ live)"
   geh_common_version:
     required: false
-    default: "7.2.1"
+    default: "7.2.2"
     description: "geh_common package version"
 
 runs:
