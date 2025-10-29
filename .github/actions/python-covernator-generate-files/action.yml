@@ -1,5 +1,5 @@
 name: "Python Covernator Commit"
-description: "Generate, summarize, and commit Covernator coverage results with Markdown overview"
+description: "Generate and commit Covernator coverage results"
 
 inputs:
   project_directory:
@@ -9,26 +9,21 @@ inputs:
     required: false
     default: "7.2.1"
     description: "geh_common package version"
-  commit_message:
-    required: false
-    default: "Update Covernator results [skip ci]"
-    description: "Commit message used when pushing updated docs/covernator output"
 
 runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Checkout branch
+    # 1️⃣ Checkout domain repo
     # -------------------------------------------------------------------------
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.head_ref || github.ref_name }}
         fetch-depth: 0
         persist-credentials: true
 
     # -------------------------------------------------------------------------
-    # 2️⃣ Setup environment
+    # 2️⃣ Setup Python + UV
     # -------------------------------------------------------------------------
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -39,7 +34,7 @@ runs:
       uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 3️⃣ Install geh_common
+    # 3️⃣ Install geh_common from branch or tag
     # -------------------------------------------------------------------------
     - name: Install geh_common
       shell: bash
@@ -49,228 +44,28 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run Covernator to generate artifacts
+    # 4️⃣ Run covernator analysis + markdown generation
     # -------------------------------------------------------------------------
-    - name: Run Covernator locally
-      id: covernator
+    - name: Run Covernator + Markdown generator
       shell: bash
       run: |
-        mkdir -p docs/covernator
-        echo "▶ Running Covernator on ${{ inputs.project_directory }}"
-        python -m geh_common.covernator_streamlit.server \
-          -g \
-          -o docs/covernator \
-          -p ${{ inputs.project_directory }}
-
-        echo "▶ Generated files in docs/covernator:"
-        ls -lah docs/covernator
-
-        safe_json=$(jq -c . docs/covernator/stats.json)
-        total_cases=$(echo "$safe_json" | jq '.total_cases')
-        total_scenarios=$(echo "$safe_json" | jq '.total_scenarios')
-        total_groups=$(echo "$safe_json" | jq '.total_groups')
-        info_lines=$(echo "$safe_json" | jq -r '.logs.info[-5:][]?.message' | sed 's/^/- /')
-        error_lines=$(echo "$safe_json" | jq -r '.logs.error[-5:][]?.message' | sed 's/^/- /')
-
-        echo "total_cases=$total_cases" >> "$GITHUB_OUTPUT"
-        echo "total_scenarios=$total_scenarios" >> "$GITHUB_OUTPUT"
-        echo "total_groups=$total_groups" >> "$GITHUB_OUTPUT"
-        echo "info_logs<<EOF" >> "$GITHUB_OUTPUT"; echo "$info_lines" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
-        echo "error_logs<<EOF" >> "$GITHUB_OUTPUT"; echo "$error_lines" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
+        python -c "
+import sys
+from geh_common.covernator_streamlit.commands import run_and_generate_markdown
+run_and_generate_markdown('${{ inputs.project_directory }}')
+"
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Generate Markdown coverage overview
+    # 5️⃣ Commit the results
     # -------------------------------------------------------------------------
-    - name: Generate Markdown coverage overview
-      shell: bash
-      working-directory: docs/covernator
-      run: |
-        echo "📘 Generating Markdown coverage overview..."
-        chmod +x "$(pwd)"
-        bash -e <<'EOF'
-        #!/usr/bin/env bash
-        set -e
-        ALL_CASES="all_cases.csv"
-        CASE_COVERAGE="case_coverage.csv"
-        STATS="stats.json"
-        OUTPUT="coverage_overview.md"
-
-        if [[ ! -f "$ALL_CASES" || ! -f "$CASE_COVERAGE" || ! -f "$STATS" ]]; then
-          echo "❌ Missing input files. Ensure all_cases.csv, case_coverage.csv, and stats.json exist."
-          exit 1
-        fi
-
-        total_cases=$(jq '.total_cases' "$STATS")
-        total_scenarios=$(jq '.total_scenarios' "$STATS")
-        total_groups=$(jq '.total_groups' "$STATS")
-
-        implemented_true=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1 && tolower($4)=="true"{c++} END{print c+0}' "$ALL_CASES")
-        total_csv_cases=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{t++} END{print t+0}' "$ALL_CASES")
-        if [[ "$total_csv_cases" -gt 0 ]]; then
-          coverage_pct=$(awk -v c=$implemented_true -v t=$total_csv_cases 'BEGIN {printf "%.1f", (c/t)*100}')
-        else
-          coverage_pct="0.0"
-        fi
-
-        # Detect subsystem name from group prefix
-        first_group=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR==2 {gsub(/^"|"$/, "", $1); print $1}' "$ALL_CASES")
-        subsystem_raw="${first_group%%/*}"                       # geh_calculated_measurements
-        subsystem_clean="${subsystem_raw#geh_}"                  # calculated_measurements
-        subsystem_title=$(echo "$subsystem_clean" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1')
-
-        # Markdown header with subsystem
-        {
-          echo "# 🧩 Covernator Coverage Overview for $subsystem_title"
-          echo
-          echo "Generated: $(TZ='Europe/Copenhagen' date '+%Y-%m-%d %H:%M:%S %Z')"
-          echo
-          echo "## 📊 Summary"
-          echo "| Metric | Value |"
-          echo "|--------|--------|"
-          echo "| 🧾 Total Cases | $total_cases |"
-          echo "| 🧠 Total Scenarios | $total_scenarios |"
-          echo "| 🗂️ Total Groups | $total_groups |"
-          echo "| ⚙️ Implemented Cases | $implemented_true / $total_csv_cases ($coverage_pct%) |"
-          echo
-        } > "$OUTPUT"
-
-        normalize_group_name() {
-          local raw="$1"
-          local clean="${raw#geh_calculated_measurements/}"
-          clean="${clean//_/ }"
-          echo "$clean" | awk '{for (i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}'
-        }
-
-        awk -v FPAT='([^,]*)|(\"[^\"]+\")' '
-          function clean(s){gsub(/^"|"$/, "", s);gsub(/\r/,"",s);gsub(/^[ \t]+|[ \t]+$/,"",s);gsub(/[ \t]+/," ",s);return tolower(s)}
-          NR>1{grp=clean($1);cas=clean($3);key=grp"|"cas;count[key]++}
-          END{for(k in count)print k"\t"count[k]}
-        ' "$CASE_COVERAGE" > coverage_counts.tmp
-
-        declare -A GROUP_ERRORS
-        declare -a OTHER_ERRORS
-        mapfile -t KNOWN_GROUPS < <(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{gsub(/^"|"$/,"",$1);print $1}' "$ALL_CASES" | sort -u)
-
-        while IFS= read -r err; do
-          if [[ "$err" =~ \[geh_calculated_measurements\]\[([a-zA-Z0-9_]+)\] ]]; then
-            group_name="${BASH_REMATCH[1]}"
-            if printf '%s\n' "${KNOWN_GROUPS[@]}" | grep -qx "geh_calculated_measurements/${group_name}"; then
-              GROUP_ERRORS["$group_name"]+="- ${err}\n"
-            else
-              OTHER_ERRORS+=("$err")
-            fi
-          else
-            OTHER_ERRORS+=("$err")
-          fi
-        done < <(jq -r '.logs.error[]?.message' "$STATS")
-
-        groups=$(awk -v FPAT='([^,]*)|(\"[^\"]+\")' 'NR>1{gsub(/^"|"$/,"",$1);print $1}' "$ALL_CASES" | sort | uniq)
-        for grp in $groups; do
-          group_display=$(normalize_group_name "$grp")
-          short_group="${grp#geh_calculated_measurements/}"
-          if [[ -n "${GROUP_ERRORS[$short_group]}" ]]; then
-            echo "## 🚨 $group_display" >> "$OUTPUT"
-          else
-            echo "## 📁 $group_display" >> "$OUTPUT"
-          fi
-          echo "### Case overview" >> "$OUTPUT"
-          echo "| Path | Case | Implemented | Covered by # scenarios |" >> "$OUTPUT"
-          echo "|----------|-----------|-------------|-------------|" >> "$OUTPUT"
-          awk -v grp="$grp" -v FPAT='([^,]*)|(\"[^\"]+\")' '
-            function clean(s){gsub(/^"|"$/,"",s);gsub(/\r/,"",s);gsub(/^[ \t]+|[ \t]+$/,"",s);return s}
-            BEGIN{while((getline line<"coverage_counts.tmp")>0){ns=split(line,a,"\t");coverage[a[1]]=a[2]}}
-            NR>1{
-              group=clean($1);path=clean($2);caseText=clean($3);implemented=clean($4)
-              if(group!=grp)next
-              key=tolower(group)"|"tolower(caseText)
-              covered=(coverage[key]?coverage[key]:0)
-              emoji=(covered==0?"⚠️":"✅")
-              impl_icon=(tolower(implemented)=="true"?"🧩":"⚠️")
-              printf "| %s | %s | %s %s | %s %d |\n", path, caseText, impl_icon, implemented, emoji, covered
-            }
-          ' "$ALL_CASES" >> "$OUTPUT"
-          echo >> "$OUTPUT"
-          if [[ -n "${GROUP_ERRORS[$short_group]}" ]]; then
-            echo "### ❌ ${group_display} Coverage Errors" >> "$OUTPUT"
-            echo -e "${GROUP_ERRORS[$short_group]}" >> "$OUTPUT"
-            echo >> "$OUTPUT"
-          fi
-        done
-        rm -f coverage_counts.tmp
-        {
-          echo "# 🧾 Logs"
-          echo
-          echo "## 📣 Info Logs"
-          jq -r '.logs.info[]?.message' "$STATS" | sed 's/^/- /' || echo "_No info logs_"
-          echo
-          echo "## ❌ Other Errors (not linked to specific groups)"
-          if ((${#OTHER_ERRORS[@]})); then
-            for e in "${OTHER_ERRORS[@]}"; do echo "- $e"; done
-          else
-            echo "_No other errors_"
-          fi
-        } >> "$OUTPUT"
-        echo "✅ Markdown coverage overview generated: $OUTPUT"
-        EOF
-
-    # -------------------------------------------------------------------------
-    # 6️⃣ Commit and push results
-    # -------------------------------------------------------------------------
-    - name: Commit and push Covernator results
-      id: commit
+    - name: Commit and push markdown to docs
       shell: bash
       env:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
+        echo "📦 Committing results to docs/covernator"
         git config user.name "github-actions"
         git config user.email "ci@github.com"
-        git add docs/covernator || true
-        if git diff --cached --quiet; then
-          echo "No Covernator output changes to commit."
-          echo "commit_status=skipped" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-        git commit -m "${{ inputs.commit_message }}"
+        git add docs/covernator/coverage_overview.md
+        git commit -m "🧩 Update Covernator results [skip ci]" || { echo "No changes to commit"; exit 0; }
         git push origin HEAD:${BRANCH_NAME}
-        echo "commit_status=committed" >> $GITHUB_OUTPUT
-
-    # -------------------------------------------------------------------------
-    # 7️⃣ CET timestamp
-    # -------------------------------------------------------------------------
-    - name: Get CET timestamp
-      id: time
-      shell: bash
-      run: |
-        CET_TIME=$(TZ="Europe/Copenhagen" date '+%Y-%m-%d %H:%M:%S %Z')
-        echo "time_cet=$CET_TIME" >> "$GITHUB_OUTPUT"
-
-    # -------------------------------------------------------------------------
-    # 8️⃣ PR comment summary
-    # -------------------------------------------------------------------------
-    - name: Add PR comment with summary and logs
-      uses: mshick/add-pr-comment@v2
-      with:
-        message-id: covernator-commit-summary
-        message: |
-          🧩 **Python Covernator Commit**
-          ✅ Successfully generated and committed Covernator results for `${{ github.repository }}`
-
-          **Stats Summary**
-          • Total Cases: **${{ steps.covernator.outputs.total_cases }}**
-          • Unique Scenarios: **${{ steps.covernator.outputs.total_scenarios }}**
-          • Unique Groups: **${{ steps.covernator.outputs.total_groups }}**
-
-          **Recent INFO logs**
-          ```
-          ${{ steps.covernator.outputs.info_logs }}
-          ```
-
-          **Recent ERROR logs**
-          ```
-          ${{ steps.covernator.outputs.error_logs }}
-          ```
-
-          **Commit status:** ${{ steps.commit.outputs.commit_status }}
-          **geh_common version:** ${{ inputs.geh_common_version }}
-          **Branch:** `${{ github.ref_name }}`
-          **Generated:** ${{ steps.time.outputs.time_cet }}
