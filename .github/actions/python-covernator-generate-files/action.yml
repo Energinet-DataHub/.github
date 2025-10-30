@@ -50,10 +50,18 @@ runs:
       shell: bash
       run: |
         python - <<'PYCODE'
+        import os
         from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
-        run_and_generate_markdown("source/geh_calculated_measurements")
-        PYCODE
 
+        project_dir = os.getenv("PROJECT_DIRECTORY")
+        if not project_dir:
+            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+
+        print(f"🔍 Running Covernator analysis on: {project_dir}")
+        run_and_generate_markdown(project_dir)
+        PYCODE
+      env:
+        PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
     # 5️⃣ Commit the results
