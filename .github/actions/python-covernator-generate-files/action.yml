@@ -70,6 +70,7 @@ runs:
     # Add explicit logging for non-main branches
     - name: Skip commit on non-main branches
       if: github.ref != 'refs/heads/main'
+      shell: bash
       run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
 
     # Actual commit step (main only)
@@ -81,3 +82,4 @@ runs:
         file_pattern: docs/covernator/coverage_overview.md
         commit_user_name: github-actions[bot]
         commit_user_email: github-actions[bot]@users.noreply.github.com
+
