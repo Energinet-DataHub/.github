@@ -64,16 +64,13 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Commit the results
+    # 5️⃣ Commit the results (only on main)
     # -------------------------------------------------------------------------
-    - name: Commit and push markdown to docs
-      shell: bash
-      env:
-        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-      run: |
-        echo "📦 Committing results to docs/covernator"
-        git config user.name "github-actions"
-        git config user.email "ci@github.com"
-        git add docs/covernator/coverage_overview.md
-        git commit -m "🧩 Update Covernator results [skip ci]" || { echo "No changes to commit"; exit 0; }
-        git push origin HEAD:${BRANCH_NAME}
+    - name: Commit and push markdown to docs (main only)
+      if: github.ref == 'refs/heads/main'
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "🧩 Update Covernator results [skip ci]"
+        file_pattern: docs/covernator/coverage_overview.md
+        commit_user_name: github-actions[bot]
+        commit_user_email: github-actions[bot]@users.noreply.github.com
