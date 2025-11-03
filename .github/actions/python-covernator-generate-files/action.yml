@@ -51,10 +51,13 @@ runs:
       run: |
         python - <<'PYCODE'
         import os
+        from pathlib import Path
         from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
         github_ref = os.getenv("GITHUB_REF")
+        runner_temp = os.getenv("RUNNER_TEMP", "/tmp")
+
         if not project_dir:
             raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
 
@@ -62,12 +65,13 @@ runs:
         if github_ref == "refs/heads/main":
             output_folder = "docs/covernator"
         else:
-            output_folder = "tmp/covernator"
-            os.makedirs(output_folder, exist_ok=True)
-            print(f"🧱 Non-main branch detected ({github_ref}) — writing markdown to temp folder: {output_folder}")
+            # Run in an isolated folder completely outside repo
+            output_folder = Path(runner_temp) / "covernator"
+            output_folder.mkdir(parents=True, exist_ok=True)
+            print(f"🧱 Non-main branch detected ({github_ref}) — writing markdown to isolated temp dir: {output_folder}")
 
         print(f"🔍 Running Covernator analysis on: {project_dir}")
-        run_and_generate_markdown(project_dir, output_folder=output_folder)
+        run_and_generate_markdown(project_dir, output_folder=str(output_folder))
         PYCODE
       env:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
@@ -77,17 +81,11 @@ runs:
     # 5️⃣ Commit the results (only on main)
     # -------------------------------------------------------------------------
 
-    # Add explicit logging for non-main branches
     - name: Skip commit on non-main branches
       if: github.ref != 'refs/heads/main'
       shell: bash
-      run: |
-        echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
-        echo "🧹 Cleaning up generated markdown to avoid merge-base changes"
-        rm -rf tmp/covernator || true
-        rm -f docs/covernator/coverage_overview.md || true
+      run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
 
-    # Actual commit step (main only)
     - name: Commit and push markdown to docs (main only)
       if: github.ref == 'refs/heads/main'
       uses: stefanzweifel/git-auto-commit-action@v4
