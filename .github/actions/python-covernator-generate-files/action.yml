@@ -1,48 +1,52 @@
-name: "Python Covernator Generate Files"
-description: "Runs Covernator coverage analysis, generates Markdown, and commits results (main branch only)."
+name: "Python Covernator Commit"
+description: "Generate and commit Covernator coverage results"
 
 inputs:
   project_directory:
-    description: "Path to the project source folder."
     required: true
+    description: "Path to the project root (where tests/ live)"
+  geh_common_version:
+    required: false
+    default: "7.2.2"
+    description: "geh_common package version"
 
 runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Setup Python environment
+    # 1️⃣ Checkout domain repo
     # -------------------------------------------------------------------------
-    - name: Set up Python
+    - name: Checkout domain repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        persist-credentials: true
+
+    # -------------------------------------------------------------------------
+    # 2️⃣ Setup Python + UV
+    # -------------------------------------------------------------------------
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    # -------------------------------------------------------------------------
-    # 2️⃣ Install dependencies
-    # -------------------------------------------------------------------------
-    - name: Install Python dependencies
-      shell: bash
-      run: |
-        python -m pip install --upgrade pip
-        pip install geh-common
-        echo "✅ geh-common package installed."
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 3️⃣ Verify working directory and environment
+    # 3️⃣ Install geh_common from branch or tag
     # -------------------------------------------------------------------------
-    - name: Verify environment
+    - name: Install geh_common
       shell: bash
       run: |
-        echo "📂 Current directory: $(pwd)"
-        echo "📦 Python version: $(python --version)"
-        echo "🌿 GitHub ref: $GITHUB_REF"
-        echo "🧪 Event name: $GITHUB_EVENT_NAME"
+        echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
+        uv pip install --system \
+          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run Covernator analysis + markdown generation (only on main)
+    # 4️⃣ Run covernator analysis + markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: bash
       run: |
         python - <<'PYCODE'
@@ -60,21 +64,16 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Commit the results (only on main)
+    # 5️⃣ Commit the results
     # -------------------------------------------------------------------------
-    - name: Commit and push markdown to docs (main only)
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: "🧩 Update Covernator results [skip ci]"
-        file_pattern: docs/covernator/coverage_overview.md
-        commit_user_name: github-actions[bot]
-        commit_user_email: github-actions[bot]@users.noreply.github.com
-
-    # -------------------------------------------------------------------------
-    # 6️⃣ Log skipped execution on non-main branches
-    # -------------------------------------------------------------------------
-    - name: Skip Covernator on non-main branches
-      if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+    - name: Commit and push markdown to docs
       shell: bash
-      run: echo "🧱 Skipping Covernator — this action only runs on push to main."
+      env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      run: |
+        echo "📦 Committing results to docs/covernator"
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+        git add docs/covernator/coverage_overview.md
+        git commit -m "🧩 Update Covernator results [skip ci]" || { echo "No changes to commit"; exit 0; }
+        git push origin HEAD:${BRANCH_NAME}
