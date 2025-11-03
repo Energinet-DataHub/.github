@@ -1,5 +1,5 @@
 name: "Python Covernator Commit"
-description: "Generate and commit Covernator coverage results"
+description: "Generate and commit Covernator coverage results, with change detection and commit guard"
 
 inputs:
   project_directory:
@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Checkout domain repo
+    # 1️⃣ Checkout domain repository
     # -------------------------------------------------------------------------
     - name: Checkout domain repository
       uses: actions/checkout@v4
@@ -23,20 +23,43 @@ runs:
         persist-credentials: true
 
     # -------------------------------------------------------------------------
-    # 2️⃣ Setup Python + UV
+    # 2️⃣ Fine-grained change detection (new)
+    # -------------------------------------------------------------------------
+    - name: Detect relevant file changes for Covernator
+      id: covernator_changed
+      uses: tj-actions/changed-files@v46
+      with:
+        since_last_remote_commit: true
+        files: |
+          source/geh_wholesale/tests/**/*.yml
+          source/geh_wholesale/tests/**/test_*.py
+
+    - name: Print change detection summary
+      shell: bash
+      run: |
+        echo "Covernator change detection:"
+        echo "Any changed: ${{ steps.covernator_changed.outputs.any_changed }}"
+        echo "Changed files:"
+        echo "${{ steps.covernator_changed.outputs.all_changed_files }}"
+
+    # -------------------------------------------------------------------------
+    # 3️⃣ Setup Python + UV
     # -------------------------------------------------------------------------
     - name: Setup Python
+      if: steps.covernator_changed.outputs.any_changed == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
     - name: Setup uv
+      if: steps.covernator_changed.outputs.any_changed == 'true'
       uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 3️⃣ Install geh_common from branch or tag
+    # 4️⃣ Install geh_common
     # -------------------------------------------------------------------------
     - name: Install geh_common
+      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       run: |
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
@@ -44,9 +67,10 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run covernator analysis + markdown generation
+    # 5️⃣ Run Covernator analysis and markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
+      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       run: |
         python - <<'PYCODE'
@@ -55,7 +79,7 @@ runs:
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
         if not project_dir:
-            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+          raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
 
         print(f"🔍 Running Covernator analysis on: {project_dir}")
         run_and_generate_markdown(project_dir)
@@ -64,16 +88,23 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Commit the results
+    # 6️⃣ Commit only if markdown truly changed (new)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
+      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       env:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
-        echo "📦 Committing results to docs/covernator"
+        echo "📦 Checking for differences before commit..."
+        if git diff --quiet docs/covernator/coverage_overview.md; then
+          echo "✅ No differences detected in coverage_overview.md; skipping commit."
+          exit 0
+        fi
+
+        echo "🧩 Changes detected; committing results."
         git config user.name "github-actions"
         git config user.email "ci@github.com"
         git add docs/covernator/coverage_overview.md
-        git commit -m "🧩 Update Covernator results [skip ci]" || { echo "No changes to commit"; exit 0; }
+        git commit -m "🧩 Update Covernator results [skip ci]"
         git push origin HEAD:${BRANCH_NAME}
