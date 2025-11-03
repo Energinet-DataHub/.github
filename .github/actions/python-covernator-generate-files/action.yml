@@ -136,4 +136,4 @@ runs:
         git --no-pager diff --color -- docs/covernator/coverage_overview.md | head -n 50 || true
         echo "::endgroup::"
         git commit -m "🧩 Update Covernator results [skip ci]"
-    git push origin HEAD:${BRANCH_NAME}
+        git push origin HEAD:${BRANCH_NAME}
