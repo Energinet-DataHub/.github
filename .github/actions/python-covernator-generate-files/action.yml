@@ -66,6 +66,13 @@ runs:
     # -------------------------------------------------------------------------
     # 5️⃣ Commit the results (only on main)
     # -------------------------------------------------------------------------
+
+    # Add explicit logging for non-main branches
+    - name: Skip commit on non-main branches
+      if: github.ref != 'refs/heads/main'
+      run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
+
+    # Actual commit step (main only)
     - name: Commit and push markdown to docs (main only)
       if: github.ref == 'refs/heads/main'
       uses: stefanzweifel/git-auto-commit-action@v4
