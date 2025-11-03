@@ -97,6 +97,17 @@ runs:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         echo "📦 Checking for differences before commit..."
+
+        if [ ! -f docs/covernator/coverage_overview.md ]; then
+          echo "🆕 coverage_overview.md does not exist in repo — committing new file."
+          git config user.name "github-actions"
+          git config user.email "ci@github.com"
+          git add docs/covernator/coverage_overview.md
+          git commit -m "🧩 Add initial Covernator results [skip ci]"
+          git push origin HEAD:${BRANCH_NAME}
+          exit 0
+        fi
+
         if git diff --quiet docs/covernator/coverage_overview.md; then
           echo "✅ No differences detected in coverage_overview.md; skipping commit."
           exit 0
