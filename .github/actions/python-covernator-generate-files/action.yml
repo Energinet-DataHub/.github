@@ -43,54 +43,54 @@ runs:
         uv pip install --system \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
-    # -------------------------------------------------------------------------
-    # 4️⃣ Run Covernator analysis + markdown generation
-    # -------------------------------------------------------------------------
-    - name: Run Covernator + Markdown generator
-      shell: bash
-      run: |
-        python - <<'PYCODE'
-        import os
-        from pathlib import Path
-        from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
-
-        project_dir = os.getenv("PROJECT_DIRECTORY")
-        github_ref = os.getenv("GITHUB_REF")
-        runner_temp = os.getenv("RUNNER_TEMP", "/tmp")
-
-        if not project_dir:
-            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
-
-        # Choose output path based on branch context
-        if github_ref == "refs/heads/main":
-            output_folder = "docs/covernator"
-        else:
-            # Run in an isolated folder completely outside repo
-            output_folder = Path(runner_temp) / "covernator"
-            output_folder.mkdir(parents=True, exist_ok=True)
-            print(f"🧱 Non-main branch detected ({github_ref}) — writing markdown to isolated temp dir: {output_folder}")
-
-        print(f"🔍 Running Covernator analysis on: {project_dir}")
-        run_and_generate_markdown(project_dir, output_folder=str(output_folder))
-        PYCODE
-      env:
-        PROJECT_DIRECTORY: ${{ inputs.project_directory }}
-        GITHUB_REF: ${{ github.ref }}
-
-    # -------------------------------------------------------------------------
-    # 5️⃣ Commit the results (only on main)
-    # -------------------------------------------------------------------------
-
-    - name: Skip commit on non-main branches
-      if: github.ref != 'refs/heads/main'
-      shell: bash
-      run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
-
-    - name: Commit and push markdown to docs (main only)
-      if: github.ref == 'refs/heads/main'
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: "🧩 Update Covernator results [skip ci]"
-        file_pattern: docs/covernator/coverage_overview.md
-        commit_user_name: github-actions[bot]
-        commit_user_email: github-actions[bot]@users.noreply.github.com
+#    # -------------------------------------------------------------------------
+#    # 4️⃣ Run Covernator analysis + markdown generation
+#    # -------------------------------------------------------------------------
+#    - name: Run Covernator + Markdown generator
+#      shell: bash
+#      run: |
+#        python - <<'PYCODE'
+#        import os
+#        from pathlib import Path
+#        from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
+#
+#        project_dir = os.getenv("PROJECT_DIRECTORY")
+#        github_ref = os.getenv("GITHUB_REF")
+#        runner_temp = os.getenv("RUNNER_TEMP", "/tmp")
+#
+#        if not project_dir:
+#            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+#
+#        # Choose output path based on branch context
+#        if github_ref == "refs/heads/main":
+#            output_folder = "docs/covernator"
+#        else:
+#            # Run in an isolated folder completely outside repo
+#            output_folder = Path(runner_temp) / "covernator"
+#            output_folder.mkdir(parents=True, exist_ok=True)
+#            print(f"🧱 Non-main branch detected ({github_ref}) — writing markdown to isolated temp dir: {output_folder}")
+#
+#        print(f"🔍 Running Covernator analysis on: {project_dir}")
+#        run_and_generate_markdown(project_dir, output_folder=str(output_folder))
+#        PYCODE
+#      env:
+#        PROJECT_DIRECTORY: ${{ inputs.project_directory }}
+#        GITHUB_REF: ${{ github.ref }}
+#
+#    # -------------------------------------------------------------------------
+#    # 5️⃣ Commit the results (only on main)
+#    # -------------------------------------------------------------------------
+#
+#    - name: Skip commit on non-main branches
+#      if: github.ref != 'refs/heads/main'
+#      shell: bash
+#      run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
+#
+#    - name: Commit and push markdown to docs (main only)
+#      if: github.ref == 'refs/heads/main'
+#      uses: stefanzweifel/git-auto-commit-action@v4
+#      with:
+#        commit_message: "🧩 Update Covernator results [skip ci]"
+#        file_pattern: docs/covernator/coverage_overview.md
+#        commit_user_name: github-actions[bot]
+#        commit_user_email: github-actions[bot]@users.noreply.github.com
