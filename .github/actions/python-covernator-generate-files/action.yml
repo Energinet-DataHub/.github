@@ -88,7 +88,7 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit only if markdown truly changed (new)
+    # 6️⃣ Commit only if markdown truly changed (fixed)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -108,9 +108,9 @@ runs:
         echo "🔍 Git status summary before diff:"
         git status --short || echo "(no status output)"
 
-        # Check if the file exists at all
-        if [ ! -f docs/covernator/coverage_overview.md ]; then
-          echo "🆕 coverage_overview.md does not exist in repo — committing new file."
+        # Detect untracked file (new coverage report)
+        if ! git ls-files --error-unmatch docs/covernator/coverage_overview.md > /dev/null 2>&1; then
+          echo "🆕 File not tracked yet — committing new file."
           git config user.name "github-actions"
           git config user.email "ci@github.com"
           git add docs/covernator/coverage_overview.md
