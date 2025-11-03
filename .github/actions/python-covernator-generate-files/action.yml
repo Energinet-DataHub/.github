@@ -44,7 +44,7 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run covernator analysis + markdown generation
+    # 4️⃣ Run Covernator analysis + markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
       shell: bash
@@ -54,14 +54,24 @@ runs:
         from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
+        github_ref = os.getenv("GITHUB_REF")
         if not project_dir:
             raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
 
+        # Choose output path based on branch context
+        if github_ref == "refs/heads/main":
+            output_folder = "docs/covernator"
+        else:
+            output_folder = "tmp/covernator"
+            os.makedirs(output_folder, exist_ok=True)
+            print(f"🧱 Non-main branch detected ({github_ref}) — writing markdown to temp folder: {output_folder}")
+
         print(f"🔍 Running Covernator analysis on: {project_dir}")
-        run_and_generate_markdown(project_dir)
+        run_and_generate_markdown(project_dir, output_folder=output_folder)
         PYCODE
       env:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
+        GITHUB_REF: ${{ github.ref }}
 
     # -------------------------------------------------------------------------
     # 5️⃣ Commit the results (only on main)
@@ -71,7 +81,11 @@ runs:
     - name: Skip commit on non-main branches
       if: github.ref != 'refs/heads/main'
       shell: bash
-      run: echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
+      run: |
+        echo "🧱 Skipping commit — current branch is '${{ github.ref }}' (commit only runs on main)."
+        echo "🧹 Cleaning up generated markdown to avoid merge-base changes"
+        rm -rf tmp/covernator || true
+        rm -f docs/covernator/coverage_overview.md || true
 
     # Actual commit step (main only)
     - name: Commit and push markdown to docs (main only)
@@ -82,4 +96,3 @@ runs:
         file_pattern: docs/covernator/coverage_overview.md
         commit_user_name: github-actions[bot]
         commit_user_email: github-actions[bot]@users.noreply.github.com
-
