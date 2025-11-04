@@ -121,12 +121,12 @@ runs:
         fi
 
         # Compare local diff against checked-out branch
-        if git diff --quiet docs/covernator/coverage_overview.md; then
-          echo "✅ No local differences detected; skipping commit."
-          exit 0
-        else
+        if ! git diff --quiet docs/covernator/coverage_overview.md; then
           echo "🧩 Local differences detected; committing results."
           git add -f docs/covernator/coverage_overview.md
           git commit -m "🧩 Update Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
+        else
+          echo "✅ No local differences detected; skipping commit."
+          exit 0
         fi
