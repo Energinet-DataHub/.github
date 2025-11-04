@@ -14,16 +14,16 @@ runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Checkout domain repository (no persisted credentials)
+    # 1️⃣ Checkout domain repository
     # -------------------------------------------------------------------------
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        persist-credentials: false
+        persist-credentials: true
 
     # -------------------------------------------------------------------------
-    # 2️⃣ Detect relevant file changes
+    # 2️⃣ Fine-grained change detection (new)
     # -------------------------------------------------------------------------
     - name: Detect relevant file changes for Covernator
       id: covernator_changed
@@ -79,7 +79,8 @@ runs:
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
         if not project_dir:
-            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+          raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+
         print(f"🔍 Running Covernator analysis on: {project_dir}")
         run_and_generate_markdown(project_dir)
         PYCODE
@@ -87,7 +88,7 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit markdown only when differences exist (Fix 1)
+    # 6️⃣ Commit only if markdown truly changed (local diff version)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -96,32 +97,36 @@ runs:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         set -e
-        echo "📦 Checking for local differences before commit."
+        echo "📦 Checking for local differences before commit..."
+        echo "🧩 Current working directory: $(pwd)"
         echo "🧾 Files in docs/covernator/:"
         ls -la docs/covernator/ || echo "(folder missing)"
 
+        echo "🔍 Git tracked files before diff:"
+        git ls-files docs/covernator/ || echo "(no tracked files)"
+        echo "🔍 Git status summary before diff:"
+        git status --short || echo "(no status output)"
+
+        # Ensure Git identity is configured
         git config user.name "github-actions"
         git config user.email "ci@github.com"
 
-        # Handle missing file (first commit case)
+        # If file does not exist at all, commit it
         if [ ! -f docs/covernator/coverage_overview.md ]; then
-          echo "🆕 coverage_overview.md not found — committing new file."
-          git add -f docs/covernator/coverage_overview.md || true
-          git commit -m "🧩 Add initial Covernator results [skip ci]" || exit 0
-          echo "✅ Initial file committed."
+          echo "🆕 coverage_overview.md does not exist locally — committing new file."
+          git add -f docs/covernator/coverage_overview.md
+          git commit -m "🧩 Add initial Covernator results [skip ci]"
+          git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
 
-        # Detect diffs and skip push completely if none
+        # Compare local diff against checked-out branch
         if git diff --quiet docs/covernator/coverage_overview.md; then
-          echo "✅ No differences detected — skipping commit and push."
-          exit 0    # <-- Fix 1: exit before any push
+          echo "✅ No local differences detected; skipping commit."
+          exit 0
+        else
+          echo "🧩 Local differences detected; committing results."
+          git add -f docs/covernator/coverage_overview.md
+          git commit -m "🧩 Update Covernator results [skip ci]"
+          git push origin HEAD:${BRANCH_NAME}
         fi
-
-        echo "🧩 Differences detected — committing results."
-        git add -f docs/covernator/coverage_overview.md
-        git commit -m "🧩 Update Covernator results [skip ci]"
-        # Authenticate manually using default token only when needed
-        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-        git push origin HEAD:${BRANCH_NAME}
-        echo "✅ Results committed successfully."
