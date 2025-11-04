@@ -108,29 +108,25 @@ runs:
         echo "🔍 Git status summary before diff:"
         git status --short || echo "(no status output)"
 
-        # Detect untracked file (new coverage report)
-        if ! git ls-files --error-unmatch docs/covernator/coverage_overview.md > /dev/null 2>&1; then
-          echo "🆕 File not tracked yet — committing new file."
-          git config user.name "github-actions"
-          git config user.email "ci@github.com"
+      # Detect if file exists in branch and differs from remote HEAD
+        if ! git fetch origin "${BRANCH_NAME}" --depth=1; then
+          echo "⚠️ Could not fetch remote branch ${BRANCH_NAME}, continuing..."
+        fi
+
+        if ! git show "origin/${BRANCH_NAME}:docs/covernator/coverage_overview.md" > /tmp/old.md 2>/dev/null; then
+          echo "🆕 No existing file in remote branch — committing new file."
           git add -f docs/covernator/coverage_overview.md
           git commit -m "🧩 Add initial Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
 
-        echo "🔍 Running diff against HEAD..."
-        git diff --name-only HEAD -- docs/covernator/coverage_overview.md || true
-
-        if git diff --quiet HEAD -- docs/covernator/coverage_overview.md; then
-          echo "✅ No differences detected in coverage_overview.md; skipping commit."
-          echo "🔍 (To debug, see above: status and diff name outputs)"
+        if diff -q docs/covernator/coverage_overview.md /tmp/old.md >/dev/null; then
+          echo "✅ No changes compared to remote HEAD — skipping commit."
           exit 0
+        else
+          echo "🧩 Changes detected compared to remote HEAD — committing."
+          git add -f docs/covernator/coverage_overview.md
+          git commit -m "🧩 Update Covernator results [skip ci]"
+          git push origin HEAD:${BRANCH_NAME}
         fi
-        
-        echo "🧩 Changes detected; committing results."
-        git config user.name "github-actions"
-        git config user.email "ci@github.com"
-        git add -f docs/covernator/coverage_overview.md
-        git commit -m "🧩 Update Covernator results [skip ci]"
-        git push origin HEAD:${BRANCH_NAME}
