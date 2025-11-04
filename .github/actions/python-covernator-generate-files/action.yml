@@ -88,7 +88,7 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit only if markdown truly changed (fixed and formatted)
+    # 6️⃣ Commit only if markdown truly changed (local diff version)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -97,35 +97,35 @@ runs:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         set -e
-        echo "📦 Checking for differences before commit..."
+        echo "📦 Checking for local differences before commit..."
         echo "🧩 Current working directory: $(pwd)"
         echo "🧾 Files in docs/covernator/:"
         ls -la docs/covernator/ || echo "(folder missing)"
 
         echo "🔍 Git tracked files before diff:"
         git ls-files docs/covernator/ || echo "(no tracked files)"
-
         echo "🔍 Git status summary before diff:"
         git status --short || echo "(no status output)"
 
-        # Detect if file exists in branch and differs from remote HEAD
-        if ! git fetch origin "${BRANCH_NAME}" --depth=1; then
-          echo "⚠️ Could not fetch remote branch ${BRANCH_NAME}, continuing..."
-        fi
+        # Ensure Git identity is configured
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
 
-        if ! git show "origin/${BRANCH_NAME}:docs/covernator/coverage_overview.md" > /tmp/old.md 2>/dev/null; then
-          echo "🆕 No existing file in remote branch — committing new file."
+        # If file does not exist at all, commit it
+        if [ ! -f docs/covernator/coverage_overview.md ]; then
+          echo "🆕 coverage_overview.md does not exist locally — committing new file."
           git add -f docs/covernator/coverage_overview.md
           git commit -m "🧩 Add initial Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
 
-        if diff -q docs/covernator/coverage_overview.md /tmp/old.md >/dev/null; then
-          echo "✅ No changes compared to remote HEAD — skipping commit."
+        # Compare local diff against checked-out branch
+        if git diff --quiet docs/covernator/coverage_overview.md; then
+          echo "✅ No local differences detected; skipping commit."
           exit 0
         else
-          echo "🧩 Changes detected compared to remote HEAD — committing."
+          echo "🧩 Local differences detected; committing results."
           git add -f docs/covernator/coverage_overview.md
           git commit -m "🧩 Update Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
