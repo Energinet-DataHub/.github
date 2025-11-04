@@ -88,7 +88,7 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit only if markdown truly changed (fixed)
+    # 6️⃣ Commit only if markdown truly changed (fixed and formatted)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -108,7 +108,7 @@ runs:
         echo "🔍 Git status summary before diff:"
         git status --short || echo "(no status output)"
 
-      # Detect if file exists in branch and differs from remote HEAD
+        # Detect if file exists in branch and differs from remote HEAD
         if ! git fetch origin "${BRANCH_NAME}" --depth=1; then
           echo "⚠️ Could not fetch remote branch ${BRANCH_NAME}, continuing..."
         fi
