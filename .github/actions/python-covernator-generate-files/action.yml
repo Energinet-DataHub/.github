@@ -97,7 +97,7 @@ runs:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         set -e
-        echo "📦 Checking for local differences before commit..."
+        echo "📦 Checking for local differences before commit."
         echo "🧩 Current working directory: $(pwd)"
         echo "🧾 Files in docs/covernator/:"
         ls -la docs/covernator/ || echo "(folder missing)"
@@ -120,10 +120,12 @@ runs:
           exit 0
         fi
 
+        # Stage the file for comparison if it's untracked (new)
+        git add docs/covernator/coverage_overview.md
+
         # Compare local diff against checked-out branch
         if ! git diff --quiet docs/covernator/coverage_overview.md; then
           echo "🧩 Local differences detected; committing results."
-          git add -f docs/covernator/coverage_overview.md
           git commit -m "🧩 Update Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
         else
