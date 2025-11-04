@@ -14,16 +14,7 @@ runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Checkout domain repository (no persisted credentials)
-    # -------------------------------------------------------------------------
-    - name: Checkout domain repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        persist-credentials: false  # <-- Fix 2: avoids branch ref updates
-
-    # -------------------------------------------------------------------------
-    # 2️⃣ Detect relevant file changes
+    # 1️⃣ Fine-grained change detection (was step 2 previously)
     # -------------------------------------------------------------------------
     - name: Detect relevant file changes for Covernator
       id: covernator_changed
@@ -43,7 +34,7 @@ runs:
         echo "${{ steps.covernator_changed.outputs.all_changed_files }}"
 
     # -------------------------------------------------------------------------
-    # 3️⃣ Setup Python + UV
+    # 2️⃣ Setup Python + UV
     # -------------------------------------------------------------------------
     - name: Setup Python
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -56,7 +47,7 @@ runs:
       uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Install geh_common
+    # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
     - name: Install geh_common
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -67,7 +58,7 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Run Covernator analysis and markdown generation
+    # 4️⃣ Run Covernator analysis and markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -87,7 +78,7 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit markdown only when differences exist (Fix 1)
+    # 5️⃣ Commit markdown only when differences exist
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
       if: steps.covernator_changed.outputs.any_changed == 'true'
@@ -115,7 +106,7 @@ runs:
         # Detect diffs and skip push completely if none
         if git diff --quiet docs/covernator/coverage_overview.md; then
           echo "✅ No differences detected — skipping commit and push."
-          exit 0    # <-- Fix 1: exit before any push
+          exit 0
         fi
 
         echo "🧩 Differences detected — committing results."
