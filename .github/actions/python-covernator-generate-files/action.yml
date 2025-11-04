@@ -120,15 +120,7 @@ runs:
           exit 0
         fi
 
-        # Stage the file for comparison if it's untracked (new)
-        git add docs/covernator/coverage_overview.md
-
-        # Compare local diff against checked-out branch
-        if ! git diff --quiet docs/covernator/coverage_overview.md; then
-          echo "🧩 Local differences detected; committing results."
-          git commit -m "🧩 Update Covernator results [skip ci]"
-          git push origin HEAD:${BRANCH_NAME}
-        else
-          echo "✅ No local differences detected; skipping commit."
-          exit 0
-        fi
+        # Always force commit the newly generated file
+        git add -f docs/covernator/coverage_overview.md
+        git commit -m "🧩 Commit newly generated Covernator results [skip ci]"
+        git push origin HEAD:${BRANCH_NAME}
