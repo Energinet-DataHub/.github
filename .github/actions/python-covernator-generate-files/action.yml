@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     # -------------------------------------------------------------------------
-    # 1️⃣ Checkout domain repository
+    # 1️⃣ Checkout repository
     # -------------------------------------------------------------------------
     - name: Checkout domain repository
       uses: actions/checkout@v4
@@ -23,43 +23,20 @@ runs:
         persist-credentials: true
 
     # -------------------------------------------------------------------------
-    # 2️⃣ Fine-grained change detection (new)
-    # -------------------------------------------------------------------------
-    - name: Detect relevant file changes for Covernator
-      id: covernator_changed
-      uses: tj-actions/changed-files@v46
-      with:
-        since_last_remote_commit: true
-        files: |
-          source/geh_wholesale/tests/**/*.yml
-          source/geh_wholesale/tests/**/test_*.py
-
-    - name: Print change detection summary
-      shell: bash
-      run: |
-        echo "Covernator change detection:"
-        echo "Any changed: ${{ steps.covernator_changed.outputs.any_changed }}"
-        echo "Changed files:"
-        echo "${{ steps.covernator_changed.outputs.all_changed_files }}"
-
-    # -------------------------------------------------------------------------
-    # 3️⃣ Setup Python + UV
+    # 2️⃣ Setup Python + UV
     # -------------------------------------------------------------------------
     - name: Setup Python
-      if: steps.covernator_changed.outputs.any_changed == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
     - name: Setup uv
-      if: steps.covernator_changed.outputs.any_changed == 'true'
       uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Install geh_common
+    # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
     - name: Install geh_common
-      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       run: |
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
@@ -67,10 +44,9 @@ runs:
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 5️⃣ Run Covernator analysis and markdown generation
+    # 4️⃣ Run Covernator analysis and markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
-      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       run: |
         python - <<'PYCODE'
@@ -88,39 +64,40 @@ runs:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
 
     # -------------------------------------------------------------------------
-    # 6️⃣ Commit only if markdown truly changed (local diff version)
+    # 5️⃣ Commit only if markdown truly changed (Layer 2 logic)
     # -------------------------------------------------------------------------
     - name: Commit and push markdown to docs
-      if: steps.covernator_changed.outputs.any_changed == 'true'
       shell: bash
       env:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         set -e
-        echo "📦 Checking for local differences before commit."
+        FILE="docs/covernator/coverage_overview.md"
+        echo "📦 Checking for local differences before commit..."
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+
         echo "🧩 Current working directory: $(pwd)"
         echo "🧾 Files in docs/covernator/:"
         ls -la docs/covernator/ || echo "(folder missing)"
 
-        echo "🔍 Git tracked files before diff:"
-        git ls-files docs/covernator/ || echo "(no tracked files)"
-        echo "🔍 Git status summary before diff:"
-        git status --short || echo "(no status output)"
-
-        # Ensure Git identity is configured
-        git config user.name "github-actions"
-        git config user.email "ci@github.com"
-
-        # If file does not exist at all, commit it
-        if [ ! -f docs/covernator/coverage_overview.md ]; then
-          echo "🆕 coverage_overview.md does not exist locally — committing new file."
-          git add -f docs/covernator/coverage_overview.md
+        # 🧩 1️⃣ If file does NOT exist in HEAD (new feature branch)
+        if ! git cat-file -e HEAD:$FILE 2>/dev/null; then
+          echo "🆕 No coverage_overview.md in branch HEAD — committing generated version."
+          git add -f "$FILE"
           git commit -m "🧩 Add initial Covernator results [skip ci]"
           git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
 
-        # Always force commit the newly generated file
-        git add -f docs/covernator/coverage_overview.md
-        git commit -m "🧩 Commit newly generated Covernator results [skip ci]"
-        git push origin HEAD:${BRANCH_NAME}
+        # 🧩 2️⃣ If file exists but differs from generated version
+        if ! git diff --quiet HEAD -- "$FILE"; then
+          echo "🧩 coverage_overview.md differs from HEAD — committing updated version."
+          git add -f "$FILE"
+          git commit -m "🧩 Update Covernator results [skip ci]"
+          git push origin HEAD:${BRANCH_NAME}
+          exit 0
+        fi
+
+        # 🧩 3️⃣ No differences
+        echo "✅ No changes in coverage_overview.md — skipping commit."
