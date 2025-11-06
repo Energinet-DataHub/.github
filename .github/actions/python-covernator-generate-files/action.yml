@@ -1,17 +1,17 @@
-name: "Python Covernator Commit"
-description: "Generate and commit Covernator coverage results, with change detection and commit guard"
+name: Python Covernator Commit
+description: Generate and commit Covernator coverage results, with change detection and commit guard
 
 inputs:
   project_directory:
     required: true
-    description: "Path to the project root (where tests/ live)"
+    description: Path to the project root (where tests/ live)
   geh_common_version:
     required: false
-    default: "7.2.3"
-    description: "geh_common package version"
+    default: 7.2.3
+    description: geh_common package version
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     # -------------------------------------------------------------------------
     # 1️⃣ Checkout repository
