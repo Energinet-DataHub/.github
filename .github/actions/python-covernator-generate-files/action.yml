@@ -27,7 +27,8 @@ runs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        # Instead of hardcoding an exact version, use the runner default major version
+        python-version: '3.x'
 
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
