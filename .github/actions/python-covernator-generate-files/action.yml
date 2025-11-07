@@ -40,7 +40,7 @@ runs:
       run: |
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
         uv pip install --system \
-          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
+          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
     # 4️⃣ Run Covernator analysis and markdown generation
