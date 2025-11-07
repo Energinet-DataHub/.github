@@ -26,40 +26,41 @@ runs:
     # -------------------------------------------------------------------------
     - name: Setup Python
       uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
 
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
     # -------------------------------------------------------------------------
-    # 3️⃣ Install geh_common into venv
+    # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
-    - name: Create venv and install geh_common
+    - name: Install geh_common
       shell: bash
       run: |
-        uv venv
-        .venv/bin/uv pip install \
+        echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
+        uv pip install --system \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run covernator using venv’s python
+    # 4️⃣ Run Covernator analysis and markdown generation
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
       shell: bash
       run: |
-        .venv/bin/python - <<'PYCODE'
+        python - <<'PYCODE'
         import os
         from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
         if not project_dir:
-            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+          raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
 
         print(f"🔍 Running Covernator analysis on: {project_dir}")
         run_and_generate_markdown(project_dir)
         PYCODE
       env:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
-
 
     # -------------------------------------------------------------------------
     # 5️⃣ Commit only if markdown truly changed (Layer 2 logic)
