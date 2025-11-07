@@ -30,6 +30,7 @@ runs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
+
     # -------------------------------------------------------------------------
     # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
@@ -37,7 +38,7 @@ runs:
       shell: bash
       run: |
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
-        uv pip install --system \
+        uv pip install \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
