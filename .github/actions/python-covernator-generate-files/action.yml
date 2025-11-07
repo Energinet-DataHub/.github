@@ -30,39 +30,36 @@ runs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v5
 
-
     # -------------------------------------------------------------------------
-    # 3️⃣ Install geh_common
+    # 3️⃣ Install geh_common into venv
     # -------------------------------------------------------------------------
     - name: Create venv and install geh_common
       shell: bash
       run: |
-        set -e
         uv venv
-        source .venv/bin/activate
-        echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
-        uv pip install \
+        .venv/bin/uv pip install \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
-    # 4️⃣ Run Covernator analysis and markdown generation
+    # 4️⃣ Run covernator using venv’s python
     # -------------------------------------------------------------------------
     - name: Run Covernator + Markdown generator
       shell: bash
       run: |
-        python - <<'PYCODE'
+        .venv/bin/python - <<'PYCODE'
         import os
         from geh_common.testing.covernator.entrypoints import run_and_generate_markdown
 
         project_dir = os.getenv("PROJECT_DIRECTORY")
         if not project_dir:
-          raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
+            raise ValueError("Missing PROJECT_DIRECTORY input for Covernator action.")
 
         print(f"🔍 Running Covernator analysis on: {project_dir}")
         run_and_generate_markdown(project_dir)
         PYCODE
       env:
         PROJECT_DIRECTORY: ${{ inputs.project_directory }}
+
 
     # -------------------------------------------------------------------------
     # 5️⃣ Commit only if markdown truly changed (Layer 2 logic)
