@@ -34,9 +34,12 @@ runs:
     # -------------------------------------------------------------------------
     # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
-    - name: Install geh_common
+    - name: Create venv and install geh_common
       shell: bash
       run: |
+        set -e
+        uv venv
+        source .venv/bin/activate
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
         uv pip install \
           "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
