@@ -8,6 +8,9 @@ inputs:
   geh_common_version:
     required: true
     description: geh_common package version
+  dh3serviceaccount_appid:
+    required: true
+    description: GitHub App ID for Energinet-DataHub dh3serviceaccount
 
 runs:
   using: composite
@@ -15,11 +18,20 @@ runs:
     # -------------------------------------------------------------------------
     # 1️⃣ Checkout repository
     # -------------------------------------------------------------------------
+    - uses: actions/create-github-app-token@v2
+      name: Generate Github token
+      id: generate_token
+      with:
+        app-id: ${{ inputs.dh3serviceaccount_appid }}
+        private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+        owner: Energinet-DataHub
+
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: true
+        token: ${{ steps.generate_token.outputs.token }}
 
     # -------------------------------------------------------------------------
     # 2️⃣ Setup Python + UV
@@ -66,38 +78,16 @@ runs:
     # -------------------------------------------------------------------------
     # 5️⃣ Commit only if markdown truly changed (Layer 2 logic)
     # -------------------------------------------------------------------------
-    - name: Commit and push markdown to docs
+
+    - name: Configure author
       shell: bash
-      env:
-        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
-        set -e
-        FILE="docs/covernator/coverage_overview.md"
-        echo "📦 Checking for local differences before commit..."
+        git status
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        echo "🧩 Current working directory: $(pwd)"
-        echo "🧾 Files in docs/covernator/:"
-        ls -la docs/covernator/ || echo "(folder missing)"
-
-        # 🧩 1️⃣ If file does NOT exist in HEAD (new feature branch)
-        if ! git cat-file -e HEAD:$FILE 2>/dev/null; then
-          echo "🆕 No coverage_overview.md in branch HEAD — committing generated version."
-          git add -f "$FILE"
-          git commit -m "🧩 Add initial Covernator results"
-          git push origin HEAD:${BRANCH_NAME}
-          exit 0
-        fi
-
-        # 🧩 2️⃣ If file exists but differs from generated version
-        if ! git diff --quiet HEAD -- "$FILE"; then
-          echo "🧩 coverage_overview.md differs from HEAD — committing updated version."
-          git add -f "$FILE"
-          git commit -m "🧩 Update Covernator results"
-          git push origin HEAD:${BRANCH_NAME}
-          exit 0
-        fi
-
-        # 🧩 3️⃣ No differences
-        echo "✅ No changes in coverage_overview.md — skipping commit."
+    - name: Commit updated coverage_overview.md
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Updated Covernator results
+        file_pattern: docs/covernator/coverage_overview.md
