@@ -11,6 +11,9 @@ inputs:
   dh3serviceaccount_appid:
     required: true
     description: GitHub App ID for Energinet-DataHub dh3serviceaccount
+  dh3serviceaccount_privatekey:
+    required: true
+    description: GitHub App private key for Energinet-DataHub dh3serviceaccount
 
 runs:
   using: composite
@@ -23,7 +26,7 @@ runs:
       id: generate_token
       with:
         app-id: ${{ inputs.dh3serviceaccount_appid }}
-        private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+        private-key: ${{ inputs.dh3serviceaccount_privatekey }}
         owner: Energinet-DataHub
 
     - name: Checkout domain repository
