@@ -8,12 +8,9 @@ inputs:
   geh_common_version:
     required: true
     description: geh_common package version
-  dh3serviceaccount_appid:
+  github_token:
     required: true
-    description: GitHub App ID for Energinet-DataHub dh3serviceaccount
-  dh3serviceaccount_privatekey:
-    required: true
-    description: GitHub App private key for Energinet-DataHub dh3serviceaccount
+    description: Github token used to checkout the repository and commit changes
 
 runs:
   using: composite
@@ -21,20 +18,13 @@ runs:
     # -------------------------------------------------------------------------
     # 1️⃣ Checkout repository
     # -------------------------------------------------------------------------
-    - uses: actions/create-github-app-token@v2
-      name: Generate Github token
-      id: generate_token
-      with:
-        app-id: ${{ inputs.dh3serviceaccount_appid }}
-        private-key: ${{ inputs.dh3serviceaccount_privatekey }}
-        owner: Energinet-DataHub
 
     - name: Checkout domain repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: true
-        token: ${{ steps.generate_token.outputs.token }}
+        token: ${{ inputs.github_token }}
 
     # -------------------------------------------------------------------------
     # 2️⃣ Setup Python + UV
