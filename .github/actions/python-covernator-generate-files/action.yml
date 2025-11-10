@@ -74,8 +74,8 @@ runs:
         set -e
         FILE="docs/covernator/coverage_overview.md"
         echo "📦 Checking for local differences before commit..."
-        git config user.name "github-actions"
-        git config user.email "ci@github.com"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
 
         echo "🧩 Current working directory: $(pwd)"
         echo "🧾 Files in docs/covernator/:"
@@ -85,7 +85,7 @@ runs:
         if ! git cat-file -e HEAD:$FILE 2>/dev/null; then
           echo "🆕 No coverage_overview.md in branch HEAD — committing generated version."
           git add -f "$FILE"
-          git commit -m "🧩 Add initial Covernator results [skip ci]"
+          git commit -m "🧩 Add initial Covernator results"
           git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
@@ -94,7 +94,7 @@ runs:
         if ! git diff --quiet HEAD -- "$FILE"; then
           echo "🧩 coverage_overview.md differs from HEAD — committing updated version."
           git add -f "$FILE"
-          git commit -m "🧩 Update Covernator results [skip ci]"
+          git commit -m "🧩 Update Covernator results"
           git push origin HEAD:${BRANCH_NAME}
           exit 0
         fi
