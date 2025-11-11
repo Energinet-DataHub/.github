@@ -143,6 +143,29 @@ jobs:
           dotnet --info
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
+      # Call action in source (caller) repository
+      - name: Prepare dotnet tests outputs
+        if: ${{ inputs.prepare_dotnet_tests == true }}
+        uses: ./.github/actions/dotnet-tests-prepare-outputs
+        with:
+          output_path: ${{ env.TESTS_OUTPUT_PATH }}
+
+      - name: Zip dotnet tests outputs
+        if: ${{ inputs.prepare_dotnet_tests == true }}
+        uses: thedoctor0/zip-release@0.6.2
+        with:
+          type: zip
+          filename: ${{ env.TESTS_ZIP_FILENAME }}
+          directory: ${{ env.TESTS_OUTPUT_PATH }}
+
+      - name: Upload dotnet-tests artifact
+        if: ${{ inputs.prepare_dotnet_tests == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-tests
+          path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
+          if-no-files-found: error
+
       - name: Generate SBOM
         if: ${{ inputs.sbom_root_directories == '' }}
         uses: anchore/sbom-action@v0.20.6
@@ -167,29 +190,6 @@ jobs:
           done
 
           syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
-
-      # Call action in source (caller) repository
-      - name: Prepare dotnet tests outputs
-        if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: ./.github/actions/dotnet-tests-prepare-outputs
-        with:
-          output_path: ${{ env.TESTS_OUTPUT_PATH }}
-
-      - name: Zip dotnet tests outputs
-        if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: thedoctor0/zip-release@0.6.2
-        with:
-          type: zip
-          filename: ${{ env.TESTS_ZIP_FILENAME }}
-          directory: ${{ env.TESTS_OUTPUT_PATH }}
-
-      - name: Upload dotnet-tests artifact
-        if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-tests
-          path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
-          if-no-files-found: error
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
