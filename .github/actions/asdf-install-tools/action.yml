@@ -17,7 +17,7 @@ runs:
         fi
 
     - name: Setup asdf
-      uses: asdf-vm/actions/setup@v3
+      uses: asdf-vm/actions/setup@v4
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
     - name: Restore asdf cache
@@ -29,7 +29,7 @@ runs:
         key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
 
     - name: Install dependencies in .tool-versions
-      uses: asdf-vm/actions/install@v3
+      uses: asdf-vm/actions/install@v4
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
     - name: Save asdf cache
