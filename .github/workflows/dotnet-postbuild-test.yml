@@ -179,11 +179,12 @@ jobs:
           native-dev-drive: true
           trusted-dev-drive: false
           env-mapping: |
-            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/nuget/packages
             ARTIFACTS_PATH,{{ DEV_DRIVE }}/artifacts
             TEST_WORKSPACE,{{ DEV_DRIVE }}/workspace
-            AZURITE_PATH,{{ DEV_DRIVE }}/node_modules/.bin
-            NODE_MODULES_PATH,{{ DEV_DRIVE }}/node_modules
+            NPM_WORKSPACE,{{ DEV_DRIVE }}/npm-workspace
+            AZURITE_PATH,{{ DEV_DRIVE }}/npm-workspace/node_modules/.bin
+            NODE_MODULES_PATH,{{ DEV_DRIVE }}/npm-workspace/node_modules
 
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
@@ -220,6 +221,12 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
 
+      - name: Create npm workspace on dev drive
+        if: ${{ inputs.use_azure_functions_tools == true }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.NPM_WORKSPACE }}"
+
       - name: Cache node modules
         if: ${{ inputs.use_azure_functions_tools == true }}
         id: cache-nodemodules
@@ -231,14 +238,14 @@ jobs:
       - name: Install Azurite v${{ inputs.azurite_version }}
         if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         shell: pwsh
-        working-directory: ${{ env.DEV_DRIVE }}
+        working-directory: ${{ env.NPM_WORKSPACE }}
         run: |
           npm install azurite@${{ inputs.azurite_version }}
 
       - name: Install Azure Functions Core Tools v${{ inputs.azure_functions_core_tools_version }}
         if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         shell: pwsh
-        working-directory: ${{ env.DEV_DRIVE }}
+        working-directory: ${{ env.NPM_WORKSPACE }}
         run: |
           npm install azure-functions-core-tools@${{ inputs.azure_functions_core_tools_version }}
 
