@@ -154,19 +154,9 @@ jobs:
     environment: ${{ inputs.environment }}
 
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
-      #
-      # Only relevant if 'use_azure_functions_tools' is TRUE
-      #
-      # Set value used by 'AzuriteManager'
-      #  Use 'AzuriteBlobFolderPath' for TestCommon version 4.2.0 and lower
-      AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
-      #  Use 'AzuriteFolderPath' for TestCommon version 4.3.0 and higher
-      AzuriteFolderPath: ${{ github.workspace }}\node_modules\.bin\
-      # Overrides settings in 'functionhost.settings.json'
-      FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
+
     steps:
       - name: Guard for Windows OS
         shell: bash
@@ -179,11 +169,29 @@ jobs:
             exit 1
           fi
 
+      - name: Setup Dev Drive for test performance optimization
+        uses: samypr100/setup-dev-drive@v3
+        with:
+          drive-size: 15GB
+          drive-format: ReFS
+          drive-type: Fixed
+          workspace-copy: false
+          native-dev-drive: true
+          trusted-dev-drive: false
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            ARTIFACTS_PATH,{{ DEV_DRIVE }}/artifacts
+            TEST_WORKSPACE,{{ DEV_DRIVE }}/workspace
+            AZURITE_PATH,{{ DEV_DRIVE }}/node_modules/.bin
+            NODE_MODULES_PATH,{{ DEV_DRIVE }}/node_modules
+
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
+        env:
+          DOTNET_INSTALL_DIR: ${{ env.DEV_DRIVE }}/dotnet
 
       # If the emulator is not started within <timeout> seconds the 'Start-CosmosDbEmulator' timeout.
       # We have added a retry action to see if this can mitigate builds failing on this account.
@@ -218,17 +226,19 @@ jobs:
         uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
-          path: ${{ github.workspace }}\node_modules
+          path: ${{ env.NODE_MODULES_PATH }}
 
       - name: Install Azurite v${{ inputs.azurite_version }}
         if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         shell: pwsh
+        working-directory: ${{ env.DEV_DRIVE }}
         run: |
           npm install azurite@${{ inputs.azurite_version }}
 
       - name: Install Azure Functions Core Tools v${{ inputs.azure_functions_core_tools_version }}
         if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
         shell: pwsh
+        working-directory: ${{ env.DEV_DRIVE }}
         run: |
           npm install azure-functions-core-tools@${{ inputs.azure_functions_core_tools_version }}
 
@@ -272,14 +282,14 @@ jobs:
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
 
-      - name: Unzip dotnet-tests-outputs.zip
+      - name: Unzip dotnet-tests-outputs.zip to dev drive
         shell: pwsh
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ env.TEST_WORKSPACE }}'
 
       - uses: actions/cache@v4
         with:
-          path: ~/.nuget/packages
+          path: ${{ env.NUGET_PACKAGES }}
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ inputs.nuget_cache_key_prefix }}-
@@ -294,26 +304,35 @@ jobs:
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
-      - name: Run tests
+      - name: Run tests on dev drive
         shell: pwsh
+        working-directory: ${{ env.TEST_WORKSPACE }}
+        env:
+          # Set value used by 'AzuriteManager'
+          #  Use 'AzuriteBlobFolderPath' for TestCommon version 4.2.0 and lower
+          AzuriteBlobFolderPath: ${{ env.AZURITE_PATH }}
+          #  Use 'AzuriteFolderPath' for TestCommon version 4.3.0 and higher
+          AzuriteFolderPath: ${{ env.AZURITE_PATH }}
+          # Overrides settings in 'functionhost.settings.json'
+          FunctionAppHostPath: ${{ env.NODE_MODULES_PATH }}\azure-functions-core-tools\bin\func.dll
         run: |
           dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
           {
-            $Env:${{ inputs.aspnetcore_test_contentroot_variable_name }} = '${{ github.workspace }}${{ inputs.aspnetcore_test_contentroot_variable_value }}'
+            $Env:${{ inputs.aspnetcore_test_contentroot_variable_name }} = '${{ env.TEST_WORKSPACE }}${{ inputs.aspnetcore_test_contentroot_variable_value }}'
           }
           # Handle filter expression
           if ( '${{ inputs.tests_filter_expression }}' -eq 'empty' )
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
+              ${{ env.TEST_WORKSPACE }}${{ inputs.tests_dll_file_path }} `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
           else
           {
             dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
+              ${{ env.TEST_WORKSPACE }}${{ inputs.tests_dll_file_path }} `
               --filter '${{ inputs.tests_filter_expression }}' `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
@@ -329,4 +348,4 @@ jobs:
           comment_title: Test results for ${{ inputs.tests_dll_file_path }}
           comment_mode: failures
           files: |
-            **/TestResults/*.trx
+            ${{ env.TEST_WORKSPACE }}/TestResults/*.trx
