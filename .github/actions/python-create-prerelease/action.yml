@@ -65,12 +65,18 @@ runs:
       with:
         path: ${{ inputs.package_path }}
         format: spdx-json
-        output-file: ${{ env.PACKAGE_NAME_FOLDER }}/sbom.json
+        output-file: ${{ github.workspace }}/sbom.json
         artifact-name: sbom-${{ inputs.package_name }}
 
     - name: Build ${{ inputs.package_name }}
       shell: bash
       run: uv build --wheel --directory ${{ inputs.package_path }}
+
+    - name: Attest SBOM
+      uses: actions/attest-sbom@v3
+      with:
+        subject-path: ${{ inputs.package_path }}/*.whl
+        sbom-path: ${{ github.workspace }}/sbom.json
 
     - name: Copy files for ${{ inputs.package_name }} prerelease
       shell: bash
