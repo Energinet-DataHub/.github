@@ -227,5 +227,5 @@ jobs:
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
         with:
-          subject-path: ${{ github.workspace }}/${{ steps.get_release_version_strings.outputs.release_version }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
+          subject-path: ${{ github.workspace }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           sbom-path: ${{ env.SBOM_PATH }}
