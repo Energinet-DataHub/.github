@@ -99,6 +99,7 @@ permissions:
   issues: read
   checks: write
   pull-requests: write
+  attestations: write
 
 jobs:
   #
