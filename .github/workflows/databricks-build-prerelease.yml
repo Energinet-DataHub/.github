@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ ! inputs.multiple_wheels }}
-        uses: anchore/sbom-action@v0.20.6
+        uses: anchore/sbom-action@v0.20.9
         with:
           path: ${{ inputs.wheel_working_directory }}
           format: spdx-json
@@ -158,7 +158,7 @@ jobs:
           release_name_prefix: ${{ inputs.prerelease_prefix }}
 
       - name: Zip files for prerelease
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
