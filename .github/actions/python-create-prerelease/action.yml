@@ -75,7 +75,7 @@ runs:
     - name: Attest SBOM
       uses: actions/attest-sbom@v3
       with:
-        subject-path: ${{ inputs.package_path }}/*.whl
+        subject-path: dist/*.whl
         sbom-path: ${{ github.workspace }}/sbom.json
 
     - name: Copy files for ${{ inputs.package_name }} prerelease
