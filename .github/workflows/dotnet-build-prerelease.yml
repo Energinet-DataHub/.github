@@ -219,7 +219,13 @@ jobs:
           mkdir -p "$combinedDir"
           for directory in "${DIRS[@]}"; do
             source="${{ github.workspace }}/$directory"
-            cp -r "$source/"* "$combinedDir/" -R
+
+            # Find all subdirectories except those containing ".Tests"
+            while IFS= read -r -d '' item; do
+              # Copy directories or files into combinedDir
+              cp -r "$item" "$combinedDir/"
+              done < <(find "$source" -mindepth 1 -maxdepth 1 ! -name "*\.Tests*" -print0)
+
           done
 
           syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
