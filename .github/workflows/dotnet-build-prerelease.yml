@@ -172,6 +172,9 @@ jobs:
         with:
           path: sbom
 
+      - name: Restore NuGet packages
+        run: dotnet restore sbom/${{ inputs.solution_file_path }}
+
       - name: Generate SBOMs for multiple root directories
         if: ${{ inputs.sbom_root_directories != '' }}
         shell: bash
