@@ -199,6 +199,9 @@ jobs:
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
 
+      - name: Recursively delete obj-folders
+        run: find . -type d -name obj -exec rm -rf {} +
+
       - name: Generate SBOM
         if: ${{ inputs.sbom_root_directories == '' }}
         uses: anchore/sbom-action@v0.20.6
