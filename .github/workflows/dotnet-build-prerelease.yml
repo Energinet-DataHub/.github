@@ -164,6 +164,7 @@ jobs:
         with:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
+          if-no-files-found: error
 
       - name: Generate SBOMs for multiple root directories
         if: ${{ inputs.sbom_root_directories != '' }}
@@ -185,7 +186,6 @@ jobs:
         run: |
           jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
           mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
-          if-no-files-found: error
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
