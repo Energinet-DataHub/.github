@@ -188,10 +188,10 @@ jobs:
 
           syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
-      - name: SBOM - remove whitespace and line breaks
-        run: |
-          jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
-          mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
+      # - name: SBOM - remove whitespace and line breaks
+      #   run: |
+      #     jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
+      #     mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
