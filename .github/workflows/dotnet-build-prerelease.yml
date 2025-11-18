@@ -70,7 +70,7 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      SBOM_PATH: ${{ github.workspace }}/sbom/sbom.json
+      SBOM_PATH: ${{ github.workspace }}/sbom.json
 
     steps:
       - name: Checkout repository
@@ -166,12 +166,6 @@ jobs:
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
           if-no-files-found: error
 
-      # check out to ${{ github.workspace }}/sbom directory
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          path: sbom
-
       - name: Generate SBOMs for multiple root directories
         if: ${{ inputs.sbom_root_directories != '' }}
         shell: bash
@@ -179,10 +173,10 @@ jobs:
           curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
 
           IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
-          combinedDir="${{ github.workspace }}/sbom/combined"
+          combinedDir="${{ github.workspace }}/combined"
           mkdir -p "$combinedDir"
           for directory in "${DIRS[@]}"; do
-            source="${{ github.workspace }}/sbom/$directory"
+            source="${{ github.workspace }}/$directory"
             cp -r "$source/"* "$combinedDir/" -R
           done
 
