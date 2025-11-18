@@ -164,6 +164,27 @@ jobs:
         with:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
+
+      - name: Generate SBOMs for multiple root directories
+        if: ${{ inputs.sbom_root_directories != '' }}
+        shell: bash
+        run: |
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+
+          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
+          combinedDir="${{ github.workspace }}/combined"
+          mkdir -p "$combinedDir"
+          for directory in "${DIRS[@]}"; do
+            source="${{ github.workspace }}/$directory"
+            cp -r "$source/"* "$combinedDir/" -R
+          done
+
+          syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+
+      - name: SBOM - remove whitespace and line breaks
+        run: |
+          jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
+          mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
           if-no-files-found: error
 
       # Call action in source (caller) repository
@@ -173,6 +194,7 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
+          sbom_path: ${{ env.SBOM_PATH }}
 
       - name: Get release version strings
         id: get_release_version_strings
@@ -208,26 +230,26 @@ jobs:
           format: spdx-json
           output-file: ${{ env.SBOM_PATH }}
 
-      - name: Generate SBOMs for multiple root directories
-        if: ${{ inputs.sbom_root_directories != '' }}
-        shell: bash
-        run: |
-          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+      # - name: Generate SBOMs for multiple root directories
+      #   if: ${{ inputs.sbom_root_directories != '' }}
+      #   shell: bash
+      #   run: |
+      #     curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
 
-          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
-          combinedDir="${{ github.workspace }}/combined"
-          mkdir -p "$combinedDir"
-          for directory in "${DIRS[@]}"; do
-            source="${{ github.workspace }}/$directory"
-            cp -r "$source/"* "$combinedDir/" -R
-          done
+      #     IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
+      #     combinedDir="${{ github.workspace }}/combined"
+      #     mkdir -p "$combinedDir"
+      #     for directory in "${DIRS[@]}"; do
+      #       source="${{ github.workspace }}/$directory"
+      #       cp -r "$source/"* "$combinedDir/" -R
+      #     done
 
-          syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+      #     syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
-      - name: SBOM - remove whitespace and line breaks
-        run: |
-          jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
-          mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
+      # - name: SBOM - remove whitespace and line breaks
+      #   run: |
+      #     jq --compact-output . ${{ env.SBOM_PATH }} > ${{ env.SBOM_PATH }}.tmp
+      #     mv ${{ env.SBOM_PATH }}.tmp ${{ env.SBOM_PATH }}
 
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
