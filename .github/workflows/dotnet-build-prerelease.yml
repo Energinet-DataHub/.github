@@ -217,16 +217,17 @@ jobs:
         run: |
           curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
 
-          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
-          combinedDir="${{ github.workspace }}/combined"
-          mkdir -p "$combinedDir"
-          for directory in "${DIRS[@]}"; do
-            source="${{ github.workspace }}/$directory"
-            cp -r "$source/"* "$combinedDir/" -R
-          done
+          # IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
+          # combinedDir="${{ github.workspace }}/combined"
+          # mkdir -p "$combinedDir"
+          # for directory in "${DIRS[@]}"; do
+          #   source="${{ github.workspace }}/$directory"
+          #   cp -r "$source/"* "$combinedDir/" -R
+          # done
 
-          RELEASE_DIRS=$(find $combinedDir -type d -path "**/bin/Release" -print | tr '\n' ',' | sed 's/,$//')
-          syft "dir:$RELEASE_DIRS" -o spdx-json | jq -c '.' > ${{ env.SBOM_PATH }}
+          # RELEASE_DIRS=$(find $combinedDir -type d -path "**/bin/Release" -print | tr '\n' ',' | sed 's/,$//')
+          # syft "dir:$RELEASE_DIRS" -o spdx-json | jq -c '.' > ${{ env.SBOM_PATH }}
+          syft "dir:${{ github.workspace }}/source/electricity-market,${{ github.workspace }}/source/electricity-market-v2" -o spdx-json | jq -c '.' > ${{ env.SBOM_PATH }}
       
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
