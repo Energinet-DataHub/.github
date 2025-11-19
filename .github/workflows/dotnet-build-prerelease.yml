@@ -226,7 +226,7 @@ jobs:
           done
 
           RELEASE_DIRS=$(find $combinedDir -type d -path "**/bin/Release" | paste -sd "," -)
-          syft dir:$RELEASE_DIRS -o spdx-tag-value > sbom.spdx
+          syft "dir:$RELEASE_DIRS" -o spdx-tag-value > sbom.spdx
       
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
