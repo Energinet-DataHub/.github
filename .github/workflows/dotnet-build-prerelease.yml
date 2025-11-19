@@ -207,7 +207,7 @@ jobs:
         uses: anchore/sbom-action@v0.20.6
         with:
           path: ${{ inputs.sbom_root_directory }}
-          artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
+          artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx
           format: spdx-tag-value
           output-file: ${{ env.SBOM_PATH }}
 
