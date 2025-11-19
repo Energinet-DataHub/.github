@@ -199,15 +199,6 @@ jobs:
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
 
-      # - name: Generate SBOM
-      #   if: ${{ inputs.sbom_root_directories == '' }}
-      #   uses: anchore/sbom-action@v0.20.6
-      #   with:
-      #     path: ${{ inputs.sbom_root_directory }}
-      #     artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
-      #     format: spdx-json
-      #     output-file: ${{ env.SBOM_PATH }}
-
       - name: Install syft
         run: |
           curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
@@ -235,7 +226,7 @@ jobs:
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom
+          name: sbom-${{ inputs.release_name_prefix }}
           path: ${{ env.SBOM_PATH }}
 
       - name: Attest SBOM
