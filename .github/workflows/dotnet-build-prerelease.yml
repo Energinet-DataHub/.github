@@ -225,7 +225,7 @@ jobs:
             cp -r "$source/"* "$combinedDir/" -R
           done
 
-          syft dir:$combinedDir/**/bin/Release -o spdx-tag-value --exclude "**/ref/**" > ${{ env.SBOM_PATH }}
+          syft dir:$combinedDir -o spdx-tag-value --exclude "**/ref/**" > ${{ env.SBOM_PATH }}
       
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
