@@ -70,7 +70,7 @@ jobs:
       TESTS_OUTPUT_PATH: ${{ github.workspace }}/tests-output
       TESTS_ZIP_FILENAME: dotnet-tests-outputs.zip
       RELEASE_FOLDER_PATH: ${{ github.workspace }}/output
-      SBOM_PATH: ${{ github.workspace }}/sbom.json
+      SBOM_PATH: ${{ github.workspace }}/sbom.spdx
 
     steps:
       - name: Checkout repository
@@ -208,7 +208,7 @@ jobs:
         with:
           path: ${{ inputs.sbom_root_directory }}
           artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
-          format: spdx-json
+          format: spdx-tag-value
           output-file: ${{ env.SBOM_PATH }}
 
       - name: Generate SBOMs for multiple root directories
