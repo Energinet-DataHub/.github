@@ -225,7 +225,7 @@ jobs:
             cp -r "$source/"* "$combinedDir/" -R
           done
 
-          RELEASE_DIRS=$(find $combinedDir -type d -path "*/bin/Release" | paste -sd "," -)
+          RELEASE_DIRS=$(find $combinedDir -type d -path "**/bin/Release" | paste -sd "," -)
           syft dir:$RELEASE_DIRS -o spdx-tag-value > sbom.spdx
       
       - name: Upload SBOM artifact
