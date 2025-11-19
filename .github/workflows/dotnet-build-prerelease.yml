@@ -225,7 +225,7 @@ jobs:
             cp -r "$source/"* "$combinedDir/" -R
           done
 
-          syft "$combinedDir" --exclude "**/obj/**" --exclude "**/ref/**" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+          syft "$combinedDir" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
       
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
