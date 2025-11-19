@@ -225,7 +225,7 @@ jobs:
           #   cp -r "$source/"* "$combinedDir/" -R
           # done
 
-          RELEASE_DIRS=$(find source/electricity-market,source/electricity-market-v2 -type d -path "**/bin/Release" -print | tr '\n' ',' | sed 's/,$//')
+          RELEASE_DIRS=$(find source/electricity-market-v2 -type d -path "**/bin/Release" -print | tr '\n' ',' | sed 's/,$//')
           syft "dir:$RELEASE_DIRS" -o spdx-json | jq -c '.' > ${{ env.SBOM_PATH }}
       
       - name: Upload SBOM artifact
