@@ -225,7 +225,7 @@ jobs:
             cp -r "$source/"* "$combinedDir/" -R
           done
 
-          syft "$combinedDir" -o spdx-tag-value | jq . > ${{ env.SBOM_PATH }}
+          syft "$combinedDir" -o spdx-tag-value > ${{ env.SBOM_PATH }}
 
       # - name: SBOM - remove whitespace and line breaks
       #   run: |
