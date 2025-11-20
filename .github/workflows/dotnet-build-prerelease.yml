@@ -222,7 +222,7 @@ jobs:
           done
 
           syft "$combinedDir" --exclude "**/obj/**" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
-      
+
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
