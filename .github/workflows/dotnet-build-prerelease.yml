@@ -207,7 +207,7 @@ jobs:
         if: ${{ inputs.sbom_root_directories == '' }}
         shell: bash
         run: |
-          syft "${{ github.workspace }}/${{ inputs.sbom_root_directory }}" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+          syft "${{ github.workspace }}/${{ inputs.sbom_root_directory }}" --exclude "**/obj/**" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
       - name: Generate SBOMs for multiple root directories
         if: ${{ inputs.sbom_root_directories != '' }}
