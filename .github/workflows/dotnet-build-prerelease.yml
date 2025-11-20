@@ -166,31 +166,6 @@ jobs:
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
           if-no-files-found: error
 
-      - name: Generate SBOM
-        if: ${{ inputs.sbom_root_directories == '' }}
-        uses: anchore/sbom-action@v0.20.6
-        with:
-          path: ${{ inputs.sbom_root_directory }}
-          artifact-name: sbom-${{ inputs.release_name_prefix }}.spdx.json
-          format: spdx-json
-          output-file: ${{ env.SBOM_PATH }}
-
-      - name: Generate SBOMs for multiple root directories
-        if: ${{ inputs.sbom_root_directories != '' }}
-        shell: bash
-        run: |
-          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
-
-          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
-          combinedDir="${{ github.workspace }}/combined"
-          mkdir -p "$combinedDir"
-          for directory in "${DIRS[@]}"; do
-            source="${{ github.workspace }}/$directory"
-            cp -r "$source/"* "$combinedDir/" -R
-          done
-
-          syft "$combinedDir" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
-
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
@@ -198,7 +173,6 @@ jobs:
         with:
           output_path: ${{ env.RELEASE_FOLDER_PATH }}
           project_name: ${{ inputs.project_name }}
-          sbom_path: ${{ env.SBOM_PATH }}
 
       - name: Get release version strings
         id: get_release_version_strings
@@ -224,3 +198,39 @@ jobs:
           title: ${{ steps.get_release_version_strings.outputs.release_version }}
           files: |
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
+
+      - name: Install syft
+        run: |
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM for single root directory
+        if: ${{ inputs.sbom_root_directories == '' }}
+        shell: bash
+        run: |
+          syft "${{ github.workspace }}/${{ inputs.sbom_root_directory }}" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+
+      - name: Generate SBOMs for multiple root directories
+        if: ${{ inputs.sbom_root_directories != '' }}
+        shell: bash
+        run: |
+          IFS=';' read -ra DIRS <<< "${{ inputs.sbom_root_directories }}"
+          combinedDir="${{ github.workspace }}/combined"
+          mkdir -p "$combinedDir"
+          for directory in "${DIRS[@]}"; do
+            source="${{ github.workspace }}/$directory"
+            cp -r "$source/"* "$combinedDir/" -R
+          done
+
+          syft "$combinedDir" --exclude "**/obj/**" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ inputs.release_name_prefix }}
+          path: ${{ env.SBOM_PATH }}
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
+          sbom-path: ${{ env.SBOM_PATH }}

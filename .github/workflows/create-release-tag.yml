@@ -23,8 +23,8 @@ jobs:
       - name: Create release
         uses: ./.github/actions/create-release-tag
         with:
-          major_version: 15
-          minor_version: 5
+          major_version: 16
+          minor_version: 0
           patch_version: 0
           repository_path: Energinet-DataHub/.github
         env:
