@@ -48,18 +48,18 @@ runs:
       run: exit 1
 
     - name: Check out code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Generate token
       id: generate-token
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@v2
       with:
         app-id: ${{ inputs.github-app-id }}
         private-key: ${{ inputs.github-app-private-key }}
         owner: ${{ github.repository_owner }}
 
     - name: Checkout environment repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: base
         repository: ${{ inputs.repository }}
