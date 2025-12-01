@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check for existence of global.json
         if: ${{ inputs.dotnet_major_version == '' }}
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload dotnet-tests artifact
         if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
@@ -224,7 +224,7 @@ jobs:
           syft "$combinedDir" --exclude "**/obj/**" --exclude "**/*Tests/**" -o spdx-json | jq . > ${{ env.SBOM_PATH }}
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sbom-${{ inputs.release_name_prefix }}
           path: ${{ env.SBOM_PATH }}
