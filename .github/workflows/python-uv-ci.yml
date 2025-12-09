@@ -221,7 +221,8 @@ jobs:
         run: |
           workspace_url=$(az keyvault secret show --name "dbw-domain-test-workspace-url" --vault-name kvintgratwe002 --query "value" | tr -d '"')
           echo "workspace_url=https://$workspace_url" >>$GITHUB_OUTPUT
-          workspace_token=$(az keyvault secret show --name "dbw-domain-test-workspace-token" --vault-name kvintgratwe002 --query "value" | tr -d '"')
+          workspace_token=$(az account get-access-token --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d --query accessToken --output tsv)
+          echo "::add-mask::$workspace_token"
           echo "workspace_token=$workspace_token" >>$GITHUB_OUTPUT
           warehouse_id=$(az keyvault secret show --name "dbw-sql-endpoint-id" --vault-name kvintgratwe002 --query "value" | tr -d '"')
           echo "warehouse_id=$warehouse_id" >>$GITHUB_OUTPUT
