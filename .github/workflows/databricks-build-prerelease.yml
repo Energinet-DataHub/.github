@@ -70,12 +70,12 @@ jobs:
           architecture: ${{ inputs.architecture }}
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v15
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
         id: find_pull_request
 
       - name: Generate SBOM
         if: ${{ ! inputs.multiple_wheels }}
-        uses: anchore/sbom-action@v0.20.6
+        uses: anchore/sbom-action@v0.20.10
         with:
           path: ${{ inputs.wheel_working_directory }}
           format: spdx-json
@@ -153,19 +153,19 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v15
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@v16
         with:
           release_name_prefix: ${{ inputs.prerelease_prefix }}
 
       - name: Zip files for prerelease
-        uses: thedoctor0/zip-release@0.6.2
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v15
+        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v16
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
