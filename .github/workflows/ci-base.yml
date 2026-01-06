@@ -252,7 +252,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run casing validation on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v15
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@v16
         with:
           folder: .github
 
