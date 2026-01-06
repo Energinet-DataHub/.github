@@ -24,8 +24,8 @@ jobs:
         uses: ./.github/actions/create-release-tag
         with:
           major_version: 16
-          minor_version: 0
-          patch_version: 2
+          minor_version: 1
+          patch_version: 0
           repository_path: Energinet-DataHub/.github
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}

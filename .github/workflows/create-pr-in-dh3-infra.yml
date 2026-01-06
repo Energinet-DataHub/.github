@@ -1,0 +1,100 @@
+name: Create PR in DH3 Infrastructure
+
+on:
+  workflow_call:
+    inputs:
+      terraform_path:
+        description: The path to the terraform files
+        required: true
+        type: string
+      terraform_variable_names:
+        description: Newline separated list of terraform variables to update in the same file (uses the same tag)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  deployments: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  create_pr_in_dh3_infrastructure:
+    name: Create PR in DH3 Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find associated pull request
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+        id: find_pull_request
+
+      - name: Set image tag
+        id: vars
+        # Tag is formatted as pr[PR_NUMBER]]
+        run: echo "tag=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/create-github-app-token@v2
+        id: generate_token
+        with:
+          app-id: ${{ vars.dh3serviceaccount_appid }}
+          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          owner: Energinet-DataHub
+
+      - name: Checkout infra repo
+        uses: actions/checkout@v6
+        with:
+          repository: Energinet-DataHub/dh3-infrastructure
+          token: ${{ steps.generate_token.outputs.token }}
+          path: infra-repo
+
+      - name: Update image tag in infra repo
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $file = "infra-repo/${{ inputs.terraform_path }}"
+          $tag = "${{ steps.vars.outputs.tag }}"
+
+          if (-not (Test-Path $file)) {
+            Write-Error "ERROR: file not found: $file"
+            exit 1
+          }
+
+          $vars = "${{ inputs.terraform_variable_names }}"
+          $vars -split "`n" | ForEach-Object {
+            $varname = $_.Trim()
+            if (-not $varname) { continue }
+
+            $content = Get-Content $file
+            $pattern = "^\s*${varname}\s*="
+            $found = $false
+
+            $newContent = $content | ForEach-Object {
+              if ($_ -match $pattern) {
+                $found = $true
+                $_ -replace '(")[^"]*(")', "`"$tag`""
+              } else {
+                $_
+              }
+            }
+
+            if ($found) {
+              $newContent | Set-Content $file
+            } else {
+              Add-Content $file "$varname = `"$tag`""
+            }
+          }
+
+      - name: Create Pull Request in Infra Repo
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          path: infra-repo
+          commit-message: Update image tag to ${{ steps.vars.outputs.tag }}
+          branch: update-${{github.repository}}-image-${{ steps.vars.outputs.tag }}
+          title: "[${{github.repository}}] Deploy image ${{ steps.vars.outputs.tag }}"
+          body: |
+            This PR updates the infrastructure to use image:
+
+            **`${{ steps.vars.outputs.tag }}`**
+
+          labels: update, ${{github.repository}}
