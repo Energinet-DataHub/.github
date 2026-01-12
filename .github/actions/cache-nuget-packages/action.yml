@@ -6,31 +6,37 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Check for existence of .tool-versions file
-      id: check_tool_versions
-      shell: bash
+    - name: Check for project files (*.csproj)
+      id: check_csproj_files
+      shell: pwsh
       run: |
-        if [ ! -f .tool-versions ]; then
-          echo "exists=false" >>$GITHUB_OUTPUT
-        else
-          echo "exists=true" >>$GITHUB_OUTPUT
-        fi
+        $projects = Get-ChildItem -Path . -Recurse -Filter *.csproj
+        if ($projects.Count -gt 0) {
+          Write-Output "exists=true" >> $env:GITHUB_OUTPUT
+        } else {
+          Write-Output "exists=false" >> $env:GITHUB_OUTPUT
+        }
 
-    - name: Restore asdf cache
+    - name: Restore cache
       uses: actions/cache/restore@v4
-      if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
-      id: cache-asdf-restore
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' }}
+      id: cache-nuget-restore
       with:
-        path: /home/runner/.asdf
-        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
 
-    - name: Install dependencies in .tool-versions
-      uses: asdf-vm/actions/install@v3
-      if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
+    - name: Restore NuGet packages
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' && steps.cache-nuget-restore.outputs.cache-hit != 'true' }}
+      shell: pwsh
+      run: |
+        $projects = Get-ChildItem -Path . -Recurse -Filter *.csproj
+        foreach ($project in $projects) {
+          dotnet restore $project.FullName
+        }
 
-    - name: Save asdf cache
+    - name: Save cache
       uses: actions/cache/save@v4
-      if: ${{ steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' && steps.cache-nuget-restore.outputs.cache-hit != 'true' }}
       with:
-        path: /home/runner/.asdf
-        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
