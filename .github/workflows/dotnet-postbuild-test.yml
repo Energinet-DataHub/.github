@@ -297,7 +297,6 @@ jobs:
       - name: Run tests
         shell: pwsh
         run: |
-          dotnet tool install --global dotnet-coverage --version 17.5.0
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
           {
@@ -306,14 +305,12 @@ jobs:
           # Handle filter expression
           if ( '${{ inputs.tests_filter_expression }}' -eq 'empty' )
           {
-            dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
+            dotnet test ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
           else
           {
-            dotnet-coverage collect -f xml -o TestResults\coverage.xml dotnet test `
-              ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
+            dotnet test ${{ github.workspace }}${{ inputs.tests_dll_file_path }} `
               --filter '${{ inputs.tests_filter_expression }}' `
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
