@@ -154,7 +154,7 @@ jobs:
         if: ${{ inputs.prepare_dotnet_tests == true }}
         run: |
           cd "${{ env.TESTS_OUTPUT_PATH }}"
-          zip -r -q "${{ env.TESTS_ZIP_FILENAME }}" .
+          zip -r -0 -q "${{ env.TESTS_ZIP_FILENAME }}" .
 
       - name: Upload dotnet-tests artifact
         if: ${{ inputs.prepare_dotnet_tests == true }}
