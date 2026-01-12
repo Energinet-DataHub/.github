@@ -144,11 +144,22 @@ jobs:
           dotnet build ${{ inputs.solution_file_path }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -p:SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
       # Call action in source (caller) repository
-      - name: Prepare dotnet tests outputs
-        if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: ./.github/actions/dotnet-tests-prepare-outputs
-        with:
-          output_path: ${{ env.TESTS_OUTPUT_PATH }}
+      # - name: Prepare dotnet tests outputs
+      #   if: ${{ inputs.prepare_dotnet_tests == true }}
+      #   uses: ./.github/actions/dotnet-tests-prepare-outputs
+      #   with:
+      #     output_path: ${{ env.TESTS_OUTPUT_PATH }}
+
+      # Eliminate use of dotnet-tests-prepare-outputs
+      - name: Copy output
+        shell: bash
+        run: |
+          # Create base directory
+          mkdir -p '${{ env.TESTS_OUTPUT_PATH }}/source' ';'
+          # Copy everything from source to the new directory
+          cp -a source/. '${{ env.TESTS_OUTPUT_PATH }}/source'
+          # Remove obj-directories from artifact
+          find ${{ env.TESTS_OUTPUT_PATH }}/ -type d -name 'obj' -exec rm -rf {} +
 
       - name: Zip dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
