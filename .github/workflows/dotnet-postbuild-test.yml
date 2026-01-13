@@ -277,10 +277,15 @@ jobs:
           attempt_limit: ${{ inputs.download_attempt_limit }}
           attempt_delay: 15000
 
+      # - name: Unzip dotnet-tests-outputs.zip
+      #   shell: pwsh
+      #   run: |
+      #     Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+
       - name: Unzip dotnet-tests-outputs.zip
-        shell: pwsh
+        shell: bash
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+          unzip -q "${{ env.ARTIFACTS_PATH }}/dotnet-tests-outputs.zip" -d "${{ github.workspace }}"
 
       - uses: actions/cache@v4
         with:
