@@ -138,6 +138,11 @@ on:
         required: false
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }}  # PR number is not available in merge_group event (Merge queue)
+      publish_test_results:
+        description: Should the test results be published
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   id-token: write
@@ -319,7 +324,7 @@ jobs:
           $testFailures
 
       - name: Publish test report
-        if: always()
+        if: ${{ inputs.publish_test_results == true && always() }}
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         with:
           check_name: Test results for ${{ inputs.tests_dll_file_path }}
