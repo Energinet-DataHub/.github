@@ -1,0 +1,49 @@
+name: Cache Nuget Packages
+description: Restore and cache Nuget packages - This action is intented to be called from the main branch of your repository
+inputs:
+  checkout:
+    description: Whether to checkout the repository (true|false)
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+
+    - name: Check for project files (*.csproj)
+      id: check_csproj_files
+      shell: pwsh
+      run: |
+        $projects = Get-ChildItem -Path . -Recurse -Filter *.csproj
+        if ($projects.Count -gt 0) {
+          Write-Output "exists=true" >> $env:GITHUB_OUTPUT
+        } else {
+          Write-Output "exists=false" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' }}
+      id: cache-nuget-restore
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+
+    - name: Restore NuGet packages
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' && steps.cache-nuget-restore.outputs.cache-hit != 'true' }}
+      shell: pwsh
+      run: |
+        $projects = Get-ChildItem -Path . -Recurse -Filter *.csproj
+        foreach ($project in $projects) {
+          dotnet restore $project.FullName
+        }
+
+    - name: Save cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.check_csproj_files.outputs.exists == 'true' && steps.cache-nuget-restore.outputs.cache-hit != 'true' }}
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
