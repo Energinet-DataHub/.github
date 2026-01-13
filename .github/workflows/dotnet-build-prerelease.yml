@@ -154,7 +154,7 @@ jobs:
         if: ${{ inputs.prepare_dotnet_tests == true }}
         run: |
           cd "${{ env.TESTS_OUTPUT_PATH }}"
-          zip -r -q "${{ env.TESTS_ZIP_FILENAME }}" .
+          zip -r -0 -q "${{ env.TESTS_ZIP_FILENAME }}" .
 
       - name: Upload dotnet-tests artifact
         if: ${{ inputs.prepare_dotnet_tests == true }}
@@ -163,6 +163,8 @@ jobs:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
           if-no-files-found: error
+          compression-level: 0 # no compression
+          retention-days: 1 # retention not needed, as artifact is only stored temporarily for downstreams jobs to consume
 
       # Call action in source (caller) repository
       - name: Prepare dotnet outputs
