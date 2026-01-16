@@ -11,6 +11,10 @@ on:
         description: The path to the Dockerfile
         required: true
         type: string
+      build_args:
+        description: Additional Docker build arguments (one per line)
+        required: false
+        type: string
     outputs:
       image_tag:
         description: The tag of the docker image to use
@@ -28,7 +32,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/${{ inputs.image_name }}
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
-  CONTAINER_REGISTRY_USER: PerTHenriksen  # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
+  CONTAINER_REGISTRY_USER: PerTHenriksen # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
 
 jobs:
   build_and_push_image:
@@ -74,7 +78,9 @@ jobs:
           cache-to: type=gha
           push: true
           tags: ${{ steps.image_name.outputs.lowercase }}:${{ steps.image_tag.outputs.tag }}
-          build-args: SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
+          build-args: |
+            SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
+            ${{ inputs.build_args }}
 
       - name: Generate SBOM from image
         id: generate_sbom_image
