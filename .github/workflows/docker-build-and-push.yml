@@ -101,7 +101,7 @@ jobs:
 
       - name: Create pre-release
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@v16
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v16
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}
