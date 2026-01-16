@@ -1,0 +1,110 @@
+name: Build and push Docker image
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: The name of the docker image to use
+        required: true
+        type: string
+      path_to_dockerfile:
+        description: The path to the Dockerfile
+        required: true
+        type: string
+      build_args:
+        description: Additional Docker build arguments (one per line)
+        required: false
+        type: string
+    outputs:
+      image_tag:
+        description: The tag of the docker image to use
+        value: ${{ jobs.build_and_push_image.outputs.image_tag }}
+
+permissions:
+  contents: write
+  deployments: write
+  packages: write
+  id-token: write
+  pull-requests: read
+  attestations: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/${{ inputs.image_name }}
+  IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
+  CONTAINER_REGISTRY_USER: PerTHenriksen # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
+
+jobs:
+  build_and_push_image:
+    runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Find associated pull request
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+        id: find_pull_request
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.CONTAINER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Declare Docker image name
+        id: image_name
+        uses: ASzc/change-string-case-action@v6
+        with:
+          string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Determine image tag
+        id: image_tag
+        run: echo "tag=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        id: push_image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.path_to_dockerfile }}
+          cache-from: type=gha
+          cache-to: type=gha
+          push: true
+          tags: ${{ steps.image_name.outputs.lowercase }}:${{ steps.image_tag.outputs.tag }}
+          build-args: |
+            SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
+            ${{ inputs.build_args }}
+
+      - name: Generate SBOM from image
+        id: generate_sbom_image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.image_name.outputs.lowercase }}:${{ steps.image_tag.outputs.tag }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: sbom-${{ inputs.image_name }}.spdx.json
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v1
+        with:
+          subject-name: ${{ steps.image_name.outputs.lowercase }}
+          subject-digest: ${{ steps.push_image.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+
+      - name: Create pre-release
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v16
+        with:
+          repo_token: ${{ github.token }}
+          automatic_release_tag: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}
+          prerelease: true
+          title: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}
+          files: README.md
