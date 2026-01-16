@@ -76,7 +76,6 @@ jobs:
           tags: ${{ steps.image_name.outputs.lowercase }}:${{ steps.image_tag.outputs.tag }}
           build-args: SourceRevisionId=PR_${{ steps.find_pull_request.outputs.pull_request_number }}+SHA_${{ github.sha }}
 
-
       - name: Generate SBOM from image
         id: generate_sbom_image
         uses: anchore/sbom-action@v0
