@@ -93,6 +93,7 @@ jobs:
 
       - name: Attest SBOM
         uses: actions/attest-sbom@v1
+        continue-on-error: true # We might hit limits on attestations, for now we skip if it happens as we want to move to ACR
         with:
           subject-name: ${{ steps.image_name.outputs.lowercase }}
           subject-digest: ${{ steps.push_image.outputs.digest }}
