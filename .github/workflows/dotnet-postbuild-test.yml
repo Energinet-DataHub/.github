@@ -141,7 +141,7 @@ on:
       publish_test_results:
         description: Should the test results be published
         required: false
-        default: true
+        default: false
         type: boolean
 
 permissions:
