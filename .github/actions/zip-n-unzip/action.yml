@@ -20,13 +20,14 @@ runs:
         CONTENT_PATH: ${{ inputs.source }}
         ARCHIVE_FILENAME: ${{ inputs.destination }}
       run: |
+        echo "Creating zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
+
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" "$CONTENT_PATH"
+          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" "$CONTENT_PATH" || { echo "::error::Cannot create archive."; exit 1; }
         else
-          zip -q -r "$ARCHIVE_FILENAME" "$CONTENT_PATH"
+          zip -q -r "$ARCHIVE_FILENAME" "$CONTENT_PATH" || { echo "::error::Cannot create archive."; exit 1; }
         fi
 
-        echo "Created zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
 
     - name: Unzip files
       if: ${{ inputs.action == 'unzip' }}
@@ -35,11 +36,11 @@ runs:
         ARCHIVE_FILENAME: ${{ inputs.source }}
         DESTINATION_PATH: ${{ inputs.destination }}
       run: |
+        echo "Extracting zip archive to $DESTINATION_PATH from $ARCHIVE_FILENAME"
+
         mkdir -p "$DESTINATION_PATH"
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y
+          7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y || { echo "::error::Cannot extract archive."; exit 1; }
         else
-          unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
+          unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH" || { echo "::error::Cannot extract archive."; exit 1; }
         fi
-
-        echo "Extracted zip archive to $DESTINATION_PATH from $ARCHIVE_FILENAME"
