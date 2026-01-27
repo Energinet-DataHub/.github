@@ -10,6 +10,9 @@ inputs:
   destination:
     description: 'Destination zip file (for zip) or directory (for unzip)'
     required: true
+  working_directory:
+    description: 'Working directory for the operation'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -19,6 +22,7 @@ runs:
       env:
         CONTENT_PATH: ${{ inputs.source }}
         ARCHIVE_FILENAME: ${{ inputs.destination }}
+      working-directory: ${{ inputs.working_directory }}
       run: |
         echo "Creating zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
 
@@ -34,6 +38,7 @@ runs:
       env:
         ARCHIVE_FILENAME: ${{ inputs.source }}
         DESTINATION_PATH: ${{ inputs.destination }}
+      working-directory: ${{ inputs.working_directory }}
       run: |
         echo "Extracting zip archive to $DESTINATION_PATH from $ARCHIVE_FILENAME"
 
