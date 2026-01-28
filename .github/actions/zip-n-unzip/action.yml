@@ -10,9 +10,6 @@ inputs:
   destination:
     description: 'Destination zip file (for zip) or directory (for unzip)'
     required: true
-  working_directory:
-    description: 'Working directory for the operation'
-    required: true
 runs:
   using: "composite"
   steps:
@@ -22,14 +19,14 @@ runs:
       env:
         CONTENT_PATH: ${{ inputs.source }}
         ARCHIVE_FILENAME: ${{ inputs.destination }}
-      working-directory: ${{ inputs.working_directory }}
+      working-directory: ${{ inputs.source }}
       run: |
         echo "Creating zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
 
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" "$CONTENT_PATH" || { echo "::error::Cannot create archive."; exit 1; }
+          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" . || { echo "::error::Cannot create archive."; exit 1; }
         else
-          zip -q -r "$ARCHIVE_FILENAME" "$CONTENT_PATH" || { echo "::error::Cannot create archive."; exit 1; }
+          zip -q -r "$ARCHIVE_FILENAME" . || { echo "::error::Cannot create archive."; exit 1; }
         fi
 
     - name: Unzip files
@@ -38,7 +35,6 @@ runs:
       env:
         ARCHIVE_FILENAME: ${{ inputs.source }}
         DESTINATION_PATH: ${{ inputs.destination }}
-      working-directory: ${{ inputs.working_directory }}
       run: |
         echo "Extracting zip archive to $DESTINATION_PATH from $ARCHIVE_FILENAME"
 
