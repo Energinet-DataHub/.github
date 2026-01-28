@@ -1,0 +1,46 @@
+name: Zip and Unzip
+description: GitHub Action to zip and unzip files and directories.
+inputs:
+  action:
+    description: zip or unzip
+    required: true
+  source:
+    description: Source file or directory (for zip) or archive (for unzip)
+    required: true
+  destination:
+    description: Destination zip file (for zip) or directory (for unzip)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Zip files
+      if: ${{ inputs.action == 'zip' }}
+      shell: bash
+      env:
+        CONTENT_PATH: ${{ inputs.source }}
+        ARCHIVE_FILENAME: ${{ inputs.destination }}
+      working-directory: ${{ inputs.source }}
+      run: |
+        echo "Creating zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
+
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" .
+        else
+          zip -q -r "$ARCHIVE_FILENAME" .
+        fi
+
+    - name: Unzip files
+      if: ${{ inputs.action == 'unzip' }}
+      shell: bash
+      env:
+        ARCHIVE_FILENAME: ${{ inputs.source }}
+        DESTINATION_PATH: ${{ inputs.destination }}
+      run: |
+        echo "Extracting zip archive to $DESTINATION_PATH from $ARCHIVE_FILENAME"
+
+        mkdir -p "$DESTINATION_PATH"
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y
+        else
+          unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
+        fi
