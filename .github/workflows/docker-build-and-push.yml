@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
@@ -92,7 +92,7 @@ jobs:
           artifact-name: sbom-${{ inputs.image_name }}.spdx.json
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v1
+        uses: actions/attest-sbom@v3
         continue-on-error: true # We might hit limits on attestations, for now we skip if it happens as we want to move to ACR
         with:
           subject-name: ${{ steps.image_name.outputs.lowercase }}
