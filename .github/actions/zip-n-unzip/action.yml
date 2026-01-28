@@ -2,16 +2,16 @@ name: Zip and Unzip
 description: GitHub Action to zip and unzip files and directories.
 inputs:
   action:
-    description: 'zip or unzip'
+    description: zip or unzip
     required: true
   source:
-    description: 'Source file or directory (for zip) or archive (for unzip)'
+    description: Source file or directory (for zip) or archive (for unzip)
     required: true
   destination:
-    description: 'Destination zip file (for zip) or directory (for unzip)'
+    description: Destination zip file (for zip) or directory (for unzip)
     required: true
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Zip files
       if: ${{ inputs.action == 'zip' }}
