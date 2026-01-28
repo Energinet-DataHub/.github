@@ -281,7 +281,7 @@ jobs:
         shell: bash
         env:
           DESTINATION_PATH: ${{ github.workspace }}
-          ARCHIVE_FILENAME: '${{ env.ARTIFACTS_PATH }}/dotnet-tests-outputs.zip'
+          ARCHIVE_FILENAME: ${{ env.ARTIFACTS_PATH }}/dotnet-tests-outputs.zip
         run: |
           mkdir -p "$DESTINATION_PATH"
 
