@@ -43,4 +43,10 @@ runs:
           else
             wget https://github.com/${{ inputs.release_repository_path }}/releases/download/${{ inputs.release_name }}/${{ inputs.release_name }}.zip
           fi
-          unzip ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
+
+    - name: Extract archive
+      shell: bash
+      run: |
+          unzip -q ${{ inputs.release_name }}.zip -d ${{ inputs.destination_folder_path }}
+
+          echo "Unzipped ${{ inputs.release_name }}.zip to ${{ inputs.destination_folder_path }}"

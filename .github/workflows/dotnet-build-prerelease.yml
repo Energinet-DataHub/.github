@@ -152,8 +152,8 @@ jobs:
 
       - name: Zip dotnet tests outputs
         if: ${{ inputs.prepare_dotnet_tests == true }}
+        working-directory: ${{ env.TESTS_OUTPUT_PATH }}
         run: |
-          cd "${{ env.TESTS_OUTPUT_PATH }}"
           zip -r -q "${{ env.TESTS_ZIP_FILENAME }}" .
 
       - name: Upload dotnet-tests artifact
@@ -180,11 +180,9 @@ jobs:
 
       - name: Zip files for prerelease
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: thedoctor0/zip-release@0.6.2
-        with:
-          type: zip
-          filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
-          directory: ${{ env.RELEASE_FOLDER_PATH }}
+        working-directory: ${{ env.RELEASE_FOLDER_PATH }}
+        run: |
+          zip -r -q "${{ steps.get_release_version_strings.outputs.release_zip_filename }}" .
 
       - name: Create pre-release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
