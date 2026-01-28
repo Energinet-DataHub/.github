@@ -24,9 +24,9 @@ runs:
         echo "Creating zip archive at $ARCHIVE_FILENAME from $CONTENT_PATH"
 
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" . || { echo "::error::Cannot create archive."; exit 1; }
+          7z a -tzip -bso0 -bsp0 "$ARCHIVE_FILENAME" .
         else
-          zip -q -r "$ARCHIVE_FILENAME" . || { echo "::error::Cannot create archive."; exit 1; }
+          zip -q -r "$ARCHIVE_FILENAME" .
         fi
 
     - name: Unzip files
@@ -40,7 +40,7 @@ runs:
 
         mkdir -p "$DESTINATION_PATH"
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y || { echo "::error::Cannot extract archive."; exit 1; }
+          7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y
         else
-          unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH" || { echo "::error::Cannot extract archive."; exit 1; }
+          unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
         fi
