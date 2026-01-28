@@ -278,9 +278,18 @@ jobs:
           attempt_delay: 15000
 
       - name: Unzip dotnet-tests-outputs.zip
-        shell: pwsh
+        shell: bash
+        env:
+          DESTINATION_PATH: ${{ github.workspace }}
+          ARCHIVE_FILENAME: '${{ env.ARTIFACTS_PATH }}/dotnet-tests-outputs.zip'
         run: |
-          Expand-Archive '${{ env.ARTIFACTS_PATH }}\dotnet-tests-outputs.zip' '${{ github.workspace }}'
+          mkdir -p "$DESTINATION_PATH"
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            7z x -bso0 -bsp0 "$ARCHIVE_FILENAME" -o"$DESTINATION_PATH" -y
+          else
+            unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
+          fi
 
       - uses: actions/cache@v4
         with:
