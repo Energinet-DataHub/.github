@@ -20,10 +20,17 @@ on:
         required: true
         type: string
         description: "Prefix to the release names. Eg: 'infrastructure', 'dotnet', 'databricks' or similar"
+    outputs:
+      pull_request_number:
+        description: "The pull request number found by the find-related-pr-number action"
+        value: ${{ jobs.publish_release.outputs.pull_request_number }}
 
 jobs:
   publish_release:
     runs-on: ubuntu-latest
+    outputs:
+      pull_request_number: ${{ steps.find_pull_request.outputs.pull_request_number }}
+
     steps:
       # Checkout the repository, so gh cli can interact with it
       - name: Checkout
