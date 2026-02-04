@@ -20,13 +20,17 @@ jobs:
   #
   # Automatic Release (verify if release tag exists)
   #
-  create_release:
-    uses: ./.github/workflows/create-release-tag.yml
+  create_actions_release:
+    uses: ./.github/workflows/create-release-tag-actions.yml
+    secrets: inherit
+
+  create_workflows_release:
+    uses: ./.github/workflows/create-release-tag-workflows.yml
     secrets: inherit
 
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest
-    needs: [ci_base, create_release]
+    needs: [ci_base, create_actions_release, create_workflows_release]
     if: |
       always()
     steps:

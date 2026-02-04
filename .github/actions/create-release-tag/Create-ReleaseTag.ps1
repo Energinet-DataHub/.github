@@ -1,17 +1,3 @@
-# Copyright 2020 Energinet DataHub A/S
-#
-# Licensed under the Apache License, Version 2.0 (the "License2");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 <#
     .SYNOPSIS
     Validate and Updates Release Tags
@@ -21,6 +7,11 @@
 #>
 function Create-ReleaseTag {
     param (
+        # Module name
+        [Parameter(Mandatory)]
+        [string]
+        $ModuleName,
+
         # Major Version number
         [Parameter(Mandatory)]
         [string]
@@ -56,21 +47,16 @@ function Create-ReleaseTag {
     $isPushToMain = $GitHubEvent -eq 'push' -and $GitHubBranch -eq 'main'
     Write-Host "Is push to main: $isPushToMain"
 
-    $version = "$MajorVersion.$MinorVersion.$PatchVersion"
+    $version = "${ModuleName}_${MajorVersion}.${MinorVersion}.${PatchVersion}"
 
     if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
         throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
     }
 
-    $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
-    if ($null -eq $existingReleases) {
-        $existingVersions = '0.0.0'
-    }
-    else {
-        $existingVersions = $existingReleases.title.Trim("v")
-    }
+    $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository -ModuleName $ModuleName
+    Write-Host "Existing releases: $existingReleases"
 
-    $conflicts = Find-ConflictingVersions $version $existingVersions
+    $conflicts = Find-ConflictingVersions $version $existingReleases
 
     if ($conflicts.Count) {
         $latest = $conflicts | Select-Object -First 1
@@ -79,14 +65,14 @@ function Create-ReleaseTag {
 
     Write-Host "Validated version tag: $version"
 
-    # Updating major version tag
+    # Create version tag
     if ($isPushToMain) {
-        Update-VersionTags -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
+        Write-Host "Creating $version"
+        gh release create $version --generate-notes --latest --title $version --target $GithubBranch -R $GitHubRepository
     }
     else {
         Write-Host 'This was a dry-run, no changes have been made'
     }
-
 
     Write-Host "All done"
 }
@@ -96,7 +82,7 @@ function Create-ReleaseTag {
     Compares two version numbers
 
     .DESCRIPTION
-    Compares two version numbers in dot-notation (eg. 1.0.3) and return (-1,1,0) if the first number is smaller, bigger og equivelant version
+    Compares two version numbers in dot-notation (eg. ModuleName_1.0.3) and returns (-1, 1, 0) if the first number is smaller, bigger or equivalent version
 #>
 function Compare-Versions {
     param(
@@ -110,9 +96,12 @@ function Compare-Versions {
         [string]
         $Comparison
     )
-    # Split the version numbers into segments
-    $v1 = $Version -Split "\."
-    $v2 = $Comparison -Split "\."
+
+    Write-Host "Comparing $Version with $Comparison"
+
+    # Extract numeric part of the version string
+    $v1 = ($Version -split "_")[1] -split "\."
+    $v2 = ($Comparison -split "_")[1] -split "\."
 
     # Pad the shorter version number with zeros
     $diff = $v1.Count - $v2.Count
@@ -145,23 +134,33 @@ function Compare-Versions {
     Uses github CLI (gh) to retrieve a list of releases
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github and filter out those containing any text followed by an underscore before the version.
+    Simple function wrapping a call with gh to retrieve the latest releases from github and filters by module name, returning an array of titles.
 #>
 function Get-GithubReleases {
     param (
         # The value of the GitHub repository variable.
         [Parameter(Mandatory)]
         [string]
-        $GitHubRepository
+        $GitHubRepository,
+
+        # The module name to filter releases.
+        [Parameter(Mandatory)]
+        [string]
+        $ModuleName
     )
 
     # Retrieve the list of releases
     $allReleases = gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 
-    # Filter out releases containing any text followed by an underscore before the version
-    $filteredReleases = $allReleases | Where-Object { $_.title -notmatch "_\d+(\.\d+)*$" }
+    # Filter the releases by module name and return their titles
+    $filteredTitles = $allReleases | Where-Object { $_.title -like "$($ModuleName)_*" } | Select-Object -ExpandProperty title
 
-    return $filteredReleases
+    # Ensure the function returns an array and handle the case where there are no releases
+    if ($null -eq $filteredTitles -or $filteredTitles.Count -eq 0) {
+        $filteredTitles = @("${ModuleName}_0.0.0")
+    }
+
+    return $filteredTitles
 }
 
 <#
@@ -177,6 +176,7 @@ function Find-ConflictingVersions {
         [Parameter(Mandatory)]
         [string]
         $Version,
+
         # Previous Version
         [Parameter(Mandatory)]
         [Object[]]
@@ -185,41 +185,4 @@ function Find-ConflictingVersions {
 
     $conflicts = $ReleaseList | Where-Object { (Compare-Versions $Version $_) -le 0 }
     return (, [array]$conflicts)
-}
-
-<#
-    .SYNOPSIS
-    Removes previous version tag and replacing with new
-
-    .DESCRIPTION
-    When merging new release number, update the major release tag eg. v11 with the latest version number
-#>
-function Update-VersionTags {
-    param(
-        # Version number
-        [Parameter(Mandatory)]
-        [ValidatePattern("^(0|[1-9]\d*)((\.(0|[1-9]\d*)\.(0|[1-9]\d*))?)?$")]
-        [string]
-        $Version,
-
-        # The value of the GitHub repository variable.
-        [Parameter(Mandatory)]
-        [string]
-        $GitHubRepository,
-
-        # The value of the GitHub repository branch.
-        [Parameter(Mandatory = $false)]
-        [string]
-        $GitHubBranch
-    )
-    $MajorVersion = $Version -Split "\." | Select-Object -First 1
-
-    Write-Host "Deleting major version tag v$MajorVersion"
-    gh release delete "v$MajorVersion" -y --cleanup-tag -R $GitHubRepository
-
-    Write-Host "Creating new major version tag v$MajorVersion"
-    gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
-
-    Write-Host "Creating $Version"
-    gh release create $Version --generate-notes --latest --title $Version --target $GithubBranch -R $GitHubRepository
 }

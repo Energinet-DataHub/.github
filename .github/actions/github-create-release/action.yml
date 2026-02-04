@@ -1,50 +1,39 @@
-name: Automatic Releases
-description: Automate the GitHub release process with assets, changelogs, pre-releases, and more
-branding:
-  icon: package
-  color: blue
+name: Create release tag
+description: Create new release tag in repository
+
 inputs:
-  repo_token:
-    description: GitHub secret token
+  module_name:
+    description: Module name
     required: true
-  automatic_release_tag:
-    description: Git tag (for automatic releases)
+  major_version:
+    description: Major version
+    required: true
+  minor_version:
+    description: Minor version
+    required: true
+  patch_version:
+    description: Patch version
+    required: true
+  repository_path:
+    description: Path to repository, i.e. Energinet-DataHub/geh-terraform-modules
+    required: true
+  target_branch:
+    description: "Branch on which tags will be created. Default: main"
     required: false
-  prerelease:
-    description: Should this release be marked as a pre-release?
-    required: false
-    default: true
-  title:
-    description: Release title (for automatic releases)
-    required: false
-  files:
-    description: Assets to upload to the release
-    required: false
-outputs:
-  automatic_releases_tag:
-    description: The release tag this action just processed
-  upload_url:
-    description: The URL for uploading additional assets to the release
-  pull_request_number:
-    description: The pull request number associated with the release
-    value: ${{ steps.create_release.outputs.pull_request_number }}
-  sha:
-    description: The commit SHA associated with the release
-    value: ${{ steps.create_release.outputs.sha }}
+    default: main
+
 runs:
   using: composite
   steps:
-    - name: Create automatic release
-      id: create_release
+    - name: Create release tag
       shell: pwsh
-      env:
-        GH_TOKEN: ${{ inputs.repo_token }}
-        GH_CONTEXT: ${{ toJSON(github) }}
       run: |
-        . ${{ github.action_path }}/Create-GitHubRelease.ps1
+        . ${{ github.action_path }}/Create-ReleaseTag.ps1
 
-        Create-GitHubRelease `
-          -TagName "${{ inputs.automatic_release_tag }}" `
-          -PreRelease "${{ inputs.prerelease }}" `
-          -title "${{ inputs.title }}" `
-          -files "${{ inputs.files }}"
+        Create-ReleaseTag -ModuleName "${{ inputs.module_name }}" `
+        -MajorVersion ${{ inputs.major_version }} `
+        -MinorVersion ${{ inputs.minor_version }} `
+        -PatchVersion ${{ inputs.patch_version }} `
+        -GithubRepository "${{ inputs.repository_path }}" `
+        -GithubBranch "${{ inputs.target_branch }}" `
+        -GithubEvent "${{ github.event_name }}" `

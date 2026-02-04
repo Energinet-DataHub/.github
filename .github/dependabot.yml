@@ -3,7 +3,7 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directories:
-      - ".github/**/*"
+      - ".github/actions/*"
     schedule:
       interval: "monthly"
       time: "08:00"
@@ -19,6 +19,27 @@ updates:
       github:
         patterns:
           - "actions/*"
+      other-providers:
+        patterns:
+          - "*" # This will catch all other providers not specified above
+  - package-ecosystem: "github-actions"
+    directories:
+      - ".github/workflows/*"
+    schedule:
+      interval: "monthly"
+      time: "08:00"
+      timezone: "Europe/Copenhagen"
+    open-pull-requests-limit: 3
+    assignees:
+      - "NicolajAaH"
+      - "djorgensendk"
+      - "lanni-energinet"
+      - "yusuftezel03"
+      - "AdmirMuric"
+    groups:
+      github:
+        patterns:
+          - "workflows/*"
       other-providers:
         patterns:
           - "*" # This will catch all other providers not specified above
