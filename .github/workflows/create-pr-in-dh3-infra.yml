@@ -62,7 +62,7 @@ jobs:
           $vars = "${{ inputs.terraform_variable_names }}"
           $vars -split "`n" | ForEach-Object {
             $varname = $_.Trim()
-            if (-not $varname) { continue }
+            if (-not $varname) { return }
 
             $content = Get-Content $file
             $pattern = "^\s*${varname}\s*="
