@@ -102,7 +102,7 @@ jobs:
     name: Install tools in Default for caching
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install tools
         uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v16
 
@@ -115,7 +115,7 @@ jobs:
     outputs:
       matrix: ${{ steps.package_matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
         id: find_pull_request
@@ -143,7 +143,7 @@ jobs:
       checks: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check if ${{ matrix.inputs.package_name }} has changed
         uses: dorny/paths-filter@v3
