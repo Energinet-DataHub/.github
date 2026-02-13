@@ -19,6 +19,9 @@ on:
       image_tag:
         description: The tag of the docker image to use
         value: ${{ jobs.build_and_push_image.outputs.image_tag }}
+      full_image_name:
+        description: The full name of the docker image including tag
+        value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ jobs.build_and_push_image.outputs.image_tag }}
 
 permissions:
   contents: write
@@ -40,6 +43,7 @@ jobs:
 
     outputs:
       image_tag: ${{ steps.image_tag.outputs.tag }}
+      full_image_name: ${{ steps.push_image.outputs.metadata.image.name }}
 
     steps:
       - name: Checkout repository
