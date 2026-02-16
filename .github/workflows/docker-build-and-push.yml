@@ -21,7 +21,7 @@ on:
         value: ${{ jobs.build_and_push_image.outputs.image_tag }}
       full_image_name:
         description: The full name of the docker image including tag
-        value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ jobs.build_and_push_image.outputs.image_tag }}
+        value: ${{ jobs.build_and_push_image.outputs.full_image_name }}
 
 permissions:
   contents: write
