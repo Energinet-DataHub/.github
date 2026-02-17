@@ -10,6 +10,27 @@ permissions:
 
 jobs:
   #
+  # Detect which paths changed
+  #
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      actions_changed: ${{ steps.changes.outputs.actions }}
+      workflows_changed: ${{ steps.changes.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            actions:
+              - '.github/actions/**'
+            workflows:
+              - '.github/workflows/**'
+
+  #
   # License and Markdown Check
   #
   ci_base:
@@ -18,21 +39,40 @@ jobs:
       dh3serviceaccount_privatekey: ${{ secrets.dh3serviceaccount_privatekey}}
 
   #
-  # Automatic Release (verify if release tag exists)
+  # Automatic Release - Actions (verify if release tag exists)
   #
-  create_release:
-    uses: ./.github/workflows/create-release-tag.yml
+  create_release_actions:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.actions_changed == 'true'
+    uses: ./.github/workflows/create-release-tag-actions.yml
+    secrets: inherit
+
+  #
+  # Automatic Release - Workflows (verify if release tag exists)
+  #
+  create_release_workflows:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.workflows_changed == 'true'
+    uses: ./.github/workflows/create-release-tag-workflows.yml
     secrets: inherit
 
   allow_merge_ci_orchestrator:
     runs-on: ubuntu-latest
-    needs: [ci_base, create_release]
+    needs:
+      [
+        ci_base,
+        detect_changes,
+        create_release_actions,
+        create_release_workflows,
+      ]
     if: |
       always()
     steps:
       - name: Verify if merge is allowed
         run: |
           echo "${{ toJSON(needs) }}"
+          # Only check ci_base and the release jobs that actually ran
+          # Skipped jobs are acceptable when no changes detected for that category
           if [[ ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }} = true ]]; then
               echo "Failed"
               exit 1

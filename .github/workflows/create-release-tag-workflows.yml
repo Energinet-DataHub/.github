@@ -1,0 +1,32 @@
+name: Create release tag (workflows)
+
+on:
+    workflow_call: {}
+
+permissions:
+    contents: write
+
+jobs:
+    create_release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Generate Github token
+              id: generate_token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ vars.dh3serviceaccount_appid }}
+                  private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+                  owner: Energinet-Datahub
+
+            - name: Create release
+              uses: ./.github/actions/create-release-tag
+              with:
+                  major_version: 1
+                  minor_version: 0
+                  patch_version: 0
+                  repository_path: Energinet-DataHub/.github
+                  prefix: workflows
+              env:
+                  GH_TOKEN: ${{ steps.generate_token.outputs.token }}
