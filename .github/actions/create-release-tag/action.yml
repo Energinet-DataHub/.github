@@ -31,6 +31,10 @@ inputs:
     description: "Branch on which tags will be created. Default: main"
     required: false
     default: main
+  prefix:
+    description: "Optional tag prefix for independent versioning (e.g., 'actions' or 'workflows'). When set, tags will be prefixed like 'actions/v1.0.0'"
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -44,6 +48,7 @@ runs:
         $repo = "${{ inputs.repository_path }}"
         $targetBranch = "${{ inputs.target_branch }}"
         $eventName = "${{ github.event_name }}"
+        $prefix = "${{ inputs.prefix }}"
 
         . ${{ github.action_path }}/Create-ReleaseTag.ps1
 
@@ -53,3 +58,4 @@ runs:
         -GithubRepository $repo `
         -GithubBranch $targetBranch `
         -GithubEvent $eventName `
+        -Prefix $prefix `

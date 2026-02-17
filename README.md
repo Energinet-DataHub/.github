@@ -6,37 +6,49 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Versioning](#versioning)
 - [Release procedure](#release-procedure)
-    - [Preparing a new major version](#preparing-a-new-major-version)
-    - [Release process](#release-process)
+  - [Preparing a new major version](#preparing-a-new-major-version)
+  - [Release process](#release-process)
 - [Workflows](#workflows)
-    - [CI Base](#ci-base)
-    - [.NET build and test](#net-build-and-test)
-    - [Python CI Test and Coverage](#python-ci-test-and-coverage)
-    - [Python build and push docker image](#python-build-and-push-docker-image)
-    - [Notify Team](#notify-team)
-    - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
+  - [CI Base](#ci-base)
+  - [.NET build and test](#net-build-and-test)
+  - [Python CI Test and Coverage](#python-ci-test-and-coverage)
+  - [Python build and push docker image](#python-build-and-push-docker-image)
+  - [Notify Team](#notify-team)
+  - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
 ## Versioning
 
-1. We support up to two major versions at any given time.
+Actions and workflows are versioned **independently** using prefixed tags:
+
+- **Actions**: `actions/v1.0.0`, `actions/v1` (major version)
+- **Workflows**: `workflows/v1.0.0`, `workflows/v1` (major version)
+
+This allows breaking changes in one category without affecting the other.
+
+1. We support up to two major versions at any given time for each category.
 1. The latest major version must contain all changes (new functionality, improvements, maintenance).
 1. The previous major version should only contain **important maintenance** changes.
 
 ## Release Procedure
 
-Every pull-request merged to main updates the workflow file [create-release-tag.yml](.github/workflows/create-release-tag.yml). The associated action ensures all merges are released and updates the latest major version tag (i.e. v46).
+Every pull-request merged to main triggers the release workflows:
 
-If a Pull-request implements any breaking changes we must create a new major version (i.e. v46 -> v47). Otherwise we keep updates as minor or patches.
+- [create-release-tag-actions.yml](.github/workflows/create-release-tag-actions.yml) - versions actions
+- [create-release-tag-workflows.yml](.github/workflows/create-release-tag-workflows.yml) - versions workflows
+
+Each category is released independently with its own version number.
+
+If a Pull-request implements any breaking changes we must create a new major version for the affected category. Otherwise we keep updates as minor or patches.
 
 ### Preparing a new major version
 
 If we have breaking changes and wish to push a new major version - a number of steps is needed that shifts the existing version into maintenance mode prior to merging.
 
-***Example moving from 9.1.3 to 10.0.0:***
+***Example moving actions from 9.1.3 to 10.0.0:***
 
-1. Delete the previous major version release and tag (v9) in GitHub - remember to delete the tag in your local git as well
-1. Create a root branch based on the last commit for the latest version (i.e. 9.1.2) and name the branch identically to the old release tag v9 (see git commands below)
-1. Create a branch policy for this new branch to ensure we use PR's for any changes on branch named (v9)
+1. Delete the previous major version release and tag (actions/v9) in GitHub - remember to delete the tag in your local git as well
+1. Create a root branch based on the last commit for the latest version (i.e. actions-9.1.2) and name the branch identically to the old release tag actions/v9 (see git commands below)
+1. Create a branch policy for this new branch to ensure we use PR's for any changes on branch named (actions/v9)
 
 Git commands:
 git tag d- <v-tag-to-delete>
@@ -48,41 +60,12 @@ git push
 
 ## Release process
 
-After we have merged a Pull Request, and created or updated any artifact within current repository, we must follow the procedure below:
+After we have merged a Pull Request, and created or updated any artifact within current repository, the release is handled automatically by:
 
 ---
-> :information_source: **These are the steps handled by the ci-workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml)**
+> :information_source: **These are the steps handled by the ci-workflows [create-release-tag-actions.yml](.github/workflows/create-release-tag-actions.yml) and [create-release-tag-workflows.yml](.github/workflows/create-release-tag-workflows.yml)**
 
 ---
-
-1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
-2. Find the major version release and click on its name (e.g. `v7`).
-
-   - This will open the release.
-   - Click the `Delete (icon)` and choose to delete the release.
-
-3. Navigate to [Tags](https://github.com/Energinet-DataHub/.github/tags)
-
-4. Find the major version tag and click on its name (e.g. `v7`).
-
-   - This will open the tag.
-   - Click `Delete` and choose to delete the tag.
-
-Then we can create the new major version tag for a specific commit:
-
-1. Navigate to [Releases](https://github.com/Energinet-DataHub/.github/releases)
-
-2. Click `Draft a new release` then fill in the formular:
-
-   - In `Choose a tag` specify the major version prefixed with `v` (e.g. `v7`) and select `Create new tag: <tag name> on publish`.
-
-   - In `Target` select `Recent Commits` and choose the commit hash code of the just released minor or patch version.
-
-   - In `Release title` specify the tag name (e.g. `v7`).
-
-   - In `Description` write `Latest release`.
-
-   - When everything looks good press `Publish release` to create the release.
 
 ## Workflows
 

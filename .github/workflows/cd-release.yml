@@ -10,8 +10,40 @@ permissions:
 
 jobs:
   #
-  # Automatic Release (create release tag)
+  # Detect which paths changed
   #
-  create_release:
-    uses: ./.github/workflows/create-release-tag.yml
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      actions_changed: ${{ steps.changes.outputs.actions }}
+      workflows_changed: ${{ steps.changes.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            actions:
+              - '.github/actions/**'
+            workflows:
+              - '.github/workflows/**'
+
+  #
+  # Automatic Release - Actions (independent versioning)
+  #
+  create_release_actions:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.actions_changed == 'true'
+    uses: ./.github/workflows/create-release-tag-actions.yml
+    secrets: inherit # Needed for organization scope GH_TOKEN
+
+  #
+  # Automatic Release - Workflows (independent versioning)
+  #
+  create_release_workflows:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.workflows_changed == 'true'
+    uses: ./.github/workflows/create-release-tag-workflows.yml
     secrets: inherit # Needed for organization scope GH_TOKEN
