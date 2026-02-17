@@ -44,7 +44,9 @@ jobs:
   create_release_actions:
     needs: detect_changes
     if: needs.detect_changes.outputs.actions_changed == 'true'
-    uses: ./.github/workflows/create-release-tag-actions.yml
+    uses: ./.github/workflows/create-release-tag.yml
+    with:
+      prefix: actions
     secrets: inherit
 
   #
@@ -53,7 +55,9 @@ jobs:
   create_release_workflows:
     needs: detect_changes
     if: needs.detect_changes.outputs.workflows_changed == 'true'
-    uses: ./.github/workflows/create-release-tag-workflows.yml
+    uses: ./.github/workflows/create-release-tag.yml
+    with:
+      prefix: workflows
     secrets: inherit
 
   allow_merge_ci_orchestrator:
