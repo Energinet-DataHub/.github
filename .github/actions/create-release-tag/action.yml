@@ -32,9 +32,8 @@ inputs:
     required: false
     default: main
   prefix:
-    description: "Optional tag prefix for independent versioning (e.g., 'actions' or 'workflows'). When set, tags will be prefixed like 'actions/v1.0.0'"
-    required: false
-    default: ""
+    description: "Tag prefix for independent versioning (e.g., 'actions' or 'workflows'). Tags will be prefixed like 'actions/v1.0.0'"
+    required: true
 
 runs:
   using: composite

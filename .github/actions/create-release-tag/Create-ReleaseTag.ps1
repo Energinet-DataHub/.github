@@ -51,10 +51,11 @@ function Create-ReleaseTag {
         [string]
         $GitHubEvent,
 
-        # Optional prefix for independent versioning (e.g., 'actions' or 'workflows')
-        [Parameter(Mandatory = $false)]
+        # Prefix for independent versioning (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
+        [ValidateSet('actions', 'workflows')]
         [string]
-        $Prefix = ""
+        $Prefix
     )
 
     Write-Host "Github event name is: $GitHubEvent"
@@ -74,12 +75,7 @@ function Create-ReleaseTag {
     }
     else {
         $existingVersions = $existingReleases.title | ForEach-Object {
-            if ($Prefix) {
-                $_ -replace "^$Prefix/v", ""
-            }
-            else {
-                $_.Trim("v")
-            }
+            $_ -replace "^$Prefix/v", ""
         }
     }
 
@@ -159,8 +155,7 @@ function Compare-Versions {
 
     .DESCRIPTION
     Simple function wrapping a call with gh to retrieve the latest releases from github.
-    When prefix is provided, filters to only releases matching that prefix.
-    When no prefix, filters out prefixed releases to get unprefixed ones.
+    Filters to only releases matching the specified prefix.
 #>
 function Get-GithubReleases {
     param (
@@ -169,23 +164,17 @@ function Get-GithubReleases {
         [string]
         $GitHubRepository,
 
-        # Optional prefix for filtering releases (e.g., 'actions' or 'workflows')
-        [Parameter(Mandatory = $false)]
+        # Prefix for filtering releases (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
         [string]
-        $Prefix = ""
+        $Prefix
     )
 
     # Retrieve the list of releases
     $allReleases = gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 
-    if ($Prefix) {
-        # Filter to only releases with this specific prefix (e.g., 'actions/v1.0.0')
-        $filteredReleases = $allReleases | Where-Object { $_.title -match "^$Prefix/v\d+(\.\d+)*$" }
-    }
-    else {
-        # Filter out all prefixed releases (containing text followed by slash or underscore before version)
-        $filteredReleases = $allReleases | Where-Object { $_.title -notmatch "^[a-zA-Z]+[/_]" }
-    }
+    # Filter to only releases with this specific prefix (e.g., 'actions/v1.0.0')
+    $filteredReleases = $allReleases | Where-Object { $_.title -match "^$Prefix/v\d+(\.\d+)*$" }
 
     return $filteredReleases
 }
@@ -218,8 +207,8 @@ function Find-ConflictingVersions {
     Removes previous version tag and replacing with new
 
     .DESCRIPTION
-    When merging new release number, update the major release tag eg. v11 with the latest version number.
-    Supports optional prefix for independent versioning (e.g., 'actions/v11').
+    When merging new release number, update the major release tag eg. actions/v11 with the latest version number.
+    Requires prefix for independent versioning (e.g., 'actions/v11').
 #>
 function Update-VersionTags {
     param(
@@ -239,21 +228,15 @@ function Update-VersionTags {
         [string]
         $GitHubBranch,
 
-        # Optional prefix for independent versioning (e.g., 'actions' or 'workflows')
-        [Parameter(Mandatory = $false)]
+        # Prefix for independent versioning (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
         [string]
-        $Prefix = ""
+        $Prefix
     )
     $MajorVersion = $Version -Split "\." | Select-Object -First 1
 
-    if ($Prefix) {
-        $majorTag = "$Prefix/v$MajorVersion"
-        $versionTag = "$Prefix/v$Version"
-    }
-    else {
-        $majorTag = "v$MajorVersion"
-        $versionTag = $Version
-    }
+    $majorTag = "$Prefix/v$MajorVersion"
+    $versionTag = "$Prefix/v$Version"
 
     Write-Host "Deleting major version tag $majorTag"
     gh release delete $majorTag -y --cleanup-tag -R $GitHubRepository
