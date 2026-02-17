@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
         id: find_pull_request
 
       - name: Set up Docker Build
@@ -102,7 +102,7 @@ jobs:
 
       - name: Create pre-release
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
-        uses: Energinet-DataHub/.github/.github/actions/github-create-release@v16
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@actions/v1
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}

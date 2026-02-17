@@ -40,10 +40,10 @@ jobs:
     secrets: inherit # Needed for organization scope GH_TOKEN
 
   #
-  # Automatic Release - Workflows (independent versioning)
+  # Automatic Release - Workflows (independent versioning) - we want to ensure that if both actions and workflows are changed, the workflow release is created after the action release to ensure correct versioning in the workflow release notes
   #
   create_release_workflows:
-    needs: detect_changes
+    needs: [detect_changes, create_release_actions]
     if: needs.detect_changes.outputs.workflows_changed == 'true'
     uses: ./.github/workflows/create-release-tag-workflows.yml
     secrets: inherit # Needed for organization scope GH_TOKEN

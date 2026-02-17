@@ -35,7 +35,7 @@ env:
   IMAGE_NAME: "${{ github.repository }}/python-unit-test:"
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
   CONTEXT_PATH: ./.docker/
-  CONTAINER_REGISTRY_USER: PerTHenriksen  # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
+  CONTAINER_REGISTRY_USER: PerTHenriksen # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
 
 jobs:
   determine_build:
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
         id: find_pull_request
 
       - name: Set image tag environmental variable
