@@ -12,6 +12,16 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Read version
+              id: version
+              run: |
+                  VERSION=$(cat .github/actions/VERSION)
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+                  IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+                  echo "major=$MAJOR" >> $GITHUB_OUTPUT
+                  echo "minor=$MINOR" >> $GITHUB_OUTPUT
+                  echo "patch=$PATCH" >> $GITHUB_OUTPUT
+
             - name: Generate Github token
               id: generate_token
               uses: actions/create-github-app-token@v2
@@ -23,9 +33,9 @@ jobs:
             - name: Create release
               uses: ./.github/actions/create-release-tag
               with:
-                  major_version: 1
-                  minor_version: 0
-                  patch_version: 1
+                  major_version: ${{ steps.version.outputs.major }}
+                  minor_version: ${{ steps.version.outputs.minor }}
+                  patch_version: ${{ steps.version.outputs.patch }}
                   repository_path: Energinet-DataHub/.github
                   prefix: actions
               env:
