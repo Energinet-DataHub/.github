@@ -15,6 +15,11 @@ on:
         description: Additional Docker build arguments (one per line)
         required: false
         type: string
+      create_prerelease:
+        description: Whether to create a pre-release in GitHub for this image
+        required: false
+        type: boolean
+        default: true
     outputs:
       image_tag:
         description: The tag of the docker image to use
@@ -101,7 +106,7 @@ jobs:
           push-to-registry: true
 
       - name: Create pre-release
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
+        if: ${{ inputs.create_prerelease && (github.event_name == 'pull_request' || github.event_name == 'merge_group') }}
         uses: Energinet-DataHub/.github/.github/actions/github-create-release@actions/v1
         with:
           repo_token: ${{ github.token }}
