@@ -23,12 +23,14 @@ This allows breaking changes in one category without affecting the other.
 
 ## Release Procedure
 
-Every pull-request merged to main triggers the release workflows:
+Every pull-request merged to main triggers the release workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml) for each category that has changes.
 
-- [create-release-tag-actions.yml](.github/workflows/create-release-tag-actions.yml) - versions actions
-- [create-release-tag-workflows.yml](.github/workflows/create-release-tag-workflows.yml) - versions workflows
+**Version files:**
 
-Each category is released independently with its own version number.
+- `.github/actions/VERSION` - bump this when releasing actions
+- `.github/workflows/VERSION` - bump this when releasing workflows
+
+Each category is released independently with its own version number. The workflow reads the version from the appropriate VERSION file.
 
 If a Pull-request implements any breaking changes we must create a new major version for the affected category. Otherwise we keep updates as minor or patches.
 
@@ -55,7 +57,7 @@ git push
 After we have merged a Pull Request, and created or updated any artifact within current repository, the release is handled automatically by:
 
 ---
-> :information_source: **These are the steps handled by the ci-workflows [create-release-tag-actions.yml](.github/workflows/create-release-tag-actions.yml) and [create-release-tag-workflows.yml](.github/workflows/create-release-tag-workflows.yml)**
+> :information_source: **These are the steps handled by the ci-workflow [create-release-tag.yml](.github/workflows/create-release-tag.yml) which reads version from the appropriate VERSION file**
 
 ---
 
