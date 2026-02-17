@@ -44,6 +44,6 @@ jobs:
   #
   create_release_workflows:
     needs: [detect_changes, create_release_actions]
-    if: needs.detect_changes.outputs.workflows_changed == 'true'
+    if: always() && needs.detect_changes.outputs.workflows_changed == 'true' && (needs.create_release_actions.result == 'success' || needs.create_release_actions.result == 'skipped')
     uses: ./.github/workflows/create-release-tag-workflows.yml
     secrets: inherit # Needed for organization scope GH_TOKEN
