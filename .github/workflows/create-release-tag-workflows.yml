@@ -25,7 +25,7 @@ jobs:
               with:
                   major_version: 1
                   minor_version: 0
-                  patch_version: 0
+                  patch_version: 1
                   repository_path: Energinet-DataHub/.github
                   prefix: workflows
               env:

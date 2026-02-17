@@ -17,7 +17,7 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
       id: find_pull_request
 
     - name: Generate Github token

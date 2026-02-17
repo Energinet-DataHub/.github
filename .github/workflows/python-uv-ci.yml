@@ -113,7 +113,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@actions/v1
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -151,7 +151,7 @@ jobs:
 
       - name: Install tools
         if: ${{ steps.changes.outputs.is_src_changed == 'true' }}
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@v16
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v1
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
@@ -178,7 +178,7 @@ jobs:
           fi
 
       - name: Lint and Format ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-lint@actions/v1
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
@@ -194,7 +194,7 @@ jobs:
         run: uv build --wheel --directory ${{ matrix.inputs.package_path }}
 
       - name: Create prerelease for ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-create-prerelease@actions/v1
         if: ${{ inputs.create_prerelease && steps.changes.outputs.is_changed == 'true' }}
         with:
           package_name: ${{ matrix.inputs.package_name }}
@@ -228,7 +228,7 @@ jobs:
           echo "warehouse_id=$warehouse_id" >>$GITHUB_OUTPUT
 
       - name: Test Integration ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@actions/v1
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
         env:
           DATABRICKS_HOST: ${{ steps.secrets.outputs.workspace_url }}
@@ -241,7 +241,7 @@ jobs:
           pytest_addopts: ${{ inputs.pytest_addopts }}
 
       - name: Test ${{ matrix.inputs.package_name }}
-        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-uv-test@actions/v1
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id == '' && inputs.azure_tenant_id == '' && inputs.azure_subscription_id == ''  }}
         with:
           name: ${{ matrix.inputs.package_name }}
