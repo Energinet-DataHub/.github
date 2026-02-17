@@ -6,15 +6,7 @@ This repository contains shared github items such as actions, workflows and much
 
 - [Versioning](#versioning)
 - [Release procedure](#release-procedure)
-  - [Preparing a new major version](#preparing-a-new-major-version)
-  - [Release process](#release-process)
 - [Workflows](#workflows)
-  - [CI Base](#ci-base)
-  - [.NET build and test](#net-build-and-test)
-  - [Python CI Test and Coverage](#python-ci-test-and-coverage)
-  - [Python build and push docker image](#python-build-and-push-docker-image)
-  - [Notify Team](#notify-team)
-  - [Structurizr Lite: Render diagrams](#structurizr-lite-render-diagrams)
 
 ## Versioning
 
