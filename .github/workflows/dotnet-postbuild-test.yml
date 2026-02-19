@@ -303,23 +303,17 @@ jobs:
           ACR_TOKEN=$(az acr login --name ${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }} --expose-token --output tsv --query accessToken)
           echo "::add-mask::$ACR_TOKEN"
           echo "token=$ACR_TOKEN" >> $GITHUB_OUTPUT
-          echo "$ACR_TOKEN" | docker login ${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }} -u 00000000-0000-0000-0000-000000000000 --password-stdin
 
-          # Create DOCKER_AUTH_CONFIG for Docker.DotNet / Testcontainers
+          # Write credentials directly to Docker config (without credsStore/credsHelper)
           AUTH_BASE64=$(echo -n "00000000-0000-0000-0000-000000000000:$ACR_TOKEN" | base64 -w 0)
           echo "::add-mask::$AUTH_BASE64"
-          DOCKER_AUTH_CONFIG=$(echo "{\"auths\":{\"${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}\":{\"auth\":\"$AUTH_BASE64\"}}}")
-          echo "docker_auth_config=$DOCKER_AUTH_CONFIG" >> $GITHUB_OUTPUT
+          mkdir -p ~/.docker
+          echo "{\"auths\":{\"${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}\":{\"auth\":\"$AUTH_BASE64\"}}}" > ~/.docker/config.json
 
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
       - name: Run tests
         shell: pwsh
-        env:
-          DOCKER_AUTH_CONFIG: ${{ steps.acr-login.outputs.docker_auth_config }}
-          DOCKER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}
-          DOCKER_REGISTRY_USERNAME: 00000000-0000-0000-0000-000000000000
-          DOCKER_REGISTRY_PASSWORD: ${{ steps.acr-login.outputs.token }}
         run: |
           # Configure content root for WebApplicationFactory<TEntryPoint>
           if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
