@@ -295,6 +295,10 @@ jobs:
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
+      - name: Login to ACR
+        if: ${{ inputs.run_integration_tests == true }}
+        run: az acr login --name ${{ vars.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}
+
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
       - name: Run tests
