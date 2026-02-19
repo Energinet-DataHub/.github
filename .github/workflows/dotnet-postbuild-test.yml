@@ -137,7 +137,7 @@ on:
         description: Prefix for caching NuGet packages
         required: false
         type: string
-        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }}  # PR number is not available in merge_group event (Merge queue)
+        default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }} # PR number is not available in merge_group event (Merge queue)
       publish_test_results:
         description: Should the test results be published
         required: false
@@ -322,12 +322,22 @@ jobs:
               --logger:"console;verbosity=normal" --logger:"trx;logfilename=logs.trx" `
           }
 
-          $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
+          $testFailures = Select-String -Path './TestResults/logs.trx' -Pattern '\[FAIL\]'
           $testFailures
 
-      - name: Publish test report
-        if: ${{ inputs.publish_test_results == true && always() }}
+      - name: Publish test report (Windows)
+        if: ${{ inputs.publish_test_results == true && runner.os == 'Windows' && always() }}
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        with:
+          check_name: Test results for ${{ inputs.tests_dll_file_path }}
+          comment_title: Test results for ${{ inputs.tests_dll_file_path }}
+          comment_mode: failures
+          files: |
+            **/TestResults/*.trx
+
+      - name: Publish test report (Linux)
+        if: ${{ inputs.publish_test_results == true && runner.os == 'Linux' && always() }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           check_name: Test results for ${{ inputs.tests_dll_file_path }}
           comment_title: Test results for ${{ inputs.tests_dll_file_path }}
