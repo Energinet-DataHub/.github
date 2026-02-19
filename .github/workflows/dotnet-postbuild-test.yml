@@ -159,7 +159,7 @@ jobs:
     environment: ${{ inputs.environment }}
 
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}\artifacts
+      ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
       # Necessary to manage Azure resources from automated tests
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
       #
@@ -167,11 +167,11 @@ jobs:
       #
       # Set value used by 'AzuriteManager'
       #  Use 'AzuriteBlobFolderPath' for TestCommon version 4.2.0 and lower
-      AzuriteBlobFolderPath: ${{ github.workspace }}\node_modules\.bin\
+      AzuriteBlobFolderPath: ${{ github.workspace }}/node_modules/.bin/
       #  Use 'AzuriteFolderPath' for TestCommon version 4.3.0 and higher
-      AzuriteFolderPath: ${{ github.workspace }}\node_modules\.bin\
+      AzuriteFolderPath: ${{ github.workspace }}/node_modules/.bin/
       # Overrides settings in 'functionhost.settings.json'
-      FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
+      FunctionAppHostPath: ${{ github.workspace }}/node_modules/azure-functions-core-tools/bin/func.dll
     steps:
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
@@ -191,7 +191,7 @@ jobs:
           shell: pwsh
           command: |
             Write-Host "Start Cosmos DB Emulator..."
-            Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+            Import-Module "$env:ProgramFiles/Azure Cosmos DB Emulator/PSModules/Microsoft.Azure.CosmosDB.Emulator"
             $error.Clear()
             Start-CosmosDbEmulator -NoUI -Timeout 240
             if ($error)
@@ -212,7 +212,7 @@ jobs:
         uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
-          path: ${{ github.workspace }}\node_modules
+          path: ${{ github.workspace }}/node_modules
 
       - name: Install Azurite v${{ inputs.azurite_version }}
         if: ${{ inputs.use_azure_functions_tools == true && steps.cache-nodemodules.outputs.cache-hit != 'true' }}
@@ -249,7 +249,7 @@ jobs:
           command: |
             Write-Host "Checking version..."
             $error.Clear()
-            sqlcmd -l 60 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+            sqlcmd -l 60 -S "(localdb)/MSSQLLocalDB" -Q "SELECT @@VERSION;"
             if ($error)
             {
               Write-Host "Failed"
