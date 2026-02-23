@@ -12,10 +12,11 @@ on:
         required: false
         type: string
         default: .
-      path_to_dockerfile:
-        description: The path to the Dockerfile
-        required: true
+      file:
+        description: Path to the Dockerfile. (default ./Dockerfile)
+        required: false
         type: string
+        default: './Dockerfile'
       build_args:
         description: Additional Docker build arguments (one per line)
         required: false
@@ -84,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.context }}
-          file: ${{ inputs.path_to_dockerfile }}
+          file: ${{ inputs.file }}
           cache-from: type=gha
           cache-to: type=gha
           push: true
