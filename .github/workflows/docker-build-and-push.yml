@@ -7,10 +7,16 @@ on:
         description: The name of the docker image to use
         required: true
         type: string
-      path_to_dockerfile:
-        description: The path to the Dockerfile
-        required: true
+      context:
+        description: The path for the docker build context, defaults to '.'
+        required: false
         type: string
+        default: .
+      file:
+        description: Path to the Dockerfile. (default ./Dockerfile)
+        required: false
+        type: string
+        default: ./Dockerfile
       build_args:
         description: Additional Docker build arguments (one per line)
         required: false
@@ -78,7 +84,8 @@ jobs:
         id: push_image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ inputs.path_to_dockerfile }}
+          context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
           cache-from: type=gha
           cache-to: type=gha
           push: true
