@@ -16,7 +16,7 @@ on:
         description: Path to the Dockerfile. (default ./Dockerfile)
         required: false
         type: string
-        default: './Dockerfile'
+        default: ./Dockerfile
       build_args:
         description: Additional Docker build arguments (one per line)
         required: false
