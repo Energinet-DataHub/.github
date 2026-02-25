@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       terraform_path:
-        description: The path to the terraform files
+        description: The relative path to the terraform variable file
         required: true
         type: string
       terraform_variable_names:
@@ -46,7 +46,8 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           path: infra-repo
 
-      - name: Update image tag in infra repo
+      - name: Update image tags
+        id: update_image_tags
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -55,9 +56,13 @@ jobs:
           $tag = "${{ steps.vars.outputs.tag }}"
 
           if (-not (Test-Path $file)) {
-            Write-Error "ERROR: file not found: $file"
-            exit 1
+            New-Item -Path $file -ItemType File -Force | Out-Null
+            Write-Output "::warning::Variable file did not exist, it has been created"
+            "new_file=true" >> $env:GITHUB_OUTPUT
           }
+
+          # Contains the list of new variables that was added to the variable file.
+          $newVars = @()
 
           $vars = "${{ inputs.terraform_variable_names }}"
           $vars -split "`n" | ForEach-Object {
@@ -80,8 +85,16 @@ jobs:
             if ($found) {
               $newContent | Set-Content $file
             } else {
-              Add-Content $file "$varname = `"$tag`""
+              $newVar = "$varname = `"$tag`""
+              Add-Content $file $newVar
+              $newVars += $varname
+              Write-Output "::warning::A new variable ($varname) was added to the variable file"
             }
+          }
+
+          if ($newVars.Count -gt 0) {
+            $newVarsList = $newVars -join ", "
+            "new_variables=$newVarsList" >> $env:GITHUB_OUTPUT
           }
 
       - name: Create Pull Request in Infra Repo
@@ -96,5 +109,8 @@ jobs:
             This PR updates the infrastructure to use image:
 
             **`${{ steps.vars.outputs.tag }}`**
+
+            ${{ steps.update_image_tags.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new image is created for the first time.' || '' }}
+            ${{ steps.update_image_tags.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_image_tags.outputs.new_variables) || '' }}
 
           labels: update, ${{github.repository}}
