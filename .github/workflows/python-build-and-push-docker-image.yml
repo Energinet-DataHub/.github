@@ -74,7 +74,7 @@ jobs:
 
       - name: Declare Docker image name
         id: image-name
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
