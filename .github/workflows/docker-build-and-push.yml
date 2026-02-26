@@ -43,7 +43,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/${{ inputs.image_name }}
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
-  CONTAINER_REGISTRY_USER: PerTHenriksen # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
 
 jobs:
   build_and_push_image:
@@ -62,13 +61,6 @@ jobs:
 
       - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.CONTAINER_REGISTRY_USER }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Declare Docker image name
         id: image_name
