@@ -215,7 +215,7 @@ jobs:
       - name: Build solution
         shell: pwsh
         run: |
-          dotnet build ${{ inputs.testproject_name }}.csproj --configuration Release
+          dotnet build ${{ inputs.testproject_name }} --configuration Release
 
       # - name: Download test artifact
       #   uses: actions/download-artifact@v4
