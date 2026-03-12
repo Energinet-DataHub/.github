@@ -7,6 +7,15 @@ inputs:
   working-directory:
     description: The working directory where the Terraform plan file is located
     required: true
+  workload-name:
+    description: The name of the workload being planned
+    required: true
+  environment:
+    description: The environment for which the plan is being created
+    required: true
+  pr-number:
+    description: The pull request number
+    required: true
 runs:
   using: composite
   steps:
@@ -42,14 +51,14 @@ runs:
       uses: marocchino/sticky-pull-request-comment@v2
       if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
       with:
-        header: terraform-plan-${{ github.event.client_payload.workload_name }}-${{ matrix.environment }}
-        number: ${{ github.event.client_payload.pr_number }}
+        header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
+        number: ${{ inputs.pr-number }}
         message: |
-          ## ${{ github.event.client_payload.workload_name }} — `${{ matrix.environment }}`
-          **Release:** `${{ github.event.client_payload.workload_name }} - ${{ github.event.client_payload.pr_number }}`
+          ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
+          **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
 
           <details>
-          <summary>Show plan for ${{ matrix.environment }}</summary>
+          <summary>Show plan for ${{ inputs.environment }}</summary>
 
           ${{ steps.comment.outputs.markdown }}
 
@@ -59,10 +68,10 @@ runs:
       if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
       uses: marocchino/sticky-pull-request-comment@v2
       with:
-        header: terraform-plan-${{ github.event.client_payload.workload_name }}-${{ matrix.environment }}
-        number: ${{ github.event.client_payload.pr_number }}
+        header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
+        number: ${{ inputs.pr-number }}
         message: |
-          ## ${{ github.event.client_payload.workload_name }} — `${{ matrix.environment }}`
-          **Release:** `${{ github.event.client_payload.workload_name }} - ${{ github.event.client_payload.pr_number }}`
+          ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
+          **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
 
           Plan output is too large to display in a comment. Please check the Terraform plan output in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
