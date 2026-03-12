@@ -11,12 +11,12 @@ on:
   workflow_call:
     inputs:
       team_name:
-        description: The name of the team who should receive the email. Used to determine the email address.
+        description: The name of the team to be notified.
         required: true
         type: string
       email:
-        description: Specify to override the email determined by team_name
-        required: false
+        description: The email address to send the notification to. This should be the email address of the MS Team Channel.
+        required: true
         type: string
       subject:
         description: The email subject. Should contain environment information when possible.
@@ -104,40 +104,12 @@ jobs:
           echo "$content" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Determine email
-        id: get_email
-        shell: bash
-        run: |
-          if [ ${{ inputs.email }} != '' ]; then
-            team_email=${{ inputs.email }}
-          elif [ ${{ inputs.team_name }} == 'Mosaic' ]; then
-            team_email=${{ vars.email_mosaic }}
-          elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
-            team_email=${{ vars.email_mandalorian }}
-          elif [ ${{ inputs.team_name }} == 'Raccoons' ]; then
-            team_email=${{ vars.email_raccoons }}
-          elif [ ${{ inputs.team_name }} == 'TeamFusion' ]; then
-            team_email=${{ vars.email_teamfusion }}
-          elif [ ${{ inputs.team_name }} == 'Volt' ]; then
-            team_email=${{ vars.email_volt }}
-          elif [ ${{ inputs.team_name}} == 'TeamFrontend' ]; then
-            team_email=${{ vars.email_teamfrontend }}
-          elif [ ${{ inputs.team_name}} == 'TeamEsettDeprecated' ]; then
-            team_email=${{ vars.email_teamesettdeprecated }}
-          else
-            # Fallback
-            team_email=${{ vars.email_teamfusion }}
-          fi
-
-          echo "::add-mask::$team_email"
-          echo "team_email=$team_email" >>$GITHUB_OUTPUT
-
       - name: Send email
         uses: Energinet-DataHub/.github/.github/actions/send-email@actions/v1
         with:
           sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
           team-name: ${{ inputs.team_name }}
-          to: ${{ steps.get_email.outputs.team_email }}
+          to: ${{ inputs.email }}
           from: ${{ vars.email_internal_sender }}
           subject: ${{ inputs.subject }}
           content: ${{ steps.email_content.outputs.content }}
