@@ -75,13 +75,8 @@ jobs:
 
           $prNumber = $merged.number
           $prUrl = $merged.html_url
-          $mergedBy = $merged.merged_by.login
-          $mergedAt = [datetime]$merged.merged_at
 
-          $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Central Europe Standard Time")
-          $localTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($mergedAt, $timeZone).ToString('yyyy-MM-dd HH:mm:ss')
-
-          $summary = "<a href='$prUrl'>PR #$prNumber</a><br>By: <b>$mergedBy</b> on $localTime"
+          $summary = "Failed following merge of PR <a href='$prUrl'>#$prNumber</a>"
 
           Write-Host "Merged PR summary:"
           Write-Host $summary
