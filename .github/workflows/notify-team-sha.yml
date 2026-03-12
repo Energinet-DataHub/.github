@@ -1,0 +1,158 @@
+# Copyright 2020 Energinet DataHub A/S
+#
+# Licensed under the Apache License, Version 2.0 (the "License2");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Notify team
+
+# DESCRIPTION:
+# This workflow is used to notify teams about failing deployments
+# by sending an email to their MS Team Channel or possibly direct mails.
+#
+# Note: Variables prefixed "EMAIL_" are organization variables allowing this reusable workflow to access them
+# regardless of where the workflow is used
+
+on:
+  workflow_call:
+    inputs:
+      team_name:
+        description: The name of the team who should receive the email. Used to determine the email address.
+        required: true
+        type: string
+      email:
+        description: Specify to override the email determined by team_name
+        required: false
+        type: string
+      subject:
+        description: The email subject. Should contain environment information when possible.
+        required: true
+        type: string
+      body:
+        description: Additional content for the email body. Apart from this the email body will also always contain a link to the failed build.
+        required: false
+        default: ""
+        type: string
+      sha_commit:
+        description: The commit SHA to link to in the email
+        required: true
+        type: string
+
+jobs:
+  notify_team:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate GitHub token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.dh3serviceaccount_appid }}
+          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          owner: Energinet-Datahub # the next step will require access to other repositories in the org
+
+      - name: Get PR Owner(s)
+        id: get_pr
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          SHA_COMMIT: ${{ inputs.sha_commit }}
+          REPO: ${{ github.repository }}
+        run: |
+          Write-Host "Looking up PR for commit: $env:SHA_COMMIT in $env:REPO"
+
+          try {
+              $prs = gh api "repos/$env:REPO/commits/$env:SHA_COMMIT/pulls" --jq '.' | ConvertFrom-Json
+          } catch {
+              Write-Warning "Failed to query PRs for commit $env:SHA_COMMIT"
+              "summary=" >> $env:GITHUB_OUTPUT
+              exit 0
+          }
+
+          $merged = $prs | Where-Object { $_.merged_at -ne $null } | Select-Object -First 1
+
+          if (-not $merged) {
+              Write-Warning "No merged PR found for commit $env:SHA_COMMIT"
+              "summary=" >> $env:GITHUB_OUTPUT
+              exit 0
+          }
+
+          $prNumber = $merged.number
+          $prUrl = $merged.html_url
+          $mergedBy = $merged.merged_by.login
+          $mergedAt = [datetime]$merged.merged_at
+
+          $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Central Europe Standard Time")
+          $localTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($mergedAt, $timeZone).ToString('yyyy-MM-dd HH:mm:ss')
+
+          $summary = "<a href='$prUrl'>PR #$prNumber</a><br>By: <b>$mergedBy</b> on $localTime"
+
+          Write-Host "Merged PR summary:"
+          Write-Host $summary
+
+          "summary=$summary" >> $env:GITHUB_OUTPUT
+
+
+      - name: Build email content
+        id: email_content
+        shell: bash
+        run: |
+          content="<html><body><br>${{ inputs.body }}"
+
+          if [ -n "${{ steps.get_pr.outputs.summary || '' }}" ]; then
+            content="$content<br><b>Merged by:</b><br>${{ steps.get_pr.outputs.summary }}"
+          fi
+
+          content="$content</body></html>"
+
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$content" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Determine email
+        id: get_email
+        shell: bash
+        run: |
+          if [ ${{ inputs.email }} != '' ]; then
+            team_email=${{ inputs.email }}
+          elif [ ${{ inputs.team_name }} == 'Mosaic' ]; then
+            team_email=${{ vars.email_mosaic }}
+          elif [ ${{ inputs.team_name }} == 'Mandalorian' ]; then
+            team_email=${{ vars.email_mandalorian }}
+          elif [ ${{ inputs.team_name }} == 'Raccoons' ]; then
+            team_email=${{ vars.email_raccoons }}
+          elif [ ${{ inputs.team_name }} == 'TeamFusion' ]; then
+            team_email=${{ vars.email_teamfusion }}
+          elif [ ${{ inputs.team_name }} == 'Volt' ]; then
+            team_email=${{ vars.email_volt }}
+          elif [ ${{ inputs.team_name}} == 'TeamFrontend' ]; then
+            team_email=${{ vars.email_teamfrontend }}
+          elif [ ${{ inputs.team_name}} == 'TeamEsettDeprecated' ]; then
+            team_email=${{ vars.email_teamesettdeprecated }}
+          else
+            # Fallback
+            team_email=${{ vars.email_teamfusion }}
+          fi
+
+          echo "::add-mask::$team_email"
+          echo "team_email=$team_email" >>$GITHUB_OUTPUT
+
+      - name: Send email
+        uses: Energinet-DataHub/.github/.github/actions/send-email@actions/v1
+        with:
+          sendgrid-api-key: ${{ secrets.sendgrid_instance_system_notifications_api_key }}
+          team-name: ${{ inputs.team_name }}
+          to: ${{ steps.get_email.outputs.team_email }}
+          from: ${{ vars.email_internal_sender }}
+          subject: ${{ inputs.subject }}
+          content: ${{ steps.email_content.outputs.content }}
