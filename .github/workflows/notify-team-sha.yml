@@ -72,7 +72,7 @@ jobs:
           Write-Host "Looking up PR for commit: $env:SHA_COMMIT in $env:REPO"
 
           try {
-              $prs = gh pr list --repo $env:REPO --search $env:SHA_COMMIT --state open --json number,url,author | ConvertFrom-Json
+              $prs = gh api "repos/$env:REPO/commits/$env:SHA_COMMIT/pulls" --jq '.' | ConvertFrom-Json
           } catch {
               Write-Warning "Failed to query PRs for commit $env:SHA_COMMIT"
               "summary=" >> $env:GITHUB_OUTPUT
@@ -82,23 +82,28 @@ jobs:
           Write-Host "PRs associated with commit:"
           $prs | ConvertTo-Json -Depth 5 | Write-Host
 
-          $pr = $prs | Select-Object -First 1
+          $merged = $prs | Where-Object { $_.merged_at -ne $null } | Select-Object -First 1
 
-          if (-not $pr) {
-              Write-Warning "No open PR found for commit $env:SHA_COMMIT"
+          if (-not $merged) {
+              Write-Warning "No merged PR found for commit $env:SHA_COMMIT"
               "summary=" >> $env:GITHUB_OUTPUT
               exit 0
           }
 
-          $prNumber = $pr.number
-          $prUrl = $pr.url
-          $prAuthor = $pr.author.login
+          $prNumber = $merged.number
+          $prUrl = $merged.html_url
+          $mergedBy = $merged.merged_by.login
+          $mergedAt = [datetime]$merged.merged_at
 
           Write-Host "PR Number: $prNumber"
           Write-Host "PR URL: $prUrl"
-          Write-Host "PR Author: $prAuthor"
+          Write-Host "Merged By: $mergedBy"
+          Write-Host "Merged At: $mergedAt"
 
-          $summary = "<a href='$prUrl'>PR #$prNumber</a><br>By: <b>$prAuthor</b>"
+          $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Central Europe Standard Time")
+          $localTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($mergedAt, $timeZone).ToString('yyyy-MM-dd HH:mm:ss')
+
+          $summary = "<a href='$prUrl'>PR #$prNumber</a><br>By: <b>$mergedBy</b> on $localTime"
 
           Write-Host "Merged PR summary:"
           Write-Host $summary
