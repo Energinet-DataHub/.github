@@ -15,8 +15,8 @@ on:
         required: true
         type: string
       email:
-        description: The email address to send the notification to. This should be the email address of the MS Team Channel.
-        required: true
+        description: The email address to send the notification to.
+        required: false
         type: string
       subject:
         description: The email subject. Should contain environment information when possible.
