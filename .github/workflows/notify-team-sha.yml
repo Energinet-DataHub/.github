@@ -61,7 +61,7 @@ jobs:
           private-key: ${{ secrets.dh3serviceaccount_privatekey }}
           owner: Energinet-Datahub # the next step will require access to other repositories in the org
 
-      - name: Get PR Owner(s)
+      - name: Get pull request for commit
         id: get_pr
         shell: pwsh
         env:
@@ -79,6 +79,9 @@ jobs:
               exit 0
           }
 
+          Write-Host "PRs associated with commit:"
+          $prs | ConvertTo-Json -Depth 5 | Write-Host
+
           $merged = $prs | Where-Object { $_.merged_at -ne $null } | Select-Object -First 1
 
           if (-not $merged) {
@@ -91,6 +94,11 @@ jobs:
           $prUrl = $merged.html_url
           $mergedBy = $merged.merged_by.login
           $mergedAt = [datetime]$merged.merged_at
+
+          Write-Host "PR Number: $prNumber"
+          Write-Host "PR URL: $prUrl"
+          Write-Host "Merged By: $mergedBy"
+          Write-Host "Merged At: $mergedAt"
 
           $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Central Europe Standard Time")
           $localTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($mergedAt, $timeZone).ToString('yyyy-MM-dd HH:mm:ss')
