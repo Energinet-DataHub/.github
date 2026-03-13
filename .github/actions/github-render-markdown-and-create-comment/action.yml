@@ -61,6 +61,7 @@ runs:
       uses: marocchino/sticky-pull-request-comment@v2
       if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
       with:
+        owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
@@ -79,6 +80,7 @@ runs:
       if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
       uses: marocchino/sticky-pull-request-comment@v2
       with:
+        owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
