@@ -17,7 +17,7 @@ inputs:
     description: The pull request number
     required: true
   repo:
-    description: 'The repository (owner/repo). Defaults to the current repository if not set.'
+    description: The repository (owner/repo). Defaults to the current repository if not set.
     required: false
 runs:
   using: composite
