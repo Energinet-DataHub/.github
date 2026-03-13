@@ -63,6 +63,7 @@ runs:
       with:
         owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
+        GITHUB_TOKEN: ${{ inputs.token }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
         message: |
@@ -82,6 +83,7 @@ runs:
       with:
         owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
+        GITHUB_TOKEN: ${{ inputs.token }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
         message: |
