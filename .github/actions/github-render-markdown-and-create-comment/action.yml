@@ -1,0 +1,77 @@
+name: Render Markdown and Create Comment
+description: Render markdown and create a comment on the PR
+inputs:
+  token:
+    description: GitHub App token used to create the comment
+    required: true
+  working-directory:
+    description: The working directory where the Terraform plan file is located
+    required: true
+  workload-name:
+    description: The name of the workload being planned
+    required: true
+  environment:
+    description: The environment for which the plan is being created
+    required: true
+  pr-number:
+    description: The pull request number
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Render plan to Markdown (no direct comment)
+      uses: borchero/terraform-plan-comment@v2
+      id: comment
+      with:
+        token: ${{ inputs.token }}
+        planfile: tfplan
+        working-directory: ${{ inputs.working-directory }}
+        skip-comment: true
+
+    - name: Check size of the comment
+      id: check_comment_size
+      shell: bash
+      run: |
+        echo "Checking how many characters the comment has"
+        # Put it in file first due to is being markdown and having many characters that needs escaping
+        # Safely write markdown to file
+        cat > comment.md <<'EOF'
+        ${{ steps.comment.outputs.markdown }}
+        EOF
+        size=$(wc -m < comment.md)
+        echo "Comment size is $size characters"
+        if [ $size -gt 65000 ]; then
+          # If size is too large, then output false to skip the comment
+          echo "commentplan=false" >> $GITHUB_OUTPUT
+        else
+          echo "commentplan=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Comment PR with Plan
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
+      with:
+        header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
+        number: ${{ inputs.pr-number }}
+        message: |
+          ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
+          **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
+
+          <details>
+          <summary>Show plan for ${{ inputs.environment }}</summary>
+
+          ${{ steps.comment.outputs.markdown }}
+
+          </details>
+
+    - name: Sticky PR comment (one per submodule; envs append)
+      if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
+        number: ${{ inputs.pr-number }}
+        message: |
+          ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
+          **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
+
+          Plan output is too large to display in a comment. Please check the Terraform plan output in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
