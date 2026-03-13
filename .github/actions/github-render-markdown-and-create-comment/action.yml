@@ -16,9 +16,19 @@ inputs:
   pr-number:
     description: The pull request number
     required: true
+  repo:
+    description: The repository (owner/repo). Defaults to the current repository if not set.
+    required: false
 runs:
   using: composite
   steps:
+    - name: Resolve repository
+      id: resolve_repo
+      shell: bash
+      run: |
+        REPO="${{ inputs.repo }}"
+        OWNER_AND_REPO="${REPO:-$GITHUB_REPOSITORY}"
+        echo "repository=${OWNER_AND_REPO#*/}" >> "$GITHUB_OUTPUT"
     - name: Render plan to Markdown (no direct comment)
       uses: borchero/terraform-plan-comment@v2
       id: comment
@@ -51,6 +61,9 @@ runs:
       uses: marocchino/sticky-pull-request-comment@v2
       if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
       with:
+        owner: Energinet-DataHub
+        repo: ${{ steps.resolve_repo.outputs.repository }}
+        github_token: ${{ inputs.token }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
         message: |
@@ -68,6 +81,9 @@ runs:
       if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
       uses: marocchino/sticky-pull-request-comment@v2
       with:
+        owner: Energinet-DataHub
+        repo: ${{ steps.resolve_repo.outputs.repository }}
+        github_token: ${{ inputs.token }}
         header: terraform-plan-${{ inputs.workload-name }}-${{ inputs.environment }}
         number: ${{ inputs.pr-number }}
         message: |
