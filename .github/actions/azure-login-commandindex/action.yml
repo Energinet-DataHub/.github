@@ -1,0 +1,40 @@
+name: Azure CLI login
+description: Wrapper for Azure Login action, with added cache restore of commandIndex.json file to speed up login
+
+inputs:
+  client-id:
+    required: false
+  tenant-id:
+    required: false
+  subscription-id:
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Check requirements
+      id: requirements
+      shell: bash
+      run: |
+        if [ ! -f ~/.azure/commandIndex.json ]; then
+          echo "exists=false" >> $GITHUB_OUTPUT
+        else
+          echo "exists=true" >> $GITHUB_OUTPUT
+        fi
+
+        VERSION=$(cat /imagegeneration/software-report.json | jq -r '.. | objects | select(.NodeType == "ToolVersionNode" and .ToolName == "Azure CLI") | .Version')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Restore commandIndex for ${{ steps.requirements.outputs.version }}
+      uses: actions/cache/restore@v4
+      if: ${{ steps.requirements.outputs.exists != 'true' }}
+      with:
+        path: ~/.azure/commandIndex.json
+        key: ${{ runner.os }}-azcli-cidx-${{ steps.requirements.outputs.version }}
+
+    - name: Login to use Azure resources from automated tests
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
