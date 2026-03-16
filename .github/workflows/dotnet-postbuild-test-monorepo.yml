@@ -179,7 +179,7 @@ jobs:
       - name: Enable long filenames
         shell: pwsh
         run: |
-          git config --system core.longpaths true
+          git config --global core.longpaths true
 
       - name: Check out repository
         uses: actions/checkout@v4
