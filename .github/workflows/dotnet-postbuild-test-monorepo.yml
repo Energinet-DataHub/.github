@@ -236,7 +236,7 @@ jobs:
       #     }
 
       - name: Run tests
-        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@actions/v1
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@NicolajAaH-patch-1
         with:
           aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
           aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
