@@ -140,7 +140,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check if ${{ matrix.inputs.package_name }} has changed
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -208,7 +208,7 @@ jobs:
       #
 
       - name: Login to access Azure resources
-        uses: azure/login@v2
+        uses: azure/login@v3
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
         with:
           client-id: ${{ inputs.azure_spn_id }}

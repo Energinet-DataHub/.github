@@ -132,7 +132,7 @@ runs:
 
     - name: Log in to the Container registry
       if: inputs.registry-push == 'true'
-      uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
+      uses: docker/login-action@292fe2d7ee5389e283d2c71e565819146798c2e2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -179,7 +179,7 @@ runs:
     - name: Commit changes
       id: commit
       if: ${{ inputs.dry_run != 'true' }}
-      uses: EndBug/add-and-commit@v9
+      uses: EndBug/add-and-commit@v10
       with:
         fetch: true
         message: Use ${{ env.version }}
