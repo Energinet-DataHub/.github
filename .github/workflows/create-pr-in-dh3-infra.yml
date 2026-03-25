@@ -103,7 +103,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           path: infra-repo
           commit-message: Update image tag to ${{ steps.vars.outputs.tag }}
-          branch: update-${{github.repository}}-image-${{ steps.vars.outputs.tag }}-${{ inputs.terraform_path }}
+          branch: update-${{github.repository}}-${{ inputs.terraform_path }}
           title: "[${{github.repository}}] Deploy image ${{ steps.vars.outputs.tag }} (${{ inputs.terraform_path }})"
           body: |
             This PR updates the infrastructure to use image:
