@@ -10,8 +10,44 @@ permissions:
 
 jobs:
   #
-  # Automatic Release (create release tag)
+  # Detect which paths changed
   #
-  create_release:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      actions_changed: ${{ steps.changes.outputs.actions }}
+      workflows_changed: ${{ steps.changes.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            actions:
+              - '.github/actions/**'
+            workflows:
+              - '.github/workflows/**'
+
+  #
+  # Automatic Release - Actions (independent versioning)
+  #
+  create_release_actions:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.actions_changed == 'true'
     uses: ./.github/workflows/create-release-tag.yml
+    with:
+      prefix: actions
+    secrets: inherit # Needed for organization scope GH_TOKEN
+
+  #
+  # Automatic Release - Workflows (independent versioning) - we want to ensure that if both actions and workflows are changed, the workflow release is created after the action release to ensure correct versioning in the workflow release notes
+  #
+  create_release_workflows:
+    needs: [detect_changes, create_release_actions]
+    if: always() && needs.detect_changes.outputs.workflows_changed == 'true' && (needs.create_release_actions.result == 'success' || needs.create_release_actions.result == 'skipped')
+    uses: ./.github/workflows/create-release-tag.yml
+    with:
+      prefix: workflows
     secrets: inherit # Needed for organization scope GH_TOKEN

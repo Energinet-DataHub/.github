@@ -103,14 +103,14 @@ jobs:
 
       - name: Login to access Azure resources (integration test environment)
         if: ${{ inputs.use_integrationtest_environment == true }}
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@v16
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@actions/v1
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_folder_path: ${{ inputs.tests_folder_path}}

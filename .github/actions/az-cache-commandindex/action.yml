@@ -1,0 +1,31 @@
+name: Azure CLI commandIndex cache
+description: Cache the Azure CLI commandIndex.json file to speed up subsequent runs of the Azure CLI in GitHub Actions.
+
+runs:
+  using: composite
+  steps:
+    - name: Check requirements
+      id: requirements
+      shell: bash
+      run: |
+        VERSION=$(cat /imagegeneration/software-report.json | jq -r '.. | objects | select(.NodeType == "ToolVersionNode" and .ToolName == "Azure CLI") | .Version')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Restore commandIndex for ${{ steps.requirements.outputs.version }}
+      uses: actions/cache/restore@v4
+      id: restore-commandindex
+      with:
+        path: ~/.azure/commandIndex.json
+        key: ${{ runner.os }}-azcli-cidx-${{ steps.requirements.outputs.version }}
+
+    - name: Generate commandIndex.json
+      if: ${{ steps.restore-commandindex.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: az version
+
+    - name: Save commandIndex cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.restore-commandindex.outputs.cache-hit != 'true' }}
+      with:
+        path: ~/.azure/commandIndex.json
+        key: ${{ runner.os }}-azcli-cidx-${{ steps.requirements.outputs.version }}

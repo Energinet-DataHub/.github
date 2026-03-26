@@ -49,12 +49,19 @@ function Create-ReleaseTag {
         # The value of the GitHub event
         [Parameter(Mandatory)]
         [string]
-        $GitHubEvent
+        $GitHubEvent,
+
+        # Prefix for independent versioning (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
+        [ValidateSet('actions', 'workflows')]
+        [string]
+        $Prefix
     )
 
     Write-Host "Github event name is: $GitHubEvent"
     $isPushToMain = $GitHubEvent -eq 'push' -and $GitHubBranch -eq 'main'
     Write-Host "Is push to main: $isPushToMain"
+    Write-Host "Prefix: $Prefix"
 
     $version = "$MajorVersion.$MinorVersion.$PatchVersion"
 
@@ -62,12 +69,14 @@ function Create-ReleaseTag {
         throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
     }
 
-    $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository
+    $existingReleases = Get-GithubReleases -GitHubRepository $GitHubRepository -Prefix $Prefix
     if ($null -eq $existingReleases) {
         $existingVersions = '0.0.0'
     }
     else {
-        $existingVersions = $existingReleases.title.Trim("v")
+        $existingVersions = $existingReleases.title | ForEach-Object {
+            $_ -replace "^$Prefix/v", ""
+        }
     }
 
     $conflicts = Find-ConflictingVersions $version $existingVersions
@@ -81,7 +90,7 @@ function Create-ReleaseTag {
 
     # Updating major version tag
     if ($isPushToMain) {
-        Update-VersionTags -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch
+        Update-VersionTags -Version $version -GitHubRepository $GitHubRepository -GitHubBranch $GitHubBranch -Prefix $Prefix
     }
     else {
         Write-Host 'This was a dry-run, no changes have been made'
@@ -145,21 +154,27 @@ function Compare-Versions {
     Uses github CLI (gh) to retrieve a list of releases
 
     .DESCRIPTION
-    Simple function wrapping a call with gh to retrieve the latest releases from github and filter out those containing any text followed by an underscore before the version.
+    Simple function wrapping a call with gh to retrieve the latest releases from github.
+    Filters to only releases matching the specified prefix.
 #>
 function Get-GithubReleases {
     param (
         # The value of the GitHub repository variable.
         [Parameter(Mandatory)]
         [string]
-        $GitHubRepository
+        $GitHubRepository,
+
+        # Prefix for filtering releases (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
+        [string]
+        $Prefix
     )
 
     # Retrieve the list of releases
     $allReleases = gh release list -L 10000 -R $GitHubRepository | ConvertFrom-Csv -Delimiter "`t" -Header @('title', 'type', 'tagname', 'published')
 
-    # Filter out releases containing any text followed by an underscore before the version
-    $filteredReleases = $allReleases | Where-Object { $_.title -notmatch "_\d+(\.\d+)*$" }
+    # Filter to only releases with this specific prefix (e.g., 'actions/v1.0.0')
+    $filteredReleases = $allReleases | Where-Object { $_.title -match "^$Prefix/v\d+(\.\d+)*$" }
 
     return $filteredReleases
 }
@@ -192,7 +207,8 @@ function Find-ConflictingVersions {
     Removes previous version tag and replacing with new
 
     .DESCRIPTION
-    When merging new release number, update the major release tag eg. v11 with the latest version number
+    When merging new release number, update the major release tag eg. actions/v11 with the latest version number.
+    Requires prefix for independent versioning (e.g., 'actions/v11').
 #>
 function Update-VersionTags {
     param(
@@ -210,16 +226,24 @@ function Update-VersionTags {
         # The value of the GitHub repository branch.
         [Parameter(Mandatory = $false)]
         [string]
-        $GitHubBranch
+        $GitHubBranch,
+
+        # Prefix for independent versioning (e.g., 'actions' or 'workflows')
+        [Parameter(Mandatory)]
+        [string]
+        $Prefix
     )
     $MajorVersion = $Version -Split "\." | Select-Object -First 1
 
-    Write-Host "Deleting major version tag v$MajorVersion"
-    gh release delete "v$MajorVersion" -y --cleanup-tag -R $GitHubRepository
+    $majorTag = "$Prefix/v$MajorVersion"
+    $versionTag = "$Prefix/v$Version"
 
-    Write-Host "Creating new major version tag v$MajorVersion"
-    gh release create "v$MajorVersion" --title "v$MajorVersion" --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
+    Write-Host "Deleting major version tag $majorTag"
+    gh release delete $majorTag -y --cleanup-tag -R $GitHubRepository
 
-    Write-Host "Creating $Version"
-    gh release create $Version --generate-notes --latest --title $Version --target $GithubBranch -R $GitHubRepository
+    Write-Host "Creating new major version tag $majorTag"
+    gh release create $majorTag --title $majorTag --notes "Latest release" --target $GitHubBranch -R $GitHubRepository
+
+    Write-Host "Creating $versionTag"
+    gh release create $versionTag --generate-notes --latest --title $versionTag --target $GithubBranch -R $GitHubRepository
 }

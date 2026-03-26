@@ -35,7 +35,6 @@ env:
   IMAGE_NAME: "${{ github.repository }}/python-unit-test:"
   IS_PULL_REQUEST_TRIGGERED: ${{ github.event_name == 'pull_request' }}
   CONTEXT_PATH: ./.docker/
-  CONTAINER_REGISTRY_USER: PerTHenriksen  # See #6 in https://energinet.atlassian.net/wiki/spaces/D3/pages/514981975/Beslutningslog+V+sentlige+beslutninger+for+DH3 for details
 
 jobs:
   determine_build:
@@ -45,7 +44,7 @@ jobs:
 
     steps:
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@v16
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
         id: find_pull_request
 
       - name: Set image tag environmental variable
@@ -70,24 +69,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
+      - name: Docker login
+        uses: docker/login-action@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.CONTAINER_REGISTRY_USER }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v4
 
       - name: Declare Docker image name
         id: image-name
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v8
         with:
           string: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ env.CONTEXT_PATH }}
           cache-from: type=gha

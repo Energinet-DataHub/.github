@@ -21,19 +21,19 @@ Describe "Create-ReleaseTag" {
         Mock Get-GithubReleases {
             return @"
                 "title","type","tagname","published"
-                "11.2.0","Latest","11.2.0","2023-05-10T12:57:40Z"
-                "v11","Draft","v11","2023-05-10T12:56:36Z"
-                "11.1.0","","11.1.0","2023-05-08T08:31:58Z"
-                "11.0.2","","11.0.2","2023-05-01T07:05:42Z"
-                "11.0.1","","11.0.1","2023-04-28T11:49:23Z"
-                "11.0.0","","11.0.0","2023-04-27T07:39:41Z"
-                "10.2.2","","10.2.2","2023-02-16T10:25:41Z"
-                "10.2.1","","10.2.1","2023-02-16T09:54:53Z"
-                "10.2.0","","10.2.0","2023-01-26T08:37:05Z"
-                "10.1.2","","10.1.2","2023-01-23T09:49:15Z"
-                "10.1.1","","10.1.1","2023-01-20T10:09:09Z"
-                "10.1.0","","10.1.0","2023-01-19T10:37:38Z"
-                "10.0.0","","10.0.0","2023-01-18T07:38:37Z"
+                "actions/v11.2.0","Latest","actions/v11.2.0","2023-05-10T12:57:40Z"
+                "actions/v11","Draft","actions/v11","2023-05-10T12:56:36Z"
+                "actions/v11.1.0","","actions/v11.1.0","2023-05-08T08:31:58Z"
+                "actions/v11.0.2","","actions/v11.0.2","2023-05-01T07:05:42Z"
+                "actions/v11.0.1","","actions/v11.0.1","2023-04-28T11:49:23Z"
+                "actions/v11.0.0","","actions/v11.0.0","2023-04-27T07:39:41Z"
+                "actions/v10.2.2","","actions/v10.2.2","2023-02-16T10:25:41Z"
+                "actions/v10.2.1","","actions/v10.2.1","2023-02-16T09:54:53Z"
+                "actions/v10.2.0","","actions/v10.2.0","2023-01-26T08:37:05Z"
+                "actions/v10.1.2","","actions/v10.1.2","2023-01-23T09:49:15Z"
+                "actions/v10.1.1","","actions/v10.1.1","2023-01-20T10:09:09Z"
+                "actions/v10.1.0","","actions/v10.1.0","2023-01-19T10:37:38Z"
+                "actions/v10.0.0","","actions/v10.0.0","2023-01-18T07:38:37Z"
 "@ | ConvertFrom-Csv
         }
     }
@@ -65,7 +65,7 @@ Describe "Create-ReleaseTag" {
     Context "When a searching for conflicting version numbers" {
         It "It returns a collection of conflicting versions." {
 
-            $releases = (Get-GithubReleases "mock").title.Trim("v")
+            $releases = (Get-GithubReleases "mock" -Prefix "actions").title | ForEach-Object { $_ -replace "^actions/v", "" }
 
             (Find-ConflictingVersions "11" $releases).Count | Should -BeGreaterThan 0
             (Find-ConflictingVersions "10" $releases).Count | Should -BeGreaterThan 0
@@ -77,22 +77,26 @@ Describe "Create-ReleaseTag" {
     }
     Context "When updating major version" {
         It "Calls gh with correct version and completes successfully" {
-            Update-VersionTags -Version "1" -GitHubRepository "mock" -GitHubBranch "mock" |
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v1' -or $args[2] -eq '1') }
+            Update-VersionTags -Version "1" -GitHubRepository "mock" -GitHubBranch "mock" -Prefix "actions" |
+            Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'actions/v1' -or $args[2] -eq 'actions/v1') }
 
-            Update-VersionTags -Version "2.0.0" -GitHubRepository "mock" -GitHubBranch "mock" |
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v2' -or $args[2] -eq '2.0.0') }
+            Update-VersionTags -Version "2.0.0" -GitHubRepository "mock" -GitHubBranch "mock" -Prefix "actions" |
+            Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'actions/v2' -or $args[2] -eq 'actions/v2.0.0') }
 
-            Update-VersionTags -Version "3.2.1" -GitHubRepository "mock" -GitHubBranch "mock" |
-                Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'v3' -or $args[2] -eq '3.2.1') }
+            Update-VersionTags -Version "3.2.1" -GitHubRepository "mock" -GitHubBranch "mock" -Prefix "actions" |
+            Should -Invoke -CommandName "gh" -Exactly -Times 3 -ParameterFilter { $args[0] -eq 'release' -and ($args[2] -eq 'actions/v3' -or $args[2] -eq 'actions/v3.2.1') }
 
         }
 
         It "Throws an exception if no version or invalid version is provided" {
             $EmptyVersion = ""
-            { Update-VersionTags -Version $EmptyVersion -GitHubRepository "mock" -GitHubBranch "mock" } | Should -Throw
+            { Update-VersionTags -Version $EmptyVersion -GitHubRepository "mock" -GitHubBranch "mock" -Prefix "actions" } | Should -Throw
             $InvalidVersion = "abc"
-            { Update-VersionTags -Version $InvalidVersion -GitHubRepository "mock" -GitHubBranch "mock" } | Should -Throw
+            { Update-VersionTags -Version $InvalidVersion -GitHubRepository "mock" -GitHubBranch "mock" -Prefix "actions" } | Should -Throw
+        }
+
+        It "Throws an exception if no prefix is provided" {
+            { Update-VersionTags -Version "1.0.0" -GitHubRepository "mock" -GitHubBranch "mock" } | Should -Throw
         }
     }
 
@@ -104,7 +108,8 @@ Describe "Create-ReleaseTag" {
                     -PatchVersion "2" `
                     -GitHubRepository "mock" `
                     -GitHubBranch "mock" `
-                    -GitHubEvent "mock" } | Should -Throw
+                    -GitHubEvent "mock" `
+                    -Prefix "actions" } | Should -Throw
         }
         It "Completes successfully when version is higher" {
             Create-ReleaseTag -MajorVersion "11" `
@@ -112,14 +117,24 @@ Describe "Create-ReleaseTag" {
                 -PatchVersion "1" `
                 -GitHubRepository "mock" `
                 -GitHubBranch "mock" `
-                -GitHubEvent "mock"
+                -GitHubEvent "mock" `
+                -Prefix "actions"
 
             Create-ReleaseTag -MajorVersion "12" `
                 -MinorVersion "0" `
                 -PatchVersion "0" `
                 -GitHubRepository "mock" `
                 -GitHubBranch "mock" `
-                -GitHubEvent "mock"
+                -GitHubEvent "mock" `
+                -Prefix "actions"
+        }
+        It "Throws an exception if no prefix is provided" {
+            { Create-ReleaseTag -MajorVersion "12" `
+                    -MinorVersion "0" `
+                    -PatchVersion "0" `
+                    -GitHubRepository "mock" `
+                    -GitHubBranch "mock" `
+                    -GitHubEvent "mock" } | Should -Throw
         }
     }
 }
