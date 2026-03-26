@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Check for existence of .tool-versions file
       id: check_tool_versions
@@ -21,7 +21,7 @@ runs:
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
     - name: Restore asdf cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
       id: cache-asdf-restore
       with:
@@ -33,7 +33,7 @@ runs:
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
     - name: Save asdf cache
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       if: ${{ steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
       with:
         path: /home/runner/.asdf
