@@ -18,6 +18,11 @@ description: Checkout the repository in a way that allows us to use the action t
 runs:
   using: composite
   steps:
+    - name: Enable long paths on Windows
+      if: ${{ runner.os == 'Windows' }}
+      shell: bash
+      run: git config --system core.longpaths true
+
     - name: Checkout repository (main branch)
       if: ${{ github.ref_name == 'main' }}
       uses: actions/checkout@v6
