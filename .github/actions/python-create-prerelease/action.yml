@@ -73,7 +73,7 @@ runs:
       run: uv build --wheel --directory ${{ inputs.package_path }}
 
     - name: Attest SBOM
-      uses: actions/attest-sbom@v3
+      uses: actions/attest-sbom@v4
       with:
         subject-path: ${{ inputs.package_path }}/dist/*.whl
         sbom-path: ${{ github.workspace }}/sbom.json
