@@ -12,7 +12,7 @@ runs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Restore commandIndex for ${{ steps.requirements.outputs.version }}
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       id: restore-commandindex
       with:
         path: ~/.azure/commandIndex.json
@@ -24,7 +24,7 @@ runs:
       run: az version
 
     - name: Save commandIndex cache
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       if: ${{ steps.restore-commandindex.outputs.cache-hit != 'true' }}
       with:
         path: ~/.azure/commandIndex.json

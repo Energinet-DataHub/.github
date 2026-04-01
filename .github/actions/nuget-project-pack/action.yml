@@ -71,7 +71,7 @@ runs:
           ${{ steps.get_version_suffix.outputs.property }}
 
     - name: Attest SBOM
-      uses: actions/attest-sbom@v3
+      uses: actions/attest-sbom@v4
       with:
         subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
         sbom-path: ${{ github.workspace }}/sbom.json

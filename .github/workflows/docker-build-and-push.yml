@@ -103,7 +103,7 @@ jobs:
           artifact-name: sbom-${{ inputs.image_name }}.spdx.json
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v3
+        uses: actions/attest-sbom@v4
         continue-on-error: true # We might hit limits on attestations, for now we skip if it happens as we want to move to ACR
         with:
           subject-name: ${{ steps.image_name.outputs.lowercase }}
