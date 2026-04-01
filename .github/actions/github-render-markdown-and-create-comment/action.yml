@@ -30,7 +30,7 @@ runs:
         OWNER_AND_REPO="${REPO:-$GITHUB_REPOSITORY}"
         echo "repository=${OWNER_AND_REPO#*/}" >> "$GITHUB_OUTPUT"
     - name: Render plan to Markdown (no direct comment)
-      uses: borchero/terraform-plan-comment@v2
+      uses: borchero/terraform-plan-comment@v3
       id: comment
       with:
         token: ${{ inputs.token }}
@@ -58,7 +58,7 @@ runs:
         fi
 
     - name: Comment PR with Plan
-      uses: marocchino/sticky-pull-request-comment@v2
+      uses: marocchino/sticky-pull-request-comment@v3
       if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
       with:
         owner: Energinet-DataHub
@@ -79,7 +79,7 @@ runs:
 
     - name: Sticky PR comment (one per submodule; envs append)
       if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
-      uses: marocchino/sticky-pull-request-comment@v2
+      uses: marocchino/sticky-pull-request-comment@v3
       with:
         owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
