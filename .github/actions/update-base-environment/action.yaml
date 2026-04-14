@@ -132,7 +132,7 @@ runs:
 
     - name: Log in to the Container registry
       if: inputs.registry-push == 'true'
-      uses: docker/login-action@292fe2d7ee5389e283d2c71e565819146798c2e2
+      uses: docker/login-action@d43e1c853e1fb3780e2a1187b33970c59f58c314
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
