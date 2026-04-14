@@ -151,7 +151,7 @@ jobs:
 
       - name: Install tools
         if: ${{ steps.changes.outputs.is_src_changed == 'true' }}
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v1
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v2
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
