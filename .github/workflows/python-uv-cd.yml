@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install tools
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v1
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v2
 
   #
   # Build Release Matrix
