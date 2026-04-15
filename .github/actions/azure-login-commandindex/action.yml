@@ -33,7 +33,7 @@ runs:
         key: ${{ runner.os }}-azcli-cidx-${{ steps.requirements.outputs.version }}
 
     - name: Login to use Azure resources from automated tests
-      uses: azure/login@v2
+      uses: azure/login@v3
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}

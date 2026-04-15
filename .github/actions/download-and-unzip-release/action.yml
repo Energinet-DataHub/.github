@@ -30,7 +30,7 @@ runs:
   using: composite
   steps:
     - name: Download release
-      uses: nick-fields/retry@v3
+      uses: nick-fields/retry@v4
       with:
         timeout_seconds: 60
         max_attempts: 3
