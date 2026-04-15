@@ -26,7 +26,7 @@ runs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Restore commandIndex for ${{ steps.requirements.outputs.version }}
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       if: ${{ steps.requirements.outputs.exists != 'true' }}
       with:
         path: ~/.azure/commandIndex.json
