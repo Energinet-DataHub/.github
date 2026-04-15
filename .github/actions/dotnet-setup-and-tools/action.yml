@@ -52,7 +52,7 @@ runs:
   steps:
     - name: Setup .NET ${{ inputs.dotnet_version }}
       if: ${{ inputs.dotnet_version }}
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ inputs.dotnet_version }}
       env:
@@ -62,7 +62,7 @@ runs:
     # We have added a retry action to see if this can mitigate builds failing on this account.
     - name: Setup Azure Cosmos DB Emulator (with retry)
       if: ${{ inputs.use_cosmos_db_emulator == 'true' }}
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v4
       with:
         timeout_minutes: 10
         max_attempts: 3
@@ -81,14 +81,14 @@ runs:
 
     - name: Use Node v${{ inputs.node_version }}
       if: ${{ inputs.use_azure_functions_tools == 'true' }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node_version }}
 
     - name: Cache node modules
       if: ${{ inputs.use_azure_functions_tools == 'true' }}
       id: cache-nodemodules
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
         path: ${{ github.workspace }}\node_modules

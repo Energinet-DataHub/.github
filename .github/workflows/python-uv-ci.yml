@@ -111,7 +111,7 @@ jobs:
     outputs:
       matrix: ${{ steps.package_matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Discover Pyproject
         uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@actions/v1
         id: package_matrix
@@ -137,10 +137,10 @@ jobs:
         inputs: ${{ fromJson(needs.ci_matrix.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check if ${{ matrix.inputs.package_name }} has changed
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -151,7 +151,7 @@ jobs:
 
       - name: Install tools
         if: ${{ steps.changes.outputs.is_src_changed == 'true' }}
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v1
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@actions/v2
 
       - name: Check Version
         if: ${{ steps.changes.outputs.is_src_changed == 'true' && inputs.create_versioned_release }}
@@ -208,7 +208,7 @@ jobs:
       #
 
       - name: Login to access Azure resources
-        uses: azure/login@v2
+        uses: azure/login@v3
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' && inputs.azure_subscription_id != '' }}
         with:
           client-id: ${{ inputs.azure_spn_id }}

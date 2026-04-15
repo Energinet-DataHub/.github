@@ -48,18 +48,18 @@ runs:
       run: exit 1
 
     - name: Check out code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Generate token
       id: generate-token
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@v2
       with:
         app-id: ${{ inputs.github-app-id }}
         private-key: ${{ inputs.github-app-private-key }}
         owner: ${{ github.repository_owner }}
 
     - name: Checkout environment repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         path: base
         repository: ${{ inputs.repository }}
@@ -132,7 +132,7 @@ runs:
 
     - name: Log in to the Container registry
       if: inputs.registry-push == 'true'
-      uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
+      uses: docker/login-action@292fe2d7ee5389e283d2c71e565819146798c2e2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -179,7 +179,7 @@ runs:
     - name: Commit changes
       id: commit
       if: ${{ inputs.dry_run != 'true' }}
-      uses: EndBug/add-and-commit@v9
+      uses: EndBug/add-and-commit@v10
       with:
         fetch: true
         message: Use ${{ env.version }}

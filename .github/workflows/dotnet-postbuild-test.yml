@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
@@ -183,7 +183,7 @@ jobs:
       # We have added a retry action to see if this can mitigate builds failing on this account.
       - name: Setup Azure Cosmos DB Emulator (with retry)
         if: ${{ inputs.use_cosmos_db_emulator == true }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -202,14 +202,14 @@ jobs:
 
       - name: Use Node v${{ inputs.node_version }}
         if: ${{ inputs.use_azure_functions_tools == true && inputs.node_version != '' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node_version }}
 
       - name: Cache node modules
         if: ${{ inputs.use_azure_functions_tools == true }}
         id: cache-nodemodules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
           path: ${{ github.workspace }}\node_modules
@@ -240,7 +240,7 @@ jobs:
       # We have added a retry action to see if this can mitigate builds failing on this account.
       - name: Verify SQL LocalDB 2019 (with retry)
         if: ${{ inputs.use_sqllocaldb_2019 == true }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 2
           max_attempts: 3
@@ -257,7 +257,7 @@ jobs:
             }
 
       - name: Wait for dotnet-tests artifact to be ready for download
-        uses: Wandalen/wretry.action@v1
+        uses: Wandalen/wretry.action@v3
         with:
           action: actions/download-artifact@v4
           with: |
@@ -280,7 +280,7 @@ jobs:
             unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
           fi
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
@@ -289,7 +289,7 @@ jobs:
 
       - name: Login to use Azure resources from automated tests
         if: ${{ inputs.run_integration_tests == true }}
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
