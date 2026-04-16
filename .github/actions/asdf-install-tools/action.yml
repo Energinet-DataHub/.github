@@ -26,7 +26,7 @@ runs:
       id: cache-asdf-restore
       with:
         path: /home/runner/.asdf
-        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+        key: ${{ runner.os }}-asdf-v2-${{ hashFiles('**/.tool-versions') }}
 
     - name: Install dependencies in .tool-versions
       uses: asdf-vm/actions/install@v4
@@ -37,4 +37,4 @@ runs:
       if: ${{ steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
       with:
         path: /home/runner/.asdf
-        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+        key: ${{ runner.os }}-asdf-v2-${{ hashFiles('**/.tool-versions') }}
