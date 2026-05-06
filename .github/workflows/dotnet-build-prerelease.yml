@@ -164,7 +164,7 @@ jobs:
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
           if-no-files-found: error
 
-      - name: Remove dotnet-tests artifact
+      - name: Remove dotnet tests outputs zip
         if: ${{ inputs.prepare_dotnet_tests == true }}
         working-directory: ${{ env.TESTS_OUTPUT_PATH }}
         run: |
