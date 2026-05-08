@@ -56,12 +56,6 @@ runs:
           -RefName "${{ github.ref_name }}" `
           -CommitMessage $commitMessage
 
-        $prNumbers = ($prNumber -split '\s+') | Where-Object { $_ -ne '' }
-        if ($prNumbers.Count -gt 1) {
-          Write-Host "::error::find-related-pr-number found $($prNumbers.Count) PRs ($prNumber), but expected exactly one. This can happen with stacked branches."
-          exit 1
-        }
-
         Write-Host "PR number found: $prNumber"
 
         echo "pull_request_number=$prNumber" >> $env:GITHUB_OUTPUT
