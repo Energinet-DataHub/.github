@@ -52,8 +52,13 @@ function Find-RelatedPullRequestNumber {
 
     $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
     if ($prData.number) {
-        # Happy path
-        $prNumber = $prData.number
+        # The API can return multiple PRs for a single commit (e.g. stacked PRs).
+        # We must ensure we only return one.
+        $prNumbers = @($prData.number)
+        if ($prNumbers.Count -gt 1) {
+            throw "Expected exactly one PR for sha $Sha, but found $($prNumbers.Count): $($prNumbers -join ', '). This can happen with stacked branches."
+        }
+        $prNumber = $prNumbers[0]
     }
 
     if ($null -eq $prNumber) {
