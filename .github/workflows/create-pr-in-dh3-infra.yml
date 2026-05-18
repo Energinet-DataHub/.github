@@ -13,10 +13,8 @@ on:
         type: string
 
 permissions:
-  contents: write
-  deployments: write
-  id-token: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   create_pr_in_dh3_infrastructure:
@@ -35,8 +33,8 @@ jobs:
       - uses: actions/create-github-app-token@v2
         id: generate_token
         with:
-          app-id: ${{ vars.dh3serviceaccount_appid }}
-          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          app-id: ${{ secrets.dh3_infra_pr_client_id }}
+          private-key: ${{ secrets.dh3_infra_pr_app_private_key }}
           owner: Energinet-DataHub
 
       - name: Checkout infra repo
