@@ -32,7 +32,7 @@ jobs:
         # Tag is formatted as pr[PR_NUMBER]]
         run: echo "tag=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
 
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: generate_token
         with:
           app-id: ${{ vars.dh3serviceaccount_appid }}
