@@ -88,6 +88,7 @@ Files:
 
 - [dotnet-build-prerelease.yml](.github/workflows/dotnet-build-prerelease.yml)
 - [dotnet-postbuild-test.yml](.github/workflows/dotnet-postbuild-test.yml)
+- [dotnet-postbuild-test-monorepo.yml](.github/workflows/dotnet-postbuild-test-monorepo.yml)
 
 These workflows are intended to run in parallel. While we build the .NET solution on one runner we can utilize this build time to setup other runners for the test execution.
 
@@ -146,6 +147,9 @@ If a compiled test project is using the Microsoft type `WebApplicationFactory<TE
 
 - `ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME`
 - `ASPNETCORE_TEST_CONTENTROOT_VARIABLE_VALUE`
+
+The monorepo test workflow also supports an optional `publish_test_report` input (default `true`).
+Set it to `false` to skip publishing test report comments/checks while still running tests and coverage.
 
 Set `ASPNETCORE_TEST_CONTENTROOT_VARIABLE_NAME` to an environment variable name following the format `ASPNETCORE_TEST_CONTENTROOT_<ASSEMBLY_NAME>`.
 Where `<ASSEMBLY_NAME>` is the name of the assembly containing the type `TEntryPoint`, but using `_` instead of dot (.).

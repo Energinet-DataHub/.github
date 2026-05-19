@@ -37,6 +37,10 @@ inputs:
   tests_filter_expression:
     description: Filter expression to use with dotnet test
     required: true
+  publish_test_report:
+    description: Set to 'false' to skip publishing test report
+    required: false
+    default: "true"
   tests_dll_file_path:
     description: Relative path from artifacts folder to test assembly
     required: true
@@ -81,7 +85,7 @@ runs:
         $testFailures
 
     - name: Publish test report
-      if: always()
+      if: ${{ always() && inputs.publish_test_report == 'true' }}
       uses: EnricoMi/publish-unit-test-result-action/windows@v2
       with:
         check_name: Test results for ${{ inputs.tests_dll_file_path }}

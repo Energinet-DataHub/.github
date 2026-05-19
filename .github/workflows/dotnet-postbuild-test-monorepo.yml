@@ -43,6 +43,11 @@ on:
         required: false
         default: empty
         type: string
+      publish_test_report:
+        description: Set to 'false' to skip publishing test report
+        required: false
+        default: true
+        type: boolean
       aspnetcore_test_contentroot_variable_name:
         description: Name of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
         required: false
@@ -236,11 +241,12 @@ jobs:
       #     }
 
       - name: Run tests
-        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@actions/v1
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-run-tests-with-coverage-and-publish-report@actions/v2
         with:
           aspnetcore_test_contentroot_variable_name: ${{ inputs.aspnetcore_test_contentroot_variable_name }}
           aspnetcore_test_contentroot_variable_value: ${{ inputs.aspnetcore_test_contentroot_variable_value }}
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
+          publish_test_report: ${{ inputs.publish_test_report }}
           tests_dll_file_path: ${{ inputs.tests_dll_file_path }}
           run_integration_tests: ${{ inputs.run_integration_tests }}
           azure_integrationtest_spn_id: ${{ inputs.azure_integrationtest_spn_id }}
