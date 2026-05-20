@@ -125,6 +125,7 @@ jobs:
             ${{ steps.update_image_tags.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_image_tags.outputs.new_variables) || '' }}
 
           labels: update, ${{github.repository}}, teamname:${{ inputs.team_name }}
+<<<<<<< HEAD
 
       - name: Enable auto-merge
         if: steps.create_pr.outputs.pull-request-number != ''
@@ -134,3 +135,5 @@ jobs:
           repository: Energinet-DataHub/dh3-infrastructure
           pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
           merge-method: squash
+=======
+>>>>>>> 75f5fb8e01d58bcf59d569580f3cd7332945f88f
