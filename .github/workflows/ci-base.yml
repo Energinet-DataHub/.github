@@ -92,7 +92,7 @@ jobs:
       # https://github.com/marketplace/actions/markdown-link-check
       - name: Markdown links check
         if: ${{ inputs.skip_markdown_links_check != 'true' }}
-        uses: tcort/github-action-markdown-link-check@v3.14.2
+        uses: tcort/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: "yes"
           use-verbose-mode: "yes"
