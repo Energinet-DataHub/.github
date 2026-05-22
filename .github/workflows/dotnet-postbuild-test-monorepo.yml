@@ -207,7 +207,7 @@ jobs:
             ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-
 
       - name: Set up test environment
-        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@actions/v1
+        uses: Energinet-Datahub/.github/.github/actions/dotnet-setup-and-tools@actions/v2
         with:
           dotnet_version: ${{ inputs.dotnet_version }}
           use_cosmos_db_emulator: ${{ inputs.use_cosmos_db_emulator }}
@@ -223,7 +223,7 @@ jobs:
           dotnet build ${{ inputs.solution_file_path }} --configuration Release
 
       # - name: Download test artifact
-      #   uses: actions/download-artifact@v4
+      #   uses: actions/download-artifact@v8
       #   with:
       #     name: ${{ inputs.testproject_artifact_name }}
       #     path: ${{ env.ARTIFACT_TEST_PATH }}/
