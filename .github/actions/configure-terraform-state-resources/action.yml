@@ -32,7 +32,7 @@ runs:
   steps:
     - name: Azure Login (Optional)
       if: ${{ inputs.azure_spn_id != '' && inputs.azure_tenant_id != '' }}
-      uses: azure/login@v2
+      uses: azure/login@v3
       with:
         client-id: ${{ inputs.azure_spn_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}

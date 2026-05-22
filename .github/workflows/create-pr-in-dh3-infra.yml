@@ -11,18 +11,28 @@ on:
         description: Newline separated list of terraform variables to update in the same file (uses the same tag)
         required: true
         type: string
+      team_name:
+        description: The name of the team owning the change. Added to the PR as a `teamname:{name}` label.
+        required: true
+        type: string
 
 permissions:
-  contents: write
-  deployments: write
-  id-token: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   create_pr_in_dh3_infrastructure:
     name: Create PR in DH3 Infrastructure
     runs-on: ubuntu-latest
     steps:
+      - name: Validate terraform_path
+        shell: bash
+        run: |
+          if [[ "${{ inputs.terraform_path }}" != *.auto.tfvars ]]; then
+            echo "::error::terraform_path must point to a *.auto.tfvars file (got '${{ inputs.terraform_path }}')"
+            exit 1
+          fi
+
       - name: Find associated pull request
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
         id: find_pull_request
@@ -32,11 +42,11 @@ jobs:
         # Tag is formatted as pr[PR_NUMBER]]
         run: echo "tag=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
 
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: generate_token
         with:
-          app-id: ${{ vars.dh3serviceaccount_appid }}
-          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          app-id: ${{ vars.dh3_infra_pr_client_id }}
+          private-key: ${{ secrets.dh3_infra_pr_app_private_key }}
           owner: Energinet-DataHub
 
       - name: Checkout infra repo
@@ -98,6 +108,7 @@ jobs:
           }
 
       - name: Create Pull Request in Infra Repo
+        id: create_pr
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -113,4 +124,13 @@ jobs:
             ${{ steps.update_image_tags.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new image is created for the first time.' || '' }}
             ${{ steps.update_image_tags.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_image_tags.outputs.new_variables) || '' }}
 
-          labels: update, ${{github.repository}}
+          labels: update, ${{github.repository}}, teamname:${{ inputs.team_name }}
+
+      - name: Enable auto-merge
+        if: steps.create_pr.outputs.pull-request-number != ''
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repository: Energinet-DataHub/dh3-infrastructure
+          pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
+          merge-method: squash
