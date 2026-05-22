@@ -34,7 +34,7 @@ jobs:
           fi
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v1
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
         id: find_pull_request
 
       - name: Set image tag
