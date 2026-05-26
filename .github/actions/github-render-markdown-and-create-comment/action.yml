@@ -70,6 +70,8 @@ runs:
           ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
           **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
 
+          ## ${{ steps.comment.outputs.change-summary }}
+
           <details>
           <summary>Show plan for ${{ inputs.environment }}</summary>
 
@@ -89,5 +91,7 @@ runs:
         message: |
           ## ${{ inputs.workload-name }} — `${{ inputs.environment }}`
           **Release:** `${{ inputs.workload-name }} - ${{ inputs.pr-number }}`
+
+          ## ${{ steps.comment.outputs.change-summary }}
 
           Plan output is too large to display in a comment. Please check the Terraform plan output in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
