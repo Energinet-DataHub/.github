@@ -1,0 +1,181 @@
+name: Custom Image Deployment
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: |
+          JSON targets for the deployment. It should be an array of objects with the following properties:
+          - image: The full name of the image to deploy, e.g. repository/image
+          - pull_request_number: Pull request number to deploy, if empty the image tag will not be updated but the deployment workflow will still be triggered
+          - terraform_path: Path to Terraform configuration file to update with new image tag, e.g. path/to/terraform.tfvars
+          - terraform_variable_names: Names of Terraform variables to update with new image tag (newline separated), e.g. variable1\nvariable2
+        required: true
+        type: string
+      deployment_workflow_repository:
+        description: Repository containing the deployment workflow
+        required: false
+        type: string
+        default: Energinet-DataHub/dh3-infrastructure
+      deployment_workflow_name:
+        description: Name of the deployment workflow
+        required: true
+        type: string
+      deployment_workflow_environment:
+        description: Environment to start deployment workflow for
+        required: true
+        type: string
+      deployment_workflow_branch:
+        description: Git branch to start deployment workflow from
+        required: true
+        type: string
+      app_client_id:
+        description: Client ID of the GitHub App used to push to the infrastructure repository and trigger the deployment workflow
+        required: true
+        type: string
+    secrets:
+      app_private_key:
+        description: Private key of the GitHub App used to push to the infrastructure repository and trigger the deployment workflow
+        required: true
+
+permissions:
+  packages: read
+  contents: read
+
+jobs:
+  deploy:
+    name: Update image tags and trigger deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        uses: actions/create-github-app-token@v3
+        id: generate_token
+        with:
+          client-id: ${{ inputs.app_client_id }}
+          private-key: ${{ secrets.app_private_key }}
+          owner: Energinet-DataHub
+
+      - name: Docker login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.deployment_workflow_repository }}
+          path: infra-repo
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Setup comitter and switch branch
+        shell: bash
+        working-directory: infra-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B ${{ inputs.deployment_workflow_branch }} origin/main
+
+      - name: Process targets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          $targets = $env:TARGETS | ConvertFrom-Json
+
+          foreach ($target in $targets) {
+            $image = $target.image.ToLower()
+            $prNumber = $target.pull_request_number
+            $terraformPath = $target.terraform_path
+            $terraformVariableNames = $target.terraform_variable_names
+
+            Write-Output "::group::$image (PR #$prNumber)"
+
+            if (-not $prNumber) {
+              Write-Output "No pull request number specified for image $image, skipping image tag update but will still trigger deployment workflow"
+              continue
+              Write-Output "::endgroup::"
+            }
+
+            # Lookup container image sha from pull request number
+            $prTag = "pr$prNumber"
+            $digest = (skopeo inspect "docker://ghcr.io/${image}:${prTag}" | ConvertFrom-Json).Digest
+            if ([string]::IsNullOrEmpty($digest)) {
+              Write-Output "::error::No package version found for image ${image}:${prTag}. Ensure the image has been built."
+              exit 1
+            }
+            $tag = "${prTag}:${digest}"
+
+            $summary = "${image} resolved ${prTag} to ${digest}"
+            Write-Output $summary
+            $summary >> $env:GITHUB_STEP_SUMMARY
+
+            # Update image tags (unchanged logic from create-pr-in-dh3-infra.yml in .github repo)
+            $file = "infra-repo/$terraformPath"
+
+            if (-not (Test-Path $file)) {
+              New-Item -Path $file -ItemType File -Force | Out-Null
+              Write-Output "::warning::Variable file did not exist, it has been created"
+            }
+
+            # Contains the list of new variables that was added to the variable file.
+            $newVars = @()
+
+            $vars = $terraformVariableNames
+            $vars -split "`n" | ForEach-Object {
+              $varname = $_.Trim()
+              if (-not $varname) { return }
+
+              $content = Get-Content $file
+              $pattern = "^\s*${varname}\s*="
+              $found = $false
+
+              $newContent = $content | ForEach-Object {
+                if ($_ -match $pattern) {
+                  $found = $true
+                  $_ -replace '(")[^"]*(")', "`"$tag`""
+                } else {
+                  $_
+                }
+              }
+
+              if ($found) {
+                $newContent | Set-Content $file
+              } else {
+                $newVar = "$varname = `"$tag`""
+                Add-Content $file $newVar
+                $newVars += $varname
+                Write-Output "::warning::A new variable ($varname) was added to the variable file"
+              }
+            }
+
+            Write-Output "::endgroup::"
+          }
+
+      - name: Commit and force push changes
+        working-directory: infra-repo
+        shell: pwsh
+        run: |
+          git add .
+          if (git diff --cached --quiet) {
+            $summary = "No changes to commit, pushing branch as-is"
+            Write-Output $summary
+            $summary >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            git commit --author "${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>" -m "Update image tags from deployment targets"
+          }
+          git push origin ${{ inputs.deployment_workflow_branch }} --force
+
+      - name: Trigger deployment workflow
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          $summary = gh workflow run ${{ inputs.deployment_workflow_name }} -R ${{ inputs.deployment_workflow_repository }} -F selected_environment=${{ inputs.deployment_workflow_environment }} -r ${{ inputs.deployment_workflow_branch }}
+          Write-Output $summary
+          $summary >> $env:GITHUB_STEP_SUMMARY
