@@ -108,7 +108,6 @@ jobs:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
           subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
-          allow-no-subscriptions: true
 
       - name: Run unit tests with filter
         uses: Energinet-DataHub/.github/.github/actions/python-unit-test@actions/v2
