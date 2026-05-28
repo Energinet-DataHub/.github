@@ -55,6 +55,7 @@ runs:
         client-id: ${{ inputs.azure_integrationtest_spn_id }}
         tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
         subscription-id: ${{ inputs.azure_integrationtest_subscription_id }}
+        allow-no-subscriptions: true
 
     # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
     # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
