@@ -37,7 +37,7 @@ runs:
         client-id: ${{ inputs.azure_spn_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
-        allow-no-subscriptions: true
+        allow-no-subscriptions: true # Added as a workaround for the issue https://github.com/Azure/login/issues/592
 
     - name: Run script to ensure storage for Terraform state exists
       shell: pwsh

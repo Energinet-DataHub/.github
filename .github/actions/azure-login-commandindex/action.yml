@@ -38,4 +38,4 @@ runs:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}
         subscription-id: ${{ inputs.subscription-id }}
-        allow-no-subscriptions: true
+        allow-no-subscriptions: true # Added as a workaround for the issue https://github.com/Azure/login/issues/592 # Added as a workaround for the issue https://github.com/Azure/login/issues/592
