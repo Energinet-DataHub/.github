@@ -6,6 +6,9 @@
     The functionality is executed as an action on a github runner and creates automated releases for pull requests.
 #>
 
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
@@ -63,47 +66,28 @@ function Create-GitHubRelease {
         [string]$Title,
         [Parameter(Mandatory)]
         [string[]]$Files,
-        [string]$PreRelease = "false"
+        [bool]$PreRelease
     )
 
-    # Input parsing
-    $isPrerelease = [bool]::Parse($PreRelease)
-
-    # Step 1: Get Previous Release
-    [GithubRelease]$release = Invoke-GithubReleaseList -TagName $TagName
-
-    # Step 2: Delete Previous Release
-    $release | Invoke-GithubReleaseDelete
-
-    # Step 3: Create new release
+    # Create new release object
     $newrelease = [GithubRelease]@{
         name         = $Title
         tagName      = $TagName
-        isPrerelease = $isPrerelease
+        isPrerelease = $PreRelease
         notes        = Get-ChangeNotes
         files        = $Files
     }
 
-    $newrelease | Invoke-GithubReleaseCreate
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
-
-    .DESCRIPTION
-    Wrapping a "gh release list" call
-#>
-function Invoke-GithubReleaseList {
-    param (
-        [string]$TagName
-    )
-    $response = gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest" | ConvertFrom-Json | Where-Object { $_.name -eq $TagName }
-    if ($response.Count -gt 1) {
-        Write-Warning "Multiple releases found with tag name '$TagName'. Using the first one, as the other one will be deleted next."
-        return $response[0]
+    # Try to create release, if it fails, delete any prior release with same tag and try again - aka do-catch pattern
+    # We previously had a test-do pattern, but the test (gh release list) uses graphql and we were hitting rate limits
+    # So we switched to do-catch and just try to create the release and if it fails we assume it's because a release with the same tag already exists and delete it before trying again
+    try {
+        $newrelease | Invoke-GithubReleaseCreate
     }
-    return $response
+    catch {
+        Invoke-GithubReleaseDelete -Name $TagName
+        $newrelease | Invoke-GithubReleaseCreate
+    }
 }
 
 <#
@@ -114,19 +98,12 @@ function Invoke-GithubReleaseList {
     Wrapping a "gh release delete" call
 #>
 function Invoke-GithubReleaseDelete {
-    [CmdletBinding()]
     param(
-        [Parameter(ValueFromPipeline)]
-        [GithubRelease]$release
+        [string]$Name
     )
 
-    if ($null -eq $release) {
-        Write-Warning "No release to delete."
-        return $release
-    }
-
-    Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y --cleanup-tag -R $GithubRepository
+    Write-Host "Deleting $Name"
+    gh release delete $Name -y --cleanup-tag -R $GithubRepository
 }
 
 <#
@@ -142,12 +119,6 @@ function Invoke-GithubReleaseCreate {
         [Parameter(ValueFromPipeline)]
         [GithubRelease]$release
     )
-
-    if ($null -eq $release) {
-        Write-Warning "No release to create."
-        return $release
-    }
-
     Write-Verbose "Creating release: $($release.tagName)"
 
     $ArgNotes = if ($release.notes) {

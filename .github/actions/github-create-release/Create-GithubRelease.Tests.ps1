@@ -14,32 +14,43 @@ BeforeAll {
 
 Describe "Create-GithubRelease" {
 
-    Context "Invoke-GithubReleaseList" {
-        It "Returns a release when release exist" -ForEach @(
-            @{ Releases = @("v1"); TagName = "v1"; Expected = "v1" },
-            @{ Releases = @("v1", "v2"); TagName = "v1"; Expected = "v1" },
-            @{ Releases = @("not_v1"); TagName = "v1"; Expected = $null }
+    Context "Create release" {
+        It "Handles preexisting = <PreExists> release" -ForEach @(
+            #@{ PreExists = $false; TagName = "v1" },
+            @{ PreExists = $true; TagName = "v1" }
         ) {
-            ## Mock gh release list
+
             Mock gh {
-                $Releases | ForEach-Object { [GithubRelease]@{ Name = $_ } } | ConvertTo-Json -AsArray
             }
-            $previousRelease = Invoke-GithubReleaseList -TagName $TagName
-            $previousRelease.Name | Should -Be $Expected
-        }
-    }
 
-    Context "Invoke-GithubReleaseDelete" {
-        It "Deletes a piped release" -ForEach @(
-            @{ Release = @{ Name = "noop" }; Expected = 1 },
-            @{ Release = $null; Expected = 0 }
-        ) {
-            Mock gh {}
-            Mock Invoke-GithubReleaseList {
+            Mock Get-ChangeNotes {
+                return ""
+            }
+
+            $script:deleted = $false
+
+            Mock Invoke-GithubReleaseCreate {
                 [GithubRelease] $Release
+
+                if ($PreExists -and -not $script:deleted) {
+                    throw "Release with tag $($Release.tagName) already exists"
+                }
+
+                return $Release
             }
 
-            Invoke-GithubReleaseList | Invoke-GithubReleaseDelete | Should -Invoke -CommandName gh -Exactly -Times $Expected
+            Mock Invoke-GithubReleaseDelete {
+                [string] $Name
+
+                $script:deleted = $true
+            }
+
+            Create-GitHubRelease -TagName $TagName -Title "title" -Files @("file1") -PreRelease $false
+
+            Should -Invoke -CommandName Invoke-GithubReleaseCreate -Exactly ($PreExists ? 2 : 1)
+
+            Should -Invoke -CommandName Invoke-GithubReleaseDelete -Exactly ($PreExists ? 1 : 0)
+
         }
     }
 
@@ -61,4 +72,3 @@ Describe "Create-GithubRelease" {
         }
     }
 }
-
