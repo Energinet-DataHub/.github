@@ -109,7 +109,7 @@ jobs:
               Write-Output "::error::No package version found for image ${image}:${prTag}. Ensure the image has been built."
               exit 1
             }
-            $tag = "${prTag}:${digest}"
+            $tag = "${prTag}@${digest}"
 
             $summary = "${image} resolved ${prTag} to ${digest}"
             Write-Output $summary
