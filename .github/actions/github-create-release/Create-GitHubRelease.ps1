@@ -6,6 +6,9 @@
     The functionality is executed as an action on a github runner and creates automated releases for pull requests.
 #>
 
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
     throw "Error: GH_TOKEN environment variable is not set, see https://cli.github.com/manual/gh_auth_login for details"
 }
@@ -45,7 +48,7 @@ class GithubRelease {
     [bool]$isPrerelease
     [bool]$isLatest
     [string]$notes
-    [string[]]$files
+    [string]$files
 }
 
 <#
@@ -62,7 +65,7 @@ function Create-GitHubRelease {
         [Parameter(Mandatory)]
         [string]$Title,
         [Parameter(Mandatory)]
-        [string[]]$Files,
+        [string]$Files,
         [string]$PreRelease = "false"
     )
 
@@ -150,17 +153,36 @@ function Invoke-GithubReleaseCreate {
 
     Write-Verbose "Creating release: $($release.tagName)"
 
-    $ArgNotes = if ($release.notes) {
-        $release.Notes  | Out-File "notes.md"
-        "--notes-file notes.md"
+    $ghArgs = @(
+        "release", "create",
+        $release.tagName,
+        "-t", $release.name,
+        "--target", $TargetSha,
+        "-R", $GithubRepository
+    )
+
+    if ($release.isPrerelease) {
+        $ghArgs += "--prerelease"
+    }
+
+    if ($release.notes) {
+        $release.Notes | Out-File "notes.md"
+        $ghArgs += @("--notes-file", "notes.md")
     }
     else {
-        "--generate-notes"
+        $ghArgs += "--generate-notes"
     }
-    $ArgPreRelease = if ($release.isPrerelease) { "--prerelease" } else { "" }
-    $cmd = "gh release create $($release.tagName) -t $($release.name) --target ${TargetSha} -R $GithubRepository ${ArgPreRelease} ${ArgNotes} $($release.Files)"
-    Write-Host $cmd
-    Invoke-Expression $cmd
+
+    # Split newline/comma-separated file list into individual file arguments
+    foreach ($file in ($release.Files -split '[,\r\n]+')) {
+        $trimmed = $file.Trim()
+        if ($trimmed) {
+            $ghArgs += $trimmed
+        }
+    }
+
+    Write-Host "gh $($ghArgs -join ' ')"
+    & gh @ghArgs
 }
 
 <#
