@@ -1,4 +1,4 @@
-name:  Create SBOM Attestation
+name: Create SBOM Attestation
 description: Creates an attestation linking a subject artifact to its SBOM using a custom predicate
 
 inputs:
