@@ -1,0 +1,77 @@
+name: Create SBOM Attestation
+description: Creates an attestation linking a subject artifact to its SBOM using a custom predicate
+
+inputs:
+  subject-path:
+    description: Path to the subject artifact. Required if subject-name and subject-digest are not provided.
+    required: false
+  subject-name:
+    description: Name of the subject artifact. Required if subject-path is not provided.
+    required: false
+  subject-digest:
+    description: Digest of the subject artifact. Required if subject-path is not provided.
+    required: false
+  sbom-path:
+    description: Path to the SBOM file.
+    required: true
+  release-tag:
+    description: Release tag to link in the predicate.
+    required: true
+  release-title:
+    description: Release title to link in the predicate.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set variables
+      id: vars
+      shell: bash
+      run: |
+        # Get sbom filename and digest
+        SBOM_NAME=$(basename "${{ inputs.sbom-path }}")
+        SBOM_DIGEST=$(sha256sum "${{ inputs.sbom-path }}" | awk '{print $1}')
+
+        # Set step outputs
+        echo "SBOM_NAME=$SBOM_NAME" >> $GITHUB_OUTPUT
+        echo "SBOM_DIGEST=$SBOM_DIGEST" >> $GITHUB_OUTPUT
+
+    - name: Create custom predicate
+      shell: bash
+      run: |
+        cat >sbom-link-predicate.json <<JSON
+        {
+          "sbom": {
+            "name": "${{ steps.vars.outputs.SBOM_NAME }}",
+            "sha256": "${{ steps.vars.outputs.SBOM_DIGEST }}",
+            "url": "https://github.com/${{ github.repository }}/releases/download/${{ inputs.release-tag }}/${{ steps.vars.outputs.SBOM_NAME }}"
+          },
+          "release": {
+            "tag": "${{ inputs.release-tag }}",
+            "title": "${{ inputs.release-title }}",
+            "url": "https://github.com/${{ github.repository }}/releases/tag/${{ inputs.release-tag }}"
+          },
+          "build": {
+            "repository": "${{ github.repository }}",
+            "run_id": "${{ github.run_id }}",
+            "sha": "${{ github.sha }}"
+          }
+        }
+        JSON
+
+    - name: Generate attestation binding artifact to SBOM digest
+      if: ${{ inputs.subject-path != '' }}
+      uses: actions/attest@v4
+      with:
+        subject-path: ${{ inputs.subject-path }}
+        predicate-path: sbom-link-predicate.json
+        predicate-type: https://datahub.dk/attestations/sbom-link/v1
+
+    - name: Generate attestation binding artifact to SBOM digest
+      if: ${{ inputs.subject-path == '' }}
+      uses: actions/attest@v4
+      with:
+        subject-name: ${{ inputs.subject-name }}
+        subject-digest: ${{ inputs.subject-digest }}
+        predicate-path: sbom-link-predicate.json
+        predicate-type: https://datahub.dk/attestations/sbom-link/v1
