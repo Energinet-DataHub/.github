@@ -102,16 +102,8 @@ jobs:
           output-file: sbom.spdx.json
           artifact-name: sbom-${{ inputs.image_name }}.spdx.json
 
-      - name: Attest SBOM
-        uses: actions/attest-sbom@v4
-        continue-on-error: true # We might hit limits on attestations, for now we skip if it happens as we want to move to ACR
-        with:
-          subject-name: ${{ steps.image_name.outputs.lowercase }}
-          subject-digest: ${{ steps.push_image.outputs.digest }}
-          sbom-path: sbom.spdx.json
-          push-to-registry: true
-
       - name: Create pre-release
+        id: release
         if: ${{ inputs.create_prerelease && (github.event_name == 'pull_request' || github.event_name == 'merge_group') }}
         uses: Energinet-DataHub/.github/.github/actions/github-create-release@actions/v2
         with:
@@ -119,4 +111,15 @@ jobs:
           automatic_release_tag: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}
           prerelease: true
           title: ${{ inputs.image_name }}_${{ steps.find_pull_request.outputs.pull_request_number }}
-          files: README.md
+          files: |
+            sbom.spdx.json
+            README.md
+
+      - name: Create SBOM attestation
+        uses: Energinet-DataHub/.github/.github/actions/github-create-sbom-attestation@actions/v2
+        with:
+          subject-name: ${{ steps.image_name.outputs.lowercase }}
+          subject-digest: ${{ steps.push_image.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          release-tag: ${{ steps.release.outputs.tag }}
+          release-title: ${{ steps.release.outputs.title }}
