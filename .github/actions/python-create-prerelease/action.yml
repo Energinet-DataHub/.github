@@ -72,12 +72,6 @@ runs:
       shell: bash
       run: uv build --wheel --directory ${{ inputs.package_path }}
 
-    - name: Attest SBOM
-      uses: actions/attest-sbom@v4
-      with:
-        subject-path: ${{ inputs.package_path }}/dist/*.whl
-        sbom-path: ${{ github.workspace }}/sbom.json
-
     - name: Copy files for ${{ inputs.package_name }} prerelease
       shell: bash
       run: |
@@ -98,7 +92,27 @@ runs:
         filename: ${{ env.RELEASE_ZIP_FILENAME }}
         directory: ${{ env.RELEASE_FOLDER_PATH }}
 
-    - name: Create prerelease for ${{ inputs.name }}
+    - name: Resolve wheel path
+      id: resolve-wheel
+      shell: bash
+      run: |
+        shopt -s nullglob
+        FILES=(${{ inputs.package_path }}/dist/*.whl)
+        shopt -u nullglob
+        if [[ ${#FILES[@]} -eq 0 ]]; then
+          echo "::error::No .whl files found"
+          exit 1
+        fi
+        if [[ ${#FILES[@]} -gt 1 ]]; then
+          echo "::error::Expected exactly 1 .whl file but found ${#FILES[@]}:"
+          printf '  %s\n' "${FILES[@]}"
+          exit 1
+        fi
+        FULL_PATH=$(realpath "${FILES[0]}")
+        echo "wheel_path=$FULL_PATH" >> $GITHUB_OUTPUT
+
+    - name: Create prerelease
+      id: release
       uses: Energinet-Datahub/.github/.github/actions/github-create-release@actions/v2
       with:
         repo_token: ${{ inputs.github_token }}
@@ -106,4 +120,14 @@ runs:
         prerelease: true
         title: ${{ inputs.release_name }}
         files: |
+          ${{ github.workspace }}/sbom.json
           ${{ env.RELEASE_FOLDER_PATH }}/${{ env.RELEASE_ZIP_FILENAME }}
+          ${{ steps.resolve-wheel.outputs.wheel_path }}
+
+    - name: Create SBOM attestation
+      uses: Energinet-DataHub/.github/.github/actions/github-create-sbom-attestation@actions/v2
+      with:
+        subject-path: ${{ steps.resolve-wheel.outputs.wheel_path }}
+        sbom-path: ${{ github.workspace }}/sbom.json
+        release-tag: ${{ steps.release.outputs.tag }}
+        release-title: ${{ steps.release.outputs.title }}
