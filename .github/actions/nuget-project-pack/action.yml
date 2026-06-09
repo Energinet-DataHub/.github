@@ -7,6 +7,10 @@ inputs:
   build_configuration:
     required: false
     default: Release
+  github_token:
+    description: The GitHub token
+    required: false
+    default: ${{ github.token }}
 
 runs:
   using: composite
@@ -70,8 +74,41 @@ runs:
           -p:RepositoryCommit=${{ github.sha }} `
           ${{ steps.get_version_suffix.outputs.property }}
 
-    - name: Attest SBOM
-      uses: actions/attest-sbom@v4
+    - name: Resolve nupkg path
+      id: resolve-nupkg
+      shell: bash
+      run: |
+        shopt -s nullglob
+        FILES=(${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg)
+        shopt -u nullglob
+        if [[ ${#FILES[@]} -eq 0 ]]; then
+          echo "::error::No .nupkg files found"
+          exit 1
+        fi
+        if [[ ${#FILES[@]} -gt 1 ]]; then
+          echo "::error::Expected exactly 1 .nupkg file but found ${#FILES[@]}:"
+          printf '  %s\n' "${FILES[@]}"
+          exit 1
+        fi
+        FULL_PATH=$(realpath "${FILES[0]}")
+        echo "nupkg_path=$FULL_PATH" >> $GITHUB_OUTPUT
+
+    - name: Create pre-release
+      id: release
+      uses: Energinet-Datahub/.github/.github/actions/github-create-release@actions/v2
       with:
-        subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
+        repo_token: ${{ inputs.github_token }}
+        automatic_release_tag: ${{ steps.compute-dir.outputs.project_name }}_${{ steps.get_version_suffix.outputs.property }}
+        prerelease: true
+        title: ${{ steps.compute-dir.outputs.project_name }}_${{ steps.get_version_suffix.outputs.property }}
+        files: |
+          ${{ github.workspace }}/sbom.json
+          ${{ steps.resolve-nupkg.outputs.nupkg_path }}
+
+    - name: Create SBOM attestation
+      uses: Energinet-DataHub/.github/.github/actions/github-create-sbom-attestation@actions/v2
+      with:
+        subject-path: ${{ steps.resolve-nupkg.outputs.nupkg_path }}
         sbom-path: ${{ github.workspace }}/sbom.json
+        release-tag: ${{ steps.release.outputs.tag }}
+        release-title: ${{ steps.release.outputs.title }}
