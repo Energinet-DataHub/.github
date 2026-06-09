@@ -93,14 +93,17 @@ runs:
         FULL_PATH=$(realpath "${FILES[0]}")
         echo "nupkg_path=$FULL_PATH" >> $GITHUB_OUTPUT
 
+        NUPKG_FILENAME=$(basename "${FILES[0]}" .nupkg)
+        echo "release_name=$NUPKG_FILENAME" >> $GITHUB_OUTPUT
+
     - name: Create pre-release
       id: release
       uses: Energinet-Datahub/.github/.github/actions/github-create-release@actions/v2
       with:
         repo_token: ${{ inputs.github_token }}
-        automatic_release_tag: ${{ steps.compute-dir.outputs.project_name }}_${{ steps.get_version_suffix.outputs.property }}
+        automatic_release_tag: ${{ steps.resolve-nupkg.outputs.release_name }}
         prerelease: true
-        title: ${{ steps.compute-dir.outputs.project_name }}_${{ steps.get_version_suffix.outputs.property }}
+        title: ${{ steps.resolve-nupkg.outputs.release_name }}
         files: |
           ${{ github.workspace }}/sbom.json
           ${{ steps.resolve-nupkg.outputs.nupkg_path }}
