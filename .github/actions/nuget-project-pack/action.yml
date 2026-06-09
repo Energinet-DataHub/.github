@@ -76,25 +76,21 @@ runs:
 
     - name: Resolve nupkg path
       id: resolve-nupkg
-      shell: bash
+      shell: pwsh
       run: |
-        shopt -s nullglob
-        FILES=(${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg)
-        shopt -u nullglob
-        if [[ ${#FILES[@]} -eq 0 ]]; then
-          echo "::error::No .nupkg files found"
+        $files = @(Get-ChildItem -Path "${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}" -Filter *.nupkg -File)
+        if ($files.Count -eq 0) {
+          Write-Output "::error::No .nupkg files found"
           exit 1
-        fi
-        if [[ ${#FILES[@]} -gt 1 ]]; then
-          echo "::error::Expected exactly 1 .nupkg file but found ${#FILES[@]}:"
-          printf '  %s\n' "${FILES[@]}"
+        }
+        if ($files.Count -gt 1) {
+          Write-Output "::error::Expected exactly 1 .nupkg file but found $($files.Count):"
+          $files | ForEach-Object { Write-Output "  $($_.FullName)" }
           exit 1
-        fi
-        FULL_PATH=$(realpath "${FILES[0]}")
-        echo "nupkg_path=$FULL_PATH" >> $GITHUB_OUTPUT
+        }
 
-        NUPKG_FILENAME=$(basename "${FILES[0]}" .nupkg)
-        echo "release_name=$NUPKG_FILENAME" >> $GITHUB_OUTPUT
+        "nupkg_path=$($files[0].FullName)" >> $env:GITHUB_OUTPUT
+        "release_name=$($files[0].BaseName)" >> $env:GITHUB_OUTPUT
 
     - name: Create pre-release
       id: release
