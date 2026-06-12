@@ -147,6 +147,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  actions: read # Needed to poll for artifact availability
   issues: read # Needed by EnricoMi/publish-unit-test-result-action
   checks: write # Needed by EnricoMi/publish-unit-test-result-action
   pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
@@ -257,14 +258,39 @@ jobs:
             }
 
       - name: Wait for dotnet-tests artifact to be ready for download
-        uses: Wandalen/wretry.action@v3
-        with:
-          action: actions/download-artifact@v8
-          with: |
-            name: dotnet-tests
-            path: ${{ env.ARTIFACTS_PATH }}
-          attempt_limit: ${{ inputs.download_attempt_limit }}
-          attempt_delay: 15000
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          attempt=0
+          max_attempts=${{ inputs.download_attempt_limit }}
+          delay_seconds=15
+          artifacts_path="${{ env.ARTIFACTS_PATH }}"
+          run_id="${{ github.run_id }}"
+          repo="${{ github.repository }}"
+          poll_cmd="gh api repos/${repo}/actions/runs/${run_id}/artifacts --jq '.artifacts[] | select(.name==\"dotnet-tests\") | .name'"
+          download_cmd="gh run download ${run_id} --repo ${repo} -n dotnet-tests -D ${artifacts_path}"
+
+          mkdir -p "${artifacts_path}"
+          echo "Polling command: ${poll_cmd}"
+          echo "Download command: ${download_cmd}"
+
+          while [ $attempt -lt $max_attempts ]; do
+            attempt=$((attempt + 1))
+            echo "Poll attempt $attempt of $max_attempts..."
+            found=$(eval "$poll_cmd" 2>&1) || true
+            if [ "$found" = "dotnet-tests" ]; then
+              echo "Artifact is available, downloading..."
+              $download_cmd
+              echo "Contents of ${artifacts_path}:"
+              find "${artifacts_path}" -type f
+              exit 0
+            fi
+            echo "Artifact not yet available (got: '${found}'), retrying in ${delay_seconds}s..."
+            sleep $delay_seconds
+          done
+          echo "::error::dotnet-tests artifact did not appear after $max_attempts attempts"
+          exit 1
 
       - name: Unzip dotnet-tests-outputs.zip
         shell: bash
