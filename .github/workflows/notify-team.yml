@@ -57,7 +57,7 @@ jobs:
         id: generate_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.dh3serviceaccount_appid }}
+          client-id: ${{ vars.dh3serviceaccount_appid }}
           private-key: ${{ secrets.dh3serviceaccount_privatekey }}
           owner: Energinet-Datahub # the next step will require access to other repositories in the org
 
