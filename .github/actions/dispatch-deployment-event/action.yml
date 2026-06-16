@@ -24,7 +24,7 @@ runs:
       id: generate_token
       uses: actions/create-github-app-token@v3
       with:
-        app-id: ${{ inputs.app_id }}
+        client-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.private_key }}
         owner: Energinet-Datahub
 

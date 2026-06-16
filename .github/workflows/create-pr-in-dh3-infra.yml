@@ -45,7 +45,7 @@ jobs:
       - uses: actions/create-github-app-token@v3
         id: generate_token
         with:
-          app-id: ${{ vars.dh3_infra_pr_client_id }}
+          client-id: ${{ vars.dh3_infra_pr_client_id }}
           private-key: ${{ secrets.dh3_infra_pr_app_private_key }}
           owner: Energinet-DataHub
 
