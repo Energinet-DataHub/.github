@@ -80,7 +80,7 @@ jobs:
           $prNumber = $merged.number
           $prUrl = $merged.html_url
 
-          $summary = "PR <a href='$prUrl'>#$prNumber</a><br>By: <b>$($merged.user.login)</b> on $($merged.merged_at)"
+          $summary = "PR <a href='$prUrl'>#$prNumber</a><br>By: <b>$($merged.user.login)</b> on $($merged.merged_at)<br><br>"
 
           Write-Host "Merged PR summary:"
           Write-Host $summary
