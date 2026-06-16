@@ -80,7 +80,7 @@ jobs:
           $prNumber = $merged.number
           $prUrl = $merged.html_url
 
-          $summary = "Failed following merge of PR <a href='$prUrl'>#$prNumber</a>"
+          $summary = "PR <a href='$prUrl'>#$prNumber</a><br>By: <b>$($merged.user.login)</b> on $($merged.merged_at)"
 
           Write-Host "Merged PR summary:"
           Write-Host $summary
@@ -160,14 +160,14 @@ jobs:
         id: email_content
         shell: bash
         run: |
-          content="<html><body><br>${{ inputs.body }}"
+          content="<html><body><br>${{ inputs.body }}<br><b>Merged by:</b>"
 
           if [ -n "${{ steps.get_pr.outputs.summary || '' }}" ]; then
             content="$content<br><br>${{ steps.get_pr.outputs.summary }}"
           fi
 
           if [ -n "${{ steps.pr_owner.outputs.pr_owner || '' }}" ]; then
-            content="$content<br><br><b>Merged by:</b><br>${{ steps.pr_owner.outputs.pr_owner }}"
+            content="$content<br><br><br>${{ steps.pr_owner.outputs.pr_owner }}"
           fi
 
           content="$content</body></html>"
