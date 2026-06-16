@@ -260,7 +260,7 @@ jobs:
       - name: Wait for dotnet-tests artifact to be ready for download
         uses: nick-fields/retry@v4
         with:
-          timeout_minutes: 1 #for each attempt, a healthy artifact should be downloaded within a minute
+          timeout_minutes: 1 # for each attempt, a healthy artifact should be downloaded within a minute
           max_attempts: ${{ inputs.download_attempt_limit }}
           retry_wait_seconds: 15
           retry_on: error
