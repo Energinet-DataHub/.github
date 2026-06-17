@@ -15,15 +15,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Submit SBOM to Dependency Graph
+    - name: Find and download SBOM via attestation
       shell: pwsh
       env:
         GH_TOKEN: ${{ inputs.token }}
         IMAGE_NAME: ${{ inputs.artifact_name }}
-        CORRELATOR: ${{ inputs.correlator || inputs.artifact_name }}
         REPO: ${{ github.repository }}
-        SHA: ${{ github.sha }}
-        REF: ${{ github.ref }}
       run: |
         $owner, $repoName = $env:REPO -split '/'
 
@@ -75,91 +72,26 @@ runs:
           exit 1
         }
 
-        # Download the SBOM
+        # Download the SBOM using gh release download (handles private repo auth)
         $tempDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "sbom-$($env:IMAGE_NAME)")
         $sbomPath = Join-Path $tempDir.FullName "sbom.spdx.json"
 
-        $headers = @{
-          "Authorization" = "Bearer $($env:GH_TOKEN)"
-          "Accept"        = "application/octet-stream"
-        }
-        Invoke-RestMethod -Uri $sbomUrl -Headers $headers -OutFile $sbomPath
+        # Extract release tag from the URL (e.g. .../releases/download/demo_app_65/sbom.spdx.json)
+        $releaseTag = ($sbomUrl -split '/releases/download/')[1] -split '/' | Select-Object -First 1
+        Write-Host "Downloading SBOM from release: $releaseTag"
+        gh release download $releaseTag --repo $env:REPO --pattern "sbom.spdx.json" --dir $tempDir.FullName
 
         if (-not (Test-Path $sbomPath)) {
-          Write-Error "Failed to download SBOM from $sbomUrl"
+          Write-Error "Failed to download SBOM from release $releaseTag"
           exit 1
         }
 
-        # Parse SPDX JSON
-        $sbom = Get-Content $sbomPath -Raw | ConvertFrom-Json
-        Write-Host "SBOM document name: $($sbom.name)"
-        Write-Host "SBOM contains $($sbom.packages.Count) packages"
+        Write-Host "SBOM downloaded to: $sbomPath"
+        echo "SBOM_PATH=$sbomPath" >> $env:GITHUB_OUTPUT
+      id: download
 
-        # Build resolved dependencies from SPDX packages
-        $resolved = @{}
-        foreach ($pkg in $sbom.packages) {
-          # Skip the document package itself
-          if ($pkg.SPDXID -eq "SPDXRef-DOCUMENT") { continue }
-
-          # Extract purl from externalRefs
-          $purl = $null
-          foreach ($ref in $pkg.externalRefs) {
-            if ($ref.referenceType -eq "purl") {
-              $purl = $ref.referenceLocator
-              break
-            }
-          }
-
-          if (-not $purl) { continue }
-
-          $resolved[$pkg.SPDXID] = @{
-            package_url = $purl
-          }
-        }
-
-        Write-Host "Resolved $($resolved.Count) dependencies with purls"
-
-        # Build the dependency submission snapshot
-        $snapshot = @{
-          version  = 0
-          sha      = $env:SHA
-          ref      = $env:REF
-          job      = @{
-            correlator = $env:CORRELATOR
-            id         = $env:GITHUB_RUN_ID
-          }
-          detector = @{
-            name    = "sbom-dependency-submission"
-            version = "1.0.0"
-            url     = "https://github.com/$($env:REPO)"
-          }
-          scanned  = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
-          manifests = @{
-            "sbom.spdx.json" = @{
-              name     = "sbom.spdx.json"
-              file     = @{
-                source_location = "sbom.spdx.json"
-              }
-              resolved = $resolved
-            }
-          }
-        }
-
-        $body = $snapshot | ConvertTo-Json -Depth 10 -Compress
-
-        # Submit to the Dependency Submission API
-        $submitHeaders = @{
-          "Accept"               = "application/vnd.github+json"
-          "Authorization"        = "Bearer $($env:GH_TOKEN)"
-          "X-GitHub-Api-Version" = "2022-11-28"
-        }
-
-        $response = Invoke-RestMethod `
-          -Uri "https://api.github.com/repos/$($env:REPO)/dependency-graph/snapshots" `
-          -Method Post `
-          -Headers $submitHeaders `
-          -Body $body `
-          -ContentType "application/json"
-
-        Write-Host "Dependency submission result: $($response.result)"
-        Write-Host "Message: $($response.message)"
+    - name: Submit SBOM to Dependency Graph
+      uses: advanced-security/spdx-dependency-submission-action@v0.2.0
+      with:
+        filePath: ${{ steps.download.outputs.SBOM_PATH }}
+        correlator: ${{ inputs.correlator || inputs.artifact_name }}
