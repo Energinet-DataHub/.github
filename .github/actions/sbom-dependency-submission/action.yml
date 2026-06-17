@@ -87,11 +87,12 @@ runs:
         }
 
         Write-Host "SBOM downloaded to: $sbomPath"
-        echo "SBOM_PATH=$sbomPath" >> $env:GITHUB_OUTPUT
+        $sbomDir = Split-Path $sbomPath -Parent
+        echo "SBOM_DIR=$sbomDir" >> $env:GITHUB_OUTPUT
       id: download
 
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
       with:
-        filepath: ${{ steps.download.outputs.SBOM_PATH }}
+        filePath: ${{ steps.download.outputs.SBOM_DIR }}
         correlator: ${{ inputs.correlator || inputs.artifact_name }}
