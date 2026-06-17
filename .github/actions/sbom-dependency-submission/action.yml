@@ -94,5 +94,5 @@ runs:
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
       with:
-        filePath: ${{ steps.download.outputs.SBOM_DIR }}
+        filepath: ${{ steps.download.outputs.SBOM_DIR }}
         correlator: ${{ inputs.correlator || inputs.artifact_name }}
