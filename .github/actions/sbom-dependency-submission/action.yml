@@ -87,6 +87,12 @@ runs:
         }
 
         Write-Host "SBOM downloaded to: $sbomPath"
+
+        # Log SBOM summary
+        $sbom = Get-Content $sbomPath -Raw | ConvertFrom-Json
+        Write-Host "SBOM document name: $($sbom.name)"
+        Write-Host "SBOM contains $($sbom.packages.Count) packages"
+
         $sbomDir = Split-Path $sbomPath -Parent
         echo "SBOM_DIR=$sbomDir" >> $env:GITHUB_OUTPUT
       id: download
