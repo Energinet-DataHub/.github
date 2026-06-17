@@ -150,6 +150,7 @@ permissions:
   issues: read # Needed by EnricoMi/publish-unit-test-result-action
   checks: write # Needed by EnricoMi/publish-unit-test-result-action
   pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
+  actions: read # Needed by gh run download
 
 jobs:
   dotnet_ci_test:
@@ -264,7 +265,7 @@ jobs:
           retry_wait_seconds: 15
           retry_on: error
           command: |
-            gh run download "${{ github.run_id }}" --name dotnet-tests --dir "${{ env.ARTIFACTS_PATH }}"
+            gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name dotnet-tests --dir "${{ env.ARTIFACTS_PATH }}"
         env:
           GH_TOKEN: ${{ github.token }}
 
