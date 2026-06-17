@@ -22,79 +22,42 @@ runs:
         IMAGE_NAME: ${{ inputs.artifact_name }}
         REPO: ${{ github.repository }}
       run: |
+        $ErrorActionPreference = 'Stop'
         $owner, $repoName = $env:REPO -split '/'
-
-        # Get latest container image version digest
-        $packageName = "$repoName/$($env:IMAGE_NAME)" -replace '/', '%2F'
-        Write-Host "Looking up latest container version for package: $repoName/$($env:IMAGE_NAME)"
-
-        $apiHeaders = @{
-          "Accept"               = "application/vnd.github+json"
-          "Authorization"        = "Bearer $($env:GH_TOKEN)"
+        $headers = @{
+          Accept = "application/vnd.github+json"
+          Authorization = "Bearer $($env:GH_TOKEN)"
           "X-GitHub-Api-Version" = "2022-11-28"
         }
 
-        $versionsUrl = "https://api.github.com/orgs/$owner/packages/container/$packageName/versions?per_page=1"
-        $versions = Invoke-RestMethod -Uri $versionsUrl -Headers $apiHeaders
-        if (-not $versions -or $versions.Count -eq 0) {
-          Write-Error "No container versions found for package '$repoName/$($env:IMAGE_NAME)'"
-          exit 1
-        }
-
+        # 1. Get latest container image digest
+        $packageName = "$repoName/$($env:IMAGE_NAME)" -replace '/', '%2F'
+        $versions = Invoke-RestMethod "https://api.github.com/orgs/$owner/packages/container/$packageName/versions?per_page=1" -Headers $headers
+        if (-not $versions) { throw "No container versions found for $repoName/$($env:IMAGE_NAME)" }
         $digest = $versions[0].name
-        Write-Host "Latest image digest: $digest"
+        Write-Host "Latest digest: $digest"
 
-        # Query attestations for this digest
-        $attestationsUrl = "https://api.github.com/repos/$($env:REPO)/attestations/$digest"
-        $attestations = Invoke-RestMethod -Uri $attestationsUrl -Headers $apiHeaders
+        # 2. Find SBOM URL from attestation
+        $attestations = (Invoke-RestMethod "https://api.github.com/repos/$($env:REPO)/attestations/$digest" -Headers $headers).attestations
+        if (-not $attestations) { throw "No attestations found for $digest" }
 
-        if (-not $attestations.attestations -or $attestations.attestations.Count -eq 0) {
-          Write-Error "No attestations found for digest '$digest'"
-          exit 1
-        }
+        $sbomUrl = $attestations | ForEach-Object {
+          $decoded = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_.bundle.dsseEnvelope.payload)) | ConvertFrom-Json
+          if ($decoded.predicateType -eq "https://datahub.dk/attestations/sbom-link/v1") { $decoded.predicate.sbom.url }
+        } | Select-Object -First 1
 
-        # Find the sbom-link attestation
-        $sbomUrl = $null
-        foreach ($att in $attestations.attestations) {
-          $payload = $att.bundle.dsseEnvelope.payload
-          $decoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload))
-          $statement = $decoded | ConvertFrom-Json
+        if (-not $sbomUrl) { throw "No sbom-link attestation found for $digest" }
+        Write-Host "SBOM URL: $sbomUrl"
 
-          if ($statement.predicateType -eq "https://datahub.dk/attestations/sbom-link/v1") {
-            $sbomUrl = $statement.predicate.sbom.url
-            Write-Host "Found SBOM attestation with URL: $sbomUrl"
-            break
-          }
-        }
-
-        if (-not $sbomUrl) {
-          Write-Error "No sbom-link attestation found for digest '$digest'"
-          exit 1
-        }
-
-        # Download the SBOM using gh release download (handles private repo auth)
-        $tempDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "sbom-$($env:IMAGE_NAME)")
-        $sbomPath = Join-Path $tempDir.FullName "sbom.spdx.json"
-
-        # Extract release tag from the URL (e.g. .../releases/download/demo_app_65/sbom.spdx.json)
+        # 3. Download SBOM from release
         $releaseTag = ($sbomUrl -split '/releases/download/')[1] -split '/' | Select-Object -First 1
-        Write-Host "Downloading SBOM from release: $releaseTag"
-        gh release download $releaseTag --repo $env:REPO --pattern "sbom.spdx.json" --dir $tempDir.FullName
+        $outDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "sbom-$($env:IMAGE_NAME)")
+        gh release download $releaseTag --repo $env:REPO --pattern "sbom.spdx.json" --dir $outDir.FullName
+        if ($LASTEXITCODE -ne 0) { throw "Failed to download SBOM from release $releaseTag" }
 
-        if (-not (Test-Path $sbomPath)) {
-          Write-Error "Failed to download SBOM from release $releaseTag"
-          exit 1
-        }
-
-        Write-Host "SBOM downloaded to: $sbomPath"
-
-        # Log SBOM summary
-        $sbom = Get-Content $sbomPath -Raw | ConvertFrom-Json
-        Write-Host "SBOM document name: $($sbom.name)"
-        Write-Host "SBOM contains $($sbom.packages.Count) packages"
-
-        $sbomDir = Split-Path $sbomPath -Parent
-        echo "SBOM_DIR=$sbomDir" >> $env:GITHUB_OUTPUT
+        $sbom = Get-Content (Join-Path $outDir.FullName "sbom.spdx.json") -Raw | ConvertFrom-Json
+        Write-Host "Downloaded SBOM: $($sbom.packages.Count) packages"
+        echo "SBOM_DIR=$($outDir.FullName)" >> $env:GITHUB_OUTPUT
       id: download
 
     - name: Submit SBOM to Dependency Graph
