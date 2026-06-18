@@ -150,6 +150,7 @@ permissions:
   issues: read # Needed by EnricoMi/publish-unit-test-result-action
   checks: write # Needed by EnricoMi/publish-unit-test-result-action
   pull-requests: write # Needed by EnricoMi/publish-unit-test-result-action
+  actions: read # Needed by gh run download
 
 jobs:
   dotnet_ci_test:
@@ -257,14 +258,16 @@ jobs:
             }
 
       - name: Wait for dotnet-tests artifact to be ready for download
-        uses: Wandalen/wretry.action@v3
+        uses: nick-fields/retry@v4
         with:
-          action: actions/download-artifact@v8
-          with: |
-            name: dotnet-tests
-            path: ${{ env.ARTIFACTS_PATH }}
-          attempt_limit: ${{ inputs.download_attempt_limit }}
-          attempt_delay: 15000
+          timeout_minutes: 1 # for each attempt, a healthy artifact should be downloaded within a minute
+          max_attempts: ${{ inputs.download_attempt_limit }}
+          retry_wait_seconds: 15
+          retry_on: error
+          command: |
+            gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name dotnet-tests --dir "${{ env.ARTIFACTS_PATH }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Unzip dotnet-tests-outputs.zip
         shell: bash
