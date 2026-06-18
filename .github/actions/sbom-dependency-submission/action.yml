@@ -50,10 +50,10 @@ runs:
         set -euo pipefail
         owner=${REPO%%/*}
         tmp_dir=$(mktemp -d)
+        cd $tmp_dir
         gh attestation download ${SUBJECT}@${DIGEST} \
           --owner $owner \
-          --predicate-type https://datahub.dk/attestations/sbom-link/v1 \
-          --dir $tmp_dir
+          --predicate-type https://datahub.dk/attestations/sbom-link/v1
         echo "bundle_dir=$tmp_dir" >> $GITHUB_OUTPUT
 
     - name: Extract SBOM URL and download
