@@ -18,6 +18,12 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Login to GitHub Container Registry
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: echo $GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+
     - name: Verify attestation
       shell: bash
       env:
