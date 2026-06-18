@@ -1,0 +1,80 @@
+name: Get Artifact Digest
+description: Resolves the attestation subject string for a container image or zip artifact.
+
+inputs:
+  artifact_name:
+    description: The artifact name (container package name or release tag prefix)
+    required: true
+  artifact_type:
+    description: "Type of artifact: 'container' or 'zip'"
+    required: true
+  token:
+    description: GitHub token with packages read permission
+    required: true
+
+outputs:
+  subject:
+    description: "The full subject string for gh attestation commands (e.g. oci://ghcr.io/org/repo/name@sha256:...)"
+    value: ${{ steps.resolve.outputs.subject }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve artifact subject
+      id: resolve
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_TYPE: ${{ inputs.artifact_type }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        owner="${REPO%%/*}"
+        repo_name="${REPO##*/}"
+
+        if [[ "$ARTIFACT_TYPE" == "container" ]]; then
+          # Get latest container image digest via Packages API
+          package_name=$(echo "${repo_name}/${ARTIFACT_NAME}" | sed 's|/|%2F|g')
+          digest=$(gh api "/orgs/${owner}/packages/container/${package_name}/versions?per_page=1" --jq '.[0].name')
+
+          if [[ -z "$digest" ]]; then
+            echo "::error::No container versions found for ${repo_name}/${ARTIFACT_NAME}"
+            exit 1
+          fi
+
+          subject="oci://ghcr.io/${owner}/${repo_name}/${ARTIFACT_NAME}@${digest}"
+          echo "Resolved container subject: $subject"
+          echo "subject=$subject" >> "$GITHUB_OUTPUT"
+
+        elif [[ "$ARTIFACT_TYPE" == "zip" ]]; then
+          # Find latest release matching the artifact name prefix
+          release_tag=$(gh api "/repos/${REPO}/releases?per_page=100" --paginate --jq \
+            "[.[] | select(.tag_name | test(\"^${ARTIFACT_NAME}_[0-9]+$\"))] | .[0].tag_name" | head -1)
+
+          if [[ -z "$release_tag" || "$release_tag" == "null" ]]; then
+            echo "::error::No release found with prefix '${ARTIFACT_NAME}'"
+            exit 1
+          fi
+          echo "Found release: $release_tag"
+
+          # Download the zip to compute its digest
+          tmp_dir=$(mktemp -d)
+          gh release download "$release_tag" --repo "$REPO" --pattern "*.zip" --dir "$tmp_dir"
+          zip_file=$(find "$tmp_dir" -name "*.zip" | head -1)
+
+          if [[ -z "$zip_file" ]]; then
+            echo "::error::No zip asset found in release $release_tag"
+            exit 1
+          fi
+
+          digest="sha256:$(sha256sum "$zip_file" | awk '{print $1}')"
+          zip_name=$(basename "$zip_file")
+          subject="${zip_name}@${digest}"
+          echo "Resolved zip subject: $subject"
+          echo "subject=$subject" >> "$GITHUB_OUTPUT"
+
+        else
+          echo "::error::Unknown artifact_type: '${ARTIFACT_TYPE}'. Must be 'container' or 'zip'."
+          exit 1
+        fi

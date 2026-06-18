@@ -1,17 +1,13 @@
 name: SBOM Dependency Submission
-description: Downloads the SBOM via the attestation API and submits it to the GitHub Dependency Submission API. Supports both container images and zip artifacts.
+description: Verifies attestation for a subject, downloads the SBOM, and submits it to the GitHub Dependency Submission API.
 
 inputs:
-  artifact_name:
-    description: The artifact name (container package name or release tag prefix)
+  subject:
+    description: "The attestation subject (e.g. oci://ghcr.io/org/repo/name@sha256:... or filename@sha256:...)"
     required: true
-  artifact_type:
-    description: "Type of artifact: 'container' (default) or 'zip'"
-    required: false
-    default: container
   correlator:
-    description: Unique correlator for the dependency snapshot (defaults to artifact_name)
-    required: false
+    description: Unique correlator for the dependency snapshot
+    required: true
   token:
     description: GitHub token with contents write permission
     required: true
@@ -19,86 +15,54 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Find and download SBOM via attestation
-      shell: pwsh
+    - name: Verify and download attestation
+      id: attestation
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
-        ARTIFACT_NAME: ${{ inputs.artifact_name }}
-        ARTIFACT_TYPE: ${{ inputs.artifact_type }}
+        SUBJECT: ${{ inputs.subject }}
         REPO: ${{ github.repository }}
       run: |
-        $ErrorActionPreference = 'Stop'
-        $owner, $repoName = $env:REPO -split '/'
-        $headers = @{
-          Accept = "application/vnd.github+json"
-          Authorization = "Bearer $($env:GH_TOKEN)"
-          "X-GitHub-Api-Version" = "2022-11-28"
-        }
+        set -euo pipefail
+        owner="${REPO%%/*}"
 
-        # 1. Get subject digest based on artifact type
-        if ($env:ARTIFACT_TYPE -eq 'container') {
-          $packageName = "$repoName/$($env:ARTIFACT_NAME)" -replace '/', '%2F'
-          $versions = Invoke-RestMethod "https://api.github.com/orgs/$owner/packages/container/$packageName/versions?per_page=1" -Headers $headers
-          if (-not $versions) { throw "No container versions found for $repoName/$($env:ARTIFACT_NAME)" }
-          $digest = $versions[0].name
-          Write-Host "Latest container digest: $digest"
-        }
-        elseif ($env:ARTIFACT_TYPE -eq 'zip') {
-          # Find latest release by tag prefix using paginated API
-          $page = 1
-          $latestRelease = $null
-          while (-not $latestRelease) {
-            $releases = Invoke-RestMethod "https://api.github.com/repos/$($env:REPO)/releases?per_page=100&page=$page" -Headers $headers
-            if (-not $releases -or $releases.Count -eq 0) { break }
-            $latestRelease = $releases | Where-Object { $_.tag_name -match "^$([regex]::Escape($env:ARTIFACT_NAME))_\d+$" } | Select-Object -First 1
-            $page++
-          }
-          if (-not $latestRelease) { throw "No release found with prefix '$($env:ARTIFACT_NAME)'" }
-          Write-Host "Latest release: $($latestRelease.tag_name)"
+        echo "Verifying attestation for: $SUBJECT"
+        gh attestation verify "$SUBJECT" \
+          --owner "$owner" \
+          --predicate-type "https://datahub.dk/attestations/sbom-link/v1"
 
-          # Download the zip from the release to compute its digest
-          $tempZipDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "zip-$($env:ARTIFACT_NAME)")
-          $zipAsset = $latestRelease.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
-          if (-not $zipAsset) { throw "No zip asset found in release $($latestRelease.tag_name)" }
+        echo "Downloading attestation bundle..."
+        tmp_dir=$(mktemp -d)
+        gh attestation download "$SUBJECT" \
+          --owner "$owner" \
+          --predicate-type "https://datahub.dk/attestations/sbom-link/v1" \
+          --dir "$tmp_dir"
 
-          gh release download $latestRelease.tag_name --repo $env:REPO --pattern $zipAsset.name --dir $tempZipDir.FullName
-          if ($LASTEXITCODE -ne 0) { throw "Failed to download zip from release $($latestRelease.tag_name)" }
+        # Parse SBOM URL from the attestation predicate
+        bundle_file=$(find "$tmp_dir" -name "*.jsonl" | head -1)
+        sbom_url=$(jq -r '.dsseEnvelope.payload' "$bundle_file" | base64 -d | jq -r '.predicate.sbom.url')
 
-          $zipPath = Join-Path $tempZipDir.FullName $zipAsset.name
-          $hash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLower()
-          $digest = "sha256:$hash"
-          Write-Host "Zip digest: $digest"
-        }
-        else {
-          throw "Unknown artifact_type: '$($env:ARTIFACT_TYPE)'. Must be 'container' or 'zip'."
-        }
+        if [[ -z "$sbom_url" || "$sbom_url" == "null" ]]; then
+          echo "::error::Could not extract SBOM URL from attestation predicate"
+          exit 1
+        fi
+        echo "SBOM URL from attestation: $sbom_url"
 
-        # 2. Find SBOM URL from attestation
-        $attestations = (Invoke-RestMethod "https://api.github.com/repos/$($env:REPO)/attestations/$digest" -Headers $headers).attestations
-        if (-not $attestations) { throw "No attestations found for $digest" }
+        # Extract release tag from URL and download SBOM
+        release_tag=$(echo "$sbom_url" | sed 's|.*/releases/download/\([^/]*\)/.*|\1|')
+        echo "Downloading SBOM from release: $release_tag"
 
-        $sbomUrl = $attestations | ForEach-Object {
-          $decoded = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_.bundle.dsseEnvelope.payload)) | ConvertFrom-Json
-          if ($decoded.predicateType -eq "https://datahub.dk/attestations/sbom-link/v1") { $decoded.predicate.sbom.url }
-        } | Select-Object -First 1
+        sbom_dir=$(mktemp -d)
+        gh release download "$release_tag" --repo "$REPO" --pattern "sbom*" --dir "$sbom_dir"
 
-        if (-not $sbomUrl) { throw "No sbom-link attestation found for $digest" }
-        Write-Host "SBOM URL: $sbomUrl"
+        sbom_file=$(find "$sbom_dir" -name "sbom*" | head -1)
+        pkg_count=$(jq '.packages | length' "$sbom_file")
+        echo "Downloaded SBOM: $pkg_count packages"
 
-        # 3. Download SBOM from release
-        $releaseTag = ($sbomUrl -split '/releases/download/')[1] -split '/' | Select-Object -First 1
-        $outDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "sbom-$($env:ARTIFACT_NAME)")
-        gh release download $releaseTag --repo $env:REPO --pattern "sbom*" --dir $outDir.FullName
-        if ($LASTEXITCODE -ne 0) { throw "Failed to download SBOM from release $releaseTag" }
-
-        $sbomFile = Get-ChildItem $outDir.FullName -Filter "sbom*" | Select-Object -First 1
-        $sbom = Get-Content $sbomFile.FullName -Raw | ConvertFrom-Json
-        Write-Host "Downloaded SBOM: $($sbom.packages.Count) packages"
-        echo "SBOM_DIR=$($outDir.FullName)" >> $env:GITHUB_OUTPUT
-      id: download
+        echo "sbom_dir=$sbom_dir" >> "$GITHUB_OUTPUT"
 
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
       with:
-        filepath: ${{ steps.download.outputs.SBOM_DIR }}
-        correlator: ${{ inputs.correlator || inputs.artifact_name }}
+        filepath: ${{ steps.attestation.outputs.sbom_dir }}
+        correlator: ${{ inputs.correlator }}
