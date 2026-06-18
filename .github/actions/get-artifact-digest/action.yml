@@ -43,7 +43,7 @@ runs:
           exit 1
         fi
 
-        subject=oci://ghcr.io/${owner}/${repo_name}/${ARTIFACT_NAME}
+        subject=$(echo oci://ghcr.io/${owner}/${repo_name}/${ARTIFACT_NAME} | tr '[:upper:]' '[:lower:]')
         echo "Subject: $subject"
         echo "Digest: $digest"
         echo "subject=$subject" >> $GITHUB_OUTPUT
