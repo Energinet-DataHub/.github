@@ -1,9 +1,12 @@
 name: SBOM Dependency Submission
-description: Verifies attestation for a subject, downloads the SBOM, and submits it to the GitHub Dependency Submission API.
+description: Verifies an attestation, extracts the SBOM URL, downloads it, and submits to the Dependency Graph.
 
 inputs:
   subject:
-    description: "The attestation subject (e.g. oci://ghcr.io/org/repo/name@sha256:... or filename@sha256:...)"
+    description: Attestation subject name
+    required: true
+  digest:
+    description: Subject digest
     required: true
   correlator:
     description: Unique correlator for the dependency snapshot
@@ -15,54 +18,66 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Verify and download attestation
-      id: attestation
+    - name: Verify attestation
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
         SUBJECT: ${{ inputs.subject }}
+        DIGEST: ${{ inputs.digest }}
         REPO: ${{ github.repository }}
       run: |
         set -euo pipefail
-        owner="${REPO%%/*}"
+        owner=${REPO%%/*}
+        gh attestation verify ${SUBJECT}@${DIGEST} \
+          --owner $owner \
+          --predicate-type https://datahub.dk/attestations/sbom-link/v1
 
-        echo "Verifying attestation for: $SUBJECT"
-        gh attestation verify "$SUBJECT" \
-          --owner "$owner" \
-          --predicate-type "https://datahub.dk/attestations/sbom-link/v1"
-
-        echo "Downloading attestation bundle..."
+    - name: Download attestation bundle
+      id: download_attestation
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        SUBJECT: ${{ inputs.subject }}
+        DIGEST: ${{ inputs.digest }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        owner=${REPO%%/*}
         tmp_dir=$(mktemp -d)
-        gh attestation download "$SUBJECT" \
-          --owner "$owner" \
-          --predicate-type "https://datahub.dk/attestations/sbom-link/v1" \
-          --dir "$tmp_dir"
+        gh attestation download ${SUBJECT}@${DIGEST} \
+          --owner $owner \
+          --predicate-type https://datahub.dk/attestations/sbom-link/v1 \
+          --dir $tmp_dir
+        echo "bundle_dir=$tmp_dir" >> $GITHUB_OUTPUT
 
-        # Parse SBOM URL from the attestation predicate
-        bundle_file=$(find "$tmp_dir" -name "*.jsonl" | head -1)
-        sbom_url=$(jq -r '.dsseEnvelope.payload' "$bundle_file" | base64 -d | jq -r '.predicate.sbom.url')
+    - name: Extract SBOM URL and download
+      id: sbom
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        BUNDLE_DIR: ${{ steps.download_attestation.outputs.bundle_dir }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        bundle_file=$(find $BUNDLE_DIR -name '*.jsonl' | head -1)
+        sbom_url=$(jq -r '.dsseEnvelope.payload' $bundle_file | base64 -d | jq -r '.predicate.sbom.url')
 
-        if [[ -z "$sbom_url" || "$sbom_url" == "null" ]]; then
-          echo "::error::Could not extract SBOM URL from attestation predicate"
+        if [[ -z $sbom_url || $sbom_url == 'null' ]]; then
+          echo '::error::Could not extract SBOM URL from attestation predicate'
           exit 1
         fi
-        echo "SBOM URL from attestation: $sbom_url"
+        echo "SBOM URL: $sbom_url"
 
-        # Extract release tag from URL and download SBOM
-        release_tag=$(echo "$sbom_url" | sed 's|.*/releases/download/\([^/]*\)/.*|\1|')
-        echo "Downloading SBOM from release: $release_tag"
-
+        release_tag=$(echo $sbom_url | sed 's|.*/releases/download/\([^/]*\)/.*|\1|')
         sbom_dir=$(mktemp -d)
-        gh release download "$release_tag" --repo "$REPO" --pattern "sbom*" --dir "$sbom_dir"
+        gh release download $release_tag --repo $REPO --pattern 'sbom*' --dir $sbom_dir
 
-        sbom_file=$(find "$sbom_dir" -name "sbom*" | head -1)
-        pkg_count=$(jq '.packages | length' "$sbom_file")
-        echo "Downloaded SBOM: $pkg_count packages"
-
-        echo "sbom_dir=$sbom_dir" >> "$GITHUB_OUTPUT"
+        sbom_file=$(find $sbom_dir -name 'sbom*' | head -1)
+        echo "Downloaded SBOM: $(jq '.packages | length' $sbom_file) packages"
+        echo "sbom_dir=$sbom_dir" >> $GITHUB_OUTPUT
 
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
       with:
-        filepath: ${{ steps.attestation.outputs.sbom_dir }}
+        filepath: ${{ steps.sbom.outputs.sbom_dir }}
         correlator: ${{ inputs.correlator }}
