@@ -8,6 +8,9 @@ inputs:
   digest:
     description: Subject digest
     required: true
+  file_path:
+    description: Path to local artifact file (required for zip, not needed for container)
+    required: false
   correlator:
     description: Unique correlator for the dependency snapshot
     required: true
@@ -25,14 +28,20 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
         SUBJECT: ${{ inputs.subject }}
         DIGEST: ${{ inputs.digest }}
+        FILE_PATH: ${{ inputs.file_path }}
         REPO: ${{ github.repository }}
       run: |
         $ErrorActionPreference = 'Stop'
         $owner = ($env:REPO -split '/')[0]
-        $artifact = "$($env:SUBJECT)@$($env:DIGEST)"
 
-        # Login to ghcr.io for private image access
-        $env:GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+        # For containers, use oci:// subject. For zips, use the local file path.
+        if ($env:FILE_PATH) {
+          $artifact = $env:FILE_PATH
+        } else {
+          $artifact = "$($env:SUBJECT)@$($env:DIGEST)"
+          # Login to ghcr.io for private image access
+          $env:GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+        }
 
         # Verify attestation
         gh attestation verify $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1

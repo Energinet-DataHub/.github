@@ -19,6 +19,9 @@ outputs:
   digest:
     description: The subject digest
     value: ${{ steps.resolve.outputs.digest }}
+  file_path:
+    description: Path to the local artifact file (zip only)
+    value: ${{ steps.resolve.outputs.file_path }}
 
 runs:
   using: composite
@@ -65,3 +68,4 @@ runs:
         Write-Host "Digest: $digest"
         "subject=$subject" >> $env:GITHUB_OUTPUT
         "digest=$digest" >> $env:GITHUB_OUTPUT
+        if ($zipFile) { "file_path=$($zipFile.FullName)" >> $env:GITHUB_OUTPUT }
