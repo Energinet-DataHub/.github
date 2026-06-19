@@ -1,5 +1,5 @@
 name: SBOM Dependency Submission
-description: Verifies an attestation, extracts the SBOM URL, downloads it, and submits to the Dependency Graph.
+description: Verifies an attestation, downloads the SBOM, and submits to the Dependency Graph.
 
 inputs:
   subject:
@@ -18,69 +18,47 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Login to GitHub Container Registry
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-      run: echo $GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
-
-    - name: Verify attestation
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        SUBJECT: ${{ inputs.subject }}
-        DIGEST: ${{ inputs.digest }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        owner=${REPO%%/*}
-        gh attestation verify ${SUBJECT}@${DIGEST} \
-          --owner $owner \
-          --predicate-type https://datahub.dk/attestations/sbom-link/v1
-
-    - name: Download attestation bundle
-      id: download_attestation
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        SUBJECT: ${{ inputs.subject }}
-        DIGEST: ${{ inputs.digest }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        owner=${REPO%%/*}
-        tmp_dir=$(mktemp -d)
-        cd $tmp_dir
-        gh attestation download ${SUBJECT}@${DIGEST} \
-          --owner $owner \
-          --predicate-type https://datahub.dk/attestations/sbom-link/v1
-        echo "bundle_dir=$tmp_dir" >> $GITHUB_OUTPUT
-
-    - name: Extract SBOM URL and download
+    - name: Verify attestation and download SBOM
       id: sbom
-      shell: bash
+      shell: pwsh
       env:
         GH_TOKEN: ${{ inputs.token }}
-        BUNDLE_DIR: ${{ steps.download_attestation.outputs.bundle_dir }}
+        SUBJECT: ${{ inputs.subject }}
+        DIGEST: ${{ inputs.digest }}
         REPO: ${{ github.repository }}
       run: |
-        set -euo pipefail
-        bundle_file=$(find $BUNDLE_DIR -name '*.jsonl' | head -1)
-        sbom_url=$(jq -r '.dsseEnvelope.payload' $bundle_file | base64 -d | jq -r '.predicate.sbom.url')
+        $ErrorActionPreference = 'Stop'
+        $owner = ($env:REPO -split '/')[0]
+        $artifact = "$($env:SUBJECT)@$($env:DIGEST)"
 
-        if [[ -z $sbom_url || $sbom_url == 'null' ]]; then
-          echo '::error::Could not extract SBOM URL from attestation predicate'
-          exit 1
-        fi
-        echo "SBOM URL: $sbom_url"
+        # Login to ghcr.io for private image access
+        $env:GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
-        release_tag=$(echo $sbom_url | sed 's|.*/releases/download/\([^/]*\)/.*|\1|')
-        sbom_dir=$(mktemp -d)
-        gh release download $release_tag --repo $REPO --pattern 'sbom*' --dir $sbom_dir
+        # Verify attestation
+        gh attestation verify $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1
 
-        sbom_file=$(find $sbom_dir -name 'sbom*' | head -1)
-        echo "Downloaded SBOM: $(jq '.packages | length' $sbom_file) packages"
-        echo "sbom_dir=$sbom_dir" >> $GITHUB_OUTPUT
+        # Download attestation bundle
+        $bundleDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'attestation')
+        Push-Location $bundleDir.FullName
+        gh attestation download $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1
+        Pop-Location
+
+        # Parse SBOM URL from bundle
+        $bundleFile = Get-ChildItem $bundleDir.FullName -Filter '*.jsonl' | Select-Object -First 1
+        $payload = (Get-Content $bundleFile.FullName | ConvertFrom-Json).dsseEnvelope.payload
+        $predicate = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload)) | ConvertFrom-Json
+        $sbomUrl = $predicate.predicate.sbom.url
+        if (-not $sbomUrl) { throw 'Could not extract SBOM URL from attestation' }
+        Write-Host "SBOM URL: $sbomUrl"
+
+        # Download SBOM from release
+        $releaseTag = ($sbomUrl -split '/releases/download/')[1] -split '/' | Select-Object -First 1
+        $sbomDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'sbom')
+        gh release download $releaseTag --repo $env:REPO --pattern 'sbom*' --dir $sbomDir.FullName
+
+        $sbom = Get-Content (Get-ChildItem $sbomDir.FullName -Filter 'sbom*' | Select-Object -First 1).FullName | ConvertFrom-Json
+        Write-Host "Downloaded SBOM: $($sbom.packages.Count) packages"
+        "sbom_dir=$($sbomDir.FullName)" >> $env:GITHUB_OUTPUT
 
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0

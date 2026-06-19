@@ -23,80 +23,45 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Resolve container digest
-      if: ${{ inputs.artifact_type == 'container' }}
-      id: container
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        ARTIFACT_NAME: ${{ inputs.artifact_name }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        owner=${REPO%%/*}
-        repo_name=${REPO##*/}
-        package_name=$(echo ${repo_name}/${ARTIFACT_NAME} | sed 's|/|%2F|g')
-
-        digest=$(gh api /orgs/${owner}/packages/container/${package_name}/versions?per_page=1 --jq '.[0].name')
-        if [[ -z $digest ]]; then
-          echo "::error::No container versions found for ${repo_name}/${ARTIFACT_NAME}"
-          exit 1
-        fi
-
-        subject=$(echo oci://ghcr.io/${owner}/${repo_name}/${ARTIFACT_NAME} | tr '[:upper:]' '[:lower:]')
-        echo "Subject: $subject"
-        echo "Digest: $digest"
-        echo "subject=$subject" >> $GITHUB_OUTPUT
-        echo "digest=$digest" >> $GITHUB_OUTPUT
-
-    - name: Resolve zip digest
-      if: ${{ inputs.artifact_type == 'zip' }}
-      id: zip
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        ARTIFACT_NAME: ${{ inputs.artifact_name }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-
-        # Find latest release matching prefix
-        release_tag=$(gh api /repos/${REPO}/releases?per_page=100 --paginate \
-          --jq "[.[] | select(.tag_name | test(\"^${ARTIFACT_NAME}_[0-9]+$\"))] | .[0].tag_name" | head -1)
-
-        if [[ -z $release_tag || $release_tag == null ]]; then
-          echo "::error::No release found with prefix ${ARTIFACT_NAME}"
-          exit 1
-        fi
-        echo "Found release: $release_tag"
-
-        # Download zip and compute digest
-        tmp_dir=$(mktemp -d)
-        gh release download $release_tag --repo $REPO --pattern '*.zip' --dir $tmp_dir
-        zip_file=$(find $tmp_dir -name '*.zip' | head -1)
-
-        if [[ -z $zip_file ]]; then
-          echo "::error::No zip asset found in release $release_tag"
-          exit 1
-        fi
-
-        digest=sha256:$(sha256sum $zip_file | awk '{print $1}')
-        subject=$(basename $zip_file)
-        echo "Subject: $subject"
-        echo "Digest: $digest"
-        echo "subject=$subject" >> $GITHUB_OUTPUT
-        echo "digest=$digest" >> $GITHUB_OUTPUT
-
-    - name: Set outputs
+    - name: Resolve subject and digest
       id: resolve
-      shell: bash
+      shell: pwsh
       env:
-        CONTAINER_SUBJECT: ${{ steps.container.outputs.subject }}
-        CONTAINER_DIGEST: ${{ steps.container.outputs.digest }}
-        ZIP_SUBJECT: ${{ steps.zip.outputs.subject }}
-        ZIP_DIGEST: ${{ steps.zip.outputs.digest }}
+        GH_TOKEN: ${{ inputs.token }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_TYPE: ${{ inputs.artifact_type }}
+        REPO: ${{ github.repository }}
       run: |
-        subject=${CONTAINER_SUBJECT:-$ZIP_SUBJECT}
-        digest=${CONTAINER_DIGEST:-$ZIP_DIGEST}
-        echo "subject=$subject" >> $GITHUB_OUTPUT
-        echo "digest=$digest" >> $GITHUB_OUTPUT
+        $ErrorActionPreference = 'Stop'
+        $owner, $repoName = $env:REPO -split '/'
+
+        if ($env:ARTIFACT_TYPE -eq 'container') {
+          $packageName = "$repoName/$($env:ARTIFACT_NAME)" -replace '/', '%2F'
+          $digest = gh api "/orgs/$owner/packages/container/$packageName/versions?per_page=1" --jq '.[0].name'
+          if (-not $digest) { throw "No container versions found for $repoName/$($env:ARTIFACT_NAME)" }
+
+          $subject = "oci://ghcr.io/$owner/$repoName/$($env:ARTIFACT_NAME)".ToLower()
+        }
+        elseif ($env:ARTIFACT_TYPE -eq 'zip') {
+          $releases = gh api "/repos/$($env:REPO)/releases?per_page=100" --paginate | ConvertFrom-Json
+          $release = $releases | Where-Object { $_.tag_name -match "^$([regex]::Escape($env:ARTIFACT_NAME))_\d+$" } | Select-Object -First 1
+          if (-not $release) { throw "No release found with prefix '$($env:ARTIFACT_NAME)'" }
+
+          Write-Host "Found release: $($release.tag_name)"
+          $tmpDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "zip-$($env:ARTIFACT_NAME)")
+          gh release download $release.tag_name --repo $env:REPO --pattern '*.zip' --dir $tmpDir.FullName
+          $zipFile = Get-ChildItem $tmpDir.FullName -Filter '*.zip' | Select-Object -First 1
+          if (-not $zipFile) { throw "No zip asset found in release $($release.tag_name)" }
+
+          $hash = (Get-FileHash -Path $zipFile.FullName -Algorithm SHA256).Hash.ToLower()
+          $digest = "sha256:$hash"
+          $subject = $zipFile.Name
+        }
+        else {
+          throw "Unknown artifact_type: '$($env:ARTIFACT_TYPE)'. Must be 'container' or 'zip'."
+        }
+
+        Write-Host "Subject: $subject"
+        Write-Host "Digest: $digest"
+        "subject=$subject" >> $env:GITHUB_OUTPUT
+        "digest=$digest" >> $env:GITHUB_OUTPUT
