@@ -52,8 +52,8 @@ runs:
         gh attestation download $artifact --owner $env:OWNER --predicate-type https://datahub.dk/attestations/sbom-link/v1
 
         # Parse predicate from bundle
-        $bundleFile = "$($env:DIGEST).jsonl"
-        $attestation = Get-Content $bundleFile | ConvertFrom-Json
+        $bundleFile = "./$($env:DIGEST).jsonl"
+        $attestation = Get-Content -LiteralPath $bundleFile | ConvertFrom-Json
         $payload = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($attestation.dsseEnvelope.payload)) | ConvertFrom-Json
         $predicate = $payload.predicate
 
