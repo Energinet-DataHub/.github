@@ -43,7 +43,7 @@ runs:
           $digest = gh api "/orgs/$owner/packages/container/$packageName/versions?per_page=1" --jq '.[0].name'
           if (-not $digest) { throw "No container versions found for $repoName/$($env:ARTIFACT_NAME)" }
 
-          $subject = "oci://ghcr.io/$owner/$repoName/$($env:ARTIFACT_NAME)".ToLower()
+          $subject = "ghcr.io/$owner/$repoName/$($env:ARTIFACT_NAME)".ToLower()
         }
         elseif ($env:ARTIFACT_TYPE -eq 'zip') {
           $releases = gh api "/repos/$($env:REPO)/releases?per_page=100" --paginate | ConvertFrom-Json
