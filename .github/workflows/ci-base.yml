@@ -102,12 +102,15 @@ jobs:
         continue-on-error: true
         id: md-link-check
 
-      # https://github.com/marketplace/actions/markdownlint-cli2-action
+      - name: Register markdownlint problem matcher
+        uses: xt0rted/markdownlint-problem-matcher@v3
+        id: md-lint-check-matcher
+
+      # https://github.com/marketplace/actions/markdownlint-mdl-action
       - name: Markdown lint check
-        uses: DavidAnson/markdownlint-cli2-action@v23
+        uses: avto-dev/markdown-lint@v1
         with:
-          config: .markdownlint.json
-          globs: "**/*.{md,markdown}"
+          args: ./
         continue-on-error: true
         id: md-lint-check
 
