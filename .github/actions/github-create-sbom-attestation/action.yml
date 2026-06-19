@@ -44,7 +44,7 @@ runs:
           "sbom": {
             "name": "${{ steps.vars.outputs.SBOM_NAME }}",
             "digest": {
-              "sha256": "${{ steps.vars.outputs.SBOM_DIGEST }}",
+              "sha256": "${{ steps.vars.outputs.SBOM_DIGEST }}"
               },
             "url": "https://github.com/${{ github.repository }}/releases/download/${{ inputs.release-tag }}/${{ steps.vars.outputs.SBOM_NAME }}"
           },
