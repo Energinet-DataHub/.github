@@ -43,10 +43,13 @@ runs:
         {
           "sbom": {
             "name": "${{ steps.vars.outputs.SBOM_NAME }}",
-            "sha256": "${{ steps.vars.outputs.SBOM_DIGEST }}",
+            "digest": {
+              "sha256": "${{ steps.vars.outputs.SBOM_DIGEST }}"
+              },
             "url": "https://github.com/${{ github.repository }}/releases/download/${{ inputs.release-tag }}/${{ steps.vars.outputs.SBOM_NAME }}"
           },
           "release": {
+            "repository": "${{ github.repository }}",
             "tag": "${{ inputs.release-tag }}",
             "title": "${{ inputs.release-title }}",
             "url": "https://github.com/${{ github.repository }}/releases/tag/${{ inputs.release-tag }}"
