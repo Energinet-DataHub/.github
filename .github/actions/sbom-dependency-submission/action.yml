@@ -43,29 +43,18 @@ runs:
           $env:GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
         }
 
-        # Verify attestation
-        gh attestation verify $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1
-
-        # Download attestation bundle
-        $bundleDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'attestation')
-        Push-Location $bundleDir.FullName
-        gh attestation download $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1
-        Pop-Location
-
-        # Parse SBOM URL from bundle
-        $bundleFile = Get-ChildItem $bundleDir.FullName -Filter '*.jsonl' | Select-Object -First 1
-        $payload = (Get-Content $bundleFile.FullName | ConvertFrom-Json).dsseEnvelope.payload
-        $predicate = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload)) | ConvertFrom-Json
-        $sbomUrl = $predicate.predicate.sbom.url
-        if (-not $sbomUrl) { throw 'Could not extract SBOM URL from attestation' }
-        Write-Host "SBOM URL: $sbomUrl"
+        # Verify attestation and get predicate as JSON
+        $result = gh attestation verify $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1 --format json | ConvertFrom-Json
+        $predicate = $result[0].verificationResult.statement.predicate
+        $releaseTag = $predicate.release.tag
+        $sbomName = $predicate.sbom.name
+        Write-Host "Release: $releaseTag, SBOM: $sbomName"
 
         # Download SBOM from release
-        $releaseTag = ($sbomUrl -split '/releases/download/')[1] -split '/' | Select-Object -First 1
         $sbomDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'sbom')
-        gh release download $releaseTag --repo $env:REPO --pattern 'sbom*' --dir $sbomDir.FullName
+        gh release download $releaseTag --repo $env:REPO --pattern $sbomName --dir $sbomDir.FullName
 
-        $sbom = Get-Content (Get-ChildItem $sbomDir.FullName -Filter 'sbom*' | Select-Object -First 1).FullName | ConvertFrom-Json
+        $sbom = Get-Content (Join-Path $sbomDir.FullName $sbomName) | ConvertFrom-Json
         Write-Host "Downloaded SBOM: $($sbom.packages.Count) packages"
         "sbom_dir=$($sbomDir.FullName)" >> $env:GITHUB_OUTPUT
 
