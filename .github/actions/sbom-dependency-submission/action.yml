@@ -29,34 +29,51 @@ runs:
         SUBJECT: ${{ inputs.subject }}
         DIGEST: ${{ inputs.digest }}
         FILE_PATH: ${{ inputs.file_path }}
-        REPO: ${{ github.repository }}
+        OWNER: ${{ github.repository_owner }}
       run: |
         $ErrorActionPreference = 'Stop'
-        $owner = ($env:REPO -split '/')[0]
+        $PSNativeCommandUseErrorActionPreference = $true
+
+        $verificationDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'sbom_verification')
+        Push-Location $verificationDir.FullName
 
         # For containers, use oci:// subject. For zips, use the local file path.
         if ($env:FILE_PATH) {
           $artifact = $env:FILE_PATH
         } else {
-          $artifact = "$($env:SUBJECT)@$($env:DIGEST)"
-          # Login to ghcr.io for private image access
+          $artifact = "oci://$($env:SUBJECT)@$($env:DIGEST)"
           $env:GH_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
         }
 
-        # Verify attestation and get predicate as JSON
-        $result = gh attestation verify $artifact --owner $owner --predicate-type https://datahub.dk/attestations/sbom-link/v1 --format json | ConvertFrom-Json
-        $predicate = $result[0].verificationResult.statement.predicate
-        $releaseTag = $predicate.release.tag
-        $sbomName = $predicate.sbom.name
-        Write-Host "Release: $releaseTag, SBOM: $sbomName"
+        # Verify attestation
+        gh attestation verify $artifact --owner $env:OWNER --predicate-type https://datahub.dk/attestations/sbom-link/v1
+
+        # Download attestation bundle
+        gh attestation download $artifact --owner $env:OWNER --predicate-type https://datahub.dk/attestations/sbom-link/v1
+
+        # Parse predicate from bundle
+        $attestation = Get-Content ($env:DIGEST -replace 'sha256:(.*)', 'sha256-$1.jsonl') | ConvertFrom-Json
+        $payload = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($attestation.dsseEnvelope.payload)) | ConvertFrom-Json
+        $predicate = $payload.predicate
 
         # Download SBOM from release
-        $sbomDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'sbom')
-        gh release download $releaseTag --repo $env:REPO --pattern $sbomName --dir $sbomDir.FullName
+        $sbomName = $predicate.sbom.name
+        gh release download $predicate.release.tag --repo $predicate.build.repository --pattern $sbomName
+        Write-Host "SBOM downloaded: $sbomName"
 
-        $sbom = Get-Content (Join-Path $sbomDir.FullName $sbomName) | ConvertFrom-Json
-        Write-Host "Downloaded SBOM: $($sbom.packages.Count) packages"
-        "sbom_dir=$($sbomDir.FullName)" >> $env:GITHUB_OUTPUT
+        # Verify SBOM integrity
+        $expectedHash = $predicate.sbom.sha256
+        $actualHash = (Get-FileHash -Algorithm SHA256 $sbomName).Hash
+        if ($actualHash -ne $expectedHash) {
+          throw "SBOM hash mismatch. Expected: $expectedHash, Actual: $actualHash"
+        }
+        Write-Host "SBOM verified (sha256: $actualHash)"
+
+        $sbom = Get-Content $sbomName | ConvertFrom-Json
+        Write-Host "SBOM contains $($sbom.packages.Count) packages"
+        "sbom_dir=$($verificationDir.FullName)" >> $env:GITHUB_OUTPUT
+
+        Pop-Location
 
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
