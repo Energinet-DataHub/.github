@@ -73,4 +73,5 @@ runs:
       uses: advanced-security/spdx-dependency-submission-action@v0.2.0
       with:
         filepath: ${{ steps.sbom.outputs.sbom_dir }}
+        filepattern: '*.json'
         correlator: ${{ inputs.correlator }}
