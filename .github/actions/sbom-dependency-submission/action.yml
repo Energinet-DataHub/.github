@@ -52,18 +52,18 @@ runs:
         gh attestation download $artifact --owner $env:OWNER --predicate-type https://datahub.dk/attestations/sbom-link/v1
 
         # Parse predicate from bundle
-        $bundleFile = "./$($env:DIGEST).jsonl"
-        $attestation = Get-Content -LiteralPath $bundleFile | ConvertFrom-Json
+        $bundleFile = Get-ChildItem -Filter '*.jsonl' | Select-Object -First 1
+        $attestation = Get-Content -LiteralPath $bundleFile.FullName | ConvertFrom-Json
         $payload = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($attestation.dsseEnvelope.payload)) | ConvertFrom-Json
         $predicate = $payload.predicate
 
         # Download SBOM from release
         $sbomName = $predicate.sbom.name
-        gh release download $predicate.release.tag --repo $predicate.build.repository --pattern $sbomName
+        gh release download $predicate.release.tag --repo $predicate.release.repository --pattern $sbomName
         Write-Host "SBOM downloaded: $sbomName"
 
         # Verify SBOM integrity
-        $expectedHash = $predicate.sbom.sha256
+        $expectedHash = $predicate.sbom.digest.sha256
         $actualHash = (Get-FileHash -Algorithm SHA256 $sbomName).Hash
         if ($actualHash -ne $expectedHash) {
           throw "SBOM hash mismatch. Expected: $expectedHash, Actual: $actualHash"
