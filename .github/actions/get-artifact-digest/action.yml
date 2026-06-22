@@ -1,0 +1,71 @@
+name: Get Artifact Digest
+description: Resolves the attestation subject and digest for a container image or zip artifact.
+
+inputs:
+  artifact_name:
+    description: The artifact name (container package name or release tag prefix)
+    required: true
+  artifact_type:
+    description: Type of artifact - container or zip
+    required: true
+  token:
+    description: GitHub token with packages read permission
+    required: true
+
+outputs:
+  subject:
+    description: The subject name
+    value: ${{ steps.resolve.outputs.subject }}
+  digest:
+    description: The subject digest
+    value: ${{ steps.resolve.outputs.digest }}
+  file_path:
+    description: Path to the local artifact file (zip only)
+    value: ${{ steps.resolve.outputs.file_path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve subject and digest
+      id: resolve
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_TYPE: ${{ inputs.artifact_type }}
+        REPO: ${{ github.repository }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $owner, $repoName = $env:REPO -split '/'
+
+        if ($env:ARTIFACT_TYPE -eq 'container') {
+          $packageName = "$repoName/$($env:ARTIFACT_NAME)" -replace '/', '%2F'
+          $digest = gh api "/orgs/$owner/packages/container/$packageName/versions?per_page=1" --jq '.[0].name'
+          if (-not $digest) { throw "No container versions found for $repoName/$($env:ARTIFACT_NAME)" }
+
+          $subject = "ghcr.io/$owner/$repoName/$($env:ARTIFACT_NAME)".ToLower()
+        }
+        elseif ($env:ARTIFACT_TYPE -eq 'zip') {
+          $releases = gh api "/repos/$($env:REPO)/releases?per_page=100" --paginate | ConvertFrom-Json
+          $release = $releases | Where-Object { $_.tag_name -match "^$([regex]::Escape($env:ARTIFACT_NAME))_\d+$" } | Select-Object -First 1
+          if (-not $release) { throw "No release found with prefix '$($env:ARTIFACT_NAME)'" }
+
+          Write-Host "Found release: $($release.tag_name)"
+          $tmpDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "zip-$($env:ARTIFACT_NAME)")
+          gh release download $release.tag_name --repo $env:REPO --pattern '*.zip' --dir $tmpDir.FullName
+          $zipFile = Get-ChildItem $tmpDir.FullName -Filter '*.zip' | Select-Object -First 1
+          if (-not $zipFile) { throw "No zip asset found in release $($release.tag_name)" }
+
+          $hash = (Get-FileHash -Path $zipFile.FullName -Algorithm SHA256).Hash.ToLower()
+          $digest = "sha256:$hash"
+          $subject = $zipFile.Name
+        }
+        else {
+          throw "Unknown artifact_type: '$($env:ARTIFACT_TYPE)'. Must be 'container' or 'zip'."
+        }
+
+        Write-Host "Subject: $subject"
+        Write-Host "Digest: $digest"
+        "subject=$subject" >> $env:GITHUB_OUTPUT
+        "digest=$digest" >> $env:GITHUB_OUTPUT
+        if ($zipFile) { "file_path=$($zipFile.FullName)" >> $env:GITHUB_OUTPUT }
