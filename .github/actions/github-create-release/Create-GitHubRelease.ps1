@@ -36,17 +36,15 @@ Write-Output "sha=$TargetSha" >> $env:GITHUB_OUTPUT
 
 <#
     .SYNOPSIS
-    Class representing a Github Release using  github CLI (gh)
+    Class representing a Github Release
 
     .DESCRIPTION
-    Simple class mapping the output from a gh release list json response to a typed object
+    Simple typed object describing a release we want to create via the gh CLI.
 #>
 class GithubRelease {
     [string]$name
     [string]$tagName
-    [string]$publishedAt
     [bool]$isPrerelease
-    [bool]$isLatest
     [string]$notes
     [string]$files
 }
@@ -56,7 +54,8 @@ class GithubRelease {
     Creates a github release
 
     .DESCRIPTION
-    Creates a github release. Makes sure to delete any prior releases with similar tag.
+    Creates a github release. If a release already owns the tag, the existing
+    release (and its tag) is deleted and creation is retried once.
 #>
 function Create-GitHubRelease {
     param (
@@ -72,13 +71,6 @@ function Create-GitHubRelease {
     # Input parsing
     $isPrerelease = [bool]::Parse($PreRelease)
 
-    # Step 1: Get Previous Release
-    [GithubRelease]$release = Invoke-GithubReleaseList -TagName $TagName
-
-    # Step 2: Delete Previous Release
-    $release | Invoke-GithubReleaseDelete
-
-    # Step 3: Create new release
     $newrelease = [GithubRelease]@{
         name         = $Title
         tagName      = $TagName
@@ -87,49 +79,31 @@ function Create-GitHubRelease {
         files        = $Files
     }
 
-    $newrelease | Invoke-GithubReleaseCreate
-}
-
-<#
-    .SYNOPSIS
-    Uses github CLI (gh) to retrieves a list of releases
-
-    .DESCRIPTION
-    Wrapping a "gh release list" call
-#>
-function Invoke-GithubReleaseList {
-    param (
-        [string]$TagName
-    )
-    $response = gh release list -L 10000 -R $GithubRepository --json "name,tagName,publishedAt,isPrerelease,isLatest" | ConvertFrom-Json | Where-Object { $_.name -eq $TagName }
-    if ($response.Count -gt 1) {
-        Write-Warning "Multiple releases found with tag name '$TagName'. Using the first one, as the other one will be deleted next."
-        return $response[0]
+    try {
+        $newrelease | Invoke-GithubReleaseCreate
     }
-    return $response
+    catch {
+        Write-Host "Release create failed for tag '$TagName' ($_). Deleting existing release and retrying."
+        Invoke-GithubReleaseDelete -TagName $TagName
+        $newrelease | Invoke-GithubReleaseCreate
+    }
 }
 
 <#
     .SYNOPSIS
-    Uses github CLI (gh) to delete a release
+    Uses github CLI (gh) to delete a release by tag
 
     .DESCRIPTION
-    Wrapping a "gh release delete" call
+    Wrapping a "gh release delete <tag> --cleanup-tag" call
 #>
 function Invoke-GithubReleaseDelete {
-    [CmdletBinding()]
     param(
-        [Parameter(ValueFromPipeline)]
-        [GithubRelease]$release
+        [Parameter(Mandatory)]
+        [string]$TagName
     )
 
-    if ($null -eq $release) {
-        Write-Warning "No release to delete."
-        return $release
-    }
-
-    Write-Host "Deleting $($release.Name)"
-    gh release delete $release.Name -y --cleanup-tag -R $GithubRepository
+    Write-Host "Deleting release for tag '$TagName'"
+    gh release delete $TagName -y --cleanup-tag -R $GithubRepository
 }
 
 <#

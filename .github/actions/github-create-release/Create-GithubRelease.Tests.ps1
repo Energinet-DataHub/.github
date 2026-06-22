@@ -14,32 +14,37 @@ BeforeAll {
 
 Describe "Create-GithubRelease" {
 
-    Context "Invoke-GithubReleaseList" {
-        It "Returns a release when release exist" -ForEach @(
-            @{ Releases = @("v1"); TagName = "v1"; Expected = "v1" },
-            @{ Releases = @("v1", "v2"); TagName = "v1"; Expected = "v1" },
-            @{ Releases = @("not_v1"); TagName = "v1"; Expected = $null }
+    Context "Invoke-GithubReleaseDelete" {
+        It "Calls gh release delete with tag '<TagName>'" -ForEach @(
+            @{ TagName = "v1"; Expected = 1 },
+            @{ TagName = "subsystem_1234"; Expected = 1 }
         ) {
-            ## Mock gh release list
-            Mock gh {
-                $Releases | ForEach-Object { [GithubRelease]@{ Name = $_ } } | ConvertTo-Json -AsArray
+            Mock gh {}
+            Invoke-GithubReleaseDelete -TagName $TagName
+            Should -Invoke -CommandName gh -Exactly -Times $Expected -ParameterFilter {
+                ($args -contains "delete") -and ($args -contains $TagName) -and ($args -contains "--cleanup-tag")
             }
-            $previousRelease = Invoke-GithubReleaseList -TagName $TagName
-            $previousRelease.Name | Should -Be $Expected
         }
     }
 
-    Context "Invoke-GithubReleaseDelete" {
-        It "Deletes a piped release" -ForEach @(
-            @{ Release = @{ Name = "noop" }; Expected = 1 },
-            @{ Release = $null; Expected = 0 }
+    Context "Create-GitHubRelease" {
+        It "Calls gh create <ExpectedCreate>x and delete <ExpectedDelete>x when first create <Scenario>" -ForEach @(
+            @{ Scenario = "succeeds"; FirstCreateFails = $false; ExpectedCreate = 1; ExpectedDelete = 0 },
+            @{ Scenario = "fails"; FirstCreateFails = $true; ExpectedCreate = 2; ExpectedDelete = 1 }
         ) {
-            Mock gh {}
-            Mock Invoke-GithubReleaseList {
-                [GithubRelease] $Release
+            $script:createCalls = 0
+            $script:failFirstCreate = $FirstCreateFails
+            Mock gh {
+                if ($args -contains "create") {
+                    $script:createCalls++
+                    if ($script:failFirstCreate -and $script:createCalls -eq 1) { throw "tag already exists" }
+                }
             }
 
-            Invoke-GithubReleaseList | Invoke-GithubReleaseDelete | Should -Invoke -CommandName gh -Exactly -Times $Expected
+            Create-GitHubRelease -TagName "v1" -Title "v1" -Files "asset.zip"
+
+            Should -Invoke -CommandName gh -Exactly -Times $ExpectedCreate -ParameterFilter { $args -contains "create" }
+            Should -Invoke -CommandName gh -Exactly -Times $ExpectedDelete -ParameterFilter { $args -contains "delete" }
         }
     }
 
