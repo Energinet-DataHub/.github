@@ -92,6 +92,11 @@ on:
           release notes have been updated.
         required: false
         default: src
+      publish_test_results:
+        description: Should the test results be published
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   id-token: write
@@ -249,3 +254,4 @@ jobs:
           path: ${{ matrix.inputs.package_path }}
           tests_path: ${{ inputs.tests_directory }}
           pytest_addopts: ${{ inputs.pytest_addopts }}
+          publish_test_report: ${{ inputs.publish_test_results }}

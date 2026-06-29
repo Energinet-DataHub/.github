@@ -73,6 +73,11 @@ on:
         required: false
         default: latest
         type: string
+      publish_test_results:
+        description: Should the test results be published
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   id-token: write # Required for use of OIDC in GitHub
@@ -118,7 +123,7 @@ jobs:
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
 
       - name: Publish test report
-        if: always()
+        if: ${{ inputs.publish_test_results == true && always() }}
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
           check_name: Python test results for ${{ inputs.test_report_path }}
