@@ -19,7 +19,7 @@ runs:
     # 1️⃣ Checkout repository
     # -------------------------------------------------------------------------
     - name: Checkout domain repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
         persist-credentials: true

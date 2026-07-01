@@ -50,7 +50,7 @@ jobs:
           owner: Energinet-DataHub
 
       - name: Checkout infra repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Energinet-DataHub/dh3-infrastructure
           token: ${{ steps.generate_token.outputs.token }}
