@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check for existence of global.json
         if: ${{ inputs.dotnet_major_version == '' }}
@@ -102,7 +102,7 @@ jobs:
           dotnet-version: ${{ inputs.dotnet_major_version }}.0.1xx
 
       - name: Cache NuGet packages
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-nuget
         with:
           path: ~/.nuget/packages
