@@ -187,7 +187,7 @@ jobs:
           git config --system core.longpaths true
 
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set NUGET_PACKAGES environment variable
         shell: pwsh
@@ -199,7 +199,7 @@ jobs:
             echo "NUGET_PACKAGES=$env:USERPROFILE\.nuget\packages" >> $env:GITHUB_ENV
           }
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.NUGET_PACKAGES }}
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}

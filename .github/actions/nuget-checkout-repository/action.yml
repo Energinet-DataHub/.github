@@ -25,10 +25,10 @@ runs:
 
     - name: Checkout repository (main branch)
       if: ${{ github.ref_name == 'main' }}
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 2 # To retrieve the preceding commit on 'main'
 
     - name: Checkout repository (feature branch)
       if: ${{ github.ref_name != 'main' }}
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7

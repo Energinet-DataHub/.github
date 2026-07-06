@@ -63,7 +63,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Checkout infrastructure repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.deployment_workflow_repository }}
           path: infra-repo
