@@ -166,6 +166,8 @@ jobs:
             team_email=${{ vars.email_teamfrontend }}
           elif [ ${{ inputs.team_name}} == 'TeamEsettDeprecated' ]; then
             team_email=${{ vars.email_teamesettdeprecated }}
+          elif [ ${{ inputs.team_name}} == 'Atlas' ]; then
+            team_email=${{ vars.email_atlas }}
           else
             # Fallback
             team_email=${{ vars.email_teamfusion }}
