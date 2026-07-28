@@ -2,7 +2,9 @@
     "ignorePatterns": [
         {
             "pattern": "^https://github.com",
-            "pattern": "^https://nuget.org"
+            "pattern": "^https://nuget.org",
+            "pattern": "^https://github.com/Energinet-DataHub/opengeh-edi",
+            "pattern": "^https://github.com/Energinet-DataHub/greenforce-frontend"
         }
     ]
 }
