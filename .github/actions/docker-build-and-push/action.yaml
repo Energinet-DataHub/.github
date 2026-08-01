@@ -55,7 +55,7 @@ runs:
 
     - name: Build and push Docker image
       id: build
-      uses: docker/build-push-action@789f68658055d3ca993799b232b5c46dfe3f114d
+      uses: docker/build-push-action@cb941d0b895b09c17fa011d41c411b33c752cf28
       with:
         context: ${{ inputs.docker-context }}
         file: ${{ inputs.dockerfile }}
