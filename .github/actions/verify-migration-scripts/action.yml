@@ -27,7 +27,7 @@ runs:
       with:
         filters: |
           has_changed:
-            - '${{ inputs.scripts_dir_path }}'
+            - '${{ inputs.scripts_dir_path }}/**'
 
     - name: Get files from PR branch
       if: ${{ steps.filter.outputs.has_changed == 'true' }}
