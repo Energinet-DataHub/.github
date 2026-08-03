@@ -1,13 +1,10 @@
 name: Verify migration scripts
 description: |
   This action verifies that the migration scripts in the PR branch are valid.
-  The action checks that the migration scripts in the PR branch:
-  1. Are newer than the latest migration script in the main branch
-  2. Are not newer than the current datetime
-  3. Have a filename that starts with a datetime and an underscore
-  4. Are not the same as the latest migration script in the main branch
-  5. Are not older than the latest migration script in the main branch
-  6. Are not the same as the current datetime
+  The action checks that new migration scripts in the PR branch:
+  1. Have a filename that starts with a datetime and an underscore (YYYYMMDDHHMM_)
+  2. Are newer than the latest migration script in the main branch
+  3. Are not newer than the current datetime
 
 #
 # This action is called from the 'ci-orchestrator.yml' file.
