@@ -31,7 +31,7 @@ runs:
       id: get_script_files_in_pr
       shell: bash
       run: |
-        # Gets all files in migration_scripts folder on the branch being merged excluding the __init__ file and put them into at comma seperated string
+        # Gets all files in migration_scripts folder on the branch being merged excluding the __init__ file and put them into a comma separated string
         SCRIPT_FILES_IN_PR=$(find ${{ inputs.scripts_dir_path }} -type f -not -name '__init__*' -printf "%f,")
         echo "script_files_in_pr=$SCRIPT_FILES_IN_PR" >> $GITHUB_OUTPUT
 
