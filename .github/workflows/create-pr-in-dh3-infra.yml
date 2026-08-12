@@ -37,10 +37,10 @@ jobs:
         uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
         id: find_pull_request
 
-      - name: Set image tag
+      - name: Set release version
         id: vars
-        # Tag is formatted as pr[PR_NUMBER]]
-        run: echo "tag=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
+        # Release version is formatted as pr[PR_NUMBER]
+        run: echo "release_version=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
 
       - uses: actions/create-github-app-token@v3
         id: generate_token
@@ -56,14 +56,14 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           path: infra-repo
 
-      - name: Update image tags
-        id: update_image_tags
+      - name: Update release version
+        id: update_release_version
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
 
           $file = "infra-repo/${{ inputs.terraform_path }}"
-          $tag = "${{ steps.vars.outputs.tag }}"
+          $tag = "${{ steps.vars.outputs.release_version }}"
 
           if (-not (Test-Path $file)) {
             New-Item -Path $file -ItemType File -Force | Out-Null
@@ -113,16 +113,16 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
           path: infra-repo
-          commit-message: Update image tag to ${{ steps.vars.outputs.tag }}
+          commit-message: Update release version to ${{ steps.vars.outputs.release_version }}
           branch: update-${{github.repository}}-${{ inputs.terraform_path }}
-          title: "[${{github.repository}}] Deploy image ${{ steps.vars.outputs.tag }} (${{ inputs.terraform_path }})"
+          title: "[${{github.repository}}] Deploy release ${{ steps.vars.outputs.release_version }} (${{ inputs.terraform_path }})"
           body: |
-            This PR updates the infrastructure to use image:
+            This PR updates the infrastructure to use release version:
 
-            **`${{ steps.vars.outputs.tag }}`**
+            **`${{ steps.vars.outputs.release_version }}`**
 
-            ${{ steps.update_image_tags.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new image is created for the first time.' || '' }}
-            ${{ steps.update_image_tags.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_image_tags.outputs.new_variables) || '' }}
+            ${{ steps.update_release_version.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new image is created for the first time.' || '' }}
+            ${{ steps.update_release_version.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_release_version.outputs.new_variables) || '' }}
 
           labels: update, ${{github.repository}}, teamname:${{ inputs.team_name }}
 
