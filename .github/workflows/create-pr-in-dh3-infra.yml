@@ -121,8 +121,8 @@ jobs:
 
             **`${{ steps.vars.outputs.release_version }}`**
 
-            ${{ steps.update_release_version.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new image is created for the first time.' || '' }}
-            ${{ steps.update_release_version.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new image is created for the first time.', steps.update_release_version.outputs.new_variables) || '' }}
+            ${{ steps.update_release_version.outputs.new_file != '' && ':warning: A new terraform variable file was created - this could indicate a misconfiguration, but is expected when a new application is created for the first time.' || '' }}
+            ${{ steps.update_release_version.outputs.new_variables != '' && format(':warning: New variables were added to the terraform file: `{0}` - this could indicate a misconfiguration, but is expected when a new application is created for the first time.', steps.update_release_version.outputs.new_variables) || '' }}
 
           labels: update, ${{github.repository}}, teamname:${{ inputs.team_name }}
 
