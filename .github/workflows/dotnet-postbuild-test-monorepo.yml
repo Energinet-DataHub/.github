@@ -81,7 +81,7 @@ on:
       node_version:
         description: Install specified Node.js version
         required: false
-        default: "16"
+        default: "24"
         type: string
       azurite_version:
         description: Install specified Azurite version
