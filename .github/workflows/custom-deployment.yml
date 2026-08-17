@@ -13,23 +13,28 @@ on:
           - terraform_variable_names: Names of Terraform variables to update (newline separated), e.g. variable1\nvariable2
         required: true
         type: string
-      deployment_workflow_repository:
+      workflow_repository:
         description: Repository containing the deployment workflow
         required: false
         type: string
         default: Energinet-DataHub/dh3-infrastructure
-      deployment_workflow_name:
+      workflow_name:
         description: Name of the deployment workflow
         required: true
         type: string
-      deployment_workflow_environment:
+      environment:
         description: Environment to start deployment workflow for
         required: true
         type: string
-      deployment_workflow_branch:
+      deployment_branch:
         description: Git branch to start deployment workflow from
         required: true
         type: string
+      deployment_base_branch:
+        description: Git ref to base the deployment branch on, defaults to main
+        required: true
+        type: string
+        default: main
       app_client_id:
         description: Client ID of the GitHub App used to push to the infrastructure repository and trigger the deployment workflow
         required: true
@@ -66,17 +71,17 @@ jobs:
       - name: Checkout infrastructure repository
         uses: actions/checkout@v6
         with:
-          repository: ${{ inputs.deployment_workflow_repository }}
+          repository: ${{ inputs.workflow_repository }}
           path: infra-repo
           token: ${{ steps.generate_token.outputs.token }}
 
-      - name: Setup comitter and switch branch
+      - name: Setup committer and switch branch
         shell: bash
         working-directory: infra-repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B ${{ inputs.deployment_workflow_branch }} origin/main
+          git checkout -B ${{ inputs.deployment_branch }} origin/${{ inputs.deployment_base_branch }}
 
       - name: Process targets
         shell: pwsh
@@ -100,8 +105,8 @@ jobs:
 
             if (-not $prNumber) {
               Write-Output "No pull request number specified for $name, skipping variable update but will still trigger deployment workflow"
-              continue
               Write-Output "::endgroup::"
+              continue
             }
 
             $variableValue = "pr$prNumber"
@@ -182,13 +187,13 @@ jobs:
           } else {
             git commit --author "${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>" -m "Update variable values from deployment targets"
           }
-          git push origin ${{ inputs.deployment_workflow_branch }} --force
+          git push origin ${{ inputs.deployment_branch }} --force
 
       - name: Trigger deployment workflow
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          $summary = gh workflow run ${{ inputs.deployment_workflow_name }} -R ${{ inputs.deployment_workflow_repository }} -F selected_environment=${{ inputs.deployment_workflow_environment }} -r ${{ inputs.deployment_workflow_branch }}
+          $summary = gh workflow run ${{ inputs.workflow_name }} -R ${{ inputs.workflow_repository }} -F selected_environment=${{ inputs.environment }} -r ${{ inputs.deployment_branch }}
           Write-Output $summary
           $summary >> $env:GITHUB_STEP_SUMMARY
