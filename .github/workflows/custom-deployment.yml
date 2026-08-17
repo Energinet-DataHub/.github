@@ -78,10 +78,14 @@ jobs:
       - name: Setup committer and switch branch
         shell: bash
         working-directory: infra-repo
+        env:
+          DEPLOYMENT_BASE_BRANCH: ${{ inputs.deployment_base_branch }}
+          DEPLOYMENT_BRANCH: ${{ inputs.deployment_branch }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B ${{ inputs.deployment_branch }} origin/${{ inputs.deployment_base_branch }}
+          git fetch origin "${DEPLOYMENT_BASE_BRANCH}"
+          git checkout -B "${DEPLOYMENT_BRANCH}" "FETCH_HEAD"
 
       - name: Process targets
         shell: pwsh
