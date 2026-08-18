@@ -263,7 +263,7 @@ jobs:
           timeout_minutes: 1 # for each attempt, a healthy artifact should be downloaded within a minute
           max_attempts: ${{ inputs.download_attempt_limit }}
           retry_wait_seconds: 15
-          retry_on: error
+          retry_on: any
           command: |
             gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name dotnet-tests --dir "${{ env.ARTIFACTS_PATH }}"
         env:
