@@ -176,7 +176,7 @@ jobs:
     steps:
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
@@ -203,14 +203,14 @@ jobs:
 
       - name: Use Node v${{ inputs.node_version }}
         if: ${{ inputs.use_azure_functions_tools == true && inputs.node_version != '' }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ inputs.node_version }}
 
       - name: Cache node modules
         if: ${{ inputs.use_azure_functions_tools == true }}
         id: cache-nodemodules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ${{ runner.os }}-nodejs-${{ inputs.node_version }}-azurite-${{ inputs.azurite_version }}-func-${{ inputs.azure_functions_core_tools_version }}
           path: ${{ github.workspace }}\node_modules
@@ -283,7 +283,7 @@ jobs:
             unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
           fi
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
           key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
