@@ -79,6 +79,6 @@ runs:
     - name: Submit SBOM to Dependency Graph
       uses: advanced-security/spdx-dependency-submission-action@v0.3.2
       with:
-        filePath: ${{ steps.sbom.outputs.sbom_dir }}
-        filePattern: "*.json"
+        filepath: ${{ steps.sbom.outputs.sbom_dir }}
+        filepattern: "*.json"
         correlator: ${{ inputs.correlator }}
