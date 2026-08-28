@@ -8,6 +8,7 @@ on:
           JSON targets for the deployment. It should be an array of objects with the following properties:
           - name: Descriptive name of the target, e.g. "My Service" or "Databricks wheel"
           - image: (Optional) The full name of the image to deploy, e.g. repository/image, leave empty for zip deployments.
+          - artifact_type: (Optional) OCI artifact type. Has no effect when image is not specified. Defaults to application/vnd.oci.image.index.v1+json.
           - pull_request_number: Pull request number to deploy, if empty the variable will not be updated but the deployment workflow will still be triggered
           - terraform_path: Path to Terraform configuration file to update, e.g. path/to/terraform.tfvars
           - terraform_variable_names: Names of Terraform variables to update (newline separated), e.g. variable1\nvariable2
@@ -68,6 +69,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Setup ORAS
+        uses: oras-project/setup-oras@v1
+
       - name: Checkout infrastructure repository
         uses: actions/checkout@v6
         with:
@@ -96,6 +100,8 @@ jobs:
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $true
 
+          $defaultArtifactType = "application/vnd.oci.image.index.v1+json"
+
           $targets = $env:TARGETS | ConvertFrom-Json
 
           foreach ($target in $targets) {
@@ -104,6 +110,7 @@ jobs:
             $prNumber = $target.pull_request_number
             $terraformPath = $target.terraform_path
             $terraformVariableNames = $target.terraform_variable_names
+            $artifactType = if ($target.artifact_type) { $target.artifact_type } else { $defaultArtifactType }
 
             Write-Output "::group::$name (PR #$prNumber)"
 
@@ -117,18 +124,22 @@ jobs:
 
             if ($target.image) {
               $image = $target.image.ToLower()
-
-              # Lookup container image sha from pull request number
-
-              $digest = (skopeo inspect "docker://ghcr.io/${image}:${variableValue}" | ConvertFrom-Json).Digest
-              if ([string]::IsNullOrEmpty($digest)) {
-                Write-Output "::error::No package version found for image ${image}:${variableValue}. Ensure the image has been built."
+              $reference = "ghcr.io/${image}:${variableValue}"
+              $descriptor = oras manifest fetch --descriptor $reference | ConvertFrom-Json
+              if ([string]::IsNullOrEmpty($descriptor.digest)) {
+                Write-Output "::error::No OCI manifest found for ${image}:${variableValue}. Ensure it has been built."
                 exit 1
               }
 
-              $tag = "${variableValue}@${digest}"
+              $manifest = oras manifest fetch $reference | ConvertFrom-Json
+              $actualArtifactType = if ($manifest.artifactType) { $manifest.artifactType } else { $descriptor.mediaType }
+              if ($actualArtifactType -ne $artifactType) {
+                Write-Output "::error::OCI manifest ${image}:${variableValue} has type '$actualArtifactType', expected '$artifactType'."
+                exit 1
+              }
 
-              $summary = "${image} resolved ${variableValue} to ${digest}"
+              $tag = if ($artifactType -eq $defaultArtifactType) { "${variableValue}@$($descriptor.digest)" } else { $variableValue }
+              $summary = "${image} resolved ${variableValue} to $($descriptor.digest) as $actualArtifactType"
               Write-Output $summary
               $summary >> $env:GITHUB_STEP_SUMMARY
             }
