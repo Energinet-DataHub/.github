@@ -138,7 +138,7 @@ jobs:
                 exit 1
               }
 
-              $tag = if ($artifactType -eq $defaultArtifactType) { "${variableValue}@$($descriptor.digest)" } else { $variableValue }
+              $tag = "${variableValue}@$($descriptor.digest)"
               $summary = "${image} resolved ${variableValue} to $($descriptor.digest) as $actualArtifactType"
               Write-Output $summary
               $summary >> $env:GITHUB_STEP_SUMMARY
