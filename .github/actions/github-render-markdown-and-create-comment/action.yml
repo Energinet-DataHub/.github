@@ -58,7 +58,7 @@ runs:
         fi
 
     - name: Comment PR with Plan
-      uses: marocchino/sticky-pull-request-comment@v3
+      uses: marocchino/sticky-pull-request-comment@v3.0.5
       if: ${{ steps.check_comment_size.outputs.commentplan == 'true' }}
       with:
         owner: Energinet-DataHub
@@ -83,7 +83,7 @@ runs:
 
     - name: Sticky PR comment (one per submodule; envs append)
       if: ${{ steps.check_comment_size.outputs.commentplan == 'false' }}
-      uses: marocchino/sticky-pull-request-comment@v3
+      uses: marocchino/sticky-pull-request-comment@v3.0.5
       with:
         owner: Energinet-DataHub
         repo: ${{ steps.resolve_repo.outputs.repository }}
