@@ -165,7 +165,10 @@ on:
         default: ""
         type: string
       nuget_cache_key_prefix:
-        description: Prefix for caching NuGet packages
+        # Deprecated and no longer used. The NuGet cache step this fed was removed, as this job never
+        # checks out source or restores packages. Kept only so that consumers still passing it do not
+        # break, since an undeclared input is a hard error for a reusable workflow.
+        description: Deprecated, no longer used
         required: false
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }}  # PR number is not available in merge_group event (Merge queue)
@@ -330,13 +333,6 @@ jobs:
           else
             unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
           fi
-
-      - uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ inputs.nuget_cache_key_prefix }}-
 
       - name: Login to use Azure resources from automated tests
         if: ${{ inputs.run_integration_tests == true }}
