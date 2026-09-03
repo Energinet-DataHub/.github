@@ -16,6 +16,8 @@ name: Build and test dotnet solution
 description: Build a .NET solution, run tests and upload code coverage
 
 inputs:
+  # Path to the solution to build and test. When 'use_testing_platform' is 'true' this may also be a
+  # solution filter ('.slnf') or a single test project ('.csproj').
   solution_file_path:
     required: true
   build_configuration:
@@ -37,6 +39,27 @@ inputs:
   max_concurrent_processes:
     required: false
     default: empty # Microsoft documentation states this is '1' by default, but it seems to be '' (empty) in practice, which means it will use all available cores. Setting this to '1' will run tests sequentially spanning assemblies.
+  # Set 'use_testing_platform' to 'true' for solutions whose tests run on Microsoft.Testing.Platform
+  # (MTP) instead of VSTest, such as solutions using xUnit v3. On the .NET 10 SDK, VSTest is no longer
+  # supported for MTP test projects, so 'dotnet test' must run in MTP mode.
+  #
+  # Using this requires the following from the solution:
+  #   1. A 'global.json' opting in to MTP mode:
+  #        { "test": { "runner": "Microsoft.Testing.Platform" } }
+  #      The opt-in is resolved by searching upwards from the working directory, so a 'global.json'
+  #      in the repository root applies to a solution in a subfolder. Place it next to the solution
+  #      instead if the repository still has other solutions that must keep running on VSTest.
+  #      Without it, 'dotnet test' falls back to VSTest and fails with 'MSB1001: Unknown switch'.
+  #   2. A reference to the 'Microsoft.Testing.Extensions.TrxReport' package in every test project,
+  #      as MTP does not produce TRX reports out of the box. The major version must match the MTP
+  #      version of the test framework: xUnit v3 4.x runs on MTP v2 and therefore needs TrxReport
+  #      2.x. Pairing it with TrxReport 1.x builds fine but fails at runtime with a TypeLoadException
+  #      on 'IDataConsumer', reported as 'Zero tests ran'.
+  #
+  # Documentation: https://learn.microsoft.com/dotnet/core/testing/unit-testing-with-dotnet-test
+  use_testing_platform:
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -75,8 +98,31 @@ runs:
       shell: pwsh
       id: run_tests
       run: |
-        dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
-        dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} ${{ (startsWith(inputs.max_concurrent_processes, 'empty') && '-m') || format('-m:{0}', inputs.max_concurrent_processes) }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        if ("${{ inputs.use_testing_platform }}" -eq "true")
+        {
+          # Microsoft.Testing.Platform mode of 'dotnet test'. VSTest options such as '--logger' and
+          # '--collect' do not exist in this mode, and the path must be passed via '--project', which
+          # accepts a project, a solution or a solution filter.
+          # 'empty' means "use all available cores", which is the default when the option is omitted.
+          $maxParallelArguments = @()
+          $maxConcurrentProcesses = "${{ inputs.max_concurrent_processes }}"
+          if ($maxConcurrentProcesses -ne "empty" -and $maxConcurrentProcesses -ne "")
+          {
+            $maxParallelArguments = @("--max-parallel-test-modules", $maxConcurrentProcesses)
+          }
+
+          dotnet test --project ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} @maxParallelArguments --report-trx
+        }
+        else
+        {
+          dotnet tool install --tool-path ./temp/reportgenerator dotnet-reportgenerator-globaltool
+          dotnet test ${{ inputs.solution_file_path }} --no-build --configuration ${{ inputs.build_configuration }} ${{ (startsWith(inputs.max_concurrent_processes, 'empty') && '-m') || format('-m:{0}', inputs.max_concurrent_processes) }} --verbosity normal --logger "trx;logfilename=testResults.trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover --output ${{ github.workspace }}\output
+        }
+
+        if ($LASTEXITCODE -ne 0)
+        {
+          exit $LASTEXITCODE
+        }
 
     - name: Publish test report
       uses: EnricoMi/publish-unit-test-result-action/windows@v2
