@@ -30,6 +30,31 @@ name: .NET test
 # artifact to be ready. Each failing download attempt will be written to the build
 # log as an error, but can be ignored. If the build takes too long, the test
 # job will fail after the last retry attempt.
+#
+# TEST RUNNERS:
+# The workflow supports both of the .NET test runners, selected by which of the two
+# mutually exclusive path inputs is set:
+#
+#   'tests_dll_file_path' (VSTest)
+#     Runs 'dotnet test <assembly.dll>'. This is the classic runner, used by xUnit v2.
+#
+#   'tests_exe_file_path' (Microsoft.Testing.Platform)
+#     Runs the published test executable directly. Used by xunit.v3, where a test project
+#     is a self contained executable. Note that 'dotnet test <assembly.dll>' and '--logger'
+#     are VSTest specific and are rejected by Microsoft.Testing.Platform, and that its
+#     alternative, 'dotnet test --project <csproj>', is not usable in this workflow because
+#     the job only downloads the build artifact and never has the source tree available.
+#
+#     The test project must opt in to the platform, otherwise the published executable is
+#     xunit.v3's own console runner, which uses a different command line ('-filterVSTest' and
+#     '-result-trx') and rejects the arguments used below:
+#
+#       <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+#
+#     It must also reference 'Microsoft.Testing.Extensions.TrxReport', whose major version has
+#     to match the platform version of the test framework (for xunit.v3 4.0.0 that is version
+#     2.x). Referencing 1.x builds fine but fails at runtime with a TypeLoadException that only
+#     surfaces as 'Zero tests ran'.
 
 on:
   workflow_call:
@@ -40,11 +65,17 @@ on:
         default: .NET CI Test
         type: string
       tests_dll_file_path:
-        description: Relative path from artifacts folder to test assembly
-        required: true
+        description: Relative path from artifacts folder to test assembly. Runs the tests using VSTest. Mutually exclusive with 'tests_exe_file_path'.
+        required: false
+        default: ""
+        type: string
+      tests_exe_file_path:
+        description: Relative path from artifacts folder to the published test executable. Runs the tests using Microsoft.Testing.Platform, as used by xunit.v3. Mutually exclusive with 'tests_dll_file_path'.
+        required: false
+        default: ""
         type: string
       tests_filter_expression:
-        description: Filter expression to use with dotnet test
+        description: Filter expression to use when selecting tests. Uses VSTest filter syntax for both test runners.
         required: false
         default: empty
         type: string
@@ -134,7 +165,10 @@ on:
         default: ""
         type: string
       nuget_cache_key_prefix:
-        description: Prefix for caching NuGet packages
+        # Deprecated and no longer used. The NuGet cache step this fed was removed, as this job never
+        # checks out source or restores packages. Kept only so that consumers still passing it do not
+        # break, since an undeclared input is a hard error for a reusable workflow.
+        description: Deprecated, no longer used
         required: false
         type: string
         default: nuget-${{ inputs.operating_system }}-pr${{ github.event.pull_request.number || '_not_available' }}  # PR number is not available in merge_group event (Merge queue)
@@ -174,6 +208,23 @@ jobs:
       # Overrides settings in 'functionhost.settings.json'
       FunctionAppHostPath: ${{ github.workspace }}\node_modules\azure-functions-core-tools\bin\func.dll
     steps:
+      - name: Validate test path inputs
+        id: validate_inputs
+        shell: pwsh
+        run: |
+          $dllPath = '${{ inputs.tests_dll_file_path }}'
+          $exePath = '${{ inputs.tests_exe_file_path }}'
+          if ( $dllPath -eq '' -and $exePath -eq '' )
+          {
+            Write-Host "::error::Either 'tests_dll_file_path' or 'tests_exe_file_path' must be set."
+            Exit 1
+          }
+          if ( $dllPath -ne '' -and $exePath -ne '' )
+          {
+            Write-Host "::error::'tests_dll_file_path' and 'tests_exe_file_path' are mutually exclusive, set only one of them."
+            Exit 1
+          }
+
       - name: Setup .NET ${{ inputs.dotnet_version }}
         if: ${{ inputs.dotnet_version }}
         uses: actions/setup-dotnet@v5
@@ -283,13 +334,6 @@ jobs:
             unzip -q "$ARCHIVE_FILENAME" -d "$DESTINATION_PATH"
           fi
 
-      - uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ inputs.nuget_cache_key_prefix }}-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ inputs.nuget_cache_key_prefix }}-
-
       - name: Login to use Azure resources from automated tests
         if: ${{ inputs.run_integration_tests == true }}
         uses: azure/login@v3
@@ -307,6 +351,7 @@ jobs:
       # To ensure code coverage tooling is available in bin folders, teams must use 'publish' on test assemblies
       # See https://github.com/coverlet-coverage/coverlet/issues/521#issuecomment-522429394
       - name: Run tests
+        if: ${{ inputs.tests_dll_file_path != '' }}
         shell: pwsh
         run: |
           # Configure content root for WebApplicationFactory<TEntryPoint>
@@ -330,12 +375,61 @@ jobs:
           $testFailures = Select-String -Path '.\TestResults\logs.trx' -Pattern '\[FAIL\]'
           $testFailures
 
+      - name: Run tests (Microsoft.Testing.Platform)
+        if: ${{ inputs.tests_exe_file_path != '' }}
+        shell: pwsh
+        run: |
+          # Configure content root for WebApplicationFactory<TEntryPoint>
+          if ( '${{ inputs.aspnetcore_test_contentroot_variable_name }}' -ne 'empty' )
+          {
+            $Env:${{ inputs.aspnetcore_test_contentroot_variable_name }} = '${{ github.workspace }}${{ inputs.aspnetcore_test_contentroot_variable_value }}'
+          }
+
+          $testExecutable = '${{ github.workspace }}${{ inputs.tests_exe_file_path }}'
+          if ( -not (Test-Path $testExecutable) )
+          {
+            Write-Host "::error::Test executable not found: $testExecutable"
+            Exit 1
+          }
+
+          # Written to a well known location so the 'Publish test report' step can find it
+          $resultsDirectory = '${{ github.workspace }}\TestResults'
+          $arguments = @('--results-directory', $resultsDirectory, '--report-trx', '--report-trx-filename', 'logs.trx')
+
+          # Handle filter expression
+          if ( '${{ inputs.tests_filter_expression }}' -ne 'empty' )
+          {
+            $arguments += @('--filter', '${{ inputs.tests_filter_expression }}')
+          }
+
+          # No need to change the working directory before running the executable. The
+          # Microsoft.Testing.Platform runner sets the current directory to the folder holding the
+          # test assembly, so content files and appsettings next to it resolve as they do locally.
+          & $testExecutable @arguments
+          $testExitCode = $LASTEXITCODE
+
+          $trxFile = Join-Path $resultsDirectory 'logs.trx'
+          if ( Test-Path $trxFile )
+          {
+            Select-String -Path $trxFile -Pattern 'outcome="Failed"'
+          }
+
+          # Any non zero exit code is a failure. Note that Microsoft.Testing.Platform exits with 8
+          # when zero tests ran, which would otherwise silently hide a broken filter expression.
+          if ( $testExitCode -ne 0 )
+          {
+            Write-Host "::error::Test run failed with exit code $testExitCode"
+            Exit $testExitCode
+          }
+
+      # 'always()' lets the report be published for failing tests, but must not let it run when the
+      # inputs never named a test project, as there would be no results to report on
       - name: Publish test report
-        if: ${{ inputs.publish_test_results == true && always() }}
+        if: ${{ inputs.publish_test_results == true && steps.validate_inputs.outcome == 'success' && always() }}
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         with:
-          check_name: Test results for ${{ inputs.tests_dll_file_path }}
-          comment_title: Test results for ${{ inputs.tests_dll_file_path }}
+          check_name: Test results for ${{ inputs.tests_dll_file_path || inputs.tests_exe_file_path }}
+          comment_title: Test results for ${{ inputs.tests_dll_file_path || inputs.tests_exe_file_path }}
           comment_mode: failures
           files: |
             **/TestResults/*.trx
