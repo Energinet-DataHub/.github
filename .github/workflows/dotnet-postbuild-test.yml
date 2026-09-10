@@ -240,6 +240,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
+          warning_on_retry: false
           shell: pwsh
           command: |
             Write-Host "Start Cosmos DB Emulator..."
