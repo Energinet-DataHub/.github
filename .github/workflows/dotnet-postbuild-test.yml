@@ -240,7 +240,6 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          warning_on_retry: false
           shell: pwsh
           command: |
             Write-Host "Start Cosmos DB Emulator..."
@@ -316,6 +315,7 @@ jobs:
           max_attempts: ${{ inputs.download_attempt_limit }}
           retry_wait_seconds: 15
           retry_on: any
+          warning_on_retry: false
           command: |
             gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name dotnet-tests --dir "${{ env.ARTIFACTS_PATH }}"
         env:
