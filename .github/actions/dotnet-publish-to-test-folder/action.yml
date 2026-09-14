@@ -1,0 +1,47 @@
+name: Publish test project to test folder
+description: Publish a test project as a self contained Windows executable into a shared test folder
+
+# Intended to be called from a repository's own 'dotnet-tests-prepare-outputs' action, which
+# 'dotnet-build-prerelease.yml' invokes to fill the 'dotnet-tests' artifact. Which projects to
+# publish is repository specific and stays there; this action is the single publish invocation.
+#
+# Under Microsoft.Testing.Platform, as used by xunit.v3, a test project is an executable rather than
+# a library loaded by a test host. 'dotnet-postbuild-test.yml' runs that executable through its
+# 'tests_exe_file_path' input, which means an apphost has to exist in the artifact.
+#
+# Producing one is not the default here, because the build runs on Linux while the tests run on
+# Windows. Publishing without a runtime identifier produces no Windows apphost at all, see
+# https://github.com/xunit/xunit/issues/3278, so the publish is pinned to 'win-x64' and asks for an
+# apphost explicitly. A runtime specific publish needs a runtime aware restore, which is why neither
+# '--no-build' nor '--no-restore' can be used.
+#
+# The runtime identifier is not an input. The shared test workflows only support Windows runners, so
+# there is no second value that would be useful.
+
+inputs:
+  project_file_path:
+    description: Path to the test project file, relative to the repository root
+    required: true
+  output_path:
+    description: Folder to publish into. All test projects of a repository are expected to share one folder.
+    required: false
+    default: testartifacts
+
+runs:
+  using: composite
+  steps:
+    # 'ErrorOnDuplicatePublishOutputFiles' is disabled because all test projects publish into the
+    # same folder, and some of them reference executable projects that were already built without a
+    # runtime identifier. The runtime agnostic and runtime specific copies of the same apphost then
+    # collide as NETSDK1152.
+    #
+    # 'Release' matches the configuration used by 'dotnet-build-prerelease.yml'.
+    - name: Publish ${{ inputs.project_file_path }}
+      shell: bash
+      run: |
+        dotnet publish '${{ inputs.project_file_path }}' \
+          --configuration Release \
+          --runtime win-x64 \
+          -p:UseAppHost=true \
+          -p:ErrorOnDuplicatePublishOutputFiles=false \
+          --output '${{ inputs.output_path }}'

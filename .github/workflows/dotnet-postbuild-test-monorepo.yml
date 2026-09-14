@@ -30,13 +30,37 @@ name: .NET test
 # artifact to be ready. Each failing download attempt will be written to the build
 # log as an error, but can be ignored. If the build takes too long, the test
 # job will fail after the last retry attempt.
+#
+# TEST RUNNERS:
+# The workflow supports both of the .NET test runners, selected by which of the two
+# mutually exclusive path inputs is set:
+#
+#   'tests_dll_file_path' (VSTest)
+#     Runs 'dotnet test <assembly.dll>'. This is the classic runner, used by xUnit v2.
+#
+#   'tests_project_file_path' (Microsoft.Testing.Platform)
+#     Runs 'dotnet test --project <project.csproj>'. Used by xunit.v3. See the
+#     'dotnet-run-tests-with-coverage-and-publish-report' action for the requirements
+#     this places on the repository and the test project.
+#
+# TEST REPORTS:
+# Set 'publish_test_report' to publish the results as a check run and a pull request
+# comment, and 'upload_test_report' to upload the TRX file as a build artifact. They are
+# independent, and a repository that fans out over many runners will usually prefer the
+# artifact, so that one job can aggregate the results afterwards.
 
 on:
   workflow_call:
     inputs:
       tests_dll_file_path:
-        description: Relative path from artifacts folder to test assembly
-        required: true
+        description: Relative path from artifacts folder to test assembly. Runs the tests using VSTest. Mutually exclusive with 'tests_project_file_path'.
+        required: false
+        default: ""
+        type: string
+      tests_project_file_path:
+        description: Path to the test project file, relative to the repository root. Runs the tests using Microsoft.Testing.Platform, as used by xunit.v3. Mutually exclusive with 'tests_dll_file_path'.
+        required: false
+        default: ""
         type: string
       tests_filter_expression:
         description: Filter expression to use with dotnet test
@@ -48,6 +72,16 @@ on:
         required: false
         default: true
         type: boolean
+      upload_test_report:
+        description: Set to 'true' to upload the TRX report as a build artifact
+        required: false
+        default: false
+        type: boolean
+      test_report_artifact_name:
+        description: Name of the artifact containing the TRX report. Defaults to 'trx-<testproject_name>'. Must be unique across the jobs of a workflow run.
+        required: false
+        default: ""
+        type: string
       aspnetcore_test_contentroot_variable_name:
         description: Name of an environment variable used for configuration of WebApplicationFactory<TEntryPoint>
         required: false
@@ -248,7 +282,17 @@ jobs:
           tests_filter_expression: ${{ inputs.tests_filter_expression }}
           publish_test_report: ${{ inputs.publish_test_report }}
           tests_dll_file_path: ${{ inputs.tests_dll_file_path }}
+          tests_project_file_path: ${{ inputs.tests_project_file_path }}
           run_integration_tests: ${{ inputs.run_integration_tests }}
           azure_integrationtest_spn_id: ${{ inputs.azure_integrationtest_spn_id }}
           azure_integrationtest_tenant_id: ${{ inputs.azure_integrationtest_tenant_id }}
           azure_integrationtest_subscription_id: ${{ inputs.azure_integrationtest_subscription_id }}
+
+      - name: Upload test report
+        if: ${{ always() && inputs.upload_test_report == true }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.test_report_artifact_name || format('trx-{0}', inputs.testproject_name) }}
+          path: ${{ github.workspace }}/TestResults/**/*.trx
+          if-no-files-found: ignore
+          retention-days: 7
