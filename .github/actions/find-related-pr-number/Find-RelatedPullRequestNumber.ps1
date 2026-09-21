@@ -43,12 +43,19 @@ function Find-RelatedPullRequestNumber {
         [string]
         $RefName,
 
+        [string]
+        $PullRequestNumber,
+
         # Empty when creating PR. It's relevant on push to main only
         [string]
         $CommitMessage
     )
 
     $prNumber = $null
+
+    if ($GithubEvent -eq "pull_request" -and -not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
+        return $PullRequestNumber
+    }
 
     $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
     if ($prData.number) {
