@@ -49,7 +49,7 @@ Describe "Find-RelatedPullRequestNumber" {
 
             Find-RelatedPullRequestNumber `
                 -GithubToken $script:GithubToken `
-                -GithubEvent 'pull_request_target' `
+                -GithubEvent 'pull_request' `
                 -Sha 'ab34bed2' `
                 -GithubRepository $script:Repository `
                 -RefName '/my/refname' `
@@ -59,22 +59,6 @@ Describe "Find-RelatedPullRequestNumber" {
 
             Should -Not -Invoke -CommandName Invoke-GithubGetPullRequestFromSha
             Should -Invoke -CommandName Write-Host -ParameterFilter { $Object -eq 'Using PR number from event payload: 6395' }
-        }
-
-        It 'should fall through to SHA lookup when event PR number is empty' {
-            Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
-
-            Find-RelatedPullRequestNumber `
-                -GithubToken $script:GithubToken `
-                -GithubEvent 'pull_request' `
-                -Sha 'ab34bed2' `
-                -GithubRepository $script:Repository `
-                -RefName '/my/refname' `
-                -PullRequestNumber '' `
-                -CommitMessage 'Fancy commit message' `
-            | Should -Be '4711'
-
-            Should -Invoke -CommandName Invoke-GithubGetPullRequestFromSha
         }
 
         It 'should return PR number when SHA returns PR' {
@@ -87,8 +71,11 @@ Describe "Find-RelatedPullRequestNumber" {
                 -Sha 'ab34bed2' `
                 -GithubRepository $script:Repository `
                 -RefName '/my/refname' `
+                -PullRequestNumber '' `
                 -CommitMessage 'Fancy commit message' `
             | Should -Be '4711'
+
+            Should -Invoke -CommandName Invoke-GithubGetPullRequestFromSha
         }
 
 

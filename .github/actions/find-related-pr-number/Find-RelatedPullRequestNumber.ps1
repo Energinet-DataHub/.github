@@ -53,7 +53,7 @@ function Find-RelatedPullRequestNumber {
 
     $prNumber = $null
 
-    if (-not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
+    if ($GithubEvent -like "pull_request*" -and -not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
         Write-Host "Using PR number from event payload: $PullRequestNumber"
         return $PullRequestNumber
     }
