@@ -43,12 +43,20 @@ function Find-RelatedPullRequestNumber {
         [string]
         $RefName,
 
+        [string]
+        $PullRequestNumber,
+
         # Empty when creating PR. It's relevant on push to main only
         [string]
         $CommitMessage
     )
 
     $prNumber = $null
+
+    if ($GithubEvent -like "pull_request*" -and -not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
+        Write-Host "Using PR number from event payload: $PullRequestNumber"
+        return $PullRequestNumber
+    }
 
     $prData = Invoke-GithubGetPullRequestFromSha -GithubRepository $GithubRepository -Sha $Sha -GithubToken $GithubToken
     if ($prData.number) {
@@ -72,9 +80,8 @@ function Find-RelatedPullRequestNumber {
                 # avoid looking up PR numbers in a merge-queue-enabled context using scheduled workflows
                 throw "No pull requests found for sha: $Sha"
             }
-            "pull_request" {
-                # Given this is a pull_request event, we're currently between a rock and a hard place...
-                throw "No pull requests found for sha: $Sha"
+            { $_ -like "pull_request*" } {
+                throw "Pull request event without a PR number in the payload, and no pull requests found for sha: $Sha"
             }
 
             "merge_group" {

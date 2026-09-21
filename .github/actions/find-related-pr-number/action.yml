@@ -54,6 +54,7 @@ runs:
           -Sha "${{ github.event.pull_request.head.sha || github.sha }}" `
           -GithubRepository "${{ github.repository }}" `
           -RefName "${{ github.ref_name }}" `
+          -PullRequestNumber "${{ github.event.pull_request.number || '' }}" `
           -CommitMessage $commitMessage
 
         $prNumbers = ($prNumber -split '\s+') | Where-Object { $_ -ne '' }
