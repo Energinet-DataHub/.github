@@ -45,10 +45,11 @@ Describe "Find-RelatedPullRequestNumber" {
                     '{ "title": "base stacked PR", "number": "6339" }' | ConvertFrom-Json
                     '{ "title": "stacked PR", "number": "6395" }' | ConvertFrom-Json
                 ) }
+            Mock Write-Host { }
 
             Find-RelatedPullRequestNumber `
                 -GithubToken $script:GithubToken `
-                -GithubEvent 'pull_request' `
+                -GithubEvent 'pull_request_target' `
                 -Sha 'ab34bed2' `
                 -GithubRepository $script:Repository `
                 -RefName '/my/refname' `
@@ -57,6 +58,23 @@ Describe "Find-RelatedPullRequestNumber" {
             | Should -Be '6395'
 
             Should -Not -Invoke -CommandName Invoke-GithubGetPullRequestFromSha
+            Should -Invoke -CommandName Write-Host -ParameterFilter { $Object -eq 'Using PR number from event payload: 6395' }
+        }
+
+        It 'should fall through to SHA lookup when event PR number is empty' {
+            Mock Invoke-GithubGetPullRequestFromSha { return '{ "title": "some PR title", "number": "4711" }' | ConvertFrom-Json }
+
+            Find-RelatedPullRequestNumber `
+                -GithubToken $script:GithubToken `
+                -GithubEvent 'pull_request' `
+                -Sha 'ab34bed2' `
+                -GithubRepository $script:Repository `
+                -RefName '/my/refname' `
+                -PullRequestNumber '' `
+                -CommitMessage 'Fancy commit message' `
+            | Should -Be '4711'
+
+            Should -Invoke -CommandName Invoke-GithubGetPullRequestFromSha
         }
 
         It 'should return PR number when SHA returns PR' {
@@ -84,7 +102,7 @@ Describe "Find-RelatedPullRequestNumber" {
                     -Sha 'ab34bed2' `
                     -GithubRepository $script:Repository `
                     -RefName '/my/refname' `
-                    -CommitMessage 'Fancy commit message' } | Should -Throw -ExpectedMessage "No pull requests found for sha: ab34bed2"
+                    -CommitMessage 'Fancy commit message' } | Should -Throw -ExpectedMessage "Pull request event without a PR number in the payload, and no pull requests found for sha: ab34bed2"
         }
     }
     Context 'merge_group event' {

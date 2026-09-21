@@ -53,7 +53,8 @@ function Find-RelatedPullRequestNumber {
 
     $prNumber = $null
 
-    if ($GithubEvent -eq "pull_request" -and -not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
+    if (-not [string]::IsNullOrWhiteSpace($PullRequestNumber)) {
+        Write-Host "Using PR number from event payload: $PullRequestNumber"
         return $PullRequestNumber
     }
 
@@ -79,9 +80,8 @@ function Find-RelatedPullRequestNumber {
                 # avoid looking up PR numbers in a merge-queue-enabled context using scheduled workflows
                 throw "No pull requests found for sha: $Sha"
             }
-            "pull_request" {
-                # Given this is a pull_request event, we're currently between a rock and a hard place...
-                throw "No pull requests found for sha: $Sha"
+            { $_ -like "pull_request*" } {
+                throw "Pull request event without a PR number in the payload, and no pull requests found for sha: $Sha"
             }
 
             "merge_group" {
