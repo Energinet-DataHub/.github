@@ -19,6 +19,9 @@ runs:
     - name: Setup asdf
       uses: asdf-vm/actions/setup@v4
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
+      # Pin to a release with downloadable binaries, v0.20.1 was uploaded without binaries.
+      with:
+        asdf_version: 0.20.0
 
     - name: Restore asdf cache
       uses: actions/cache/restore@v5
