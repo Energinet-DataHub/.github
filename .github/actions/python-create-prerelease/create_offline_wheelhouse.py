@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -103,6 +104,29 @@ def run(
         stdout=subprocess.DEVNULL if hide_stdout else None,
         env=environment,
     )
+
+
+def create_git_build_environment(token: str) -> dict[str, str]:
+    environment = {
+        **os.environ,
+        "PYTHONHASHSEED": "0",
+        "SOURCE_DATE_EPOCH": "315532800",
+    }
+    if not token:
+        return environment
+
+    credentials = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+    header_key = "http.https://github.com/.extraheader"
+    environment.update(
+        {
+            "GIT_CONFIG_COUNT": "2",
+            "GIT_CONFIG_KEY_0": header_key,
+            "GIT_CONFIG_VALUE_0": "",
+            "GIT_CONFIG_KEY_1": header_key,
+            "GIT_CONFIG_VALUE_1": f"AUTHORIZATION: basic {credentials}",
+        }
+    )
+    return environment
 
 
 def find_lock(package_path: Path) -> Path:
@@ -328,11 +352,9 @@ def build_wheelhouse(package_path: Path, runtime_packages: set[str]) -> None:
                     str(git_requirements),
                 ],
                 cwd=package_path,
-                environment={
-                    **os.environ,
-                    "PYTHONHASHSEED": "0",
-                    "SOURCE_DATE_EPOCH": "315532800",
-                },
+                environment=create_git_build_environment(
+                    os.environ.get("OFFLINE_WHEELHOUSE_GIT_TOKEN", "")
+                ),
             )
 
     packages = create_manifest(wheelhouse, load_locked_packages(lock_path))

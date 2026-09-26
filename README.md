@@ -218,12 +218,15 @@ can add deployment-ready dependency wheels to prereleases:
 ```yaml
 jobs:
   ci:
-    uses: Energinet-DataHub/.github/.github/workflows/python-uv-ci.yml@actions/v2
+    uses: Energinet-DataHub/.github/.github/workflows/python-uv-ci.yml@workflows/v3
     with:
       build_offline_wheelhouse: true
       # Names only; versions continue to come from uv.lock.
       offline_wheelhouse_runtime_packages: |
         package-provided-by-the-runtime
+    secrets:
+      # Required only for private Git dependencies outside the caller repository.
+      git_dependency_token: ${{ secrets.PYTHON_DEPENDENCY_READ_TOKEN }}
 ```
 
 The feature is opt-in and disabled by default. It uses `uv export --frozen` for
@@ -240,6 +243,17 @@ top-level `dist/*.whl` and adds:
 Wheelhouses target Linux x86-64 and the Python version active in the caller's
 CI job. Source distributions and local path dependencies are intentionally
 rejected so deployment does not need a compiler, package index, or Git.
+The caller's `GITHUB_TOKEN` is scoped to its own repository and is not assumed
+to grant access to private dependency repositories. Callers with private Git
+dependencies must pass `git_dependency_token` as a GitHub App installation
+token or fine-grained PAT with read access to every required repository. The
+token is provided to Git only through process-scoped configuration and is not
+written to release artifacts.
+
+Changes to this capability must promote both independently versioned release
+families. The action release must be promoted before the workflow release
+because the workflow calls the action through its moving major tag. The
+repository release workflow enforces this order when both areas change.
 
 ### Python Build and Push Docker Image
 

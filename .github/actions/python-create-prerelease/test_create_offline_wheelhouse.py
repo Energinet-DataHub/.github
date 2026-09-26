@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import importlib.util
 import json
 import tempfile
@@ -117,6 +118,18 @@ private-package @ git+https://github.com/example/private-package@0123456789abcde
 
             with self.assertRaisesRegex(ValueError, "credentials"):
                 MODULE.load_index_arguments([project])
+
+    def test_git_token_is_passed_as_an_ephemeral_authorization_header(self):
+        environment = MODULE.create_git_build_environment("secret-token")
+
+        self.assertEqual(environment["GIT_CONFIG_COUNT"], "2")
+        self.assertEqual(environment["GIT_CONFIG_VALUE_0"], "")
+        self.assertEqual(
+            environment["GIT_CONFIG_VALUE_1"],
+            "AUTHORIZATION: basic "
+            + base64.b64encode(b"x-access-token:secret-token").decode(),
+        )
+        self.assertNotIn("secret-token", environment["GIT_CONFIG_KEY_1"])
 
 
 if __name__ == "__main__":

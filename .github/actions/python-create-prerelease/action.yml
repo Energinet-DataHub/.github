@@ -40,6 +40,10 @@ inputs:
     description: Comma- or newline-separated package names supplied by the deployment runtime
     required: false
     default: ""
+  git_dependency_token:
+    description: GitHub token with read access to private Git dependency repositories
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -84,6 +88,7 @@ runs:
       if: ${{ inputs.build_offline_wheelhouse == 'true' }}
       shell: bash
       env:
+        OFFLINE_WHEELHOUSE_GIT_TOKEN: ${{ inputs.git_dependency_token }}
         OFFLINE_WHEELHOUSE_RUNTIME_PACKAGES: ${{ inputs.offline_wheelhouse_runtime_packages }}
       run: |
         python "${{ github.action_path }}/create_offline_wheelhouse.py" \

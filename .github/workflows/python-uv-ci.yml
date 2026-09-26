@@ -111,6 +111,12 @@ on:
         required: false
         default: ""
         type: string
+    secrets:
+      git_dependency_token:
+        description: |
+          Optional GitHub App installation token or fine-grained PAT with read
+          access to private Git dependency repositories.
+        required: false
 
 permissions:
   id-token: write
@@ -223,6 +229,7 @@ jobs:
           package_source_code_directory: ${{ matrix.inputs.package_path }}/${{ inputs.package_source_code_directory }}
           build_offline_wheelhouse: ${{ inputs.build_offline_wheelhouse }}
           offline_wheelhouse_runtime_packages: ${{ inputs.offline_wheelhouse_runtime_packages }}
+          git_dependency_token: ${{ secrets.git_dependency_token }}
 
       #
       # Testing steps
