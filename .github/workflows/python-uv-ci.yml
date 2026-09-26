@@ -97,6 +97,26 @@ on:
         required: false
         default: false
         type: boolean
+      build_offline_wheelhouse:
+        description: |
+          Build an offline Linux x86-64 wheelhouse from the frozen uv lock for
+          deployment environments without Git or package-index access.
+        required: false
+        default: false
+        type: boolean
+      offline_wheelhouse_runtime_packages:
+        description: |
+          Comma- or newline-separated package names supplied by the deployment
+          runtime and therefore omitted from the offline wheelhouse.
+        required: false
+        default: ""
+        type: string
+    secrets:
+      git_dependency_token:
+        description: |
+          Optional GitHub App installation token or fine-grained PAT with read
+          access to private Git dependency repositories.
+        required: false
 
 permissions:
   id-token: write
@@ -207,6 +227,9 @@ jobs:
           release_name: ${{ matrix.inputs.release_name }}
           create_subsystem_release: ${{ inputs.create_subsystem_release }}
           package_source_code_directory: ${{ matrix.inputs.package_path }}/${{ inputs.package_source_code_directory }}
+          build_offline_wheelhouse: ${{ inputs.build_offline_wheelhouse }}
+          offline_wheelhouse_runtime_packages: ${{ inputs.offline_wheelhouse_runtime_packages }}
+          git_dependency_token: ${{ secrets.git_dependency_token }}
 
       #
       # Testing steps
