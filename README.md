@@ -210,6 +210,37 @@ coverage run --branch -m pytest -k "$1" --junitxml=pytest-results.xml .
 
 Optional `image_tag` can be set which the custom action `python-unit-test` is being called with. Default value is `latest`. If `python-unit-test` does not know the input `image_tag` it will throw a warning. It is possible to get the `image_tag` from [the python docker build](#python-build-and-push-docker-image).
 
+### Python UV CI offline wheelhouse
+
+The reusable [`python-uv-ci.yml`](.github/workflows/python-uv-ci.yml) workflow
+can add deployment-ready dependency wheels to prereleases:
+
+```yaml
+jobs:
+  ci:
+    uses: Energinet-DataHub/.github/.github/workflows/python-uv-ci.yml@actions/v2
+    with:
+      build_offline_wheelhouse: true
+      # Names only; versions continue to come from uv.lock.
+      offline_wheelhouse_runtime_packages: |
+        package-provided-by-the-runtime
+```
+
+The feature is opt-in and disabled by default. It uses `uv export --frozen` for
+production dependencies, downloads compatible binary registry wheels, builds
+commit-pinned Git dependencies, and verifies the result using `pip install
+--no-index`. The release ZIP keeps the application wheel as the only
+top-level `dist/*.whl` and adds:
+
+- `dist/wheelhouse/*.whl`
+- `dist/offline-requirements.txt`, containing local wheel paths and SHA-256 hashes
+- `dist/offline-wheelhouse-manifest.json`, containing the target runtime,
+  omitted runtime package names, package metadata, and SHA-256 hashes
+
+Wheelhouses target Linux x86-64 and the Python version active in the caller's
+CI job. Source distributions and local path dependencies are intentionally
+rejected so deployment does not need a compiler, package index, or Git.
+
 ### Python Build and Push Docker Image
 
 File: [python-build-and-push-docker-image.yml](.github/workflows/python-build-and-push-docker-image.yml)

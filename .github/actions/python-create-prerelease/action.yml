@@ -32,6 +32,14 @@ inputs:
   package_source_code_directory:
     description: The directory inside the package path that contains the source code and tests
     required: true
+  build_offline_wheelhouse:
+    description: Build an offline wheelhouse from the frozen uv lock
+    required: false
+    default: "false"
+  offline_wheelhouse_runtime_packages:
+    description: Comma- or newline-separated package names supplied by the deployment runtime
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -71,6 +79,16 @@ runs:
     - name: Build ${{ inputs.package_name }}
       shell: bash
       run: uv build --wheel --directory ${{ inputs.package_path }}
+
+    - name: Build offline wheelhouse for ${{ inputs.package_name }}
+      if: ${{ inputs.build_offline_wheelhouse == 'true' }}
+      shell: bash
+      env:
+        OFFLINE_WHEELHOUSE_RUNTIME_PACKAGES: ${{ inputs.offline_wheelhouse_runtime_packages }}
+      run: |
+        python "${{ github.action_path }}/create_offline_wheelhouse.py" \
+          --package-path "${{ inputs.package_path }}" \
+          --runtime-packages "$OFFLINE_WHEELHOUSE_RUNTIME_PACKAGES"
 
     - name: Copy files for ${{ inputs.package_name }} prerelease
       shell: bash
