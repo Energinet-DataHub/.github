@@ -30,7 +30,7 @@ from pathlib import Path
 import tomllib
 
 NAME_PATTERN = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)\s*(==|@)\s*(.+)$")
-PINNED_COMMIT_PATTERN = re.compile(r"@[0-9a-fA-F]{40}(?:[#;]|$)")
+FULL_COMMIT_PATTERN = re.compile(r"[0-9a-fA-F]{40}")
 
 
 def canonicalize_name(name: str) -> str:
@@ -73,14 +73,20 @@ def parse_requirement_blocks(content: str) -> list[tuple[str, str, str]]:
 
 
 def validate_git_requirement(block: str) -> None:
-    logical = re.sub(r"\\\s*\n\s*", " ", block)
-    if " @ git+" not in logical:
+    logical = re.sub(r"\\\s*\n\s*", " ", block).strip()
+    match = NAME_PATTERN.match(logical)
+    if not match or match.group(2) != "@":
         raise ValueError(f"Only Git and registry dependencies are supported: {logical}")
-    if not PINNED_COMMIT_PATTERN.search(logical):
+
+    direct_url = match.group(3).split(" ;", maxsplit=1)[0].strip()
+    if not direct_url.startswith("git+"):
+        raise ValueError(f"Only Git and registry dependencies are supported: {logical}")
+
+    parsed = urllib.parse.urlsplit(direct_url.removeprefix("git+"))
+    _, revision_separator, revision = parsed.path.rpartition("@")
+    if not revision_separator or not FULL_COMMIT_PATTERN.fullmatch(revision):
         raise ValueError(f"Git dependency is not pinned to a full commit: {logical}")
 
-    url = logical.split(" @ git+", maxsplit=1)[1].split(" ;", maxsplit=1)[0]
-    parsed = urllib.parse.urlsplit(url)
     if parsed.password or (parsed.scheme in {"http", "https"} and parsed.username):
         raise ValueError("Git dependency URL contains credentials")
 

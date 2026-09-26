@@ -62,6 +62,42 @@ private-package @ git+https://github.com/example/private-package@0123456789abcde
                 "0123456789abcdef0123456789abcdef01234567"
             )
 
+    def test_git_requirement_accepts_commit_with_subdirectory(self):
+        MODULE.validate_git_requirement(
+            "package @ git+https://github.com/example/package@"
+            "0123456789abcdef0123456789abcdef01234567"
+            "?download=1#subdirectory=src/package"
+        )
+
+    def test_git_requirement_rejects_branch_with_commit_in_fragment(self):
+        with self.assertRaisesRegex(ValueError, "full commit"):
+            MODULE.validate_git_requirement(
+                "package @ git+https://github.com/example/package@main"
+                "#subdirectory=src@0123456789abcdef0123456789abcdef01234567"
+            )
+
+    def test_git_requirement_rejects_branch_with_commit_in_query(self):
+        with self.assertRaisesRegex(ValueError, "full commit"):
+            MODULE.validate_git_requirement(
+                "package @ git+https://github.com/example/package@main"
+                "?ref=0123456789abcdef0123456789abcdef01234567"
+            )
+
+    def test_git_requirement_rejects_branch_with_commit_in_userinfo(self):
+        with self.assertRaisesRegex(ValueError, "full commit"):
+            MODULE.validate_git_requirement(
+                "package @ git+https://"
+                "0123456789abcdef0123456789abcdef01234567@github.com/"
+                "example/package@main"
+            )
+
+    def test_git_requirement_rejects_tag_with_commit_in_repository_path(self):
+        with self.assertRaisesRegex(ValueError, "full commit"):
+            MODULE.validate_git_requirement(
+                "package @ git+https://github.com/example/"
+                "0123456789abcdef0123456789abcdef01234567/package@v1.0.0"
+            )
+
     def test_manifest_uses_metadata_and_sha256_deterministically(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             wheelhouse = Path(temp_dir)
