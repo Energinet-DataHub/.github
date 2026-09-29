@@ -32,6 +32,11 @@ on:
         description: Specify to override the email determined by team_name
         required: false
         type: string
+      include_team_fusion:
+        description: Also send the notification to Team Fusion.
+        required: false
+        default: false
+        type: boolean
       subject:
         description: The email subject. Should contain environment information when possible.
         required: true
@@ -168,9 +173,15 @@ jobs:
             team_email=${{ vars.email_teamesettdeprecated }}
           elif [ ${{ inputs.team_name}} == 'Atlas' ]; then
             team_email=${{ vars.email_atlas }}
+          elif [ ${{ inputs.team_name}} == 'Nexus' ]; then
+            team_email=${{ vars.email_nexus }}
           else
             # Fallback
             team_email=${{ vars.email_teamfusion }}
+          fi
+
+          if [ ${{ inputs.include_team_fusion }} = true ] && [ "$team_email" != "${{ vars.email_teamfusion }}" ]; then
+            team_email="$team_email,${{ vars.email_teamfusion }}"
           fi
 
           echo "::add-mask::$team_email"
