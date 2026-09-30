@@ -87,7 +87,7 @@ runs:
 
     - name: Login to use Azure resources from automated tests
       if: ${{ inputs.azure_tenant_id != '' }}
-      uses: azure/login@v3
+      uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
       with:
         client-id: ${{ inputs.azure_spn_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
@@ -125,7 +125,7 @@ runs:
         }
 
     - name: Publish test report
-      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      uses: EnricoMi/publish-unit-test-result-action/windows@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2
       if: inputs.publish_test_report == 'true' || (failure() && steps.run_tests.conclusion == 'failure' && inputs.publish_test_report == 'true') # Reference_ https://docs.github.com/en/actions/learn-github-actions/expressions#failure-with-conditions
       with:
         check_name: Test results for ${{ inputs.solution_file_path }}

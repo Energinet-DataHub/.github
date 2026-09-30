@@ -34,7 +34,7 @@ jobs:
           fi
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         id: find_pull_request
 
       - name: Set release version
@@ -42,7 +42,7 @@ jobs:
         # Release version is formatted as pr[PR_NUMBER]
         run: echo "release_version=pr${{ steps.find_pull_request.outputs.pull_request_number }}" >> $GITHUB_OUTPUT
 
-      - uses: actions/create-github-app-token@v3
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         id: generate_token
         with:
           client-id: ${{ vars.dh3_infra_pr_client_id }}
@@ -50,7 +50,7 @@ jobs:
           owner: Energinet-DataHub
 
       - name: Checkout infra repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: Energinet-DataHub/dh3-infrastructure
           token: ${{ steps.generate_token.outputs.token }}
@@ -109,7 +109,7 @@ jobs:
 
       - name: Create Pull Request in Infra Repo
         id: create_pr
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ steps.generate_token.outputs.token }}
           path: infra-repo
@@ -128,7 +128,7 @@ jobs:
 
       - name: Enable auto-merge
         if: steps.create_pr.outputs.pull-request-number != ''
-        uses: peter-evans/enable-pull-request-automerge@v3
+        uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3
         with:
           token: ${{ steps.generate_token.outputs.token }}
           repository: Energinet-DataHub/dh3-infrastructure

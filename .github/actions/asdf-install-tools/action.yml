@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
     - name: Check for existence of .tool-versions file
       id: check_tool_versions
@@ -17,14 +17,14 @@ runs:
         fi
 
     - name: Setup asdf
-      uses: asdf-vm/actions/setup@v4
+      uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
       # Pin to a release with downloadable binaries, v0.20.1 was uploaded without binaries.
       with:
         asdf_version: 0.20.0
 
     - name: Restore asdf cache
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
       id: cache-asdf-restore
       with:
@@ -32,11 +32,11 @@ runs:
         key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
 
     - name: Install dependencies in .tool-versions
-      uses: asdf-vm/actions/install@v4
+      uses: asdf-vm/actions/install@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4
       if: ${{ steps.check_tool_versions.outputs.exists == 'true' }}
 
     - name: Save asdf cache
-      uses: actions/cache/save@v5
+      uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
       if: ${{ steps.cache-asdf-restore.outputs.cache-hit != 'true' && steps.check_tool_versions.outputs.exists == 'true' }}
       with:
         path: /home/runner/.asdf

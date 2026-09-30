@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Check for existence of global.json
         if: ${{ inputs.dotnet_major_version == '' }}
@@ -91,18 +91,18 @@ jobs:
 
       - name: Setup .NET using global.json
         if: ${{ steps.check_global_json.outputs.global_json_exists == 'true' }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           global-json-file: global.json
 
       - name: Setup .NET ${{ inputs.dotnet_major_version }}
         if: ${{ inputs.dotnet_major_version }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: ${{ inputs.dotnet_major_version }}.0.1xx
 
       - name: Cache NuGet packages
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         id: cache-nuget
         with:
           path: ~/.nuget/packages
@@ -129,7 +129,7 @@ jobs:
           fi
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         id: find_pull_request
 
       - name: Build solution
@@ -158,7 +158,7 @@ jobs:
 
       - name: Upload dotnet-tests artifact
         if: ${{ inputs.prepare_dotnet_tests == true }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dotnet-tests
           path: ${{ env.TESTS_OUTPUT_PATH }}/${{ env.TESTS_ZIP_FILENAME }}
@@ -180,7 +180,7 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           release_name_prefix: ${{ inputs.release_name_prefix }}
 
@@ -217,7 +217,7 @@ jobs:
       - name: Create pre-release
         id: release
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-        uses: Energinet-DataHub/.github/.github/actions/github-create-release@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-create-release@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
@@ -228,7 +228,7 @@ jobs:
             ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
 
       - name: Create SBOM attestation
-        uses: Energinet-DataHub/.github/.github/actions/github-create-sbom-attestation@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-create-sbom-attestation@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           subject-path: ${{ env.RELEASE_FOLDER_PATH }}/${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           sbom-path: ${{ env.SBOM_PATH }}

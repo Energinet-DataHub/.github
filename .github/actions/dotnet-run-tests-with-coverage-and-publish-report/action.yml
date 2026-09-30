@@ -96,7 +96,7 @@ runs:
 
     - name: Login to use Azure resources from automated tests
       if: ${{ inputs.run_integration_tests == 'true' }}
-      uses: azure/login@v3
+      uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
       with:
         client-id: ${{ inputs.azure_integrationtest_spn_id }}
         tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
@@ -193,7 +193,7 @@ runs:
     # inputs never named a test project, as there would be no results to report on
     - name: Publish test report
       if: ${{ always() && inputs.publish_test_report == 'true' && steps.validate_inputs.outcome == 'success' }}
-      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      uses: EnricoMi/publish-unit-test-result-action/windows@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2
       with:
         check_name: Test results for ${{ inputs.tests_dll_file_path || inputs.tests_project_file_path }}
         comment_title: Test results for ${{ inputs.tests_dll_file_path || inputs.tests_project_file_path }}
