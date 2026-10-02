@@ -12,8 +12,9 @@ description: Publish a test project as a self contained Windows executable into 
 # Producing one is not the default here, because the build runs on Linux while the tests run on
 # Windows. Publishing without a runtime identifier produces no Windows apphost at all, see
 # https://github.com/xunit/xunit/issues/3278, so the publish is pinned to 'win-x64' and asks for an
-# apphost explicitly. A runtime specific publish needs a runtime aware restore, which is why neither
-# '--no-build' nor '--no-restore' can be used.
+# apphost explicitly. A runtime specific publish needs runtime aware restore and build outputs, so
+# callers may only skip those operations when they have already produced compatible 'win-x64'
+# outputs.
 #
 # The runtime identifier is not an input. The shared test workflows only support Windows runners, so
 # there is no second value that would be useful.
@@ -26,6 +27,10 @@ inputs:
     description: Folder to publish into. All test projects of a repository are expected to share one folder.
     required: false
     default: testartifacts
+  skip_build_and_restore:
+    description: Skip building and restoring. Requires existing win-x64 build and restore outputs.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -44,4 +49,5 @@ runs:
           --runtime win-x64 \
           -p:UseAppHost=true \
           -p:ErrorOnDuplicatePublishOutputFiles=false \
+          ${{ inputs.skip_build_and_restore == 'true' && '--no-build --no-restore' || '' }} \
           --output '${{ inputs.output_path }}'
