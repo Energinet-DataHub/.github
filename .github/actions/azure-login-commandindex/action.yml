@@ -26,14 +26,14 @@ runs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Restore commandIndex for ${{ steps.requirements.outputs.version }}
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
       if: ${{ steps.requirements.outputs.exists != 'true' }}
       with:
         path: ~/.azure/commandIndex.json
         key: ${{ runner.os }}-azcli-cidx-${{ steps.requirements.outputs.version }}
 
     - name: Login to use Azure resources from automated tests
-      uses: azure/login@v3
+      uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}

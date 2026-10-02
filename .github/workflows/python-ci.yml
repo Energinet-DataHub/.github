@@ -98,17 +98,17 @@ jobs:
       AZURE_KEYVAULT_URL: ${{ inputs.azure_keyvault_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Static checks
-        uses: TrueBrain/actions-flake8@v2
+        uses: TrueBrain/actions-flake8@36ab8db923b9a63cfd4b87840ca2f94c117bb50e # v2
         with:
           path: ${{ inputs.path_static_checks }}
           ignore: ${{ inputs.ignore_errors_and_warning_flake8 }}
 
       - name: Login to access Azure resources (integration test environment)
         if: ${{ inputs.use_integrationtest_environment == true }}
-        uses: azure/login@v3
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
         with:
           client-id: ${{ inputs.azure_integrationtest_spn_id }}
           tenant-id: ${{ inputs.azure_integrationtest_tenant_id }}
@@ -116,7 +116,7 @@ jobs:
           allow-no-subscriptions: true # Added as a workaround for the issue https://github.com/Azure/login/issues/592
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_folder_path: ${{ inputs.tests_folder_path}}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Publish test report
         if: ${{ inputs.publish_test_results == true && always() }}
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2
         with:
           check_name: Python test results for ${{ inputs.test_report_path }}
           comment_title: Python test results

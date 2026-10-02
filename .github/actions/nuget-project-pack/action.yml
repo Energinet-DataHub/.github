@@ -52,7 +52,7 @@ runs:
         echo "project_name=$project_name" >> $GITHUB_OUTPUT
 
     - name: Generate SBOM
-      uses: anchore/sbom-action@v0.24.0
+      uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
       with:
         path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}
         artifact-name: sbom-${{ steps.compute-dir.outputs.project_name }}.spdx.json
@@ -71,7 +71,7 @@ runs:
           ${{ steps.get_version_suffix.outputs.property }}
 
     - name: Attest SBOM
-      uses: actions/attest@v4
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
       with:
         subject-path: ${{ steps.compute-dir.outputs.project_dir }}/bin/${{ inputs.build_configuration }}/*.nupkg
         sbom-path: ${{ github.workspace }}/sbom.json

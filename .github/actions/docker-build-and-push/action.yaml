@@ -35,7 +35,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       name: Download available artifacts # this supports use of artifacts (currently only frontends)
       with:
         path: artifacts/

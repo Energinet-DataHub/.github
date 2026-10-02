@@ -15,7 +15,7 @@ jobs:
   create_release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Read version
         id: version
@@ -29,7 +29,7 @@ jobs:
 
       - name: Generate Github token
         id: generate_token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           client-id: ${{ vars.dh3serviceaccount_appid }}
           private-key: ${{ secrets.dh3serviceaccount_privatekey }}

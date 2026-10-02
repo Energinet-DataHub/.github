@@ -17,19 +17,19 @@ runs:
   using: composite
   steps:
     - name: Find associated pull request
-      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
+      uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
       id: find_pull_request
 
     - name: Generate Github token
       id: generate_token
-      uses: actions/create-github-app-token@v3
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
       with:
         client-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.private_key }}
         owner: Energinet-Datahub
 
     - name: Repository Dispatch
-      uses: peter-evans/repository-dispatch@v4
+      uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4
       with:
         token: ${{ steps.generate_token.outputs.token }}
         repository: ${{ inputs.repository }}

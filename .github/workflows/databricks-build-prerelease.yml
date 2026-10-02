@@ -61,21 +61,21 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ inputs.python_version }}
           architecture: ${{ inputs.architecture }}
 
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         id: find_pull_request
 
       - name: Generate SBOM
         if: ${{ ! inputs.multiple_wheels }}
-        uses: anchore/sbom-action@v0.24.0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
           path: ${{ inputs.wheel_working_directory }}
           format: spdx-json
@@ -153,19 +153,19 @@ jobs:
 
       - name: Get release version strings
         id: get_release_version_strings
-        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-get-releaseversion-strings@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           release_name_prefix: ${{ inputs.prerelease_prefix }}
 
       - name: Zip files for prerelease
-        uses: thedoctor0/zip-release@0.7.6
+        uses: thedoctor0/zip-release@b57d897cb5d60cb78b51a507f63fa184cfe35554 # 0.7.6
         with:
           type: zip
           filename: ${{ steps.get_release_version_strings.outputs.release_zip_filename }}
           directory: ${{ env.RELEASE_FOLDER_PATH }}
 
       - name: Create prerelease
-        uses: Energinet-Datahub/.github/.github/actions/github-create-release@actions/v2
+        uses: Energinet-Datahub/.github/.github/actions/github-create-release@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.get_release_version_strings.outputs.release_version }}
