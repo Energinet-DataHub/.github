@@ -167,7 +167,7 @@ jobs:
           fi
 
           if [ -n "${{ steps.pr_owner.outputs.pr_owner || '' }}" ]; then
-            content="$content<br><br><br>${{ steps.pr_owner.outputs.pr_owner }}"
+            content="$content<br>${{ steps.pr_owner.outputs.pr_owner }}"
           fi
 
           content="$content</body></html>"
