@@ -4,6 +4,9 @@ inputs:
   name:
     description: The name of the package
     required: true
+  pat_token:
+    description: The GitHub PAT token for authentication
+    required: true
   path:
     description: The path to the package
     required: true
@@ -30,6 +33,11 @@ runs:
         cache-dependency-glob: |
           ${{ inputs.path }}/pyproject.toml
           ${{ inputs.path }}/uv.lock
+
+    - name: Inject pat_token into git configuration
+      shell: bash
+      run: |
+        git config --global url."https://oauth2:${{ inputs.pat_token }}@github.com".insteadOf https://github.com
 
     - name: Test
       shell: bash
