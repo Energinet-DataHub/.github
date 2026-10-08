@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install tools
-        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/asdf-install-tools@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
 
   #
   # Build Release Matrix
@@ -117,10 +117,10 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Find associated pull request
-        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/find-related-pr-number@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         id: find_pull_request
       - name: Discover Pyproject
-        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/python-discover-pyproject@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         id: package_matrix
         with:
           path: ${{ inputs.packages_directory }}
@@ -154,7 +154,7 @@ jobs:
               - ${{ matrix.inputs.package_path }}/**
 
       - name: Promote prerelease ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-promote-prerelease@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           release_name: ${{ matrix.inputs.release_name }}
@@ -180,7 +180,7 @@ jobs:
           echo "event_name=$lowercase_event_name" >>$GITHUB_OUTPUT
 
       - name: Dispatch Release for ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/dispatch-deployment-event@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         if: ${{ inputs.dispatch_deployment_event && steps.changes.outputs.is_changed == 'true' && steps.check_dispatch_variables.outputs.SHOULD_DISPATCH == 'true' }}
         with:
           event_name: ${{ steps.create_dispatch_event_name.outputs.event_name }}
@@ -189,7 +189,7 @@ jobs:
           private_key: ${{ secrets.dh3serviceaccount_privatekey }}
 
       - name: Notify Team of failed deployment for ${{ matrix.inputs.release_name }}
-        uses: Energinet-DataHub/.github/.github/actions/send-email@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/send-email@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         if: ${{ failure() && steps.changes.outputs.is_changed == 'true' }}
         with:
           sendgrid-api-key: ${{ secrets.send_grid_api_key }}

@@ -291,7 +291,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Run casing validation on .github folder
-        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/github-actions-validate-casing@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         with:
           folder: .github
 

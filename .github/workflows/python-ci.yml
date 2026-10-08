@@ -116,7 +116,7 @@ jobs:
           allow-no-subscriptions: true # Added as a workaround for the issue https://github.com/Azure/login/issues/592
 
       - name: Run unit tests with filter
-        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@aebdf4aa8ea6e744e78032c89290866731d31be2 # actions/v2
+        uses: Energinet-DataHub/.github/.github/actions/python-unit-test@c7ff9c8af0ab199427a7f75f087e7c4451ab1b24 # actions/v3
         with:
           image_tag: ${{ inputs.image_tag }}
           tests_folder_path: ${{ inputs.tests_folder_path}}
