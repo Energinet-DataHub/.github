@@ -101,7 +101,6 @@ on:
       dh3serviceaccount_privatekey:
         required: true
         description: Private key used to issue short-lived tokens for authenticating Github API requests with the GitHub App
-        type: string
 
 permissions:
   id-token: write
