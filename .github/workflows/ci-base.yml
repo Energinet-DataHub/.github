@@ -75,11 +75,20 @@ jobs:
       - name: Checkout local repo
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      - name: Generate Github token
+        id: generate_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          client-id: ${{ vars.dh3serviceaccount_appid }}
+          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          owner: Energinet-DataHub
+
       - name: Checkout remote repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: Energinet-DataHub/.github
           path: ${{ env.REMOTE_REPO_PATH }}
+          repository: Energinet-DataHub/.github
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Copy configuration files
         run: |
@@ -168,11 +177,20 @@ jobs:
       - name: Checkout local repo
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      - name: Generate Github token
+        id: generate_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          client-id: ${{ vars.dh3serviceaccount_appid }}
+          private-key: ${{ secrets.dh3serviceaccount_privatekey }}
+          owner: Energinet-DataHub
+
       - name: Checkout remote repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: Energinet-DataHub/.github
           path: ${{ env.REMOTE_REPO_PATH }}
+          repository: Energinet-DataHub/.github
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Copy configuration files
         run: cp ${{ env.REMOTE_REPO_PATH }}/.github/utilities/license-check/.licenserc.json ${{ github.workspace }}/.licenserc.json
