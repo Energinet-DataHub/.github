@@ -195,6 +195,7 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' }}
         with:
           name: ${{ matrix.inputs.package_name }}
+          pat_token: ${{ steps.generate_token.outputs.token }}
           path: ${{ matrix.inputs.package_path }}
 
       #
@@ -250,6 +251,7 @@ jobs:
           DATABRICKS_WAREHOUSE_ID: ${{ steps.secrets.outputs.warehouse_id }}
         with:
           name: ${{ matrix.inputs.package_name }}
+          pat_token: ${{ steps.generate_token.outputs.token }}
           path: ${{ matrix.inputs.package_path }}
           tests_path: ${{ inputs.tests_directory }}
           pytest_addopts: ${{ inputs.pytest_addopts }}
@@ -259,6 +261,7 @@ jobs:
         if: ${{ steps.changes.outputs.is_changed == 'true' && inputs.azure_spn_id == '' && inputs.azure_tenant_id == '' && inputs.azure_subscription_id == ''  }}
         with:
           name: ${{ matrix.inputs.package_name }}
+          pat_token: ${{ steps.generate_token.outputs.token }}
           path: ${{ matrix.inputs.package_path }}
           tests_path: ${{ inputs.tests_directory }}
           pytest_addopts: ${{ inputs.pytest_addopts }}
