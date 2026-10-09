@@ -40,12 +40,18 @@ runs:
     # -------------------------------------------------------------------------
     # 3️⃣ Install geh_common
     # -------------------------------------------------------------------------
+
+    - name: Inject github_token into git configuration
+      shell: bash
+      run: |
+        git config --global url."https://oauth2:${{ inputs.github_token }}@github.com".insteadOf https://github.com/
+
     - name: Install geh_common
       shell: bash
       run: |
         echo "Installing geh_common from branch ${{ inputs.geh_common_version }}"
         uv pip install --system \
-          "geh_common @ git+https://git@github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
+          "geh_common @ git+https://github.com/Energinet-DataHub/opengeh-python-packages@geh_common_${{ inputs.geh_common_version }}#subdirectory=source/geh_common"
 
     # -------------------------------------------------------------------------
     # 4️⃣ Run Covernator analysis and markdown generation
