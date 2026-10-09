@@ -44,7 +44,7 @@ runs:
     - name: Inject github_token into git configuration
       shell: bash
       run: |
-        git config --global url."https://oauth2:${{ inputs.github_token }}@github.com".insteadOf https://github.com
+        git config --global url."https://oauth2:${{ inputs.github_token }}@github.com".insteadOf https://github.com/
 
     - name: Install geh_common
       shell: bash
